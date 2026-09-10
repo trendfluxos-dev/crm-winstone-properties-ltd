@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CoachRouteImport } from './routes/coach'
+import { Route as DeskRouteImport } from './routes/desk'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as HqRouteImport } from './routes/hq'
 import { Route as IngestRouteImport } from './routes/ingest'
@@ -37,9 +39,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoachRoute = CoachRouteImport.update({
   id: '/coach',
   path: '/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeskRoute = DeskRouteImport.update({
+  id: '/desk',
+  path: '/desk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DispatchRoute = DispatchRouteImport.update({
@@ -147,7 +159,9 @@ const ApiPublicReportsSummaryRoute = ApiPublicReportsSummaryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
@@ -171,7 +185,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
@@ -196,7 +212,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
@@ -222,7 +240,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/coach'
+    | '/desk'
     | '/dispatch'
     | '/hq'
     | '/ingest'
@@ -246,7 +266,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/coach'
+    | '/desk'
     | '/dispatch'
     | '/hq'
     | '/ingest'
@@ -270,7 +292,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/coach'
+    | '/desk'
     | '/dispatch'
     | '/hq'
     | '/ingest'
@@ -295,7 +319,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   CoachRoute: typeof CoachRoute
+  DeskRoute: typeof DeskRoute
   DispatchRoute: typeof DispatchRoute
   HqRoute: typeof HqRoute
   IngestRoute: typeof IngestRoute
@@ -327,11 +353,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coach': {
       id: '/coach'
       path: '/coach'
       fullPath: '/coach'
       preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/desk': {
+      id: '/desk'
+      path: '/desk'
+      fullPath: '/desk'
+      preLoaderRoute: typeof DeskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dispatch': {
@@ -479,7 +519,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   CoachRoute: CoachRoute,
+  DeskRoute: DeskRoute,
   DispatchRoute: DispatchRoute,
   HqRoute: HqRoute,
   IngestRoute: IngestRoute,

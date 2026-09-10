@@ -157,15 +157,15 @@ export const importLeads = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        adminToken: AdminToken,
+        adminToken: OptionalToken,
         rows: z.array(ImportRow).min(1).max(5000),
         autoAssign: z.boolean().default(false),
       })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const normalize = (p: string) => p.replace(/[^\d+]/g, "");
@@ -285,7 +285,7 @@ export const reanalyzeRecording = createServerFn({ method: "POST" })
   });
 
 const AssignInput = z.object({
-  adminToken: AdminToken,
+  adminToken: OptionalToken,
   agentId: z.string().uuid(),
   count: z.number().int().min(1).max(2000),
   onlyUnassigned: z.boolean().default(true),
@@ -295,8 +295,8 @@ const AssignInput = z.object({
 export const assignLeadsToAgent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AssignInput.parse(input))
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     let query = supabaseAdmin

@@ -1,214 +1,175 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Lock, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { BarChart3, Headphones, Lock, Server, Users } from "lucide-react";
+import { useState } from "react";
 
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
-import { AdminGate } from "@/components/crm/AdminPinDialog";
-import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
-import { AppShell } from "@/components/crm/AppShell";
-import { LeadCard } from "@/components/crm/LeadCard";
-import { LeadDossier } from "@/components/crm/LeadDossier";
-import { ManualIngestDialog } from "@/components/crm/ManualIngestDialog";
+import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  buildTimeline,
-  latestVerifiedCall,
-  LEAD_STATUSES,
-  useSnapshot,
-} from "@/lib/crm-data";
-import { useAdminToken, useOperatorId } from "@/lib/local-session";
+import { useMyAccount } from "@/lib/session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Agent Workspace — Tele-Sales CRM OS" },
+      { title: "Winstone Connect — Tele-Sales Entry Hall" },
       {
         name: "description",
         content:
-          "One-tap dialling, WhatsApp deep links and AI call context for every lead in the pipeline.",
+          "Enter Winstone Connect as a sales agent, coordinator, executive or IT administrator. Accounts for agents and coordinators, master PIN for HQ and IT.",
       },
-      { property: "og:title", content: "Agent Workspace — Tele-Sales CRM OS" },
+      { property: "og:title", content: "Winstone Connect — Tele-Sales Entry Hall" },
       {
         property: "og:description",
-        content: "Work the pipeline stage by stage with verified call audio and AI summaries.",
+        content:
+          "Four ways in: Sales Agent desk, Coordinator Deck, Executive HQ and IT Console.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  pendingComponent: () => (
-    <AppShell>
-      <SnapshotSkeleton />
-    </AppShell>
-  ),
-  component: LeadQueue,
+  component: EntryHall,
 });
 
-function LeadQueue() {
-  const { profiles, leads, calls, messages, isPending } = useSnapshot();
-  // Only authority (IT console / HQ / coordinator PIN) may look across agents.
-  const isAuthority = useAdminToken() !== null;
+function EntryHall() {
+  const navigate = useNavigate();
+  const { scope } = useMyAccount();
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinTarget, setPinTarget] = useState<"/hq" | "/system">("/hq");
 
-  const [search, setSearch] = useState("");
-  const operatorId = useOperatorId();
-  const [agentFilter, setAgentFilter] = useState("all");
-  // Follow the top-bar "Operating as" agent so each agent lands on their own queue.
-  useEffect(() => {
-    setAgentFilter(operatorId ?? "all");
-  }, [operatorId]);
-  const [openLeadId, setOpenLeadId] = useState<string | null>(null);
-
-  const agents = useMemo(
-    () => profiles.filter((p) => p.role === "agent" || p.role === "team_leader"),
-    [profiles],
-  );
-
-  const filtered = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    return leads.filter((lead) => {
-      const matchesAgent =
-        agentFilter === "all" ||
-        (agentFilter === "unassigned" ? lead.assigned_to === null : lead.assigned_to === agentFilter);
-      const matchesSearch =
-        !needle ||
-        lead.name.toLowerCase().includes(needle) ||
-        lead.phone_number.includes(needle) ||
-        (lead.company ?? "").toLowerCase().includes(needle);
-      return matchesAgent && matchesSearch;
-    });
-  }, [leads, search, agentFilter]);
-
-  const openLead = leads.find((l) => l.id === openLeadId) ?? null;
+  const openPin = (target: "/hq" | "/system") => {
+    setPinTarget(target);
+    setPinOpen(true);
+  };
 
   return (
-    <AppShell>
-      <div className="space-y-6">
-        <div className="card-elevated flex items-center gap-3 overflow-hidden rounded-2xl border border-border p-3.5 sm:gap-4 sm:p-4">
+    <div className="grid-noise min-h-screen">
+      <main className="mx-auto w-full max-w-5xl animate-rise px-4 py-12 sm:px-6 sm:py-16">
+        <header className="flex flex-col items-center text-center">
           <img
             src={logoAsset.url}
             alt="Winstone Properties Ltd. — Find. Build. Invest."
-            className="size-12 shrink-0 rounded-full object-cover shadow-sm ring-2 ring-primary/20 sm:size-14"
+            className="size-16 rounded-full object-cover shadow-sm ring-2 ring-primary/20"
           />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold tracking-tight sm:text-base">
-              Winstone Properties Ltd.
-            </p>
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground sm:text-xs">
-              Find. Build. Invest.
-            </p>
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 rounded-full border border-live/30 bg-live/10 px-3 py-1.5 sm:flex">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-live" />
-            </span>
-            <span className="text-[11px] font-semibold text-live">Floor live</span>
-          </div>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">Winstone Connect</h1>
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Tele-Sales Operating System
+          </p>
+          <p className="mt-4 max-w-xl text-sm text-muted-foreground">
+            Choose how you are entering today. Agents and coordinators use their own account;
+            Executive HQ and the IT Console open with the master PIN.
+          </p>
+        </header>
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          <EntryCard
+            icon={<Headphones className="size-6" />}
+            title="Sales Agent"
+            description="Your own lead queue, call log, WhatsApp threads and AI coaching."
+            primary={
+              <Button asChild className="flex-1">
+                <Link to="/auth" search={{ role: "agent", mode: "signin" }}>Sign in</Link>
+              </Button>
+            }
+            secondary={
+              <Button asChild variant="secondary" className="flex-1">
+                <Link to="/auth" search={{ role: "agent", mode: "signup" }}>Create account</Link>
+              </Button>
+            }
+          />
+
+          <EntryCard
+            icon={<Users className="size-6" />}
+            title="Coordinator Deck"
+            description="Assign and balance leads, import lists and watch the whole floor queue."
+            primary={
+              <Button asChild className="flex-1">
+                <Link to="/auth" search={{ role: "coordinator", mode: "signin" }}>Sign in</Link>
+              </Button>
+            }
+            secondary={
+              <Button asChild variant="secondary" className="flex-1">
+                <Link to="/auth" search={{ role: "coordinator", mode: "signup" }}>Create account</Link>
+              </Button>
+            }
+          />
+
+          <EntryCard
+            icon={<BarChart3 className="size-6" />}
+            title="Executive HQ"
+            description="Live floor performance, leaderboards and ask-anything reports and charts."
+            primary={
+              <Button className="flex-1" onClick={() => openPin("/hq")}>
+                <Lock className="size-4" /> Unlock PIN
+              </Button>
+            }
+          />
+
+          <EntryCard
+            icon={<Server className="size-6" />}
+            title="IT Console"
+            description="System configuration, integrations, data health and account approvals."
+            primary={
+              <Button className="flex-1" onClick={() => openPin("/system")}>
+                <Lock className="size-4" /> Unlock PIN
+              </Button>
+            }
+          />
         </div>
 
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 sm:flex sm:flex-wrap sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">My Leads</h1>
-            <p className="text-xs text-muted-foreground sm:text-sm">
-              {filtered.length} of {leads.length} leads · one tap to dial or open WhatsApp
-            </p>
-          </div>
-          <div className="shrink-0">
-            <AdminGate
-              locked={(openPin) => (
-                <Button variant="secondary" size="sm" onClick={openPin}>
-                  <Lock className="size-4" /> Manual log
-                </Button>
-              )}
-            >
-              <ManualIngestDialog leads={leads} agents={agents} />
-            </AdminGate>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name, company or number"
-              className="pl-9"
-            />
-          </div>
-          {isAuthority && (
-            <Select value={agentFilter} onValueChange={setAgentFilter}>
-              <SelectTrigger className="w-full sm:w-[220px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All agents</SelectItem>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {agents.map((agent) => (
-                  <SelectItem key={agent.id} value={agent.id}>
-                    {agent.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-
-        {!isAuthority && (
-          <p className="rounded-xl border border-dashed border-border bg-card p-4 text-center text-sm text-muted-foreground">
-            Unlock authority access to view customer leads. Agent devices must use their authenticated
-            workspace connection.
+        {scope !== "none" && (
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Already signed in —{" "}
+            <Link to="/desk" className="font-semibold text-primary hover:underline">
+              go to my desk
+            </Link>
           </p>
         )}
 
-        {isPending && <SnapshotSkeleton />}
+        <footer className="mt-14 text-center text-xs text-muted-foreground">
+          <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
+          <p className="mt-1">Developed &amp; Powered by Zahid Hasan Emon.</p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+            <span className="hidden sm:inline">·</span>
+            <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
+          </div>
+        </footer>
+      </main>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {LEAD_STATUSES.map((status) => {
-            const columnLeads = filtered.filter((lead) => lead.status === status.key);
-            return (
-              <section key={status.key} className="space-y-3">
-                <header className="flex items-center justify-between rounded-lg bg-surface-2 px-3 py-2">
-                  <h2 className="text-sm font-semibold">{status.label}</h2>
-                  <span className="tabular text-xs text-muted-foreground">
-                    {columnLeads.length}
-                  </span>
-                </header>
-                <div className="space-y-3">
-                  {columnLeads.map((lead) => (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      agent={profiles.find((p) => p.id === lead.assigned_to)}
-                      verifiedCall={latestVerifiedCall(calls, lead.id)}
-                      onOpen={() => setOpenLeadId(lead.id)}
-                    />
-                  ))}
-                  {columnLeads.length === 0 && (
-                    <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                      Nothing here
-                    </p>
-                  )}
-                </div>
-              </section>
-            );
-          })}
-        </div>
-      </div>
-
-      <LeadDossier
-        lead={openLead}
-        agents={profiles}
-        timeline={openLead ? buildTimeline(calls, messages, openLead.id) : []}
-        open={openLeadId !== null}
-        onOpenChange={(next) => !next && setOpenLeadId(null)}
+      <AdminPinDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onUnlocked={() => void navigate({ to: pinTarget })}
       />
-    </AppShell>
+    </div>
+  );
+}
+
+function EntryCard({
+  icon,
+  title,
+  description,
+  primary,
+  secondary,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  primary: React.ReactNode;
+  secondary?: React.ReactNode;
+}) {
+  return (
+    <section className="card-elevated flex flex-col gap-3 p-5">
+      <span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary">
+        {icon}
+      </span>
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+      <div className="mt-auto flex flex-wrap gap-2 pt-2">
+        {primary}
+        {secondary}
+      </div>
+    </section>
   );
 }

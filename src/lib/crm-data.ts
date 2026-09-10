@@ -21,12 +21,12 @@ export type CrmSnapshot = Awaited<ReturnType<typeof getCrmSnapshot>>;
 
 /**
  * One server round-trip for the board, scoped to who is asking.
- * Authority (IT console / HQ / coordinator PIN) sees the whole floor.
- * Locked browsers receive an empty snapshot.
+ * Authority PIN and coordinators see the whole floor, an agent sees only
+ * their own leads, and anyone else receives an empty snapshot.
  */
 export const snapshotQueryFor = (scope: { token: string | null }) =>
   queryOptions({
-    queryKey: ["crm-snapshot", scope.token ? "authority" : "locked"],
+    queryKey: ["crm-snapshot", scope.token ? "authority" : "session"],
     queryFn: () => getCrmSnapshot({ data: { token: scope.token } }),
     refetchInterval: 15_000,
     staleTime: 5_000,
