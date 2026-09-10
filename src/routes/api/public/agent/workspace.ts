@@ -76,14 +76,14 @@ export const Route = createFileRoute("/api/public/agent/workspace")({
               supabaseAdmin
                 .from("call_recordings")
                 .select(
-                  "id, lead_id, agent_id, duration_seconds, call_direction, sync_status, is_two_sided, ai_summary, outcome_category, created_at",
+                  "id, lead_id, agent_id, phone_number, duration_seconds, call_direction, sync_status, is_two_sided, ai_summary, sentiment, deal_stage, created_at",
                 )
                 .in("lead_id", leadIds)
                 .order("created_at", { ascending: false })
                 .limit(limit),
               supabaseAdmin
                 .from("whatsapp_interactions")
-                .select("id, lead_id, agent_id, sender_type, message_type, message_text, created_at")
+                .select("id, lead_id, agent_id, sender_type, message_type, message_content, created_at")
                 .in("lead_id", leadIds)
                 .order("created_at", { ascending: false })
                 .limit(limit),
