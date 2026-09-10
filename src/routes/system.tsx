@@ -6,7 +6,6 @@ import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
-import { ProPlanCard } from "@/components/crm/ProPlanCard";
 import { SystemCustomizer } from "@/components/crm/SystemCustomizer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,7 +99,6 @@ function SystemBoard() {
         <CopilotDrawer />
       </div>
 
-      <ProPlanCard />
 
       <SystemCustomizer />
 
