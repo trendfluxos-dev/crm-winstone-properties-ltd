@@ -24,7 +24,7 @@ import {
   snapshotQuery,
 } from "@/lib/crm-data";
 
-export const Route = createFileRoute("/leads")({
+export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Smart Lead Queue — Tele-Sales CRM OS" },

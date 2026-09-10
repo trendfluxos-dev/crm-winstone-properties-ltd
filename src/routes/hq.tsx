@@ -32,7 +32,7 @@ import { autoDistributeLeads } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
 import { getAdminToken } from "@/lib/local-session";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/hq")({
   head: () => ({
     meta: [
       { title: "Executive HQ — Tele-Sales CRM OS" },
