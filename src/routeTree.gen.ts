@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoachRouteImport } from './routes/coach'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as HqRouteImport } from './routes/hq'
+import { Route as IngestRouteImport } from './routes/ingest'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SystemRouteImport } from './routes/system'
@@ -29,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachRoute = CoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DispatchRoute = DispatchRouteImport.update({
   id: '/dispatch',
   path: '/dispatch',
@@ -37,6 +44,11 @@ const DispatchRoute = DispatchRouteImport.update({
 const HqRoute = HqRouteImport.update({
   id: '/hq',
   path: '/hq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IngestRoute = IngestRouteImport.update({
+  id: '/ingest',
+  path: '/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -98,8 +110,10 @@ const ApiPublicReportsSummaryRoute = ApiPublicReportsSummaryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
+  '/ingest': typeof IngestRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
@@ -114,8 +128,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
+  '/ingest': typeof IngestRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
@@ -131,8 +147,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
+  '/ingest': typeof IngestRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
@@ -149,8 +167,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/coach'
     | '/dispatch'
     | '/hq'
+    | '/ingest'
     | '/privacy'
     | '/reports'
     | '/system'
@@ -165,8 +185,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/coach'
     | '/dispatch'
     | '/hq'
+    | '/ingest'
     | '/privacy'
     | '/reports'
     | '/system'
@@ -181,8 +203,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/coach'
     | '/dispatch'
     | '/hq'
+    | '/ingest'
     | '/privacy'
     | '/reports'
     | '/system'
@@ -198,8 +222,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CoachRoute: typeof CoachRoute
   DispatchRoute: typeof DispatchRoute
   HqRoute: typeof HqRoute
+  IngestRoute: typeof IngestRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportsRoute: typeof ReportsRoute
   SystemRoute: typeof SystemRoute
@@ -222,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach': {
+      id: '/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dispatch': {
       id: '/dispatch'
       path: '/dispatch'
@@ -234,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/hq'
       fullPath: '/hq'
       preLoaderRoute: typeof HqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ingest': {
+      id: '/ingest'
+      path: '/ingest'
+      fullPath: '/ingest'
+      preLoaderRoute: typeof IngestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -318,8 +358,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CoachRoute: CoachRoute,
   DispatchRoute: DispatchRoute,
   HqRoute: HqRoute,
+  IngestRoute: IngestRoute,
   PrivacyRoute: PrivacyRoute,
   ReportsRoute: ReportsRoute,
   SystemRoute: SystemRoute,
