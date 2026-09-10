@@ -149,6 +149,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             Terms of Service
           </Link>
+          <span className="hidden sm:inline">·</span>
+          <AboutLegalModal />
         </div>
       </footer>
 
