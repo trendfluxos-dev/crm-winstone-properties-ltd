@@ -1,0 +1,69 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+
+const Payload = z.object({
+  lead_id: z.string().uuid().optional(),
+  phone_number: z.string().min(5).optional(),
+  agent_id: z.string().uuid().nullable().optional(),
+  sender_type: z.enum(["agent", "customer"]),
+  message_type: z.enum(["text", "voice_note", "image", "document"]).default("text"),
+  message_content: z.string().min(1),
+  media_url: z.string().nullable().optional(),
+  duration_seconds: z.number().int().min(0).nullable().optional(),
+});
+
+function authorized(request: Request): boolean {
+  const secret = process.env["INGEST_SECRET"];
+  const provided = request.headers.get("x-ingest-secret") ?? "";
+  if (!secret || provided.length !== secret.length) return false;
+  let diff = 0;
+  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
+  return diff === 0;
+}
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+export const Route = createFileRoute("/api/public/ingest/message")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
+
+        const parsed = Payload.safeParse(await request.json().catch(() => null));
+        if (!parsed.success) return json({ error: "Invalid payload" }, 400);
+        const body = parsed.data;
+
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        let leadId = body.lead_id ?? null;
+        if (!leadId && body.phone_number) {
+          const { data: lead } = await supabaseAdmin
+            .from("leads")
+            .select("id")
+            .eq("phone_number", body.phone_number)
+            .maybeSingle();
+          leadId = lead?.id ?? null;
+        }
+        if (!leadId) return json({ error: "Unknown lead" }, 404);
+
+        const { error } = await supabaseAdmin.from("whatsapp_interactions").insert({
+          lead_id: leadId,
+          agent_id: body.agent_id ?? null,
+          sender_type: body.sender_type,
+          message_type: body.message_type,
+          message_content: body.message_content,
+          media_url: body.media_url ?? null,
+          duration_seconds: body.duration_seconds ?? null,
+        });
+        if (error) return json({ error: error.message }, 500);
+
+        return json({ ok: true }, 201);
+      },
+    },
+  },
+});
