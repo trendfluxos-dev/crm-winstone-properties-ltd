@@ -28,9 +28,11 @@ const PRESENCE = {
 export function AgentRadar({
   agents,
   calls,
+  onSelectAgent,
 }: {
   agents: Profile[];
   calls: CallRecording[];
+  onSelectAgent?: (agentId: string) => void;
 }) {
   const now = useNow();
 
@@ -62,8 +64,15 @@ export function AgentRadar({
           return (
             <article
               key={agent.id}
+              role={onSelectAgent ? "button" : undefined}
+              tabIndex={onSelectAgent ? 0 : undefined}
+              onClick={() => onSelectAgent?.(agent.id)}
+              onKeyDown={(e) => {
+                if (onSelectAgent && (e.key === "Enter" || e.key === " ")) onSelectAgent(agent.id);
+              }}
               className={cn(
-                "relative overflow-hidden rounded-xl border bg-card p-4 transition-colors",
+                "relative overflow-hidden rounded-xl border bg-card p-4 text-left transition-colors",
+                onSelectAgent && "cursor-pointer hover:border-primary/50",
                 style.ring,
               )}
             >

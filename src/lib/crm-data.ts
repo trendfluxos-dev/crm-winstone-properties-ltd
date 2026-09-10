@@ -33,6 +33,7 @@ export type AgentStats = {
   dials: number;
   connected: number;
   talkSeconds: number;
+  avgCallSeconds: number;
   whatsappTouches: number;
   syncedAudio: number;
   closedWon: number;
@@ -72,11 +73,13 @@ export function buildAgentStats(
         (c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS,
       ).length;
 
+      const talkSeconds = agentCalls.reduce((sum, c) => sum + c.duration_seconds, 0);
       return {
         profile,
         dials: agentCalls.length,
         connected,
-        talkSeconds: agentCalls.reduce((sum, c) => sum + c.duration_seconds, 0),
+        talkSeconds,
+        avgCallSeconds: connected ? talkSeconds / connected : 0,
         whatsappTouches: agentMessages.length,
         syncedAudio: agentCalls.filter((c) => c.sync_status === "verified").length,
         closedWon,

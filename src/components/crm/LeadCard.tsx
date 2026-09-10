@@ -68,21 +68,21 @@ export function LeadCard({
       </div>
 
       <div className="flex gap-2">
-        <Button asChild size="sm" className="flex-1">
+        <Button asChild size="lg" className="h-11 flex-1 text-base font-semibold">
           <a href={`tel:${lead.phone_number}`}>
-            <PhoneOutgoing className="size-3.5" /> Call
+            <PhoneOutgoing className="size-5" /> Call
           </a>
         </Button>
-        <Button asChild size="sm" variant="secondary" className="flex-1">
+        <Button asChild size="lg" variant="secondary" className="h-11 flex-1 text-base font-semibold">
           <a
             href={`https://wa.me/${digitsOnly(lead.phone_number)}`}
             target="_blank"
             rel="noreferrer"
           >
-            <MessageCircle className="size-3.5" /> Chat
+            <MessageCircle className="size-5" /> WhatsApp
           </a>
         </Button>
-        <Button size="sm" variant="outline" onClick={onOpen}>
+        <Button size="lg" variant="outline" className="h-11" onClick={onOpen}>
           Dossier
         </Button>
       </div>
