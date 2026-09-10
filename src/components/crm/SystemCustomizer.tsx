@@ -285,13 +285,11 @@ function NumberRow({
   value,
   onChange,
   suffix,
-  step = 1,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
   suffix: string;
-  step?: number;
 }) {
   return (
     <div>
@@ -307,7 +305,6 @@ function NumberRow({
         />
         <span className="whitespace-nowrap text-xs text-muted-foreground">{suffix}</span>
       </div>
-      <input type="hidden" data-step={step} />
     </div>
   );
 }
