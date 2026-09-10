@@ -16,7 +16,9 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
+import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
@@ -57,9 +59,19 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentCoachRoute = ApiPublicAgentCoachRouteImport.update({
+  id: '/api/public/agent/coach',
+  path: '/api/public/agent/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentWorkspaceRoute = ApiPublicAgentWorkspaceRouteImport.update({
   id: '/api/public/agent/workspace',
   path: '/api/public/agent/workspace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicConfigRulesRoute = ApiPublicConfigRulesRouteImport.update({
+  id: '/api/public/config/rules',
+  path: '/api/public/config/rules',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicIngestLeadRoute = ApiPublicIngestLeadRouteImport.update({
@@ -92,7 +104,9 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
+  '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -106,7 +120,9 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
+  '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -121,7 +137,9 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
+  '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -137,7 +155,9 @@ export interface FileRouteTypes {
     | '/reports'
     | '/system'
     | '/terms'
+    | '/api/public/agent/coach'
     | '/api/public/agent/workspace'
+    | '/api/public/config/rules'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -151,7 +171,9 @@ export interface FileRouteTypes {
     | '/reports'
     | '/system'
     | '/terms'
+    | '/api/public/agent/coach'
     | '/api/public/agent/workspace'
+    | '/api/public/config/rules'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -165,7 +187,9 @@ export interface FileRouteTypes {
     | '/reports'
     | '/system'
     | '/terms'
+    | '/api/public/agent/coach'
     | '/api/public/agent/workspace'
+    | '/api/public/config/rules'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -180,7 +204,9 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
+  ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
+  ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
@@ -238,11 +264,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/coach': {
+      id: '/api/public/agent/coach'
+      path: '/api/public/agent/coach'
+      fullPath: '/api/public/agent/coach'
+      preLoaderRoute: typeof ApiPublicAgentCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/workspace': {
       id: '/api/public/agent/workspace'
       path: '/api/public/agent/workspace'
       fullPath: '/api/public/agent/workspace'
       preLoaderRoute: typeof ApiPublicAgentWorkspaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/config/rules': {
+      id: '/api/public/config/rules'
+      path: '/api/public/config/rules'
+      fullPath: '/api/public/config/rules'
+      preLoaderRoute: typeof ApiPublicConfigRulesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ingest/lead': {
@@ -284,7 +324,9 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
+  ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
+  ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
