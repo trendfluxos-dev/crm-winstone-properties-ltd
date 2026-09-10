@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "sdk_version": "2.0.4",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://siepfegeubbqwhodyxcg.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "web-crm-winstone",
+      "version": "0.1.0",
+      "title": "WEB CRM WINSTONE"
+    },
+    "tools": [
+      {
+        "name": "list_agents",
+        "title": "List sales agents",
+        "description": "List the sales floor roster with each agent's employee ID, role, live presence and active state.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_leads",
+        "title": "List leads",
+        "description": "List leads, newest activity first. Filter by stage, source, assigned employee ID or a name/phone search.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "contacted",
+                "follow_up",
+                "closed"
+              ],
+              "description": "Lead stage."
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "description": "Where the lead came from."
+            },
+            "employee_id": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 32,
+              "description": "Only leads of this agent."
+            },
+            "search": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 60,
+              "description": "Match on lead name or phone number."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "lead_history",
+        "title": "Lead history",
+        "description": "Full history of one lead: its details plus every call recording summary and WhatsApp message logged against it.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "lead_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The lead's ID."
+            },
+            "phone_number": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 24,
+              "description": "The lead's phone number."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "floor_summary",
+        "title": "Sales floor summary",
+        "description": "Activity summary for the last N days: calls, talk time, WhatsApp messages, lead stage mix and a per-agent scorecard.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90,
+              "default": 7,
+              "description": "How many days back to summarise."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_lead",
+        "title": "Create a lead",
+        "description": "Add a new lead to the CRM. Optionally assign it to an agent by employee ID; otherwise it stays unassigned.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 120
+            },
+            "phone_number": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 24
+            },
+            "company": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "source": {
+              "type": "string",
+              "maxLength": 40,
+              "default": "mcp"
+            },
+            "employee_id": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 32
+            }
+          },
+          "required": [
+            "name",
+            "phone_number"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

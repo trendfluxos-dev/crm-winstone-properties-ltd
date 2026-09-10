@@ -54,6 +54,14 @@ export const AppConfigSchema = z.object({
   fields: z.array(CustomFieldSchema).max(20).default([]),
   rules: RulesSchema.default({}),
   permissions: PermissionsSchema.default({}),
+  /**
+   * Email addresses allowed to reach the CRM through the agent-integration
+   * (MCP) endpoint. Empty list = nobody, which is the safe default.
+   */
+  mcpAllowedEmails: z
+    .array(z.string().trim().toLowerCase().email().max(160))
+    .max(25)
+    .default([]),
 });
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 
