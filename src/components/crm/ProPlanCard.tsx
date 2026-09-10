@@ -44,8 +44,7 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
         items: [{ priceId, quantity: seats }],
         settings: { displayMode: "overlay", theme: "light" },
       });
-      // Paddle fires no promise on completion — refresh shortly after open and on close events.
-      window.Paddle.Setup?.;
+      // Paddle fires no promise on completion — refresh the licence shortly after opening.
       setTimeout(() => queryClient.invalidateQueries({ queryKey: ["license"] }), 20_000);
       toast.info(isSandbox ? "Test checkout opened — no real money moves." : "Secure checkout opened");
     } catch (error) {
