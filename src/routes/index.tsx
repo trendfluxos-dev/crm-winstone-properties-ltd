@@ -89,7 +89,7 @@ function LeadQueue() {
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="card flex items-center gap-3 overflow-hidden p-3.5 sm:gap-4 sm:p-4">
+        <div className="card-elevated flex items-center gap-3 overflow-hidden rounded-2xl border border-border p-3.5 sm:gap-4 sm:p-4">
           <img
             src={logoAsset.url}
             alt="Winstone Properties Ltd. — Find. Build. Invest."
