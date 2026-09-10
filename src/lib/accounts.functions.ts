@@ -6,8 +6,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const RequestedRole = z.enum(["agent", "coordinator"]);
 
 /**
- * Called right after sign-up / first sign-in: creates the desk profile in
- * "pending" state so IT Console or HQ can approve it. Idempotent.
+ * Called right after sign-up / first sign-in. Staff already on the pre-approved
+ * roster are linked to their existing desk profile (or created as approved);
+ * everyone else lands in "pending" for the IT Console to decide. Idempotent.
  */
 export const registerMyAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -30,19 +31,53 @@ export const registerMyAccount = createServerFn({ method: "POST" })
     if (existing) return { ok: true as const, created: false as const };
 
     const email = typeof context.claims["email"] === "string" ? context.claims["email"] : null;
+    const { rosterRole, normalizeName } = await import("@/lib/roster.server");
+    const preApproved = rosterRole(data.name);
+
+    if (preApproved) {
+      // Claim the roster profile that is waiting for this person, if there is one.
+      const { data: unclaimed } = await supabaseAdmin
+        .from("profiles")
+        .select("id, name")
+        .is("user_id", null)
+        .limit(200);
+      const match = (unclaimed ?? []).find(
+        (row) => normalizeName(row.name) === normalizeName(data.name),
+      );
+
+      if (match) {
+        const { error } = await supabaseAdmin
+          .from("profiles")
+          .update({
+            user_id: context.userId,
+            email,
+            phone: data.phone || null,
+            role: preApproved,
+            requested_role: preApproved,
+            approval_status: "approved",
+            is_active: true,
+          })
+          .eq("id", match.id);
+        if (error) throw new Error(error.message);
+        return { ok: true as const, created: false as const };
+      }
+    }
+
     const { error } = await supabaseAdmin.from("profiles").insert({
       user_id: context.userId,
       name: data.name,
       phone: data.phone || null,
       email,
-      role: "agent",
-      requested_role: data.requestedRole === "coordinator" ? "team_leader" : "agent",
-      approval_status: "pending",
+      role: preApproved ?? "agent",
+      requested_role:
+        preApproved ?? (data.requestedRole === "coordinator" ? "team_leader" : "agent"),
+      approval_status: preApproved ? "approved" : "pending",
       is_active: true,
     });
     if (error) throw new Error(error.message);
     return { ok: true as const, created: true as const };
   });
+
 
 /** Who am I? Drives the role-aware shell, nav and landing redirect. */
 export const getMyAccount = createServerFn({ method: "POST" })
