@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HqRouteImport } from './routes/hq'
+import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const HqRoute = HqRouteImport.update({
   id: '/hq',
   path: '/hq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIngestLeadRoute = ApiPublicIngestLeadRouteImport.update({
+  id: '/api/public/ingest/lead',
+  path: '/api/public/ingest/lead',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicIngestMessageRoute = ApiPublicIngestMessageRouteImport.update({
@@ -39,12 +45,14 @@ const ApiPublicIngestRecordingRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/hq': typeof HqRoute
+  '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/hq': typeof HqRoute
+  '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
 }
@@ -52,20 +60,30 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/hq': typeof HqRoute
+  '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/hq' | '/api/public/ingest/message' | '/api/public/ingest/recording'
+    | '/'
+    | '/hq'
+    | '/api/public/ingest/lead'
+    | '/api/public/ingest/message'
+    | '/api/public/ingest/recording'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/hq' | '/api/public/ingest/message' | '/api/public/ingest/recording'
+    | '/'
+    | '/hq'
+    | '/api/public/ingest/lead'
+    | '/api/public/ingest/message'
+    | '/api/public/ingest/recording'
   id:
     | '__root__'
     | '/'
     | '/hq'
+    | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
   fileRoutesById: FileRoutesById
@@ -73,6 +91,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HqRoute: typeof HqRoute
+  ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
 }
@@ -91,6 +110,13 @@ declare module '@tanstack/react-router' {
       path: '/hq'
       fullPath: '/hq'
       preLoaderRoute: typeof HqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ingest/lead': {
+      id: '/api/public/ingest/lead'
+      path: '/api/public/ingest/lead'
+      fullPath: '/api/public/ingest/lead'
+      preLoaderRoute: typeof ApiPublicIngestLeadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ingest/message': {
@@ -113,6 +139,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HqRoute: HqRoute,
+  ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
 }
