@@ -1,0 +1,151 @@
+import { queryOptions } from "@tanstack/react-query";
+
+import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
+
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Lead = Database["public"]["Tables"]["leads"]["Row"];
+export type CallRecording = Database["public"]["Tables"]["call_recordings"]["Row"];
+export type WhatsappMessage = Database["public"]["Tables"]["whatsapp_interactions"]["Row"];
+export type LeadStatus = Database["public"]["Enums"]["lead_status"];
+
+export const LEAD_STATUSES: { key: LeadStatus; label: string }[] = [
+  { key: "pending", label: "Pending" },
+  { key: "contacted", label: "Contacted" },
+  { key: "follow_up", label: "Follow-up" },
+  { key: "closed", label: "Closed" },
+];
+
+export const profilesQuery = queryOptions({
+  queryKey: ["profiles"],
+  queryFn: async (): Promise<Profile[]> => {
+    const { data, error } = await supabase.from("profiles").select("*").order("name");
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
+export const leadsQuery = queryOptions({
+  queryKey: ["leads"],
+  queryFn: async (): Promise<Lead[]> => {
+    const { data, error } = await supabase
+      .from("leads")
+      .select("*")
+      .order("updated_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
+export const callsQuery = queryOptions({
+  queryKey: ["call_recordings"],
+  queryFn: async (): Promise<CallRecording[]> => {
+    const { data, error } = await supabase
+      .from("call_recordings")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
+export const messagesQuery = queryOptions({
+  queryKey: ["whatsapp_interactions"],
+  queryFn: async (): Promise<WhatsappMessage[]> => {
+    const { data, error } = await supabase
+      .from("whatsapp_interactions")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .limit(1000);
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
+export const CONNECTED_THRESHOLD_SECONDS = 10;
+
+export type AgentStats = {
+  profile: Profile;
+  dials: number;
+  connected: number;
+  talkSeconds: number;
+  whatsappTouches: number;
+  syncedAudio: number;
+  closedWon: number;
+  assigned: number;
+  conversionRate: number;
+};
+
+function isToday(iso: string): boolean {
+  const d = new Date(iso);
+  const now = new Date();
+  return d.toDateString() === now.toDateString();
+}
+
+export function buildAgentStats(
+  profiles: Profile[],
+  leads: Lead[],
+  calls: CallRecording[],
+  messages: WhatsappMessage[],
+  todayOnly = false,
+): AgentStats[] {
+  const agents = profiles.filter((p) => p.role === "agent" || p.role === "team_leader");
+  const inWindow = (iso: string) => (todayOnly ? isToday(iso) : true);
+
+  return agents
+    .map((profile) => {
+      const agentCalls = calls.filter(
+        (c) => c.agent_id === profile.id && inWindow(c.created_at),
+      );
+      const agentMessages = messages.filter(
+        (m) => m.agent_id === profile.id && m.sender_type === "agent" && inWindow(m.created_at),
+      );
+      const assignedLeads = leads.filter((l) => l.assigned_to === profile.id);
+      const closedWon = assignedLeads.filter(
+        (l) => l.status === "closed" && l.outcome_category === "deal_won",
+      ).length;
+      const connected = agentCalls.filter(
+        (c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS,
+      ).length;
+
+      return {
+        profile,
+        dials: agentCalls.length,
+        connected,
+        talkSeconds: agentCalls.reduce((sum, c) => sum + c.duration_seconds, 0),
+        whatsappTouches: agentMessages.length,
+        syncedAudio: agentCalls.filter((c) => c.sync_status === "verified").length,
+        closedWon,
+        assigned: assignedLeads.length,
+        conversionRate: assignedLeads.length ? (closedWon / assignedLeads.length) * 100 : 0,
+      };
+    })
+    .sort((a, b) => b.connected - a.connected || b.talkSeconds - a.talkSeconds);
+}
+
+export type TimelineEntry =
+  | { kind: "call"; at: string; call: CallRecording }
+  | { kind: "message"; at: string; message: WhatsappMessage };
+
+export function buildTimeline(
+  calls: CallRecording[],
+  messages: WhatsappMessage[],
+  leadId: string,
+): TimelineEntry[] {
+  const entries: TimelineEntry[] = [
+    ...calls
+      .filter((c) => c.lead_id === leadId)
+      .map((call) => ({ kind: "call" as const, at: call.created_at, call })),
+    ...messages
+      .filter((m) => m.lead_id === leadId)
+      .map((message) => ({ kind: "message" as const, at: message.created_at, message })),
+  ];
+  return entries.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+}
+
+export function latestVerifiedCall(calls: CallRecording[], leadId: string) {
+  return calls
+    .filter((c) => c.lead_id === leadId && c.sync_status === "verified" && c.ai_summary)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+}
