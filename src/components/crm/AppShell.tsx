@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Lock, LockOpen, Radio, Smartphone } from "lucide-react";
+import { Lock, LockOpen, Radio, Smartphone, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { AgentSelector } from "@/components/crm/AgentSelector";
+import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { Button } from "@/components/ui/button";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
@@ -13,7 +14,9 @@ const APK_URL = "/downloads/winstone-connect.apk";
 
 const NAV = [
   { to: "/", label: "My Leads" },
+  { to: "/dispatch", label: "Dispatcher" },
   { to: "/hq", label: "Control Board" },
+  { to: "/system", label: "System" },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -31,9 +34,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
             <span className="leading-tight">
               <span className="block font-display text-sm font-bold tracking-wide">
-                TELE-SALES CRM OS
+                WINSTONE CONNECT
               </span>
-              <span className="block text-[11px] text-muted-foreground">Winstone Command Center</span>
+              <span className="block text-[11px] text-muted-foreground">Tele-Sales OS</span>
             </span>
           </Link>
 
@@ -109,6 +112,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6">{children}</main>
+
+      <footer className="border-t border-border/80 px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
+        <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
+        <p className="mt-1">Developed &amp; Powered by Zahid Hasan Emon.</p>
+      </footer>
+
+      {adminToken && (
+        <div className="fixed bottom-5 right-5 z-40">
+          <CopilotDrawer
+            trigger={
+              <Button size="lg" className="gap-2 rounded-full shadow-lg">
+                <Sparkles className="size-4" /> AI Copilot
+              </Button>
+            }
+          />
+        </div>
+      )}
 
       <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />
     </div>

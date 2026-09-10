@@ -115,3 +115,56 @@ export function latestVerifiedCall(calls: CallRecording[], leadId: string) {
     .filter((c) => c.lead_id === leadId && c.sync_status === "verified" && c.ai_summary)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
 }
+
+/** Default carrier estimate in BDT per outgoing minute (editable on the IT board). */
+export const DEFAULT_RATE_PER_MINUTE = 0.4;
+
+export type BillingSummary = {
+  monthLabel: string;
+  dials: number;
+  connected: number;
+  connectedPct: number;
+  billableMinutes: number;
+  carrierCost: number;
+  aiAnalysed: number;
+  dealsWon: number;
+  newLeads: number;
+};
+
+function sameMonth(iso: string, ref: Date) {
+  const d = new Date(iso);
+  return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+}
+
+/** Monthly telephony + floor billing rollup, computed from synced recordings. */
+export function buildBillingSummary(
+  calls: CallRecording[],
+  leads: Lead[],
+  ratePerMinute = DEFAULT_RATE_PER_MINUTE,
+  ref = new Date(),
+): BillingSummary {
+  const monthCalls = calls.filter((c) => sameMonth(c.created_at, ref));
+  const connected = monthCalls.filter(
+    (c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS,
+  ).length;
+  const billableMinutes = monthCalls.reduce(
+    (sum, c) => sum + Math.ceil(c.duration_seconds / 60),
+    0,
+  );
+  return {
+    monthLabel: ref.toLocaleDateString("en-GB", { month: "long", year: "numeric" }),
+    dials: monthCalls.length,
+    connected,
+    connectedPct: monthCalls.length ? (connected / monthCalls.length) * 100 : 0,
+    billableMinutes,
+    carrierCost: billableMinutes * ratePerMinute,
+    aiAnalysed: monthCalls.filter((c) => c.ai_summary).length,
+    dealsWon: leads.filter(
+      (l) =>
+        l.status === "closed" &&
+        l.outcome_category === "deal_won" &&
+        sameMonth(l.updated_at, ref),
+    ).length,
+    newLeads: leads.filter((l) => sameMonth(l.created_at, ref)).length,
+  };
+}

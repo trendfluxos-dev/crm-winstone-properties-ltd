@@ -144,6 +144,7 @@ export const importLeads = createServerFn({ method: "POST" })
       phone_number: string;
       company: string | null;
       notes: string | null;
+      source: string;
       assigned_to: string | null;
     }[] = [];
     let skipped = 0;
@@ -159,6 +160,7 @@ export const importLeads = createServerFn({ method: "POST" })
         phone_number: row.phone_number.trim(),
         company: row.company || null,
         notes: row.notes || null,
+        source: "csv_import",
         assigned_to: agents.length ? agents[toInsert.length % agents.length]!.id : null,
       });
     }
@@ -232,4 +234,43 @@ export const reanalyzeRecording = createServerFn({ method: "POST" })
     const { processRecording } = await import("@/lib/call-intel.server");
     await processRecording(data.recordingId);
     return { ok: true };
+  });
+
+const AssignInput = z.object({
+  adminToken: AdminToken,
+  agentId: z.string().uuid(),
+  count: z.number().int().min(1).max(2000),
+  onlyUnassigned: z.boolean().default(true),
+});
+
+/** Coordinator dispatcher: push a batch of pending leads under one agent. */
+export const assignLeadsToAgent = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => AssignInput.parse(input))
+  .handler(async ({ data }) => {
+    const { requireAdminToken } = await import("@/lib/admin-gate.server");
+    requireAdminToken(data.adminToken);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let query = supabaseAdmin
+      .from("leads")
+      .select("id")
+      .eq("status", "pending")
+      .order("created_at")
+      .limit(data.count);
+    if (data.onlyUnassigned) query = query.is("assigned_to", null);
+    else query = query.neq("assigned_to", data.agentId);
+
+    const { data: pool, error } = await query;
+    if (error) throw new Error(error.message);
+    if (!pool?.length) return { assigned: 0 };
+
+    const { error: updateError } = await supabaseAdmin
+      .from("leads")
+      .update({ assigned_to: data.agentId })
+      .in(
+        "id",
+        pool.map((l) => l.id),
+      );
+    if (updateError) throw new Error(updateError.message);
+    return { assigned: pool.length };
   });
