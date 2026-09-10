@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getSystemNotices } from "@/lib/notices.functions";
-import type { NoticeLevel, SystemNotice } from "@/lib/notices.server";
+import type { NoticeLevel, SystemNotice } from "@/lib/notices-types";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
 const STYLES: Record<NoticeLevel, { row: string; icon: string }> = {

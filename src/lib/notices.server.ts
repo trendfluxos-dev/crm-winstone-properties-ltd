@@ -3,18 +3,7 @@
  * Executive HQ so a blocked pipeline or an unpaid bill is never silent.
  */
 
-export type NoticeLevel = "critical" | "warning" | "info";
-
-export type SystemNotice = {
-  id: string;
-  level: NoticeLevel;
-  /** Bengali headline. */
-  title: string;
-  /** Bengali explanation: কেন কাজ হচ্ছে না / কী করতে হবে. */
-  detail: string;
-  /** Where to fix it. */
-  action: string | null;
-};
+import type { SystemNotice } from "@/lib/notices-types";
 
 const HOUR = 60 * 60 * 1000;
 
