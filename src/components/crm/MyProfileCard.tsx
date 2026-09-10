@@ -1,0 +1,107 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Check, Loader2, LogOut, Palette } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { updateMyProfile } from "@/lib/accounts.functions";
+import { useMyAccount, useSignOut } from "@/lib/session";
+
+const HUES = [200, 260, 320, 20, 60, 140];
+
+/** Agents and coordinators keep their own name, phone and avatar colour here. */
+export function MyProfileCard() {
+  const { account } = useMyAccount();
+  const queryClient = useQueryClient();
+  const save = useServerFn(updateMyProfile);
+  const signOut = useSignOut();
+
+  const profile = account?.profile ?? null;
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(profile?.name ?? "");
+  const [phone, setPhone] = useState(profile?.phone ?? "");
+  const [hue, setHue] = useState(profile?.avatar_hue ?? 200);
+
+  const mutation = useMutation({
+    mutationFn: () => save({ data: { name, phone, avatarHue: hue } }),
+    onSuccess: () => {
+      toast.success("Profile updated");
+      setOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ["my-account"] });
+      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  if (!profile) return null;
+
+  return (
+    <section className="card-elevated p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <span
+          className="grid size-11 place-items-center rounded-full text-sm font-bold text-white"
+          style={{ backgroundColor: `hsl(${profile.avatar_hue} 65% 45%)` }}
+        >
+          {profile.name.slice(0, 2).toUpperCase()}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold">{profile.name}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {profile.role === "team_leader" ? "Coordinator" : "Sales agent"}
+            {profile.employee_id ? ` · ${profile.employee_id}` : ""}
+            {profile.email ? ` · ${profile.email}` : ""}
+          </p>
+        </div>
+        <Button variant="secondary" size="sm" onClick={() => setOpen((v) => !v)}>
+          <Palette className="size-4" /> Edit profile
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+          <LogOut className="size-4" /> Sign out
+        </Button>
+      </div>
+
+      {open && (
+        <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="my-name">Name</Label>
+            <Input id="my-name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="my-phone">Phone</Label>
+            <Input id="my-phone" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label>Avatar colour</Label>
+            <div className="flex gap-2">
+              {HUES.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setHue(value)}
+                  className="grid size-8 place-items-center rounded-full ring-2 ring-transparent data-[on=true]:ring-primary"
+                  data-on={hue === value}
+                  style={{ backgroundColor: `hsl(${value} 65% 45%)` }}
+                  aria-label={`Colour ${value}`}
+                >
+                  {hue === value && <Check className="size-4 text-white" />}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <Button
+              disabled={name.trim().length < 2 || mutation.isPending}
+              onClick={() => mutation.mutate()}
+            >
+              {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+              Save profile
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
