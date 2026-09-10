@@ -3,6 +3,7 @@ import { Lock, LockOpen, Smartphone, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import apkAsset from "@/assets/winstone-connect.apk.asset.json";
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AboutLegalModal } from "@/components/crm/AboutLegalModal";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
 
-const APK_URL = "/downloads/winstone-connect.apk";
+const APK_URL = apkAsset.url;
 
 /**
  * Whole-CRM licence rule: an active Winstone Connect Pro plan unlocks the
@@ -115,22 +116,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button
               size="sm"
               className="h-8 gap-1.5 rounded-full px-3.5 text-xs font-semibold shadow-sm transition-all duration-300 hover:shadow-md"
-              onClick={async () => {
-                try {
-                  const res = await fetch(APK_URL, { method: "HEAD" });
-                  if (!res.ok) throw new Error("missing");
-                } catch {
-                  toast.error("Agent app file is not uploaded yet", {
-                    description: "Place winstone-connect.apk in public/downloads/ to enable the download.",
-                  });
-                  return;
-                }
+              onClick={() => {
                 const a = document.createElement("a");
                 a.href = APK_URL;
                 a.download = "winstone-connect.apk";
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
+                toast.success("Agent app download started");
               }}
             >
               <Smartphone className="size-3.5" />
