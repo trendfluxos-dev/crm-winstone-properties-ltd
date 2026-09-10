@@ -62,26 +62,14 @@ export const Route = createFileRoute("/hq")({
 function ControlBoardPage() {
   return (
     <AppShell>
-      <AdminGate
-        locked={(openPin) => (
-          <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-14 text-center">
-            <span className="grid size-14 place-items-center rounded-full bg-primary/15 text-primary">
-              <ShieldCheck className="size-7" />
-            </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Authority Control Board</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Live radar, leaderboard, call audits and lead distribution. Master PIN required.
-              </p>
-            </div>
-            <Button size="lg" onClick={openPin}>
-              <Lock className="size-4" /> Enter PIN
-            </Button>
-          </div>
-        )}
+      <RoleGate
+        allow={["authority"]}
+        icon={<ShieldCheck className="size-7" />}
+        title="Executive HQ"
+        description="Live radar, leaderboard, call audits and ask-anything reports. Master PIN required."
       >
         <ControlBoard />
-      </AdminGate>
+      </RoleGate>
     </AppShell>
   );
 }
@@ -112,18 +100,6 @@ function ControlBoard() {
     talkMinutes: Math.round(row.talkSeconds / 60),
   }));
 
-  const balance = useMutation({
-    mutationFn: () => distribute({ data: { adminToken: getAdminToken() ?? "" } }),
-    onSuccess: (result) => {
-      toast.success(
-        result.assigned > 0
-          ? `${result.assigned} leads spread across ${result.agents} agents`
-          : "Every lead is already assigned",
-      );
-      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
   const openAgent = profiles.find((p) => p.id === openAgentId) ?? null;
