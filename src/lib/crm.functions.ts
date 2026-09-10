@@ -80,7 +80,7 @@ export const checkAdminToken = createServerFn({ method: "POST" })
   });
 
 const AudioInput = z.object({
-  adminToken: AdminToken,
+  adminToken: OptionalToken,
   recordingId: z.string().uuid(),
 });
 
@@ -88,16 +88,20 @@ const AudioInput = z.object({
 export const getAudioUrl = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AudioInput.parse(input))
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    if (caller.scope === "none") throw new Error("Sign in or enter the master PIN first");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: recording, error: lookupError } = await supabaseAdmin
       .from("call_recordings")
-      .select("audio_url")
+      .select("audio_url, agent_id")
       .eq("id", data.recordingId)
       .maybeSingle();
     if (lookupError) throw new Error("Could not load this recording");
     if (!recording?.audio_url) throw new Error("This recording has no audio");
+    if (caller.scope === "agent" && recording.agent_id !== caller.profile?.id) {
+      throw new Error("This recording belongs to another agent");
+    }
     const { data: signed, error } = await supabaseAdmin.storage
       .from("call-audio")
       .createSignedUrl(recording.audio_url, 5 * 60);
@@ -105,12 +109,12 @@ export const getAudioUrl = createServerFn({ method: "POST" })
     return { url: signed.signedUrl };
   });
 
-/** Splits every unassigned lead evenly across the active agents. Admin PIN required. */
+/** Splits every unassigned lead evenly across the active agents. Coordinator or PIN. */
 export const autoDistributeLeads = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ adminToken: AdminToken }).parse(input))
+  .inputValidator((input: unknown) => z.object({ adminToken: OptionalToken }).parse(input))
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [{ data: agents, error: agentError }, { data: leads, error: leadError }] =
