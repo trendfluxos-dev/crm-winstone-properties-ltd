@@ -13,6 +13,7 @@ import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { Button } from "@/components/ui/button";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
+import { useMyAccount, useSignOut } from "@/lib/session";
 
 const APK_URL = apkAsset.url;
 
