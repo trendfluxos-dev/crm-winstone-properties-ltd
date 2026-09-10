@@ -19,6 +19,7 @@ import { LeadDossier } from "@/components/crm/LeadDossier";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
+import { SystemNoticeBar } from "@/components/crm/SystemNoticeBar";
 import {
   buildAgentStats,
   buildTimeline,
@@ -109,6 +110,8 @@ function ControlBoard() {
             Read-only view · lead assignment lives in the Coordinator Deck
           </p>
         </div>
+
+        <SystemNoticeBar surface="hq" />
 
         <AskHqPanel />
 
