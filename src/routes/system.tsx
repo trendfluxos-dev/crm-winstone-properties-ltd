@@ -89,6 +89,8 @@ function SystemBoard() {
       </div>
 
 
+      <AccountApprovals />
+
       <SystemCustomizer />
 
 
