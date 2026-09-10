@@ -97,6 +97,79 @@ export const autoDistributeLeads = createServerFn({ method: "POST" })
     return { assigned: leads.length, agents: agents.length };
   });
 
+const ImportRow = z.object({
+  name: z.string().trim().min(1).max(120),
+  phone_number: z.string().trim().min(6).max(24),
+  company: z.string().trim().max(120).optional().nullable(),
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
+
+/** Bulk-inserts leads from a CSV (parsed in the browser). Skips numbers already in the pipeline. */
+export const importLeads = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        adminToken: AdminToken,
+        rows: z.array(ImportRow).min(1).max(5000),
+        autoAssign: z.boolean().default(false),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { requireAdminToken } = await import("@/lib/admin-gate.server");
+    requireAdminToken(data.adminToken);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const normalize = (p: string) => p.replace(/[^\d+]/g, "");
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from("leads")
+      .select("phone_number");
+    if (existingError) throw new Error(existingError.message);
+    const seen = new Set((existing ?? []).map((l) => normalize(l.phone_number)));
+
+    let agents: { id: string }[] = [];
+    if (data.autoAssign) {
+      const { data: activeAgents, error } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("is_active", true)
+        .in("role", ["agent", "team_leader"])
+        .order("name");
+      if (error) throw new Error(error.message);
+      agents = activeAgents ?? [];
+    }
+
+    const toInsert: {
+      name: string;
+      phone_number: string;
+      company: string | null;
+      notes: string | null;
+      assigned_to: string | null;
+    }[] = [];
+    let skipped = 0;
+    for (const row of data.rows) {
+      const key = normalize(row.phone_number);
+      if (!key || seen.has(key)) {
+        skipped += 1;
+        continue;
+      }
+      seen.add(key);
+      toInsert.push({
+        name: row.name,
+        phone_number: row.phone_number.trim(),
+        company: row.company || null,
+        notes: row.notes || null,
+        assigned_to: agents.length ? agents[toInsert.length % agents.length]!.id : null,
+      });
+    }
+
+    if (toInsert.length) {
+      const { error } = await supabaseAdmin.from("leads").insert(toInsert);
+      if (error) throw new Error(error.message);
+    }
+    return { imported: toInsert.length, skipped };
+  });
+
 const ManualCallInput = z.object({
   adminToken: AdminToken,
   leadId: z.string().uuid(),
