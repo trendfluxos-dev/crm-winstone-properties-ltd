@@ -29,6 +29,7 @@ export function AdminPinDialog({
   onUnlocked?: () => void;
 }) {
   const [pin, setPin] = useState("");
+  const [attemptNo, setAttemptNo] = useState(0);
   const unlock = useServerFn(unlockAdmin);
 
   const attempt = useMutation({
@@ -43,11 +44,13 @@ export function AdminPinDialog({
       } else {
         toast.error("Wrong PIN");
         setPin("");
+        setAttemptNo((n) => n + 1);
       }
     },
     onError: (error: Error) => {
       toast.error(error.message);
       setPin("");
+      setAttemptNo((n) => n + 1);
     },
   });
 
@@ -71,6 +74,7 @@ export function AdminPinDialog({
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-2">
           <InputOTP
+            key={attemptNo}
             maxLength={PIN_LENGTH}
             value={pin}
             onChange={setPin}
