@@ -20,6 +20,7 @@ import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
+import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -77,6 +78,11 @@ const ApiPublicIngestRecordingRoute =
     path: '/api/public/ingest/recording',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicReportsSummaryRoute = ApiPublicReportsSummaryRouteImport.update({
+  id: '/api/public/reports/summary',
+  path: '/api/public/reports/summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
+  '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
+  '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
+  '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
+    | '/api/public/reports/summary'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
+    | '/api/public/reports/summary'
   id:
     | '__root__'
     | '/'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
+    | '/api/public/reports/summary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -172,6 +184,7 @@ export interface RootRouteChildren {
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
+  ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIngestRecordingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/reports/summary': {
+      id: '/api/public/reports/summary'
+      path: '/api/public/reports/summary'
+      fullPath: '/api/public/reports/summary'
+      preLoaderRoute: typeof ApiPublicReportsSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -268,6 +288,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
+  ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
