@@ -45,7 +45,34 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2 rounded-full border border-live/30 bg-live/10 px-3 py-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto gap-2 border-primary/40 text-primary hover:bg-primary/10 hover:text-primary"
+            onClick={async () => {
+              try {
+                const res = await fetch(APK_URL, { method: "HEAD" });
+                if (!res.ok) throw new Error("missing");
+              } catch {
+                toast.error("Agent app file is not uploaded yet", {
+                  description: "Place winstone-connect.apk in public/downloads/ to enable the download.",
+                });
+                return;
+              }
+              const a = document.createElement("a");
+              a.href = APK_URL;
+              a.download = "winstone-connect.apk";
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            }}
+          >
+            <Smartphone className="size-4" />
+            <span className="hidden sm:inline">Download Agent Android App</span>
+            <span className="sm:hidden">Agent App</span>
+          </Button>
+
+          <div className="flex items-center gap-2 rounded-full border border-live/30 bg-live/10 px-3 py-1.5">
             <span className="relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-live" />
