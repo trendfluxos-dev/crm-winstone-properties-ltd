@@ -19,20 +19,27 @@ const APK_URL = apkAsset.url;
 
 
 
+type Scope = "authority" | "coordinator" | "agent" | "none";
+
 const NAV = [
-  { to: "/", label: "Agent Queue" },
-  { to: "/coach", label: "AI Coach" },
-  { to: "/dispatch", label: "Coordinator Deck" },
-  { to: "/hq", label: "Executive HQ" },
-  { to: "/reports", label: "Reports" },
-  { to: "/system", label: "IT Console" },
-  { to: "/ingest", label: "Ingest Check" },
-] as const;
+  { to: "/", label: "Home", scopes: ["authority", "coordinator", "agent", "none"] },
+  { to: "/desk", label: "My Desk", scopes: ["coordinator", "agent"] },
+  { to: "/coach", label: "AI Coach", scopes: ["authority", "coordinator", "agent"] },
+  { to: "/dispatch", label: "Coordinator Deck", scopes: ["authority", "coordinator"] },
+  { to: "/hq", label: "Executive HQ", scopes: ["authority"] },
+  { to: "/reports", label: "Reports", scopes: ["authority", "coordinator", "agent"] },
+  { to: "/system", label: "IT Console", scopes: ["authority"] },
+  { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
+] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;
 
 export function AppShell({ children }: { children: ReactNode }) {
   useCrmRealtime();
   const adminToken = useAdminToken();
+  const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
+  const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope));
+
+
 
   return (
     <div className="min-h-screen grid-noise">
