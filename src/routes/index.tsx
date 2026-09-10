@@ -160,9 +160,19 @@ function ExecutiveHq() {
         <AgentRadar agents={agents} calls={calls} />
 
         <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-semibold">Connected calls vs talk minutes</h2>
-            <p className="text-sm text-muted-foreground">Per agent, all recorded activity</p>
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-semibold">Connected calls vs talk minutes</h2>
+              <p className="text-sm text-muted-foreground">Per agent, all recorded activity</p>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-primary" /> Connected calls
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-live" /> Talk minutes
+              </span>
+            </div>
           </div>
           <div className="h-72 rounded-xl border border-border bg-card p-4">
             <ResponsiveContainer width="100%" height="100%">
