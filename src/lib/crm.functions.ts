@@ -2,24 +2,26 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const AdminToken = z.string().min(1);
+/** PIN token is optional now: coordinators/agents authenticate with their account. */
+const OptionalToken = z.string().nullable().optional();
 
 const SnapshotScope = z.object({
   token: z.string().nullable().optional(),
 });
 
 /**
- * Board data read server-side so agents never need an account.
- * Authority (IT console / HQ / coordinator PIN) gets the whole floor.
- * Unauthenticated visitors receive no customer, agent, call, or message data.
+ * Board data scoped to who is asking.
+ * Authority (HQ / IT PIN) and coordinators get the whole floor; a signed-in
+ * agent gets only their own leads, calls and messages. Anyone else gets nothing.
  */
 export const getCrmSnapshot = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SnapshotScope.parse(input ?? {}))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { adminTokenValid } = await import("@/lib/admin-gate.server");
-    const isAuthority = adminTokenValid(data.token ?? null);
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.token ?? null);
 
-    if (!isAuthority) return { profiles: [], leads: [], calls: [], messages: [] };
+    if (caller.scope === "none") return { profiles: [], leads: [], calls: [], messages: [] };
 
     const [profiles, leads, calls, messages] = await Promise.all([
       supabaseAdmin.from("profiles").select("*").order("name"),
@@ -37,6 +39,21 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
     ]);
     const failed = [profiles, leads, calls, messages].find((r) => r.error);
     if (failed?.error) throw new Error(failed.error.message);
+
+    if (caller.scope === "agent" && caller.profile) {
+      const me = caller.profile.id;
+      const myLeads = (leads.data ?? []).filter((l) => l.assigned_to === me);
+      const myLeadIds = new Set(myLeads.map((l) => l.id));
+      return {
+        profiles: (profiles.data ?? []).filter((p) => p.id === me),
+        leads: myLeads,
+        calls: (calls.data ?? []).filter((c) => c.agent_id === me || (c.lead_id && myLeadIds.has(c.lead_id))),
+        messages: (messages.data ?? []).filter(
+          (m) => m.agent_id === me || (m.lead_id && myLeadIds.has(m.lead_id)),
+        ),
+      };
+    }
+
     return {
       profiles: profiles.data ?? [],
       leads: leads.data ?? [],
@@ -63,7 +80,7 @@ export const checkAdminToken = createServerFn({ method: "POST" })
   });
 
 const AudioInput = z.object({
-  adminToken: AdminToken,
+  adminToken: OptionalToken,
   recordingId: z.string().uuid(),
 });
 
@@ -71,16 +88,20 @@ const AudioInput = z.object({
 export const getAudioUrl = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AudioInput.parse(input))
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    if (caller.scope === "none") throw new Error("Sign in or enter the master PIN first");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: recording, error: lookupError } = await supabaseAdmin
       .from("call_recordings")
-      .select("audio_url")
+      .select("audio_url, agent_id")
       .eq("id", data.recordingId)
       .maybeSingle();
     if (lookupError) throw new Error("Could not load this recording");
     if (!recording?.audio_url) throw new Error("This recording has no audio");
+    if (caller.scope === "agent" && recording.agent_id !== caller.profile?.id) {
+      throw new Error("This recording belongs to another agent");
+    }
     const { data: signed, error } = await supabaseAdmin.storage
       .from("call-audio")
       .createSignedUrl(recording.audio_url, 5 * 60);
@@ -88,12 +109,12 @@ export const getAudioUrl = createServerFn({ method: "POST" })
     return { url: signed.signedUrl };
   });
 
-/** Splits every unassigned lead evenly across the active agents. Admin PIN required. */
+/** Splits every unassigned lead evenly across the active agents. Coordinator or PIN. */
 export const autoDistributeLeads = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ adminToken: AdminToken }).parse(input))
+  .inputValidator((input: unknown) => z.object({ adminToken: OptionalToken }).parse(input))
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [{ data: agents, error: agentError }, { data: leads, error: leadError }] =
