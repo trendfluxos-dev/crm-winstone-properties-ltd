@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Lock, LockOpen, Radio, Smartphone, Sparkles } from "lucide-react";
+import { Lock, LockOpen, Smartphone, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
