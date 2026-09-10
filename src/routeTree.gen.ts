@@ -14,10 +14,13 @@ import { Route as CoachRouteImport } from './routes/coach'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as HqRouteImport } from './routes/hq'
 import { Route as IngestRouteImport } from './routes/ingest'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
@@ -53,6 +56,11 @@ const IngestRoute = IngestRouteImport.update({
   path: '/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -71,6 +79,17 @@ const SystemRoute = SystemRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAgentCoachRoute = ApiPublicAgentCoachRouteImport.update({
@@ -126,10 +145,13 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
+  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -146,10 +168,13 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
+  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -167,10 +192,13 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
+  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -189,10 +217,13 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/hq'
     | '/ingest'
+    | '/mcp'
     | '/privacy'
     | '/reports'
     | '/system'
     | '/terms'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/agent/coach'
     | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
@@ -209,10 +240,13 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/hq'
     | '/ingest'
+    | '/mcp'
     | '/privacy'
     | '/reports'
     | '/system'
     | '/terms'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/agent/coach'
     | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
@@ -229,10 +263,13 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/hq'
     | '/ingest'
+    | '/mcp'
     | '/privacy'
     | '/reports'
     | '/system'
     | '/terms'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/agent/coach'
     | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
@@ -250,10 +287,13 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   HqRoute: typeof HqRoute
   IngestRoute: typeof IngestRoute
+  McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportsRoute: typeof ReportsRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
@@ -302,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IngestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -328,6 +375,20 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/agent/coach': {
@@ -402,10 +463,14 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   HqRoute: HqRoute,
   IngestRoute: IngestRoute,
+  McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
   ReportsRoute: ReportsRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
