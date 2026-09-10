@@ -149,7 +149,7 @@ export function CallEntry({ call }: { call: CallRecording }) {
   });
 
   return (
-    <article className="rounded-xl border border-border bg-card">
+    <article className="card-elevated">
       <header className="flex flex-wrap items-center gap-3 border-b border-border/70 px-4 py-3">
         <span className="grid size-8 place-items-center rounded-full bg-primary/15 text-primary">
           {call.call_direction === "outgoing" ? (

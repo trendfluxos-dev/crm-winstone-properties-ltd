@@ -24,7 +24,7 @@ export function Leaderboard({
         <Trophy className="size-5 text-idle" />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden card-elevated">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-sm">
             <thead className="bg-surface-2 text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -40,15 +40,15 @@ export function Leaderboard({
                 <th className="px-4 py-3 text-right font-medium">Synced audio</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="zebra">
               {stats.map((row, index) => (
                 <tr
                   key={row.profile.id}
                   onClick={() => onSelectAgent?.(row.profile.id)}
                   className={
                     onSelectAgent
-                      ? "cursor-pointer border-t border-border/70 transition-colors hover:bg-surface-2/60"
-                      : "border-t border-border/70"
+                      ? "cursor-pointer border-t border-border transition-colors"
+                      : "border-t border-border"
                   }
                 >
                   <td className="tabular px-4 py-3 text-muted-foreground">{index + 1}</td>

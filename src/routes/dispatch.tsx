@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
@@ -44,6 +45,11 @@ export const Route = createFileRoute("/dispatch")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(snapshotQuery);
   },
+  pendingComponent: () => (
+    <AppShell>
+      <SnapshotSkeleton />
+    </AppShell>
+  ),
   component: DispatchPage,
 });
 
@@ -57,7 +63,7 @@ function DispatchPage() {
               <Users className="size-7" />
             </span>
             <div>
-              <h1 className="font-display text-2xl font-bold">Team Coordinator Desk</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Team Coordinator Desk</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Lead dispatching, team load and AI distribution. Master PIN required.
               </p>
@@ -131,7 +137,7 @@ function Dispatcher() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold">Lead Dispatcher</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Lead Dispatcher</h1>
           <p className="text-sm text-muted-foreground">
             {leads.length} leads in the pipeline · {unassigned} waiting for an owner
           </p>
@@ -142,7 +148,7 @@ function Dispatcher() {
         </div>
       </div>
 
-      <section className="rounded-xl border border-border bg-card p-4">
+      <section className="card-elevated p-4">
         <h2 className="text-sm font-semibold">Bulk push</h2>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Select value={agentId} onValueChange={setAgentId}>
@@ -182,7 +188,7 @@ function Dispatcher() {
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Team load</h2>
-        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <div className="overflow-x-auto card-elevated">
           <table className="w-full text-sm">
             <thead className="bg-surface-2 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>

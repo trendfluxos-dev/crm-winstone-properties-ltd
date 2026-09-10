@@ -15,13 +15,26 @@ function useNow(intervalMs = 1000) {
 }
 
 const PRESENCE = {
-  on_call: { label: "On Call", dot: "bg-live", text: "text-live", ring: "border-live/40" },
-  idle: { label: "Idle", dot: "bg-idle", text: "text-idle", ring: "border-idle/35" },
+  on_call: {
+    label: "On Call",
+    dot: "bg-live",
+    text: "text-live",
+    ring: "border-live/40",
+    pill: "bg-live/10 text-live border-live/25",
+  },
+  idle: {
+    label: "Idle",
+    dot: "bg-idle",
+    text: "text-idle-foreground",
+    ring: "border-border",
+    pill: "bg-idle/15 text-idle-foreground border-idle/30",
+  },
   offline: {
     label: "Offline",
     dot: "bg-offline",
     text: "text-muted-foreground",
     ring: "border-border",
+    pill: "bg-surface-2 text-muted-foreground border-border",
   },
 } as const;
 
@@ -71,21 +84,26 @@ export function AgentRadar({
                 if (onSelectAgent && (e.key === "Enter" || e.key === " ")) onSelectAgent(agent.id);
               }}
               className={cn(
-                "relative overflow-hidden rounded-xl border bg-card p-4 text-left transition-colors",
-                onSelectAgent && "cursor-pointer hover:border-primary/50",
+                "card-elevated relative overflow-hidden p-4 text-left",
+                onSelectAgent && "cursor-pointer hover:border-primary/40",
                 style.ring,
               )}
             >
               {agent.presence === "on_call" && (
-                <span className="absolute inset-x-0 top-0 h-px animate-pulse bg-live" />
+                <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-live/0 via-live to-live/0" />
               )}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <span
-                    className="grid size-10 place-items-center rounded-full text-sm font-semibold"
+                    className={cn(
+                      "grid size-11 place-items-center rounded-full text-sm font-semibold ring-2 ring-offset-2 ring-offset-card",
+                      agent.presence === "on_call" && "glow-live ring-live",
+                      agent.presence === "idle" && "ring-idle/70",
+                      agent.presence === "offline" && "ring-border",
+                    )}
                     style={{
-                      backgroundColor: `oklch(0.35 0.06 ${agent.avatar_hue})`,
-                      color: `oklch(0.92 0.06 ${agent.avatar_hue})`,
+                      backgroundColor: `oklch(0.93 0.05 ${agent.avatar_hue})`,
+                      color: `oklch(0.4 0.12 ${agent.avatar_hue})`,
                     }}
                   >
                     {agent.name
@@ -95,21 +113,30 @@ export function AgentRadar({
                       .join("")}
                   </span>
                   <div>
-                    <p className="font-medium leading-tight">{agent.name}</p>
+                    <p className="font-semibold leading-tight tracking-tight">{agent.name}</p>
                     <p className="text-xs capitalize text-muted-foreground">
                       {agent.role.replace("_", " ")}
                     </p>
                   </div>
                 </div>
 
-                <span className={cn("flex items-center gap-1.5 text-xs font-medium", style.text)}>
+                <span
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                    style.pill,
+                  )}
+                >
                   <span className="relative flex size-2">
                     {agent.presence === "on_call" && (
                       <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-80" />
                     )}
                     <span className={cn("relative inline-flex size-2 rounded-full", style.dot)} />
                   </span>
-                  {style.label}
+                  {liveSeconds !== null ? (
+                    <span className="tabular">{formatDuration(liveSeconds)}</span>
+                  ) : (
+                    style.label
+                  )}
                 </span>
               </div>
 

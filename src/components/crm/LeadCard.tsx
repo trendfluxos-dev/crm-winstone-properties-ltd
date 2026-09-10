@@ -1,4 +1,11 @@
-import { BadgeCheck, MessageCircle, PhoneOutgoing, Repeat, Sparkles } from "lucide-react";
+import {
+  BadgeCheck,
+  FolderOpen,
+  MessageCircle,
+  PhoneOutgoing,
+  Repeat,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { CallRecording, Lead, Profile } from "@/lib/crm-data";
@@ -6,9 +13,9 @@ import { digitsOnly, relativeTime, summaryBullets } from "@/lib/crm-format";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "border-border bg-secondary text-secondary-foreground",
-  contacted: "border-primary/30 bg-primary/10 text-primary",
-  follow_up: "border-idle/30 bg-idle/10 text-idle",
+  pending: "border-idle/30 bg-idle/15 text-idle-foreground",
+  contacted: "border-primary/25 bg-accent text-accent-foreground",
+  follow_up: "border-chart-4/30 bg-chart-4/10 text-chart-4",
   closed: "border-live/30 bg-live/10 text-live",
 };
 
@@ -26,7 +33,7 @@ export function LeadCard({
   const headline = summaryBullets(verifiedCall?.ai_summary ?? null)[0];
 
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
+    <article className="card-elevated flex flex-col gap-3 p-4 hover:border-primary/30">
       <div className="flex items-start justify-between gap-3">
         <button onClick={onOpen} className="min-w-0 text-left">
           <p className="flex items-center gap-1.5 font-medium">
@@ -44,7 +51,7 @@ export function LeadCard({
         </button>
         <span
           className={cn(
-            "shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] capitalize",
+            "shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold capitalize",
             STATUS_STYLES[lead.status],
           )}
         >
@@ -68,12 +75,20 @@ export function LeadCard({
       </div>
 
       <div className="flex gap-2">
-        <Button asChild size="lg" className="h-11 flex-1 text-base font-semibold">
+        <Button
+          asChild
+          size="lg"
+          className="h-11 flex-1 rounded-xl text-base font-semibold shadow-sm transition-all duration-300 hover:shadow-md"
+        >
           <a href={`tel:${lead.phone_number}`}>
             <PhoneOutgoing className="size-5" /> Call
           </a>
         </Button>
-        <Button asChild size="lg" variant="secondary" className="h-11 flex-1 text-base font-semibold">
+        <Button
+          asChild
+          size="lg"
+          className="h-11 flex-1 rounded-xl bg-whatsapp text-base font-semibold text-live-foreground shadow-sm transition-all duration-300 hover:bg-whatsapp/90 hover:shadow-md"
+        >
           <a
             href={`https://wa.me/${digitsOnly(lead.phone_number)}`}
             target="_blank"
@@ -82,8 +97,15 @@ export function LeadCard({
             <MessageCircle className="size-5" /> WhatsApp
           </a>
         </Button>
-        <Button size="lg" variant="outline" className="h-11" onClick={onOpen}>
-          Dossier
+        <Button
+          size="lg"
+          variant="outline"
+          className="expand-btn h-11 rounded-xl px-3"
+          onClick={onOpen}
+          aria-label="Open dossier"
+        >
+          <FolderOpen className="size-5" />
+          <span className="expand-label text-sm">Dossier</span>
         </Button>
       </div>
     </article>

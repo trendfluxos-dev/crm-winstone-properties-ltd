@@ -82,7 +82,7 @@ export function CallAudioPlayer({
   const progress = duration > 0 ? current / duration : 0;
 
   return (
-    <div className="rounded-xl border border-border bg-surface-2 p-3">
+    <div className="rounded-2xl bg-ink p-3 text-ink-foreground shadow-inner">
       {source?.url && (
         <audio
           ref={audioRef}
@@ -137,7 +137,7 @@ export function CallAudioPlayer({
                 key={index}
                 className={cn(
                   "flex-1 rounded-sm transition-colors",
-                  played ? "bg-primary" : "bg-border",
+                  played ? "bg-live" : "bg-ink-muted/40",
                 )}
                 style={{ height: `${Math.round(height * 100)}%` }}
               />
@@ -145,28 +145,38 @@ export function CallAudioPlayer({
           })}
         </div>
 
-        <span className="tabular w-24 shrink-0 text-right text-xs text-muted-foreground">
+        <span className="tabular w-24 shrink-0 text-right text-xs text-ink-muted">
           {formatDuration(current)} / {formatDuration(duration)}
         </span>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Button variant="secondary" size="sm" onClick={() => skip(-5)} disabled={!source?.url}>
+        <Button
+          size="sm"
+          className="rounded-full bg-ink-foreground/10 text-ink-foreground hover:bg-ink-foreground/20"
+          onClick={() => skip(-5)}
+          disabled={!source?.url}
+        >
           <RotateCcw className="size-3.5" /> 5s
         </Button>
-        <Button variant="secondary" size="sm" onClick={() => skip(5)} disabled={!source?.url}>
+        <Button
+          size="sm"
+          className="rounded-full bg-ink-foreground/10 text-ink-foreground hover:bg-ink-foreground/20"
+          onClick={() => skip(5)}
+          disabled={!source?.url}
+        >
           <RotateCw className="size-3.5" /> 5s
         </Button>
-        <div className="ml-auto flex items-center gap-1 rounded-md bg-background p-1">
+        <div className="ml-auto flex items-center gap-1 rounded-full bg-ink-foreground/10 p-1">
           {SPEEDS.map((option) => (
             <button
               key={option}
               onClick={() => setSpeed(option)}
               className={cn(
-                "tabular rounded px-2 py-1 text-xs transition-colors",
+                "tabular rounded-full px-2 py-1 text-xs transition-colors",
                 speed === option
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "bg-live text-live-foreground"
+                  : "text-ink-muted hover:text-ink-foreground",
               )}
             >
               {option}x

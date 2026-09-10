@@ -4,6 +4,7 @@ import { Lock, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { LeadCard } from "@/components/crm/LeadCard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
@@ -44,6 +45,11 @@ export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(snapshotQuery);
   },
+  pendingComponent: () => (
+    <AppShell>
+      <SnapshotSkeleton />
+    </AppShell>
+  ),
   component: LeadQueue,
 });
 
@@ -88,7 +94,7 @@ function LeadQueue() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">My Leads</h1>
+            <h1 className="text-2xl font-bold tracking-tight">My Leads</h1>
             <p className="text-sm text-muted-foreground">
               {filtered.length} of {leads.length} leads · one tap to dial or open WhatsApp
             </p>

@@ -10,7 +10,9 @@ export function useCrmRealtime() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const channel = supabase.channel("crm-live");
+    // Unique name per mount: reusing "crm-live" returns the already-subscribed
+    // channel and throws "cannot add postgres_changes callbacks after subscribe()".
+    const channel = supabase.channel(`crm-live-${Math.random().toString(36).slice(2)}`);
 
     for (const table of TABLES) {
       channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
