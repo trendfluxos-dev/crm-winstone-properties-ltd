@@ -147,7 +147,7 @@ export function SystemCustomizer() {
             <NumberRow
               label="Carrier rate"
               suffix="৳/min"
-              step={0.05}
+              
               value={draft.rules.ratePerMinute}
               onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, ratePerMinute: v } }))}
             />
