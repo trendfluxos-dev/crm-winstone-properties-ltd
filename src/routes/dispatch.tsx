@@ -214,6 +214,10 @@ function Dispatcher() {
           </table>
         </div>
       </section>
+
+      <section className="border-t border-border pt-6">
+        <QueueBoard title="Agent Queue" canSeeAllAgents showManualLog />
+      </section>
     </div>
   );
 }
