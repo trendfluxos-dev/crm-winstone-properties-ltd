@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { getCrmSnapshot } from "@/lib/crm.functions";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -16,52 +16,15 @@ export const LEAD_STATUSES: { key: LeadStatus; label: string }[] = [
   { key: "closed", label: "Closed" },
 ];
 
-export const profilesQuery = queryOptions({
-  queryKey: ["profiles"],
-  queryFn: async (): Promise<Profile[]> => {
-    const { data, error } = await supabase.from("profiles").select("*").order("name");
-    if (error) throw error;
-    return data ?? [];
-  },
+/** One server round-trip for the whole board; refreshed on a timer as a realtime fallback. */
+export const snapshotQuery = queryOptions({
+  queryKey: ["crm-snapshot"],
+  queryFn: () => getCrmSnapshot(),
+  refetchInterval: 15_000,
+  staleTime: 5_000,
 });
 
-export const leadsQuery = queryOptions({
-  queryKey: ["leads"],
-  queryFn: async (): Promise<Lead[]> => {
-    const { data, error } = await supabase
-      .from("leads")
-      .select("*")
-      .order("updated_at", { ascending: false });
-    if (error) throw error;
-    return data ?? [];
-  },
-});
-
-export const callsQuery = queryOptions({
-  queryKey: ["call_recordings"],
-  queryFn: async (): Promise<CallRecording[]> => {
-    const { data, error } = await supabase
-      .from("call_recordings")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500);
-    if (error) throw error;
-    return data ?? [];
-  },
-});
-
-export const messagesQuery = queryOptions({
-  queryKey: ["whatsapp_interactions"],
-  queryFn: async (): Promise<WhatsappMessage[]> => {
-    const { data, error } = await supabase
-      .from("whatsapp_interactions")
-      .select("*")
-      .order("created_at", { ascending: true })
-      .limit(1000);
-    if (error) throw error;
-    return data ?? [];
-  },
-});
+export type CrmSnapshot = Awaited<ReturnType<typeof getCrmSnapshot>>;
 
 export const CONNECTED_THRESHOLD_SECONDS = 10;
 

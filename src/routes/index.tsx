@@ -2,7 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, PhoneCall, Shuffle, Timer, TrendingUp, Users } from "lucide-react";
+import { Loader2, Lock, PhoneCall, Shuffle, Timer, TrendingUp, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -15,6 +15,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { AgentRadar } from "@/components/crm/AgentRadar";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
@@ -24,14 +25,12 @@ import { Button } from "@/components/ui/button";
 import {
   buildAgentStats,
   buildTimeline,
-  callsQuery,
   CONNECTED_THRESHOLD_SECONDS,
-  leadsQuery,
-  messagesQuery,
-  profilesQuery,
+  snapshotQuery,
 } from "@/lib/crm-data";
-import { autoDistributeLeads, claimAdminIfFirst } from "@/lib/crm.functions";
+import { autoDistributeLeads } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
+import { getAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,21 +50,15 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(profilesQuery),
-      context.queryClient.ensureQueryData(leadsQuery),
-      context.queryClient.ensureQueryData(callsQuery),
-      context.queryClient.ensureQueryData(messagesQuery),
-    ]);
+    await context.queryClient.ensureQueryData(snapshotQuery);
   },
   component: ExecutiveHq,
 });
 
 function ExecutiveHq() {
-  const { data: profiles } = useSuspenseQuery(profilesQuery);
-  const { data: leads } = useSuspenseQuery(leadsQuery);
-  const { data: calls } = useSuspenseQuery(callsQuery);
-  const { data: messages } = useSuspenseQuery(messagesQuery);
+  const {
+    data: { profiles, leads, calls, messages },
+  } = useSuspenseQuery(snapshotQuery);
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const distribute = useServerFn(autoDistributeLeads);
@@ -90,57 +83,23 @@ function ExecutiveHq() {
   }));
 
   const balance = useMutation({
-    mutationFn: () => distribute({}),
+    mutationFn: () => distribute({ data: { adminToken: getAdminToken() ?? "" } }),
     onSuccess: (result) => {
       toast.success(
         result.assigned > 0
           ? `${result.assigned} leads spread across ${result.agents} agents`
           : "Every lead is already assigned",
       );
-      void queryClient.invalidateQueries({ queryKey: ["leads"] });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const claimAdmin = useMutation({
-    mutationFn: () => claimAdminIfFirst({}),
-    onSuccess: (result) => {
-      if (result.claimed) {
-        toast.success("You are now the admin. Reloading the dashboard.");
-        void queryClient.invalidateQueries({ queryKey: ["profiles"] });
-      } else {
-        toast.info(result.reason ?? "An admin already exists.");
-      }
+      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
-  const hasAdmin = profiles.some((p) => p.role === "admin");
 
   return (
     <AppShell>
       <div className="space-y-8">
-        {!hasAdmin && (
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="font-semibold">Finish setup</h2>
-                <p className="text-sm text-muted-foreground">
-                  No admin account is configured yet. Claim admin access to start managing agents and leads.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => claimAdmin.mutate()}
-                disabled={claimAdmin.isPending}
-              >
-                {claimAdmin.isPending && <Loader2 className="mr-1 size-4 animate-spin" />}
-                Claim admin access
-              </Button>
-            </div>
-          </div>
-        )}
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-display text-2xl font-bold">Executive HQ</h1>
@@ -149,15 +108,23 @@ function ExecutiveHq() {
             </p>
           </div>
           <div className="flex gap-2">
-            <ManualIngestDialog leads={leads} agents={agents} />
-            <Button size="sm" onClick={() => balance.mutate()} disabled={balance.isPending}>
-              {balance.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Shuffle className="size-4" />
+            <AdminGate
+              locked={(openPin) => (
+                <Button variant="secondary" size="sm" onClick={openPin}>
+                  <Lock className="size-4" /> Control board
+                </Button>
               )}
-              Balance {unassigned > 0 ? `${unassigned} leads` : "leads"}
-            </Button>
+            >
+              <ManualIngestDialog leads={leads} agents={agents} />
+              <Button size="sm" onClick={() => balance.mutate()} disabled={balance.isPending}>
+                {balance.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Shuffle className="size-4" />
+                )}
+                Balance {unassigned > 0 ? `${unassigned} leads` : "leads"}
+              </Button>
+            </AdminGate>
           </div>
         </div>
 

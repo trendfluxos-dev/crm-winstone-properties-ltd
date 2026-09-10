@@ -144,6 +144,7 @@ export type Database = {
           avatar_hue: number
           created_at: string
           current_call_started_at: string | null
+          employee_id: string | null
           id: string
           is_active: boolean
           last_active_at: string | null
@@ -157,6 +158,7 @@ export type Database = {
           avatar_hue?: number
           created_at?: string
           current_call_started_at?: string | null
+          employee_id?: string | null
           id?: string
           is_active?: boolean
           last_active_at?: string | null
@@ -170,6 +172,7 @@ export type Database = {
           avatar_hue?: number
           created_at?: string
           current_call_started_at?: string | null
+          employee_id?: string | null
           id?: string
           is_active?: boolean
           last_active_at?: string | null

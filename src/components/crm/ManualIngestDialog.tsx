@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { Lead, Profile } from "@/lib/crm-data";
 import { logWhatsappMessage, uploadCallRecording } from "@/lib/crm.functions";
+import { getAdminToken, useOperatorId } from "@/lib/local-session";
 
 async function fileToBase64(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
@@ -42,9 +43,13 @@ export function ManualIngestDialog({
   leads: Lead[];
   agents: Profile[];
 }) {
+  const operatorId = useOperatorId();
   const [open, setOpen] = useState(false);
   const [leadId, setLeadId] = useState<string>("");
-  const [agentId, setAgentId] = useState<string>("");
+  const [agentOverride, setAgentOverride] = useState<string | null>(null);
+  // Defaults to the top-bar "Operating as" agent; can still be changed per log.
+  const agentId = agentOverride ?? (agents.some((a) => a.id === operatorId) ? operatorId! : "");
+  const setAgentId = setAgentOverride;
   const [file, setFile] = useState<File | null>(null);
   const [direction, setDirection] = useState<"outgoing" | "incoming_callback">("outgoing");
   const [duration, setDuration] = useState("60");
@@ -60,6 +65,7 @@ export function ManualIngestDialog({
       if (!leadId || !file) throw new Error("Pick a lead and an audio file");
       return uploadCall({
         data: {
+          adminToken: getAdminToken() ?? "",
           leadId,
           agentId: agentId || null,
           audioBase64: await fileToBase64(file),
@@ -84,6 +90,7 @@ export function ManualIngestDialog({
       if (!leadId || !messageContent.trim()) throw new Error("Pick a lead and write a message");
       return logMessage({
         data: {
+          adminToken: getAdminToken() ?? "",
           leadId,
           agentId: agentId || null,
           senderType,

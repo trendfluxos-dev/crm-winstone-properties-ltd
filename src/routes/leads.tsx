@@ -1,12 +1,14 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { Lock, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { AppShell } from "@/components/crm/AppShell";
 import { LeadCard } from "@/components/crm/LeadCard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { ManualIngestDialog } from "@/components/crm/ManualIngestDialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -17,12 +19,9 @@ import {
 } from "@/components/ui/select";
 import {
   buildTimeline,
-  callsQuery,
   latestVerifiedCall,
   LEAD_STATUSES,
-  leadsQuery,
-  messagesQuery,
-  profilesQuery,
+  snapshotQuery,
 } from "@/lib/crm-data";
 
 export const Route = createFileRoute("/leads")({
@@ -42,21 +41,15 @@ export const Route = createFileRoute("/leads")({
     ],
   }),
   loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(profilesQuery),
-      context.queryClient.ensureQueryData(leadsQuery),
-      context.queryClient.ensureQueryData(callsQuery),
-      context.queryClient.ensureQueryData(messagesQuery),
-    ]);
+    await context.queryClient.ensureQueryData(snapshotQuery);
   },
   component: LeadQueue,
 });
 
 function LeadQueue() {
-  const { data: profiles } = useSuspenseQuery(profilesQuery);
-  const { data: leads } = useSuspenseQuery(leadsQuery);
-  const { data: calls } = useSuspenseQuery(callsQuery);
-  const { data: messages } = useSuspenseQuery(messagesQuery);
+  const {
+    data: { profiles, leads, calls, messages },
+  } = useSuspenseQuery(snapshotQuery);
 
   const [search, setSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
@@ -94,7 +87,15 @@ function LeadQueue() {
               {filtered.length} of {leads.length} leads · one tap to dial or open WhatsApp
             </p>
           </div>
-          <ManualIngestDialog leads={leads} agents={agents} />
+          <AdminGate
+            locked={(openPin) => (
+              <Button variant="secondary" size="sm" onClick={openPin}>
+                <Lock className="size-4" /> Manual log
+              </Button>
+            )}
+          >
+            <ManualIngestDialog leads={leads} agents={agents} />
+          </AdminGate>
         </div>
 
         <div className="flex flex-wrap gap-3">

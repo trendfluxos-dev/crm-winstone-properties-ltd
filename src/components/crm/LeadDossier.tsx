@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { CallRecording, Lead, Profile, TimelineEntry, WhatsappMessage } from "@/lib/crm-data";
 import { reanalyzeRecording } from "@/lib/crm.functions";
+import { getAdminToken } from "@/lib/local-session";
 import {
   clockTime,
   dayLabel,
@@ -135,7 +136,11 @@ function CallEntry({ call }: { call: CallRecording }) {
   const runAnalysis = useServerFn(reanalyzeRecording);
 
   const analysis = useMutation({
-    mutationFn: () => runAnalysis({ data: { recordingId: call.id } }),
+    mutationFn: () => {
+      const adminToken = getAdminToken();
+      if (!adminToken) throw new Error("Unlock the control board with the admin PIN first");
+      return runAnalysis({ data: { adminToken, recordingId: call.id } });
+    },
     onSuccess: () => {
       toast.success("AI analysis updated");
       void queryClient.invalidateQueries({ queryKey: ["call_recordings"] });
