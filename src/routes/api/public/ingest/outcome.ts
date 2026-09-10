@@ -84,7 +84,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
             notes: appended,
             call_attempts: (lead.call_attempts ?? 0) + 1,
             last_call_at: stamp.toISOString(),
-            is_verified: connected === true ? true : undefined,
+            ...(connected === true ? { is_verified: true } : {}),
           })
           .eq("id", lead_id);
         if (error) return json({ error: error.message }, 500);
