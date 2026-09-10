@@ -9,7 +9,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { buildBillingSummary, DEFAULT_RATE_PER_MINUTE, snapshotQuery } from "@/lib/crm-data";
+import { buildBillingSummary, DEFAULT_RATE_PER_MINUTE, useSnapshot } from "@/lib/crm-data";
 
 export const Route = createFileRoute("/system")({
   head: () => ({
@@ -29,9 +29,6 @@ export const Route = createFileRoute("/system")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(snapshotQuery);
-  },
   pendingComponent: () => (
     <AppShell>
       <SnapshotSkeleton />
@@ -74,9 +71,7 @@ const ENDPOINTS = [
 ];
 
 function SystemBoard() {
-  const {
-    data: { profiles, leads, calls, messages },
-  } = useSuspenseQuery(snapshotQuery);
+  const { profiles, leads, calls, messages } = useSnapshot();
   const [rate, setRate] = useState(String(DEFAULT_RATE_PER_MINUTE));
 
   const billing = useMemo(

@@ -22,7 +22,7 @@ import {
   buildTimeline,
   latestVerifiedCall,
   LEAD_STATUSES,
-  snapshotQuery,
+  useSnapshot,
 } from "@/lib/crm-data";
 import { useOperatorId } from "@/lib/local-session";
 
@@ -42,9 +42,6 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(snapshotQuery);
-  },
   pendingComponent: () => (
     <AppShell>
       <SnapshotSkeleton />
@@ -54,9 +51,7 @@ export const Route = createFileRoute("/")({
 });
 
 function LeadQueue() {
-  const {
-    data: { profiles, leads, calls, messages },
-  } = useSuspenseQuery(snapshotQuery);
+  const { profiles, leads, calls, messages, isPending } = useSnapshot();
 
   const [search, setSearch] = useState("");
   const operatorId = useOperatorId();

@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { buildAgentStats, snapshotQuery } from "@/lib/crm-data";
+import { buildAgentStats, useSnapshot } from "@/lib/crm-data";
 import { assignLeadsToAgent, autoDistributeLeads } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
 import { getAdminToken } from "@/lib/local-session";
@@ -42,9 +42,6 @@ export const Route = createFileRoute("/dispatch")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(snapshotQuery);
-  },
   pendingComponent: () => (
     <AppShell>
       <SnapshotSkeleton />
@@ -81,9 +78,7 @@ function DispatchPage() {
 }
 
 function Dispatcher() {
-  const {
-    data: { profiles, leads, calls, messages },
-  } = useSuspenseQuery(snapshotQuery);
+  const { profiles, leads, calls, messages } = useSnapshot();
   const queryClient = useQueryClient();
   const assign = useServerFn(assignLeadsToAgent);
   const distribute = useServerFn(autoDistributeLeads);

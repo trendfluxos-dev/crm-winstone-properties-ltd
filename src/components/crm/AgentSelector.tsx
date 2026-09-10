@@ -8,16 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { snapshotQuery } from "@/lib/crm-data";
+import { useSnapshot } from "@/lib/crm-data";
 import { setOperatorId, useOperatorId } from "@/lib/local-session";
 
 const NONE = "__none__";
 
 /** "Operating as" switcher: picks which agent manual logs are attributed to. No login needed. */
 export function AgentSelector() {
-  const { data } = useQuery(snapshotQuery);
+  const data = useSnapshot();
   const operatorId = useOperatorId();
-  const agents = (data?.profiles ?? []).filter(
+  const agents = data.profiles.filter(
     (p) => p.is_active && (p.role === "agent" || p.role === "team_leader"),
   );
   const current = agents.find((a) => a.id === operatorId);
