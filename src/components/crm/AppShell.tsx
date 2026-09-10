@@ -33,20 +33,20 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Radio className="size-4" />
             </span>
             <span className="leading-tight">
-              <span className="block text-[13px] font-bold tracking-tight">Winstone Connect</span>
+              <span className="block whitespace-nowrap text-[13px] font-bold tracking-tight">Winstone Connect</span>
               <span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 Tele-Sales OS
               </span>
             </span>
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-0.5 rounded-full border border-border bg-surface-2/70 p-1 md:flex">
+          <nav className="ml-2 hidden items-center gap-0.5 rounded-full border border-border bg-surface-2/70 p-1 lg:flex">
             {NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="rounded-full px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-all duration-300 hover:text-foreground data-[status=active]:bg-card data-[status=active]:text-primary data-[status=active]:shadow-sm"
+                className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-all duration-300 hover:text-foreground data-[status=active]:bg-card data-[status=active]:text-primary data-[status=active]:shadow-sm"
               >
                 {item.label}
               </Link>
@@ -112,7 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-2 md:hidden">
+        <nav className="flex gap-1 overflow-x-auto px-3 pb-2 lg:hidden">
           {NAV.map((item) => (
             <Link
               key={item.to}
