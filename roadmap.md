@@ -10,6 +10,10 @@
       call transcripts + WhatsApp logs, + /api/public/agent/coach for the phone app
 - [x] Ingest validation screen (/ingest): pipe health, data problems, payload tester
 
+- [x] Android live call screen (LiveCallScreen.kt): in-call timer, REC chip, live notes,
+      mute/speaker, End call, outcome sheet -> presence + recording + outcome endpoints
+- [x] /api/public/agent/presence (live on-call radar) and /api/public/ingest/outcome
+
 ## Queued
 - [ ] Android: build APK with WinstoneApi.kt + LiveCallLauncher.kt + WinstoneRules.kt wired in;
       place at public/downloads/winstone-connect.apk
