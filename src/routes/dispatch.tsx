@@ -53,26 +53,14 @@ export const Route = createFileRoute("/dispatch")({
 function DispatchPage() {
   return (
     <AppShell>
-      <AdminGate
-        locked={(openPin) => (
-          <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-14 text-center">
-            <span className="grid size-14 place-items-center rounded-full bg-primary/15 text-primary">
-              <Users className="size-7" />
-            </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Team Coordinator Desk</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Lead dispatching, team load and AI distribution. Master PIN required.
-              </p>
-            </div>
-            <Button size="lg" onClick={openPin}>
-              <Lock className="size-4" /> Enter PIN
-            </Button>
-          </div>
-        )}
+      <RoleGate
+        allow={["authority", "coordinator"]}
+        icon={<Users className="size-7" />}
+        title="Team Coordinator Desk"
+        description="Lead dispatching, team load and the full floor queue. Coordinator account or master PIN."
       >
         <Dispatcher />
-      </AdminGate>
+      </RoleGate>
     </AppShell>
   );
 }
