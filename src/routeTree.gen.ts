@@ -24,6 +24,7 @@ import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
+import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/ingest/outcome'
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
 
@@ -102,6 +103,11 @@ const ApiPublicIngestMessageRoute = ApiPublicIngestMessageRouteImport.update({
   path: '/api/public/ingest/message',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIngestOutcomeRoute = ApiPublicIngestOutcomeRouteImport.update({
+  id: '/api/public/ingest/outcome',
+  path: '/api/public/ingest/outcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicIngestRecordingRoute =
   ApiPublicIngestRecordingRouteImport.update({
     id: '/api/public/ingest/recording',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
+  '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
+  '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
+  '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/api/public/config/rules'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
+    | '/api/public/ingest/outcome'
     | '/api/public/ingest/recording'
     | '/api/public/reports/summary'
   fileRoutesByTo: FileRoutesByTo
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/api/public/config/rules'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
+    | '/api/public/ingest/outcome'
     | '/api/public/ingest/recording'
     | '/api/public/reports/summary'
   id:
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/api/public/config/rules'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
+    | '/api/public/ingest/outcome'
     | '/api/public/ingest/recording'
     | '/api/public/reports/summary'
   fileRoutesById: FileRoutesById
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
+  ApiPublicIngestOutcomeRoute: typeof ApiPublicIngestOutcomeRoute
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
 }
@@ -359,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIngestMessageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ingest/outcome': {
+      id: '/api/public/ingest/outcome'
+      path: '/api/public/ingest/outcome'
+      fullPath: '/api/public/ingest/outcome'
+      preLoaderRoute: typeof ApiPublicIngestOutcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ingest/recording': {
       id: '/api/public/ingest/recording'
       path: '/api/public/ingest/recording'
@@ -392,6 +412,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
+  ApiPublicIngestOutcomeRoute: ApiPublicIngestOutcomeRoute,
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,
 }
