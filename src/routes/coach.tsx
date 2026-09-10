@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { getCoachBriefing } from "@/lib/coach.functions";
 import { useSnapshot } from "@/lib/crm-data";
-import { useAdminToken, useOperatorId } from "@/lib/local-session";
+import { useAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/coach")({
   head: () => ({
@@ -57,7 +57,6 @@ type Briefing = Awaited<ReturnType<typeof getCoachBriefing>>;
 function CoachPage() {
   const { profiles } = useSnapshot();
   const token = useAdminToken();
-  const operatorId = useOperatorId();
   const isAuthority = token !== null;
 
   const agents = useMemo(
@@ -65,7 +64,7 @@ function CoachPage() {
     [profiles],
   );
   const [selected, setSelected] = useState<string | null>(null);
-  const agentId = isAuthority ? selected : operatorId;
+  const agentId = isAuthority ? selected : null;
   const [briefing, setBriefing] = useState<Briefing | null>(null);
 
   const run = useMutation({
@@ -125,7 +124,7 @@ function CoachPage() {
 
         {!agentId && (
           <p className="rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
-            Pick your name in “Operating as” at the top and your personal coaching briefing loads here.
+            Unlock authority access to load an agent coaching briefing.
           </p>
         )}
 

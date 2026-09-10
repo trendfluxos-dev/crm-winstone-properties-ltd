@@ -162,8 +162,8 @@ function LeadQueue() {
 
         {!isAuthority && !operatorId && (
           <p className="rounded-xl border border-dashed border-border bg-card p-4 text-center text-sm text-muted-foreground">
-            Pick your name in “Operating as” at the top to load your own leads. Other agents’ leads
-            stay private.
+            Unlock authority access to view customer leads. Agent devices must use their authenticated
+            workspace connection.
           </p>
         )}
 
