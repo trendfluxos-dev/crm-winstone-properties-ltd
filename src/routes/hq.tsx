@@ -73,7 +73,7 @@ function ControlBoardPage() {
               <ShieldCheck className="size-7" />
             </span>
             <div>
-              <h1 className="font-display text-2xl font-bold">Authority Control Board</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Authority Control Board</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Live radar, leaderboard, call audits and lead distribution. Master PIN required.
               </p>
@@ -139,7 +139,7 @@ function ControlBoard() {
       <div className="space-y-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">Control Board</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Control Board</h1>
             <p className="text-sm text-muted-foreground">
               Every dial, recording and WhatsApp touch across the floor, updating live.
             </p>

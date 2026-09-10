@@ -63,7 +63,7 @@ function DispatchPage() {
               <Users className="size-7" />
             </span>
             <div>
-              <h1 className="font-display text-2xl font-bold">Team Coordinator Desk</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Team Coordinator Desk</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Lead dispatching, team load and AI distribution. Master PIN required.
               </p>
@@ -137,7 +137,7 @@ function Dispatcher() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold">Lead Dispatcher</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Lead Dispatcher</h1>
           <p className="text-sm text-muted-foreground">
             {leads.length} leads in the pipeline · {unassigned} waiting for an owner
           </p>

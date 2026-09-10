@@ -94,7 +94,7 @@ function LeadQueue() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">My Leads</h1>
+            <h1 className="text-2xl font-bold tracking-tight">My Leads</h1>
             <p className="text-sm text-muted-foreground">
               {filtered.length} of {leads.length} leads · one tap to dial or open WhatsApp
             </p>

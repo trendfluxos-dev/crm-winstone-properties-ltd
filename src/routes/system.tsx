@@ -50,7 +50,7 @@ function SystemPage() {
               <Database className="size-7" />
             </span>
             <div>
-              <h1 className="font-display text-2xl font-bold">System Controller</h1>
+              <h1 className="text-2xl font-bold tracking-tight">System Controller</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Data health, ingestion endpoints and monthly billing. Master PIN required.
               </p>
@@ -96,7 +96,7 @@ function SystemBoard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold">System & Billing</h1>
+          <h1 className="text-2xl font-bold tracking-tight">System & Billing</h1>
           <p className="text-sm text-muted-foreground">
             Core engine status, ingestion endpoints and monthly telephony cost.
           </p>
@@ -199,7 +199,7 @@ function Tile({ label, value, hint }: { label: string; value: string; hint: stri
   return (
     <div className="card-elevated p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="tabular mt-1 font-display text-2xl font-bold">{value}</p>
+      <p className="tabular mt-1 text-2xl font-bold tracking-tight">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
     </div>
   );
