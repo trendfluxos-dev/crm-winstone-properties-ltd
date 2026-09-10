@@ -221,7 +221,7 @@ export const importLeads = createServerFn({ method: "POST" })
   });
 
 const ManualCallInput = z.object({
-  adminToken: AdminToken,
+  adminToken: OptionalToken,
   leadId: z.string().uuid(),
   agentId: z.string().uuid().nullable(),
   audioBase64: z.string().min(1),
@@ -231,12 +231,12 @@ const ManualCallInput = z.object({
   isTwoSided: z.boolean(),
 });
 
-/** Admin override: upload a recording by hand and run the AI analysis on it. */
+/** Manual log: upload a recording by hand and run the AI analysis on it. */
 export const uploadCallRecording = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ManualCallInput.parse(input))
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
     const { adminToken: _token, ...payload } = data;
     const { ingestRecording, processRecording } = await import("@/lib/call-intel.server");
     const recordingId = await ingestRecording(payload);
@@ -245,7 +245,7 @@ export const uploadCallRecording = createServerFn({ method: "POST" })
   });
 
 const ManualMessageInput = z.object({
-  adminToken: AdminToken,
+  adminToken: OptionalToken,
   leadId: z.string().uuid(),
   agentId: z.string().uuid().nullable(),
   senderType: z.enum(["agent", "customer"]),
@@ -253,12 +253,12 @@ const ManualMessageInput = z.object({
   messageContent: z.string().min(1),
 });
 
-/** Admin override: log a WhatsApp message against a lead. */
+/** Manual log: record a WhatsApp message against a lead. */
 export const logWhatsappMessage = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ManualMessageInput.parse(input))
   .handler(async ({ data }) => {
-    const { requireAdminToken } = await import("@/lib/admin-gate.server");
-    requireAdminToken(data.adminToken);
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("whatsapp_interactions").insert({
       lead_id: data.leadId,

@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { AccountApprovals } from "@/components/crm/AccountApprovals";
+import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
@@ -40,26 +41,14 @@ export const Route = createFileRoute("/system")({
 function SystemPage() {
   return (
     <AppShell>
-      <AdminGate
-        locked={(openPin) => (
-          <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-14 text-center">
-            <span className="grid size-14 place-items-center rounded-full bg-primary/15 text-primary">
-              <Database className="size-7" />
-            </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">System Controller</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Data health, ingestion endpoints and monthly billing. Master PIN required.
-              </p>
-            </div>
-            <Button size="lg" onClick={openPin}>
-              <Lock className="size-4" /> Enter PIN
-            </Button>
-          </div>
-        )}
+      <RoleGate
+        allow={["authority"]}
+        icon={<Database className="size-7" />}
+        title="IT Console"
+        description="System configuration, account approvals, data health and billing. Master PIN required."
       >
         <SystemBoard />
-      </AdminGate>
+      </RoleGate>
     </AppShell>
   );
 }
@@ -99,6 +88,8 @@ function SystemBoard() {
         <CopilotDrawer />
       </div>
 
+
+      <AccountApprovals />
 
       <SystemCustomizer />
 

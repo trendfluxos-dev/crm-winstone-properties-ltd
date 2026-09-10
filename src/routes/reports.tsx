@@ -19,7 +19,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { RoleGate } from "@/components/crm/RoleGate";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
@@ -72,26 +72,14 @@ export const Route = createFileRoute("/reports")({
 function ReportsPage() {
   return (
     <AppShell>
-      <AdminGate
-        locked={(openPin) => (
-          <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-14 text-center">
-            <span className="grid size-14 place-items-center rounded-full bg-primary/15 text-primary">
-              <BarChart3 className="size-7" />
-            </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Custom Reports</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Performance charts, filters and exports. Master PIN required.
-              </p>
-            </div>
-            <Button size="lg" onClick={openPin}>
-              <Lock className="size-4" /> Enter PIN
-            </Button>
-          </div>
-        )}
+      <RoleGate
+        allow={["authority", "coordinator", "agent"]}
+        icon={<BarChart3 className="size-7" />}
+        title="Reports"
+        description="Performance charts, filters and exports. Sign in to your desk or enter the master PIN."
       >
         <ReportsBoard />
-      </AdminGate>
+      </RoleGate>
     </AppShell>
   );
 }

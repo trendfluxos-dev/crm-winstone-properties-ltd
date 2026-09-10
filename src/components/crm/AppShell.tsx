@@ -13,26 +13,35 @@ import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { Button } from "@/components/ui/button";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
+import { useMyAccount, useSignOut } from "@/lib/session";
 
 const APK_URL = apkAsset.url;
 
 
 
 
+type Scope = "authority" | "coordinator" | "agent" | "none";
+
 const NAV = [
-  { to: "/", label: "Agent Queue" },
-  { to: "/coach", label: "AI Coach" },
-  { to: "/dispatch", label: "Coordinator Deck" },
-  { to: "/hq", label: "Executive HQ" },
-  { to: "/reports", label: "Reports" },
-  { to: "/system", label: "IT Console" },
-  { to: "/ingest", label: "Ingest Check" },
-] as const;
+  { to: "/", label: "Home", scopes: ["authority", "coordinator", "agent", "none"] },
+  { to: "/desk", label: "My Desk", scopes: ["coordinator", "agent"] },
+  { to: "/coach", label: "AI Coach", scopes: ["authority", "coordinator", "agent"] },
+  { to: "/dispatch", label: "Coordinator Deck", scopes: ["authority", "coordinator"] },
+  { to: "/hq", label: "Executive HQ", scopes: ["authority"] },
+  { to: "/reports", label: "Reports", scopes: ["authority", "coordinator", "agent"] },
+  { to: "/system", label: "IT Console", scopes: ["authority"] },
+  { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
+] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;
 
 export function AppShell({ children }: { children: ReactNode }) {
   useCrmRealtime();
   const adminToken = useAdminToken();
+  const { scope } = useMyAccount();
+  const signOut = useSignOut();
   const [pinOpen, setPinOpen] = useState(false);
+  const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope));
+
+
 
   return (
     <div className="min-h-screen grid-noise">
@@ -53,7 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <nav className="ml-2 hidden items-center gap-0.5 rounded-full border border-border bg-surface-2/70 p-1 lg:flex">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -89,6 +98,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="hidden lg:inline">{adminToken ? "Authority unlocked" : "Master PIN"}</span>
             </button>
 
+            {scope !== "none" && !adminToken && (
+              <button
+                type="button"
+                onClick={() => {
+                  void signOut().then(() => toast.info("Signed out"));
+                }}
+                className="inline-flex h-8 items-center rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:text-foreground hover:shadow-sm"
+              >
+                Sign out
+              </button>
+            )}
+
             <Button
               size="sm"
               className="h-8 gap-1.5 rounded-full px-3.5 text-xs font-semibold shadow-sm transition-all duration-300 hover:shadow-md"
@@ -118,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex gap-1 overflow-x-auto px-3 pb-2 lg:hidden">
-          {NAV.map((item) => (
+          {nav.map((item) => (
             <Link
               key={item.to}
               to={item.to}
