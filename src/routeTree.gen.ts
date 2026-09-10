@@ -19,6 +19,7 @@ import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
+import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
@@ -76,6 +77,11 @@ const ApiPublicAgentCoachRoute = ApiPublicAgentCoachRouteImport.update({
   path: '/api/public/agent/coach',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentPresenceRoute = ApiPublicAgentPresenceRouteImport.update({
+  id: '/api/public/agent/presence',
+  path: '/api/public/agent/presence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentWorkspaceRoute = ApiPublicAgentWorkspaceRouteImport.update({
   id: '/api/public/agent/workspace',
   path: '/api/public/agent/workspace',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
+  '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
+  '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
+  '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/system'
     | '/terms'
     | '/api/public/agent/coach'
+    | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/ingest/lead'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/system'
     | '/terms'
     | '/api/public/agent/coach'
+    | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/ingest/lead'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/system'
     | '/terms'
     | '/api/public/agent/coach'
+    | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/ingest/lead'
@@ -231,6 +243,7 @@ export interface RootRouteChildren {
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
   ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
+  ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentCoachRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/presence': {
+      id: '/api/public/agent/presence'
+      path: '/api/public/agent/presence'
+      fullPath: '/api/public/agent/presence'
+      preLoaderRoute: typeof ApiPublicAgentPresenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/workspace': {
       id: '/api/public/agent/workspace'
       path: '/api/public/agent/workspace'
@@ -367,6 +387,7 @@ const rootRouteChildren: RootRouteChildren = {
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
   ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
+  ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
