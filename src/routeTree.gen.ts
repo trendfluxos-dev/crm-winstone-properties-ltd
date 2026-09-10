@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CoachRouteImport } from './routes/coach'
+import { Route as DeskRouteImport } from './routes/desk'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as HqRouteImport } from './routes/hq'
 import { Route as IngestRouteImport } from './routes/ingest'
@@ -46,6 +47,11 @@ const AuthRoute = AuthRouteImport.update({
 const CoachRoute = CoachRouteImport.update({
   id: '/coach',
   path: '/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeskRoute = DeskRouteImport.update({
+  id: '/desk',
+  path: '/desk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DispatchRoute = DispatchRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/coach'
+    | '/desk'
     | '/dispatch'
     | '/hq'
     | '/ingest'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/coach'
+    | '/desk'
     | '/dispatch'
     | '/hq'
     | '/ingest'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/coach'
+    | '/desk'
     | '/dispatch'
     | '/hq'
     | '/ingest'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   CoachRoute: typeof CoachRoute
+  DeskRoute: typeof DeskRoute
   DispatchRoute: typeof DispatchRoute
   HqRoute: typeof HqRoute
   IngestRoute: typeof IngestRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/coach'
       fullPath: '/coach'
       preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/desk': {
+      id: '/desk'
+      path: '/desk'
+      fullPath: '/desk'
+      preLoaderRoute: typeof DeskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dispatch': {
@@ -501,6 +521,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   CoachRoute: CoachRoute,
+  DeskRoute: DeskRoute,
   DispatchRoute: DispatchRoute,
   HqRoute: HqRoute,
   IngestRoute: IngestRoute,
