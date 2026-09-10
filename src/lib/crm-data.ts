@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import type { Database } from "@/integrations/supabase/types";
 import { getCrmSnapshot } from "@/lib/crm.functions";
-import { useAdminToken, useOperatorId } from "@/lib/local-session";
+import { useAdminToken } from "@/lib/local-session";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -21,14 +21,13 @@ export type CrmSnapshot = Awaited<ReturnType<typeof getCrmSnapshot>>;
 
 /**
  * One server round-trip for the board, scoped to who is asking.
- * Authority (IT console / HQ / coordinator PIN) sees the whole floor;
- * a plain agent only ever receives their own leads and logs.
+ * Authority (IT console / HQ / coordinator PIN) sees the whole floor.
+ * Locked browsers receive an empty snapshot.
  */
-export const snapshotQueryFor = (scope: { token: string | null; operatorId: string | null }) =>
+export const snapshotQueryFor = (scope: { token: string | null }) =>
   queryOptions({
-    queryKey: ["crm-snapshot", scope.token ? "authority" : (scope.operatorId ?? "observer")],
-    queryFn: () =>
-      getCrmSnapshot({ data: { token: scope.token, operatorId: scope.operatorId } }),
+    queryKey: ["crm-snapshot", scope.token ? "authority" : "locked"],
+    queryFn: () => getCrmSnapshot({ data: { token: scope.token } }),
     refetchInterval: 15_000,
     staleTime: 5_000,
   });
@@ -40,11 +39,10 @@ const EMPTY_SNAPSHOT = {
   messages: [] as WhatsappMessage[],
 };
 
-/** Snapshot for the current device: authority token if unlocked, else the selected agent. */
+/** Snapshot for the current device; customer data requires an authority token. */
 export function useSnapshot() {
   const token = useAdminToken();
-  const operatorId = useOperatorId();
-  const query = useQuery(snapshotQueryFor({ token, operatorId }));
+  const query = useQuery(snapshotQueryFor({ token }));
   return { ...(query.data ?? EMPTY_SNAPSHOT), isPending: query.isPending };
 }
 

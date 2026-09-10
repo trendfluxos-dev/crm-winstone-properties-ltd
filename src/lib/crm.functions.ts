@@ -5,14 +5,12 @@ const AdminToken = z.string().min(1);
 
 const SnapshotScope = z.object({
   token: z.string().nullable().optional(),
-  operatorId: z.string().uuid().nullable().optional(),
 });
 
 /**
  * Board data read server-side so agents never need an account.
  * Authority (IT console / HQ / coordinator PIN) gets the whole floor.
- * A plain agent only receives their own leads plus the logs attached to them,
- * and a name-only roster so the "Operating as" switcher still works.
+ * Unauthenticated visitors receive no customer, agent, call, or message data.
  */
 export const getCrmSnapshot = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SnapshotScope.parse(input ?? {}))
@@ -21,75 +19,27 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
     const { adminTokenValid } = await import("@/lib/admin-gate.server");
     const isAuthority = adminTokenValid(data.token ?? null);
 
-    const profilesRes = await supabaseAdmin.from("profiles").select("*").order("name");
-    if (profilesRes.error) throw new Error(profilesRes.error.message);
-    const allProfiles = profilesRes.data ?? [];
+    if (!isAuthority) return { profiles: [], leads: [], calls: [], messages: [] };
 
-    if (isAuthority) {
-      const [leads, calls, messages] = await Promise.all([
-        supabaseAdmin.from("leads").select("*").order("updated_at", { ascending: false }),
-        supabaseAdmin
-          .from("call_recordings")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(500),
-        supabaseAdmin
-          .from("whatsapp_interactions")
-          .select("*")
-          .order("created_at", { ascending: true })
-          .limit(1000),
-      ]);
-      const failed = [leads, calls, messages].find((r) => r.error);
-      if (failed?.error) throw new Error(failed.error.message);
-      return {
-        profiles: allProfiles,
-        leads: leads.data ?? [],
-        calls: calls.data ?? [],
-        messages: messages.data ?? [],
-      };
-    }
-
-    // Agent view: roster names only (no phone numbers, no presence detail of others).
-    const roster = allProfiles.map((p) => ({
-      ...p,
-      phone: p.id === data.operatorId ? p.phone : null,
-    }));
-
-    if (!data.operatorId) {
-      return { profiles: roster, leads: [], calls: [], messages: [] };
-    }
-
-    const leadsRes = await supabaseAdmin
-      .from("leads")
-      .select("*")
-      .eq("assigned_to", data.operatorId)
-      .order("updated_at", { ascending: false });
-    if (leadsRes.error) throw new Error(leadsRes.error.message);
-    const leads = leadsRes.data ?? [];
-    const leadIds = leads.map((l) => l.id);
-    if (leadIds.length === 0) {
-      return { profiles: roster, leads, calls: [], messages: [] };
-    }
-
-    const [calls, messages] = await Promise.all([
+    const [profiles, leads, calls, messages] = await Promise.all([
+      supabaseAdmin.from("profiles").select("*").order("name"),
+      supabaseAdmin.from("leads").select("*").order("updated_at", { ascending: false }),
       supabaseAdmin
         .from("call_recordings")
         .select("*")
-        .in("lead_id", leadIds)
         .order("created_at", { ascending: false })
         .limit(500),
       supabaseAdmin
         .from("whatsapp_interactions")
         .select("*")
-        .in("lead_id", leadIds)
         .order("created_at", { ascending: true })
         .limit(1000),
     ]);
-    const failed = [calls, messages].find((r) => r.error);
+    const failed = [profiles, leads, calls, messages].find((r) => r.error);
     if (failed?.error) throw new Error(failed.error.message);
     return {
-      profiles: roster,
-      leads,
+      profiles: profiles.data ?? [],
+      leads: leads.data ?? [],
       calls: calls.data ?? [],
       messages: messages.data ?? [],
     };
@@ -112,17 +62,29 @@ export const checkAdminToken = createServerFn({ method: "POST" })
     return { valid: adminTokenValid(data.token) };
   });
 
-const AudioInput = z.object({ path: z.string().min(1) });
+const AudioInput = z.object({
+  adminToken: AdminToken,
+  recordingId: z.string().uuid(),
+});
 
 /** Short-lived playback link for a stored call recording. */
 export const getAudioUrl = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AudioInput.parse(input))
   .handler(async ({ data }) => {
+    const { requireAdminToken } = await import("@/lib/admin-gate.server");
+    requireAdminToken(data.adminToken);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: recording, error: lookupError } = await supabaseAdmin
+      .from("call_recordings")
+      .select("audio_url")
+      .eq("id", data.recordingId)
+      .maybeSingle();
+    if (lookupError) throw new Error("Could not load this recording");
+    if (!recording?.audio_url) throw new Error("This recording has no audio");
     const { data: signed, error } = await supabaseAdmin.storage
       .from("call-audio")
-      .createSignedUrl(data.path, 60 * 60);
-    if (error || !signed) throw new Error(error?.message ?? "Could not create playback link");
+      .createSignedUrl(recording.audio_url, 5 * 60);
+    if (error || !signed) throw new Error("Could not create playback link");
     return { url: signed.signedUrl };
   });
 

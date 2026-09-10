@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getAudioUrl } from "@/lib/crm.functions";
 import { formatDuration } from "@/lib/crm-format";
+import { useAdminToken } from "@/lib/local-session";
 import { cn } from "@/lib/utils";
 
 const SPEEDS = [1, 1.25, 1.5, 2] as const;
@@ -23,13 +24,11 @@ function waveformBars(seed: string, count = 72): number[] {
 
 export function CallAudioPlayer({
   recordingId,
-  audioPath,
   fallbackDuration,
   seekRequest,
   onTimeUpdate,
 }: {
   recordingId: string;
-  audioPath: string;
   fallbackDuration: number;
   seekRequest?: { at: number; nonce: number } | null;
   onTimeUpdate?: (seconds: number) => void;
@@ -40,6 +39,7 @@ export function CallAudioPlayer({
   const [duration, setDuration] = useState(fallbackDuration);
   const [speed, setSpeed] = useState<number>(1);
   const bars = useMemo(() => waveformBars(recordingId), [recordingId]);
+  const adminToken = useAdminToken();
 
   const resolveUrl = useServerFn(getAudioUrl);
   const {
@@ -48,12 +48,15 @@ export function CallAudioPlayer({
     isPending,
     isError,
   } = useMutation({
-    mutationFn: () => resolveUrl({ data: { path: audioPath } }),
+    mutationFn: () => {
+      if (!adminToken) throw new Error("Authority access is required to play recordings");
+      return resolveUrl({ data: { adminToken, recordingId } });
+    },
   });
 
   useEffect(() => {
     loadUrl();
-  }, [loadUrl, audioPath]);
+  }, [loadUrl, recordingId, adminToken]);
 
   useEffect(() => {
     if (!seekRequest || !audioRef.current) return;
