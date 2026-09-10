@@ -14,7 +14,7 @@ export function useCrmRealtime() {
 
     for (const table of TABLES) {
       channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
-        void queryClient.invalidateQueries({ queryKey: [table] });
+        void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
       });
     }
 
