@@ -205,9 +205,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_status: string
           avatar_hue: number
           created_at: string
           current_call_started_at: string | null
+          email: string | null
           employee_id: string | null
           id: string
           is_active: boolean
@@ -216,14 +218,17 @@ export type Database = {
           phone: string | null
           pin_hash: string | null
           presence: Database["public"]["Enums"]["agent_presence"]
+          requested_role: Database["public"]["Enums"]["app_role"]
           role: Database["public"]["Enums"]["app_role"]
           status: string | null
           user_id: string | null
         }
         Insert: {
+          approval_status?: string
           avatar_hue?: number
           created_at?: string
           current_call_started_at?: string | null
+          email?: string | null
           employee_id?: string | null
           id?: string
           is_active?: boolean
@@ -232,14 +237,17 @@ export type Database = {
           phone?: string | null
           pin_hash?: string | null
           presence?: Database["public"]["Enums"]["agent_presence"]
+          requested_role?: Database["public"]["Enums"]["app_role"]
           role?: Database["public"]["Enums"]["app_role"]
           status?: string | null
           user_id?: string | null
         }
         Update: {
+          approval_status?: string
           avatar_hue?: number
           created_at?: string
           current_call_started_at?: string | null
+          email?: string | null
           employee_id?: string | null
           id?: string
           is_active?: boolean
@@ -248,6 +256,7 @@ export type Database = {
           phone?: string | null
           pin_hash?: string | null
           presence?: Database["public"]["Enums"]["agent_presence"]
+          requested_role?: Database["public"]["Enums"]["app_role"]
           role?: Database["public"]["Enums"]["app_role"]
           status?: string | null
           user_id?: string | null
