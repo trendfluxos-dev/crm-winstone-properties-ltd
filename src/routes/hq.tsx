@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Lock, PhoneCall, ShieldCheck, Shuffle, Timer, TrendingUp, Users } from "lucide-react";
+import { PhoneCall, ShieldCheck, Timer, TrendingUp, Users } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import {
   Bar,
   BarChart,
@@ -14,25 +11,21 @@ import {
   YAxis,
 } from "recharts";
 
-import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { AgentDossier } from "@/components/crm/AgentDossier";
-import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { AgentRadar } from "@/components/crm/AgentRadar";
+import { AskHqPanel } from "@/components/crm/AskHqPanel";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
-import { ManualIngestDialog } from "@/components/crm/ManualIngestDialog";
+import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
-import { Button } from "@/components/ui/button";
 import {
   buildAgentStats,
   buildTimeline,
   CONNECTED_THRESHOLD_SECONDS,
   useSnapshot,
 } from "@/lib/crm-data";
-import { autoDistributeLeads } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
-import { getAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/hq")({
   head: () => ({
