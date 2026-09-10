@@ -2,24 +2,26 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const AdminToken = z.string().min(1);
+/** PIN token is optional now: coordinators/agents authenticate with their account. */
+const OptionalToken = z.string().nullable().optional();
 
 const SnapshotScope = z.object({
   token: z.string().nullable().optional(),
 });
 
 /**
- * Board data read server-side so agents never need an account.
- * Authority (IT console / HQ / coordinator PIN) gets the whole floor.
- * Unauthenticated visitors receive no customer, agent, call, or message data.
+ * Board data scoped to who is asking.
+ * Authority (HQ / IT PIN) and coordinators get the whole floor; a signed-in
+ * agent gets only their own leads, calls and messages. Anyone else gets nothing.
  */
 export const getCrmSnapshot = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SnapshotScope.parse(input ?? {}))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { adminTokenValid } = await import("@/lib/admin-gate.server");
-    const isAuthority = adminTokenValid(data.token ?? null);
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.token ?? null);
 
-    if (!isAuthority) return { profiles: [], leads: [], calls: [], messages: [] };
+    if (caller.scope === "none") return { profiles: [], leads: [], calls: [], messages: [] };
 
     const [profiles, leads, calls, messages] = await Promise.all([
       supabaseAdmin.from("profiles").select("*").order("name"),
@@ -37,6 +39,21 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
     ]);
     const failed = [profiles, leads, calls, messages].find((r) => r.error);
     if (failed?.error) throw new Error(failed.error.message);
+
+    if (caller.scope === "agent" && caller.profile) {
+      const me = caller.profile.id;
+      const myLeads = (leads.data ?? []).filter((l) => l.assigned_to === me);
+      const myLeadIds = new Set(myLeads.map((l) => l.id));
+      return {
+        profiles: (profiles.data ?? []).filter((p) => p.id === me),
+        leads: myLeads,
+        calls: (calls.data ?? []).filter((c) => c.agent_id === me || (c.lead_id && myLeadIds.has(c.lead_id))),
+        messages: (messages.data ?? []).filter(
+          (m) => m.agent_id === me || (m.lead_id && myLeadIds.has(m.lead_id)),
+        ),
+      };
+    }
+
     return {
       profiles: profiles.data ?? [],
       leads: leads.data ?? [],
