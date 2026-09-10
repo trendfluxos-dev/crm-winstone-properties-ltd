@@ -1,8 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Radio } from "lucide-react";
+import { Radio, Smartphone } from "lucide-react";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
+
+const APK_URL = "/downloads/winstone-connect.apk";
 
 const NAV = [
   { to: "/", label: "Executive HQ" },
