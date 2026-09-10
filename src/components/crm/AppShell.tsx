@@ -17,6 +17,7 @@ const NAV = [
   { to: "/", label: "Agent Queue" },
   { to: "/dispatch", label: "Coordinator Deck" },
   { to: "/hq", label: "Executive HQ" },
+  { to: "/reports", label: "Reports" },
   { to: "/system", label: "IT Console" },
 ] as const;
 
