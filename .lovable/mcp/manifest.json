@@ -46,9 +46,13 @@
           "properties": {
             "status": {
               "type": "string",
-              "minLength": 1,
-              "maxLength": 40,
-              "description": "Lead stage, e.g. new or follow_up."
+              "enum": [
+                "pending",
+                "contacted",
+                "follow_up",
+                "closed"
+              ],
+              "description": "Lead stage."
             },
             "source": {
               "type": "string",

@@ -55,7 +55,7 @@ export default defineTool({
           notes: notes ? `${notes}\n\n(added via agent integration by ${email})` : `Added via agent integration by ${email}`,
           source,
           assigned_to: assignedTo,
-          status: "new",
+          status: "pending",
         })
         .select("id, name, phone_number, status, assigned_to, created_at")
         .single();

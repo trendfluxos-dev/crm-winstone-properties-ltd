@@ -9,7 +9,10 @@ export default defineTool({
   description:
     "List leads, newest activity first. Filter by stage, source, assigned employee ID or a name/phone search.",
   inputSchema: {
-    status: z.string().trim().min(1).max(40).optional().describe("Lead stage, e.g. new or follow_up."),
+    status: z
+      .enum(["pending", "contacted", "follow_up", "closed"])
+      .optional()
+      .describe("Lead stage."),
     source: z.string().trim().min(1).max(40).optional().describe("Where the lead came from."),
     employee_id: z.string().trim().min(2).max(32).optional().describe("Only leads of this agent."),
     search: z.string().trim().min(2).max(60).optional().describe("Match on lead name or phone number."),
