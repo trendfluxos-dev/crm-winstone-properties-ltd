@@ -12,11 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Input } from "@/components/ui/input";
 import { unlockAdmin } from "@/lib/crm.functions";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
-
-const PIN_LENGTH = 10;
 
 /** Controlled PIN modal. Once unlocked the token is kept in localStorage. */
 export function AdminPinDialog({
@@ -73,24 +71,26 @@ export function AdminPinDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-2">
-          <InputOTP
+          <Input
             key={attemptNo}
-            maxLength={PIN_LENGTH}
-            value={pin}
-            onChange={setPin}
-            onComplete={(value) => attempt.mutate(value)}
+            type="password"
+            inputMode="text"
+            autoComplete="off"
             autoFocus
+            placeholder="Master PIN"
+            value={pin}
+            onChange={(event) => setPin(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && pin.length >= 4 && !attempt.isPending) {
+                attempt.mutate(pin);
+              }
+            }}
             disabled={attempt.isPending}
-          >
-            <InputOTPGroup>
-              {Array.from({ length: PIN_LENGTH }, (_, i) => (
-                <InputOTPSlot key={i} index={i} className="size-8 text-sm sm:size-9" />
-              ))}
-            </InputOTPGroup>
-          </InputOTP>
+            className="text-center tracking-[0.3em]"
+          />
           <Button
             className="w-full"
-            disabled={pin.length !== PIN_LENGTH || attempt.isPending}
+            disabled={pin.length < 4 || attempt.isPending}
             onClick={() => attempt.mutate(pin)}
           >
             {attempt.isPending ? (
