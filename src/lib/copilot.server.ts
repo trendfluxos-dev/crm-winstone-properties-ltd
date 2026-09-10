@@ -184,7 +184,10 @@ export async function runCopilot(history: CopilotMessage[]) {
   if (!key) throw new Error("AI is not configured");
 
   const messages: unknown[] = [
-    { role: "system", content: SYSTEM },
+    {
+      role: "system",
+      content: `${SYSTEM}\nToday is ${new Date().toISOString().slice(0, 10)} (Asia/Dhaka floor).`,
+    },
     ...history.slice(-12).map((m) => ({ role: m.role, content: m.content })),
   ];
   const cards: CopilotCard[] = [];
