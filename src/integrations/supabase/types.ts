@@ -101,10 +101,42 @@ export type Database = {
           },
         ]
       }
-      leads: {
+      custom_reports: {
         Row: {
           assigned_to: string | null
+          created_at: string
+          id: string
+          status: string
+          target_metrics: string
+          target_range: string | null
+          title: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          target_metrics: string
+          target_range?: string | null
+          title: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          target_metrics?: string
+          target_range?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          assigned_agent_id: string | null
+          assigned_to: string | null
           call_attempts: number
+          call_count: number | null
           company: string | null
           created_at: string
           id: string
@@ -119,8 +151,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_agent_id?: string | null
           assigned_to?: string | null
           call_attempts?: number
+          call_count?: number | null
           company?: string | null
           created_at?: string
           id?: string
@@ -135,8 +169,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_agent_id?: string | null
           assigned_to?: string | null
           call_attempts?: number
+          call_count?: number | null
           company?: string | null
           created_at?: string
           id?: string
@@ -151,6 +187,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_assigned_to_fkey"
             columns: ["assigned_to"]
@@ -171,8 +214,10 @@ export type Database = {
           last_active_at: string | null
           name: string
           phone: string | null
+          pin_hash: string | null
           presence: Database["public"]["Enums"]["agent_presence"]
           role: Database["public"]["Enums"]["app_role"]
+          status: string | null
           user_id: string | null
         }
         Insert: {
@@ -185,8 +230,10 @@ export type Database = {
           last_active_at?: string | null
           name: string
           phone?: string | null
+          pin_hash?: string | null
           presence?: Database["public"]["Enums"]["agent_presence"]
           role?: Database["public"]["Enums"]["app_role"]
+          status?: string | null
           user_id?: string | null
         }
         Update: {
@@ -199,9 +246,29 @@ export type Database = {
           last_active_at?: string | null
           name?: string
           phone?: string | null
+          pin_hash?: string | null
           presence?: Database["public"]["Enums"]["agent_presence"]
           role?: Database["public"]["Enums"]["app_role"]
+          status?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
         }
         Relationships: []
       }
