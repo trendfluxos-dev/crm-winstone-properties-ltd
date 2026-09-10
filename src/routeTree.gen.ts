@@ -15,6 +15,7 @@ import { Route as HqRouteImport } from './routes/hq'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
@@ -49,6 +50,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentWorkspaceRoute = ApiPublicAgentWorkspaceRouteImport.update({
+  id: '/api/public/agent/workspace',
+  path: '/api/public/agent/workspace',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicIngestLeadRoute = ApiPublicIngestLeadRouteImport.update({
   id: '/api/public/ingest/lead',
   path: '/api/public/ingest/lead',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/system'
     | '/terms'
+    | '/api/public/agent/workspace'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/system'
     | '/terms'
+    | '/api/public/agent/workspace'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/system'
     | '/terms'
+    | '/api/public/agent/workspace'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
+  ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/workspace': {
+      id: '/api/public/agent/workspace'
+      path: '/api/public/agent/workspace'
+      fullPath: '/api/public/agent/workspace'
+      preLoaderRoute: typeof ApiPublicAgentWorkspaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ingest/lead': {
       id: '/api/public/ingest/lead'
       path: '/api/public/ingest/lead'
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
+  ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
