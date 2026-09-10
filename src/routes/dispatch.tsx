@@ -5,7 +5,8 @@ import { Loader2, Lock, Send, Shuffle, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { QueueBoard } from "@/components/crm/QueueBoard";
+import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
