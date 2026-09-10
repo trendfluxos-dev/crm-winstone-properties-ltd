@@ -17,6 +17,12 @@
 - [x] Agent integrations (MCP) at /mcp: sign-in required (Google + consent page), email allow-list in
       IT Console → Customizer; tools list_agents, list_leads, lead_history, floor_summary, create_lead
 
+- [x] Entry hall home (/) with four doors: Sales Agent, Coordinator Deck, Executive HQ, IT Console
+- [x] Agent + coordinator accounts (/auth, /desk) with approval-before-access, editable own profile
+- [x] Coordinator Deck owns lead assignment, balancing, CSV import and the full Agent Queue
+- [x] Executive HQ is read-only + Ask HQ panel (natural-language answers with charts)
+- [x] IT Console approves / rejects new accounts and keeps system configuration
+
 ## Queued
 - [ ] Android: build APK with WinstoneApi.kt + LiveCallLauncher.kt + WinstoneRules.kt wired in;
       place at public/downloads/winstone-connect.apk
