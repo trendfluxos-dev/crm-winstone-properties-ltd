@@ -221,7 +221,7 @@ export const importLeads = createServerFn({ method: "POST" })
   });
 
 const ManualCallInput = z.object({
-  adminToken: AdminToken,
+  adminToken: OptionalToken,
   leadId: z.string().uuid(),
   agentId: z.string().uuid().nullable(),
   audioBase64: z.string().min(1),
@@ -245,7 +245,7 @@ export const uploadCallRecording = createServerFn({ method: "POST" })
   });
 
 const ManualMessageInput = z.object({
-  adminToken: AdminToken,
+  adminToken: OptionalToken,
   leadId: z.string().uuid(),
   agentId: z.string().uuid().nullable(),
   senderType: z.enum(["agent", "customer"]),
