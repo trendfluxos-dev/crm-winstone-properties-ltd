@@ -71,8 +71,6 @@ function ControlBoard() {
   const { profiles, leads, calls, messages } = useSnapshot();
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [openAgentId, setOpenAgentId] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const distribute = useServerFn(autoDistributeLeads);
 
   const agents = useMemo(
     () => profiles.filter((p) => p.role === "agent" || p.role === "team_leader"),
