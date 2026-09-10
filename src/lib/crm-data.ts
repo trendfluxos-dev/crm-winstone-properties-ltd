@@ -1,7 +1,8 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import type { Database } from "@/integrations/supabase/types";
 import { getCrmSnapshot } from "@/lib/crm.functions";
+import { useAdminToken, useOperatorId } from "@/lib/local-session";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -16,15 +17,36 @@ export const LEAD_STATUSES: { key: LeadStatus; label: string }[] = [
   { key: "closed", label: "Closed" },
 ];
 
-/** One server round-trip for the whole board; refreshed on a timer as a realtime fallback. */
-export const snapshotQuery = queryOptions({
-  queryKey: ["crm-snapshot"],
-  queryFn: () => getCrmSnapshot(),
-  refetchInterval: 15_000,
-  staleTime: 5_000,
-});
-
 export type CrmSnapshot = Awaited<ReturnType<typeof getCrmSnapshot>>;
+
+/**
+ * One server round-trip for the board, scoped to who is asking.
+ * Authority (IT console / HQ / coordinator PIN) sees the whole floor;
+ * a plain agent only ever receives their own leads and logs.
+ */
+export const snapshotQueryFor = (scope: { token: string | null; operatorId: string | null }) =>
+  queryOptions({
+    queryKey: ["crm-snapshot", scope.token ? "authority" : (scope.operatorId ?? "observer")],
+    queryFn: () =>
+      getCrmSnapshot({ data: { token: scope.token, operatorId: scope.operatorId } }),
+    refetchInterval: 15_000,
+    staleTime: 5_000,
+  });
+
+const EMPTY_SNAPSHOT = {
+  profiles: [] as Profile[],
+  leads: [] as Lead[],
+  calls: [] as CallRecording[],
+  messages: [] as WhatsappMessage[],
+};
+
+/** Snapshot for the current device: authority token if unlocked, else the selected agent. */
+export function useSnapshot() {
+  const token = useAdminToken();
+  const operatorId = useOperatorId();
+  const query = useQuery(snapshotQueryFor({ token, operatorId }));
+  return { ...(query.data ?? EMPTY_SNAPSHOT), isPending: query.isPending };
+}
 
 export const CONNECTED_THRESHOLD_SECONDS = 10;
 
