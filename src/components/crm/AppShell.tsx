@@ -15,10 +15,12 @@ const APK_URL = "/downloads/winstone-connect.apk";
 
 const NAV = [
   { to: "/", label: "Agent Queue" },
+  { to: "/coach", label: "AI Coach" },
   { to: "/dispatch", label: "Coordinator Deck" },
   { to: "/hq", label: "Executive HQ" },
   { to: "/reports", label: "Reports" },
   { to: "/system", label: "IT Console" },
+  { to: "/ingest", label: "Ingest Check" },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
