@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Lock, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";

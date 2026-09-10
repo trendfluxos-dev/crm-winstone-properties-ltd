@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, Download, Lock, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
