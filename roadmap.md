@@ -11,3 +11,4 @@
 - [ ] IT console: system customizer (carrier rate, ingest key manager, retention, feature flags)
 - [ ] Agent workspace: AI sales guidance drawer + personal status / dialer preference
 - [ ] Wire the above into the Android app
+- [ ] Install APK on a real phone, place a live call, confirm recording + WhatsApp log land in the agent workspace (needs the physical handset — cannot be done from this environment)

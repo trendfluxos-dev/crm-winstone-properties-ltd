@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -29,7 +28,7 @@ import {
   buildAgentStats,
   buildTimeline,
   CONNECTED_THRESHOLD_SECONDS,
-  snapshotQuery,
+  useSnapshot,
 } from "@/lib/crm-data";
 import { autoDistributeLeads } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
@@ -52,9 +51,6 @@ export const Route = createFileRoute("/hq")({
       },
     ],
   }),
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(snapshotQuery);
-  },
   pendingComponent: () => (
     <AppShell>
       <SnapshotSkeleton />
@@ -91,9 +87,7 @@ function ControlBoardPage() {
 }
 
 function ControlBoard() {
-  const {
-    data: { profiles, leads, calls, messages },
-  } = useSuspenseQuery(snapshotQuery);
+  const { profiles, leads, calls, messages } = useSnapshot();
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [openAgentId, setOpenAgentId] = useState<string | null>(null);
   const queryClient = useQueryClient();

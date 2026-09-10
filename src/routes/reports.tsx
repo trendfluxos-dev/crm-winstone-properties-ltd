@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, Download, Lock, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -33,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LEAD_STATUSES, snapshotQuery, type LeadStatus } from "@/lib/crm-data";
+import { LEAD_STATUSES, useSnapshot, type LeadStatus } from "@/lib/crm-data";
 import {
   buildReport,
   defaultFilters,
@@ -62,9 +61,6 @@ export const Route = createFileRoute("/reports")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(snapshotQuery);
-  },
   pendingComponent: () => (
     <AppShell>
       <SnapshotSkeleton />
@@ -115,7 +111,7 @@ const PRESETS = [
 ] as const;
 
 function ReportsBoard() {
-  const { data } = useSuspenseQuery(snapshotQuery);
+  const data = useSnapshot();
   const [filters, setFilters] = useState<ReportFilters>(() => defaultFilters(30));
 
   const sources = useMemo(() => leadSources(data.leads), [data.leads]);
