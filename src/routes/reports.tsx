@@ -19,7 +19,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { RoleGate } from "@/components/crm/RoleGate";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";

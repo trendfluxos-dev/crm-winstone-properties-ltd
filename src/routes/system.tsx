@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { AccountApprovals } from "@/components/crm/AccountApprovals";
+import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
