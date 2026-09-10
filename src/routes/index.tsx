@@ -4,6 +4,7 @@ import { Lock, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { LeadCard } from "@/components/crm/LeadCard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
@@ -44,6 +45,11 @@ export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(snapshotQuery);
   },
+  pendingComponent: () => (
+    <AppShell>
+      <SnapshotSkeleton />
+    </AppShell>
+  ),
   component: LeadQueue,
 });
 

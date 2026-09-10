@@ -24,7 +24,7 @@ export function Leaderboard({
         <Trophy className="size-5 text-idle" />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden card-elevated">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-sm">
             <thead className="bg-surface-2 text-left text-xs uppercase tracking-wide text-muted-foreground">

@@ -4,6 +4,7 @@ import { Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,11 @@ export const Route = createFileRoute("/system")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(snapshotQuery);
   },
+  pendingComponent: () => (
+    <AppShell>
+      <SnapshotSkeleton />
+    </AppShell>
+  ),
   component: SystemPage,
 });
 
@@ -134,7 +140,7 @@ function SystemBoard() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="card-elevated p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
             <Database className="size-4 text-primary" /> Data health
           </h2>
@@ -157,7 +163,7 @@ function SystemBoard() {
           </dl>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="card-elevated p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
             <Radio className="size-4 text-primary" /> Ingestion endpoints
           </h2>
@@ -191,7 +197,7 @@ function SystemBoard() {
 
 function Tile({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="card-elevated p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="tabular mt-1 font-display text-2xl font-bold">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{hint}</p>

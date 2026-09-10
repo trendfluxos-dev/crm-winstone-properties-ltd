@@ -22,6 +22,7 @@ import { AgentRadar } from "@/components/crm/AgentRadar";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { ManualIngestDialog } from "@/components/crm/ManualIngestDialog";
+import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +55,11 @@ export const Route = createFileRoute("/hq")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(snapshotQuery);
   },
+  pendingComponent: () => (
+    <AppShell>
+      <SnapshotSkeleton />
+    </AppShell>
+  ),
   component: ControlBoardPage,
 });
 
@@ -237,7 +243,7 @@ function ControlBoard() {
                   <button
                     key={call.id}
                     onClick={() => lead && setOpenLeadId(lead.id)}
-                    className="rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/40"
+                    className="card-elevated p-4 text-left transition-colors hover:border-primary/40"
                   >
                     <p className="font-medium">{lead?.name ?? "Unknown lead"}</p>
                     <p className="text-xs text-muted-foreground">
