@@ -96,6 +96,7 @@ export type Database = {
           notes: string | null
           outcome_category: string | null
           phone_number: string
+          source: string
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
         }
@@ -111,6 +112,7 @@ export type Database = {
           notes?: string | null
           outcome_category?: string | null
           phone_number: string
+          source?: string
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
         }
@@ -126,6 +128,7 @@ export type Database = {
           notes?: string | null
           outcome_category?: string | null
           phone_number?: string
+          source?: string
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
         }
