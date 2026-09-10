@@ -51,6 +51,8 @@ export const Route = createFileRoute("/")({
 
 function LeadQueue() {
   const { profiles, leads, calls, messages, isPending } = useSnapshot();
+  // Only authority (IT console / HQ / coordinator PIN) may look across agents.
+  const isAuthority = useAdminToken() !== null;
 
   const [search, setSearch] = useState("");
   const operatorId = useOperatorId();
