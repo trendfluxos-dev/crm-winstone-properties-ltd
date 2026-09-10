@@ -127,7 +127,7 @@ export function LeadDossier({
   );
 }
 
-function CallEntry({ call }: { call: CallRecording }) {
+export function CallEntry({ call }: { call: CallRecording }) {
   const [seekRequest, setSeekRequest] = useState<{ at: number; nonce: number } | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const transcript = parseTranscript(call.transcription_text);

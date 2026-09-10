@@ -12,8 +12,8 @@ import { setAdminToken, useAdminToken } from "@/lib/local-session";
 const APK_URL = "/downloads/winstone-connect.apk";
 
 const NAV = [
-  { to: "/", label: "Executive HQ" },
-  { to: "/leads", label: "Lead Queue" },
+  { to: "/", label: "My Leads" },
+  { to: "/hq", label: "Control Board" },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
