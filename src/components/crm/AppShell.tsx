@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Lock, LockOpen, Radio, Smartphone, Sparkles } from "lucide-react";
+import { Lock, LockOpen, Smartphone, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AboutLegalModal } from "@/components/crm/AboutLegalModal";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { AgentSelector } from "@/components/crm/AgentSelector";
@@ -33,9 +34,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="glass sticky top-0 z-40 border-b border-border">
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2.5">
-            <span className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <Radio className="size-4" />
-            </span>
+            <img
+              src={logoAsset.url}
+              alt="Winstone Properties Ltd. logo"
+              className="size-9 rounded-full object-cover shadow-sm ring-1 ring-border"
+            />
             <span className="leading-tight">
               <span className="block whitespace-nowrap text-[13px] font-bold tracking-tight">Winstone Connect</span>
               <span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
