@@ -160,7 +160,7 @@ function LeadQueue() {
           )}
         </div>
 
-        {!isAuthority && !operatorId && (
+        {!isAuthority && (
           <p className="rounded-xl border border-dashed border-border bg-card p-4 text-center text-sm text-muted-foreground">
             Unlock authority access to view customer leads. Agent devices must use their authenticated
             workspace connection.
