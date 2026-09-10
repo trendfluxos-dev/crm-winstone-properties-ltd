@@ -44,10 +44,11 @@ export function parseTranscript(text: string | null): TranscriptLine[] {
     .map((line) => {
       const match = line.match(/^\[(\d{1,2}):(\d{2})\]\s*([^:]+):\s*(.*)$/);
       if (!match) return null;
+      const [, mm = "0", ss = "0", speaker = "", body = ""] = match;
       return {
-        at: Number(match[1]) * 60 + Number(match[2]),
-        speaker: match[3].trim(),
-        text: match[4].trim(),
+        at: Number(mm) * 60 + Number(ss),
+        speaker: speaker.trim(),
+        text: body.trim(),
       };
     })
     .filter((l): l is TranscriptLine => l !== null);
