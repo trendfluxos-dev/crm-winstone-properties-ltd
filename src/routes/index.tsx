@@ -23,7 +23,7 @@ import {
   LEAD_STATUSES,
   useSnapshot,
 } from "@/lib/crm-data";
-import { useOperatorId } from "@/lib/local-session";
+import { useAdminToken, useOperatorId } from "@/lib/local-session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
