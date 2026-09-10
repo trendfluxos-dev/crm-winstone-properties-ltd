@@ -30,7 +30,7 @@ import {
   messagesQuery,
   profilesQuery,
 } from "@/lib/crm-data";
-import { autoDistributeLeads } from "@/lib/crm.functions";
+import { autoDistributeLeads, claimAdminIfFirst } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
 
 export const Route = createFileRoute("/")({
