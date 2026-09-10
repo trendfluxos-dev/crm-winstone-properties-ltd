@@ -28,7 +28,7 @@ export function AgentSelector() {
       onValueChange={(value) => setOperatorId(value === NONE ? null : value)}
     >
       <SelectTrigger
-        className="h-9 w-auto max-w-[240px] gap-2 border-border/70 bg-secondary/60 text-xs"
+        className="h-9 w-auto min-w-0 max-w-[130px] gap-1.5 border-border/70 bg-secondary/60 text-xs sm:max-w-[240px] sm:gap-2"
         aria-label="Operating as"
       >
         <UserRound className="size-4 shrink-0 text-muted-foreground" />

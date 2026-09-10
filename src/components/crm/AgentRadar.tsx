@@ -51,10 +51,11 @@ export function AgentRadar({
 
   return (
     <section className="space-y-3">
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">Live Agent Radar</h2>
-          <p className="text-sm text-muted-foreground">Who is talking right now, and for how long</p>
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold sm:text-lg">Live Agent Radar</h2>
+          <p className="text-xs text-muted-foreground sm:text-sm">Who is talking right now, and for how long</p>
+
         </div>
         <span className="tabular text-xs text-muted-foreground">
           {agents.filter((a) => a.presence === "on_call").length} on call /{" "}
