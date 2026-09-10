@@ -135,10 +135,10 @@ function Dispatcher() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Lead Dispatcher</h1>
-          <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Lead Dispatcher</h1>
+          <p className="text-xs text-muted-foreground sm:text-sm">
             {leads.length} leads in the pipeline · {unassigned} waiting for an owner
           </p>
         </div>
@@ -152,7 +152,7 @@ function Dispatcher() {
         <h2 className="text-sm font-semibold">Bulk push</h2>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Select value={agentId} onValueChange={setAgentId}>
-            <SelectTrigger className="w-[240px]">
+            <SelectTrigger className="w-full sm:w-[240px]">
               <SelectValue placeholder="Choose agent" />
             </SelectTrigger>
             <SelectContent>
@@ -167,15 +167,15 @@ function Dispatcher() {
           <Input
             value={count}
             onChange={(e) => setCount(e.target.value.replace(/\D/g, ""))}
-            className="w-24"
+            className="w-20 sm:w-24"
             inputMode="numeric"
             placeholder="20"
           />
-          <Button onClick={() => push.mutate()} disabled={!agentId || push.isPending}>
+          <Button className="flex-1 sm:flex-none" onClick={() => push.mutate()} disabled={!agentId || push.isPending}>
             {push.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             Push leads
           </Button>
-          <Button variant="secondary" onClick={() => balance.mutate()} disabled={balance.isPending}>
+          <Button variant="secondary" className="flex-1 sm:flex-none" onClick={() => balance.mutate()} disabled={balance.isPending}>
             {balance.isPending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
@@ -189,7 +189,8 @@ function Dispatcher() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Team load</h2>
         <div className="overflow-x-auto card-elevated">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[640px] text-sm">
+
             <thead className="bg-surface-2 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-4 py-2 text-left">Agent</th>

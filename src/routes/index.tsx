@@ -92,26 +92,28 @@ function LeadQueue() {
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">My Leads</h1>
-            <p className="text-sm text-muted-foreground">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 sm:flex sm:flex-wrap sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">My Leads</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">
               {filtered.length} of {leads.length} leads · one tap to dial or open WhatsApp
             </p>
           </div>
-          <AdminGate
-            locked={(openPin) => (
-              <Button variant="secondary" size="sm" onClick={openPin}>
-                <Lock className="size-4" /> Manual log
-              </Button>
-            )}
-          >
-            <ManualIngestDialog leads={leads} agents={agents} />
-          </AdminGate>
+          <div className="shrink-0">
+            <AdminGate
+              locked={(openPin) => (
+                <Button variant="secondary" size="sm" onClick={openPin}>
+                  <Lock className="size-4" /> Manual log
+                </Button>
+              )}
+            >
+              <ManualIngestDialog leads={leads} agents={agents} />
+            </AdminGate>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <div className="relative min-w-[240px] flex-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="relative min-w-0 flex-1">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -121,7 +123,7 @@ function LeadQueue() {
             />
           </div>
           <Select value={agentFilter} onValueChange={setAgentFilter}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-full sm:w-[220px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -136,7 +138,8 @@ function LeadQueue() {
           </Select>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
           {LEAD_STATUSES.map((status) => {
             const columnLeads = filtered.filter((lead) => lead.status === status.key);
             return (

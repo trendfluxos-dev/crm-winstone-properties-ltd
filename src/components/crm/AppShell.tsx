@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen grid-noise">
       <header className="glass sticky top-0 z-40 border-b border-border">
-        <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2.5">
             <span className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
               <Radio className="size-4" />
@@ -53,8 +53,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
             <AgentSelector />
+
 
             <button
               type="button"
@@ -126,7 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
       </header>
 
-      <main className="mx-auto w-full max-w-[1600px] animate-rise px-4 py-6 sm:px-6">{children}</main>
+      <main className="mx-auto w-full max-w-[1600px] animate-rise px-3 py-5 sm:px-6 sm:py-6">{children}</main>
 
       <footer className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
         <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
