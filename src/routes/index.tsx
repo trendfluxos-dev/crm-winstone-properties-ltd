@@ -89,6 +89,29 @@ function LeadQueue() {
   return (
     <AppShell>
       <div className="space-y-6">
+        <div className="card flex items-center gap-3 overflow-hidden p-3.5 sm:gap-4 sm:p-4">
+          <img
+            src={logoAsset.url}
+            alt="Winstone Properties Ltd. — Find. Build. Invest."
+            className="size-12 shrink-0 rounded-full object-cover shadow-sm ring-2 ring-primary/20 sm:size-14"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold tracking-tight sm:text-base">
+              Winstone Properties Ltd.
+            </p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground sm:text-xs">
+              Find. Build. Invest.
+            </p>
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 rounded-full border border-live/30 bg-live/10 px-3 py-1.5 sm:flex">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-live" />
+            </span>
+            <span className="text-[11px] font-semibold text-live">Floor live</span>
+          </div>
+        </div>
+
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 sm:flex sm:flex-wrap sm:justify-between">
           <div className="min-w-0">
             <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">My Leads</h1>
