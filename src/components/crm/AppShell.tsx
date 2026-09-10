@@ -139,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex gap-1 overflow-x-auto px-3 pb-2 lg:hidden">
-          {NAV.map((item) => (
+          {nav.map((item) => (
             <Link
               key={item.to}
               to={item.to}
