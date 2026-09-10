@@ -214,7 +214,7 @@
   animation: var(--animate-shimmer);
 }
 
-/* Emerald pulsing glow ring for on-call avatars */
+/* Green pulsing glow ring for on-call avatars */
 @utility glow-live {
   animation: var(--animate-glow-ring);
 }
