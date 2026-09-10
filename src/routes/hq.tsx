@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Lock, PhoneCall, ShieldCheck, Shuffle, Timer, TrendingUp, Users } from "lucide-react";
+import { PhoneCall, ShieldCheck, Timer, TrendingUp, Users } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import {
   Bar,
   BarChart,
@@ -14,25 +11,21 @@ import {
   YAxis,
 } from "recharts";
 
-import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { AgentDossier } from "@/components/crm/AgentDossier";
-import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { AgentRadar } from "@/components/crm/AgentRadar";
+import { AskHqPanel } from "@/components/crm/AskHqPanel";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
-import { ManualIngestDialog } from "@/components/crm/ManualIngestDialog";
+import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
-import { Button } from "@/components/ui/button";
 import {
   buildAgentStats,
   buildTimeline,
   CONNECTED_THRESHOLD_SECONDS,
   useSnapshot,
 } from "@/lib/crm-data";
-import { autoDistributeLeads } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
-import { getAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/hq")({
   head: () => ({
@@ -62,26 +55,14 @@ export const Route = createFileRoute("/hq")({
 function ControlBoardPage() {
   return (
     <AppShell>
-      <AdminGate
-        locked={(openPin) => (
-          <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-14 text-center">
-            <span className="grid size-14 place-items-center rounded-full bg-primary/15 text-primary">
-              <ShieldCheck className="size-7" />
-            </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Authority Control Board</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Live radar, leaderboard, call audits and lead distribution. Master PIN required.
-              </p>
-            </div>
-            <Button size="lg" onClick={openPin}>
-              <Lock className="size-4" /> Enter PIN
-            </Button>
-          </div>
-        )}
+      <RoleGate
+        allow={["authority"]}
+        icon={<ShieldCheck className="size-7" />}
+        title="Executive HQ"
+        description="Live radar, leaderboard, call audits and ask-anything reports. Master PIN required."
       >
         <ControlBoard />
-      </AdminGate>
+      </RoleGate>
     </AppShell>
   );
 }
@@ -90,8 +71,6 @@ function ControlBoard() {
   const { profiles, leads, calls, messages } = useSnapshot();
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [openAgentId, setOpenAgentId] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const distribute = useServerFn(autoDistributeLeads);
 
   const agents = useMemo(
     () => profiles.filter((p) => p.role === "agent" || p.role === "team_leader"),
@@ -112,18 +91,6 @@ function ControlBoard() {
     talkMinutes: Math.round(row.talkSeconds / 60),
   }));
 
-  const balance = useMutation({
-    mutationFn: () => distribute({ data: { adminToken: getAdminToken() ?? "" } }),
-    onSuccess: (result) => {
-      toast.success(
-        result.assigned > 0
-          ? `${result.assigned} leads spread across ${result.agents} agents`
-          : "Every lead is already assigned",
-      );
-      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
   const openAgent = profiles.find((p) => p.id === openAgentId) ?? null;
@@ -138,19 +105,14 @@ function ControlBoard() {
               Every dial, recording and WhatsApp touch across the floor, updating live.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <CsvImportDialog />
-            <ManualIngestDialog leads={leads} agents={agents} />
-            <Button size="sm" onClick={() => balance.mutate()} disabled={balance.isPending}>
-              {balance.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Shuffle className="size-4" />
-              )}
-              Auto distribute {unassigned > 0 ? `${unassigned} leads` : "leads"}
-            </Button>
-          </div>
+          <p className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+            Read-only view · lead assignment lives in the Coordinator Deck
+          </p>
         </div>
+
+        <AskHqPanel />
+
+
 
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
