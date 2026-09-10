@@ -114,19 +114,14 @@ function ControlBoard() {
               Every dial, recording and WhatsApp touch across the floor, updating live.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <CsvImportDialog />
-            <ManualIngestDialog leads={leads} agents={agents} />
-            <Button size="sm" onClick={() => balance.mutate()} disabled={balance.isPending}>
-              {balance.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Shuffle className="size-4" />
-              )}
-              Auto distribute {unassigned > 0 ? `${unassigned} leads` : "leads"}
-            </Button>
-          </div>
+          <p className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+            Read-only view · lead assignment lives in the Coordinator Deck
+          </p>
         </div>
+
+        <AskHqPanel />
+
+
 
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
