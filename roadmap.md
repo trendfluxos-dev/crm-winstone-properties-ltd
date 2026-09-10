@@ -14,6 +14,9 @@
       mute/speaker, End call, outcome sheet -> presence + recording + outcome endpoints
 - [x] /api/public/agent/presence (live on-call radar) and /api/public/ingest/outcome
 
+- [x] Agent integrations (MCP) at /mcp: sign-in required (Google + consent page), email allow-list in
+      IT Console → Customizer; tools list_agents, list_leads, lead_history, floor_summary, create_lead
+
 ## Queued
 - [ ] Android: build APK with WinstoneApi.kt + LiveCallLauncher.kt + WinstoneRules.kt wired in;
       place at public/downloads/winstone-connect.apk
