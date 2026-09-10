@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { ProPlanCard } from "@/components/crm/ProPlanCard";
 import { AgentDossier } from "@/components/crm/AgentDossier";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { AgentRadar } from "@/components/crm/AgentRadar";
@@ -131,6 +132,7 @@ function ControlBoard() {
   return (
     <>
       <div className="space-y-8">
+        <ProPlanCard compact />
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Control Board</h1>
