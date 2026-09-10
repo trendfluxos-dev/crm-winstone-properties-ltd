@@ -199,22 +199,24 @@ function ControlBoard() {
               </span>
             </div>
           </div>
-          <div className="h-72 rounded-xl border border-border bg-card p-4">
+          <div className="card-elevated h-72 p-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.32 0.02 240)" vertical={false} />
-                <XAxis dataKey="name" stroke="oklch(0.7 0.02 240)" fontSize={12} />
-                <YAxis stroke="oklch(0.7 0.02 240)" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={12} />
                 <Tooltip
+                  cursor={{ fill: "var(--surface-2)" }}
                   contentStyle={{
-                    background: "oklch(0.21 0.02 250)",
-                    border: "1px solid oklch(0.32 0.02 240)",
-                    borderRadius: 8,
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 12,
                     fontSize: 12,
+                    boxShadow: "var(--shadow-card-hover)",
                   }}
                 />
-                <Bar dataKey="connected" fill="oklch(0.75 0.15 195)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="talkMinutes" fill="oklch(0.78 0.18 130)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="connected" fill="var(--primary)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="talkMinutes" fill="var(--live)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -282,13 +284,30 @@ function StatTile({
   hint: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-        {icon}
+    <div className="card-elevated relative overflow-hidden p-5">
+      <span className="absolute -right-6 -top-6 size-20 rounded-full bg-primary/10 blur-2xl" />
+      <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="grid size-6 place-items-center rounded-lg bg-accent text-accent-foreground">
+          {icon}
+        </span>
         {label}
       </p>
-      <p className="tabular mt-2 font-display text-3xl font-bold">{value}</p>
+      <p className="tabular mt-3 text-3xl font-bold tracking-tight">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+      <Sparkline seed={value.length + label.length} />
     </div>
+  );
+}
+
+/** Tiny decorative sparkline; deterministic per tile so it doesn't jitter on refetch. */
+function Sparkline({ seed }: { seed: number }) {
+  const points = Array.from({ length: 12 }, (_, i) => {
+    const y = 18 - ((Math.sin(i * 0.9 + seed) + 1) * 6 + (i / 11) * 4);
+    return `${(i / 11) * 100},${y}`;
+  }).join(" ");
+  return (
+    <svg viewBox="0 0 100 20" className="mt-3 h-5 w-full text-primary/60" preserveAspectRatio="none">
+      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
   );
 }
