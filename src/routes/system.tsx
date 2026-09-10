@@ -94,15 +94,16 @@ function SystemBoard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">System & Billing</h1>
-          <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">System &amp; Billing</h1>
+          <p className="text-xs text-muted-foreground sm:text-sm">
             Core engine status, ingestion endpoints and monthly telephony cost.
           </p>
         </div>
         <CopilotDrawer />
       </div>
+
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -199,7 +200,7 @@ function Tile({ label, value, hint }: { label: string; value: string; hint: stri
   return (
     <div className="card-elevated p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="tabular mt-1 text-2xl font-bold tracking-tight">{value}</p>
+      <p className="tabular mt-1 text-xl font-bold tracking-tight sm:text-2xl">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
     </div>
   );

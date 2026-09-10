@@ -137,10 +137,10 @@ function ControlBoard() {
   return (
     <>
       <div className="space-y-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Control Board</h1>
-            <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Control Board</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">
               Every dial, recording and WhatsApp touch across the floor, updating live.
             </p>
           </div>
@@ -157,6 +157,7 @@ function ControlBoard() {
             </Button>
           </div>
         </div>
+
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile
@@ -205,7 +206,7 @@ function ControlBoard() {
               </span>
             </div>
           </div>
-          <div className="card-elevated h-72 p-4">
+          <div className="card-elevated h-64 p-2 sm:h-72 sm:p-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -298,7 +299,7 @@ function StatTile({
         </span>
         {label}
       </p>
-      <p className="tabular mt-3 text-3xl font-bold tracking-tight">{value}</p>
+      <p className="tabular mt-3 text-2xl font-bold tracking-tight sm:text-3xl">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
       <Sparkline seed={value.length + label.length} />
     </div>
