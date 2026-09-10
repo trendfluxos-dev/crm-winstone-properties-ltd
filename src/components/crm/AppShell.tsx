@@ -116,6 +116,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="border-t border-border/80 px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
         <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
         <p className="mt-1">Developed &amp; Powered by Zahid Hasan Emon.</p>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <Link
+            to="/privacy"
+            className="transition-colors hover:text-foreground"
+            activeOptions={{ exact: true }}
+          >
+            Privacy Policy
+          </Link>
+          <span className="hidden text-border-foreground/30 sm:inline">·</span>
+          <Link
+            to="/terms"
+            className="transition-colors hover:text-foreground"
+            activeOptions={{ exact: true }}
+          >
+            Terms of Service
+          </Link>
+        </div>
       </footer>
 
       {adminToken && (

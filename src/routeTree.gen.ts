@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as HqRouteImport } from './routes/hq'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SystemRouteImport } from './routes/system'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
@@ -32,9 +34,19 @@ const HqRoute = HqRouteImport.update({
   path: '/hq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SystemRoute = SystemRouteImport.update({
   id: '/system',
   path: '/system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicIngestLeadRoute = ApiPublicIngestLeadRouteImport.update({
@@ -58,7 +70,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
+  '/privacy': typeof PrivacyRoute
   '/system': typeof SystemRoute
+  '/terms': typeof TermsRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -67,7 +81,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
+  '/privacy': typeof PrivacyRoute
   '/system': typeof SystemRoute
+  '/terms': typeof TermsRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -77,7 +93,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
+  '/privacy': typeof PrivacyRoute
   '/system': typeof SystemRoute
+  '/terms': typeof TermsRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
@@ -88,7 +106,9 @@ export interface FileRouteTypes {
     | '/'
     | '/dispatch'
     | '/hq'
+    | '/privacy'
     | '/system'
+    | '/terms'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -97,7 +117,9 @@ export interface FileRouteTypes {
     | '/'
     | '/dispatch'
     | '/hq'
+    | '/privacy'
     | '/system'
+    | '/terms'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -106,7 +128,9 @@ export interface FileRouteTypes {
     | '/'
     | '/dispatch'
     | '/hq'
+    | '/privacy'
     | '/system'
+    | '/terms'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/recording'
@@ -116,7 +140,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DispatchRoute: typeof DispatchRoute
   HqRoute: typeof HqRoute
+  PrivacyRoute: typeof PrivacyRoute
   SystemRoute: typeof SystemRoute
+  TermsRoute: typeof TermsRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
@@ -145,11 +171,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/system': {
       id: '/system'
       path: '/system'
       fullPath: '/system'
       preLoaderRoute: typeof SystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ingest/lead': {
@@ -180,7 +220,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DispatchRoute: DispatchRoute,
   HqRoute: HqRoute,
+  PrivacyRoute: PrivacyRoute,
   SystemRoute: SystemRoute,
+  TermsRoute: TermsRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
