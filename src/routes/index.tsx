@@ -30,7 +30,7 @@ import {
   messagesQuery,
   profilesQuery,
 } from "@/lib/crm-data";
-import { autoDistributeLeads } from "@/lib/crm.functions";
+import { autoDistributeLeads, claimAdminIfFirst } from "@/lib/crm.functions";
 import { formatTalkTime } from "@/lib/crm-format";
 
 export const Route = createFileRoute("/")({
@@ -102,11 +102,45 @@ function ExecutiveHq() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const claimAdmin = useMutation({
+    mutationFn: () => claimAdminIfFirst({}),
+    onSuccess: (result) => {
+      if (result.claimed) {
+        toast.success("You are now the admin. Reloading the dashboard.");
+        void queryClient.invalidateQueries({ queryKey: ["profiles"] });
+      } else {
+        toast.info(result.reason ?? "An admin already exists.");
+      }
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
+  const hasAdmin = profiles.some((p) => p.role === "admin");
 
   return (
     <AppShell>
       <div className="space-y-8">
+        {!hasAdmin && (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-semibold">Finish setup</h2>
+                <p className="text-sm text-muted-foreground">
+                  No admin account is configured yet. Claim admin access to start managing agents and leads.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => claimAdmin.mutate()}
+                disabled={claimAdmin.isPending}
+              >
+                {claimAdmin.isPending && <Loader2 className="mr-1 size-4 animate-spin" />}
+                Claim admin access
+              </Button>
+            </div>
+          </div>
+        )}
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-display text-2xl font-bold">Executive HQ</h1>

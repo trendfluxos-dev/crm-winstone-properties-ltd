@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const AudioInput = z.object({ path: z.string().min(1) });
 
@@ -47,6 +48,49 @@ export const autoDistributeLeads = createServerFn({ method: "POST" }).handler(as
 
   return { assigned: leads.length, agents: agents.length };
 });
+
+/** Lets the first authenticated user claim admin rights so the CRM has an initial administrator. */
+export const claimAdminIfFirst = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const userId = context.userId;
+
+    const { data: existingAdmins, error: adminCheckError } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("role", "admin")
+      .limit(1);
+
+    if (adminCheckError) throw new Error(adminCheckError.message);
+    if (existingAdmins && existingAdmins.length > 0) {
+      return { claimed: false, reason: "An admin already exists." };
+    }
+
+    const { data: existingProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .single();
+
+    if (existingProfile) {
+      const { error } = await supabaseAdmin
+        .from("profiles")
+        .update({ role: "admin" })
+        .eq("id", existingProfile.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin.from("profiles").insert({
+        user_id: userId,
+        name: "Admin",
+        role: "admin",
+        is_active: true,
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    return { claimed: true };
+  });
 
 const ManualCallInput = z.object({
   leadId: z.string().uuid(),
