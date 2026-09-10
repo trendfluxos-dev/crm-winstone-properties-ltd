@@ -15,6 +15,33 @@ import { setAdminToken, useAdminToken } from "@/lib/local-session";
 
 const APK_URL = "/downloads/winstone-connect.apk";
 
+/**
+ * Whole-CRM licence rule: an active Winstone Connect Pro plan unlocks the
+ * floor. Authority PIN holders always keep access so billing can be fixed.
+ * Fails open while the licence state is loading or unreachable.
+ */
+function LicenseGate({ children }: { children: ReactNode }) {
+  const adminToken = useAdminToken();
+  const license = useLicense();
+  const locked = !adminToken && license.isSuccess && license.data && !license.data.active;
+
+  if (!locked) return <>{children}</>;
+  return (
+    <div className="mx-auto flex max-w-xl flex-col items-center gap-4 py-10 text-center">
+      <div>
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Winstone Connect Pro required</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          The sales floor unlocks with an active Pro subscription. Unlock with the Master PIN if you are an
+          administrator.
+        </p>
+      </div>
+      <div className="w-full">
+        <ProPlanCard />
+      </div>
+    </div>
+  );
+}
+
 const NAV = [
   { to: "/", label: "Agent Queue" },
   { to: "/coach", label: "AI Coach" },
@@ -135,7 +162,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
       </header>
 
-      <main className="mx-auto w-full max-w-[1600px] animate-rise px-3 py-5 sm:px-6 sm:py-6">{children}</main>
+      <main className="mx-auto w-full max-w-[1600px] animate-rise px-3 py-5 sm:px-6 sm:py-6">
+        <LicenseGate>{children}</LicenseGate>
+      </main>
 
       <footer className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
         <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
