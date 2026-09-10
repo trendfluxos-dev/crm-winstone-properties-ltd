@@ -195,6 +195,31 @@ export function SystemCustomizer() {
       </div>
 
       <div className="card-elevated space-y-3 p-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold">
+          <ShieldCheck className="size-4 text-primary" /> Agent integrations (AI assistants)
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          Only these email addresses can reach the CRM from an AI assistant such as ChatGPT or Claude. They must sign
+          in with that Google account first. Leave it empty to block everyone.
+        </p>
+        <Label className="text-xs text-muted-foreground">Approved email addresses (comma separated)</Label>
+        <Input
+          value={draft.mcpAllowedEmails.join(", ")}
+          placeholder="you@winstonebd.com, manager@winstonebd.com"
+          onChange={(e) =>
+            edit((c) => ({
+              ...c,
+              mcpAllowedEmails: e.target.value
+                .split(",")
+                .map((v) => v.trim().toLowerCase())
+                .filter(Boolean)
+                .slice(0, 25),
+            }))
+          }
+        />
+      </div>
+
+      <div className="card-elevated space-y-3 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-semibold">Extra lead fields</h3>
           <Button variant="outline" size="sm" onClick={addField} disabled={draft.fields.length >= 20}>
