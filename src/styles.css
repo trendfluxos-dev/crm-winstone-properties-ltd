@@ -207,7 +207,7 @@
   background: linear-gradient(
     100deg,
     var(--surface-2) 30%,
-    color-mix(in oklab, var(--card) 90%, var(--primary) 10%) 50%,
+    color-mix(in oklab, var(--card) 88%, var(--primary) 12%) 50%,
     var(--surface-2) 70%
   );
   background-size: 200% 100%;
