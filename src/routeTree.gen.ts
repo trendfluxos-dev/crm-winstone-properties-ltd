@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as HqRouteImport } from './routes/hq'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
@@ -38,6 +39,11 @@ const HqRoute = HqRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SystemRoute = SystemRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/privacy': typeof PrivacyRoute
+  '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/privacy': typeof PrivacyRoute
+  '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/hq': typeof HqRoute
   '/privacy': typeof PrivacyRoute
+  '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/hq'
     | '/privacy'
+    | '/reports'
     | '/system'
     | '/terms'
     | '/api/public/agent/workspace'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/hq'
     | '/privacy'
+    | '/reports'
     | '/system'
     | '/terms'
     | '/api/public/agent/workspace'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/hq'
     | '/privacy'
+    | '/reports'
     | '/system'
     | '/terms'
     | '/api/public/agent/workspace'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   HqRoute: typeof HqRoute
   PrivacyRoute: typeof PrivacyRoute
+  ReportsRoute: typeof ReportsRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/system': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   HqRoute: HqRoute,
   PrivacyRoute: PrivacyRoute,
+  ReportsRoute: ReportsRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
