@@ -37,6 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useCrmRealtime();
   const adminToken = useAdminToken();
   const { scope } = useMyAccount();
+  const signOut = useSignOut();
   const [pinOpen, setPinOpen] = useState(false);
   const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope));
 
