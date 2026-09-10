@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Lock, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
