@@ -1,7 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Lock, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { AppShell } from "@/components/crm/AppShell";
@@ -23,17 +23,18 @@ import {
   LEAD_STATUSES,
   snapshotQuery,
 } from "@/lib/crm-data";
+import { useOperatorId } from "@/lib/local-session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Smart Lead Queue — Tele-Sales CRM OS" },
+      { title: "Agent Workspace — Tele-Sales CRM OS" },
       {
         name: "description",
         content:
           "One-tap dialling, WhatsApp deep links and AI call context for every lead in the pipeline.",
       },
-      { property: "og:title", content: "Smart Lead Queue — Tele-Sales CRM OS" },
+      { property: "og:title", content: "Agent Workspace — Tele-Sales CRM OS" },
       {
         property: "og:description",
         content: "Work the pipeline stage by stage with verified call audio and AI summaries.",
@@ -52,7 +53,12 @@ function LeadQueue() {
   } = useSuspenseQuery(snapshotQuery);
 
   const [search, setSearch] = useState("");
+  const operatorId = useOperatorId();
   const [agentFilter, setAgentFilter] = useState("all");
+  // Follow the top-bar "Operating as" agent so each agent lands on their own queue.
+  useEffect(() => {
+    setAgentFilter(operatorId ?? "all");
+  }, [operatorId]);
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
 
   const agents = useMemo(
@@ -82,7 +88,7 @@ function LeadQueue() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">Smart Lead Queue</h1>
+            <h1 className="font-display text-2xl font-bold">My Leads</h1>
             <p className="text-sm text-muted-foreground">
               {filtered.length} of {leads.length} leads · one tap to dial or open WhatsApp
             </p>

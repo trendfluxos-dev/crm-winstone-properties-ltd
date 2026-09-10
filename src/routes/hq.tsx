@@ -2,7 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Lock, PhoneCall, Shuffle, Timer, TrendingUp, Users } from "lucide-react";
+import { Loader2, Lock, PhoneCall, ShieldCheck, Shuffle, Timer, TrendingUp, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -16,6 +16,8 @@ import {
 } from "recharts";
 
 import { AdminGate } from "@/components/crm/AdminPinDialog";
+import { AgentDossier } from "@/components/crm/AgentDossier";
+import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { AgentRadar } from "@/components/crm/AgentRadar";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
@@ -35,13 +37,13 @@ import { getAdminToken } from "@/lib/local-session";
 export const Route = createFileRoute("/hq")({
   head: () => ({
     meta: [
-      { title: "Executive HQ — Tele-Sales CRM OS" },
+      { title: "Control Board — Tele-Sales CRM OS" },
       {
         name: "description",
         content:
           "Live agent radar, call leaderboard and AI call intelligence for enterprise tele-sales teams.",
       },
-      { property: "og:title", content: "Executive HQ — Tele-Sales CRM OS" },
+      { property: "og:title", content: "Control Board — Tele-Sales CRM OS" },
       {
         property: "og:description",
         content:
@@ -52,14 +54,42 @@ export const Route = createFileRoute("/hq")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(snapshotQuery);
   },
-  component: ExecutiveHq,
+  component: ControlBoardPage,
 });
 
-function ExecutiveHq() {
+function ControlBoardPage() {
+  return (
+    <AppShell>
+      <AdminGate
+        locked={(openPin) => (
+          <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border border-border bg-card px-6 py-14 text-center">
+            <span className="grid size-14 place-items-center rounded-full bg-primary/15 text-primary">
+              <ShieldCheck className="size-7" />
+            </span>
+            <div>
+              <h1 className="font-display text-2xl font-bold">Authority Control Board</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Live radar, leaderboard, call audits and lead distribution. Master PIN required.
+              </p>
+            </div>
+            <Button size="lg" onClick={openPin}>
+              <Lock className="size-4" /> Enter PIN
+            </Button>
+          </div>
+        )}
+      >
+        <ControlBoard />
+      </AdminGate>
+    </AppShell>
+  );
+}
+
+function ControlBoard() {
   const {
     data: { profiles, leads, calls, messages },
   } = useSuspenseQuery(snapshotQuery);
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [openAgentId, setOpenAgentId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const distribute = useServerFn(autoDistributeLeads);
 
@@ -96,35 +126,29 @@ function ExecutiveHq() {
   });
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
+  const openAgent = profiles.find((p) => p.id === openAgentId) ?? null;
 
   return (
-    <AppShell>
+    <>
       <div className="space-y-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">Executive HQ</h1>
+            <h1 className="font-display text-2xl font-bold">Control Board</h1>
             <p className="text-sm text-muted-foreground">
               Every dial, recording and WhatsApp touch across the floor, updating live.
             </p>
           </div>
-          <div className="flex gap-2">
-            <AdminGate
-              locked={(openPin) => (
-                <Button variant="secondary" size="sm" onClick={openPin}>
-                  <Lock className="size-4" /> Control board
-                </Button>
+          <div className="flex flex-wrap gap-2">
+            <CsvImportDialog />
+            <ManualIngestDialog leads={leads} agents={agents} />
+            <Button size="sm" onClick={() => balance.mutate()} disabled={balance.isPending}>
+              {balance.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Shuffle className="size-4" />
               )}
-            >
-              <ManualIngestDialog leads={leads} agents={agents} />
-              <Button size="sm" onClick={() => balance.mutate()} disabled={balance.isPending}>
-                {balance.isPending ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Shuffle className="size-4" />
-                )}
-                Balance {unassigned > 0 ? `${unassigned} leads` : "leads"}
-              </Button>
-            </AdminGate>
+              Auto distribute {unassigned > 0 ? `${unassigned} leads` : "leads"}
+            </Button>
           </div>
         </div>
 
@@ -158,7 +182,7 @@ function ExecutiveHq() {
           />
         </div>
 
-        <AgentRadar agents={agents} calls={calls} />
+        <AgentRadar agents={agents} calls={calls} onSelectAgent={setOpenAgentId} />
 
         <section className="space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-2">
@@ -196,7 +220,7 @@ function ExecutiveHq() {
           </div>
         </section>
 
-        <Leaderboard stats={stats} />
+        <Leaderboard stats={stats} onSelectAgent={setOpenAgentId} />
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Latest verified conversations</h2>
@@ -234,7 +258,15 @@ function ExecutiveHq() {
         open={openLeadId !== null}
         onOpenChange={(next) => !next && setOpenLeadId(null)}
       />
-    </AppShell>
+      <AgentDossier
+        agent={openAgent}
+        leads={leads}
+        calls={calls}
+        messages={messages}
+        open={openAgentId !== null}
+        onOpenChange={(next) => !next && setOpenAgentId(null)}
+      />
+    </>
   );
 }
 
