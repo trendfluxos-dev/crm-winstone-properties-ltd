@@ -14,7 +14,224 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      call_recordings: {
+        Row: {
+          agent_id: string | null
+          ai_summary: string | null
+          audio_url: string | null
+          call_direction: Database["public"]["Enums"]["call_direction"]
+          created_at: string
+          customer_objections: string[]
+          deal_stage: string | null
+          duration_seconds: number
+          id: string
+          is_two_sided: boolean
+          lead_id: string | null
+          phone_number: string
+          sentiment: Database["public"]["Enums"]["call_sentiment"] | null
+          sync_status: Database["public"]["Enums"]["sync_status"]
+          transcription_text: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          ai_summary?: string | null
+          audio_url?: string | null
+          call_direction?: Database["public"]["Enums"]["call_direction"]
+          created_at?: string
+          customer_objections?: string[]
+          deal_stage?: string | null
+          duration_seconds?: number
+          id?: string
+          is_two_sided?: boolean
+          lead_id?: string | null
+          phone_number: string
+          sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          sync_status?: Database["public"]["Enums"]["sync_status"]
+          transcription_text?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          ai_summary?: string | null
+          audio_url?: string | null
+          call_direction?: Database["public"]["Enums"]["call_direction"]
+          created_at?: string
+          customer_objections?: string[]
+          deal_stage?: string | null
+          duration_seconds?: number
+          id?: string
+          is_two_sided?: boolean
+          lead_id?: string | null
+          phone_number?: string
+          sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          sync_status?: Database["public"]["Enums"]["sync_status"]
+          transcription_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_recordings_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_recordings_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_to: string | null
+          call_attempts: number
+          company: string | null
+          created_at: string
+          id: string
+          is_verified: boolean
+          last_call_at: string | null
+          name: string
+          notes: string | null
+          outcome_category: string | null
+          phone_number: string
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          call_attempts?: number
+          company?: string | null
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          last_call_at?: string | null
+          name: string
+          notes?: string | null
+          outcome_category?: string | null
+          phone_number: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          call_attempts?: number
+          company?: string | null
+          created_at?: string
+          id?: string
+          is_verified?: boolean
+          last_call_at?: string | null
+          name?: string
+          notes?: string | null
+          outcome_category?: string | null
+          phone_number?: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_hue: number
+          created_at: string
+          current_call_started_at: string | null
+          id: string
+          is_active: boolean
+          last_active_at: string | null
+          name: string
+          phone: string | null
+          presence: Database["public"]["Enums"]["agent_presence"]
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string | null
+        }
+        Insert: {
+          avatar_hue?: number
+          created_at?: string
+          current_call_started_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_active_at?: string | null
+          name: string
+          phone?: string | null
+          presence?: Database["public"]["Enums"]["agent_presence"]
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string | null
+        }
+        Update: {
+          avatar_hue?: number
+          created_at?: string
+          current_call_started_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_active_at?: string | null
+          name?: string
+          phone?: string | null
+          presence?: Database["public"]["Enums"]["agent_presence"]
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_interactions: {
+        Row: {
+          agent_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          lead_id: string | null
+          media_url: string | null
+          message_content: string | null
+          message_type: Database["public"]["Enums"]["message_type"]
+          sender_type: Database["public"]["Enums"]["sender_type"]
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          lead_id?: string | null
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: Database["public"]["Enums"]["message_type"]
+          sender_type: Database["public"]["Enums"]["sender_type"]
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          lead_id?: string | null
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: Database["public"]["Enums"]["message_type"]
+          sender_type?: Database["public"]["Enums"]["sender_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_interactions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_interactions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +240,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      agent_presence: "on_call" | "idle" | "offline"
+      app_role: "admin" | "team_leader" | "agent"
+      call_direction: "outgoing" | "incoming_callback"
+      call_sentiment: "positive" | "neutral" | "negative" | "critical"
+      lead_status: "pending" | "contacted" | "follow_up" | "closed"
+      message_type: "text" | "voice_note" | "image" | "document"
+      sender_type: "agent" | "customer"
+      sync_status: "uploaded" | "verified" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +374,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      agent_presence: ["on_call", "idle", "offline"],
+      app_role: ["admin", "team_leader", "agent"],
+      call_direction: ["outgoing", "incoming_callback"],
+      call_sentiment: ["positive", "neutral", "negative", "critical"],
+      lead_status: ["pending", "contacted", "follow_up", "closed"],
+      message_type: ["text", "voice_note", "image", "document"],
+      sender_type: ["agent", "customer"],
+      sync_status: ["uploaded", "verified", "failed"],
+    },
   },
 } as const
