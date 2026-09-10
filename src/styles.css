@@ -95,53 +95,53 @@
 
 :root {
   --radius: 0.75rem;
-  /* Pure white / crisp slate foundation */
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.2 0.02 260);
+  /* Warm cream foundation with clean white cards */
+  --background: oklch(0.985 0.01 95);
+  --foreground: oklch(0.25 0.02 95);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 260);
+  --card-foreground: oklch(0.25 0.02 95);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 260);
-  /* Electric indigo / violet-600 primary */
-  --primary: oklch(0.54 0.23 285);
+  --popover-foreground: oklch(0.25 0.02 95);
+  /* Emerald-600 primary: fresh green action color */
+  --primary: oklch(0.62 0.17 155);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.006 255);
-  --secondary-foreground: oklch(0.3 0.02 260);
-  --muted: oklch(0.965 0.005 255);
-  --muted-foreground: oklch(0.5 0.02 260);
-  --accent: oklch(0.95 0.03 285);
-  --accent-foreground: oklch(0.4 0.18 285);
+  --secondary: oklch(0.96 0.01 95);
+  --secondary-foreground: oklch(0.3 0.02 95);
+  --muted: oklch(0.965 0.01 95);
+  --muted-foreground: oklch(0.5 0.02 95);
+  --accent: oklch(0.95 0.05 155);
+  --accent-foreground: oklch(0.35 0.15 155);
   --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
-  /* slate-200/80 micro-borders */
-  --border: oklch(0.92 0.008 255 / 80%);
-  --input: oklch(0.9 0.01 255);
-  --ring: oklch(0.54 0.23 285);
-  --surface: oklch(0.975 0.004 255);
-  --surface-2: oklch(0.96 0.006 255);
+  /* Warm neutral micro-borders */
+  --border: oklch(0.9 0.01 95 / 80%);
+  --input: oklch(0.9 0.01 95);
+  --ring: oklch(0.62 0.17 155);
+  --surface: oklch(0.975 0.01 95);
+  --surface-2: oklch(0.96 0.01 95);
   /* Dark "ink" surface for the waveform container */
-  --ink: oklch(0.22 0.02 260);
-  --ink-foreground: oklch(0.96 0.005 250);
-  --ink-muted: oklch(0.6 0.02 260);
+  --ink: oklch(0.2 0.02 95);
+  --ink-foreground: oklch(0.96 0.005 95);
+  --ink-muted: oklch(0.6 0.02 95);
   /* Emerald-500 live, amber-500 idle */
-  --live: oklch(0.7 0.17 160);
+  --live: oklch(0.7 0.17 155);
   --live-foreground: oklch(0.99 0 0);
   --idle: oklch(0.77 0.17 70);
   --idle-foreground: oklch(0.25 0.05 70);
-  --offline: oklch(0.72 0.015 255);
+  --offline: oklch(0.72 0.015 95);
   --offline-foreground: oklch(0.99 0 0);
-  --verified: oklch(0.65 0.17 160);
+  --verified: oklch(0.65 0.17 155);
   --verified-foreground: oklch(0.99 0 0);
   --critical: oklch(0.6 0.22 25);
   --whatsapp: oklch(0.68 0.17 155);
-  --chart-1: oklch(0.54 0.23 285);
-  --chart-2: oklch(0.7 0.17 160);
+  --chart-1: oklch(0.62 0.17 155);
+  --chart-2: oklch(0.7 0.17 155);
   --chart-3: oklch(0.77 0.17 70);
   --chart-4: oklch(0.62 0.2 320);
   --chart-5: oklch(0.6 0.22 25);
-  --shadow-card: 0 1px 2px oklch(0.2 0.02 260 / 5%), 0 1px 3px oklch(0.2 0.02 260 / 4%);
-  --shadow-card-hover: 0 4px 12px oklch(0.2 0.02 260 / 7%), 0 2px 4px oklch(0.2 0.02 260 / 4%);
-  --shadow-glass: 0 1px 0 oklch(1 0 0 / 60%) inset, 0 8px 24px -12px oklch(0.2 0.02 260 / 15%);
+  --shadow-card: 0 1px 2px oklch(0.2 0.02 95 / 5%), 0 1px 3px oklch(0.2 0.02 95 / 4%);
+  --shadow-card-hover: 0 4px 12px oklch(0.2 0.02 95 / 7%), 0 2px 4px oklch(0.2 0.02 95 / 4%);
+  --shadow-glass: 0 1px 0 oklch(1 0 0 / 60%) inset, 0 8px 24px -12px oklch(0.2 0.02 95 / 15%);
 }
 
 @layer base {
