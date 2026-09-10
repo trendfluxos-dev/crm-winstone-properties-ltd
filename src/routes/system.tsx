@@ -6,6 +6,7 @@ import { AdminGate } from "@/components/crm/AdminPinDialog";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
+import { SystemCustomizer } from "@/components/crm/SystemCustomizer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buildBillingSummary, DEFAULT_RATE_PER_MINUTE, useSnapshot } from "@/lib/crm-data";
@@ -97,6 +98,10 @@ function SystemBoard() {
         </div>
         <CopilotDrawer />
       </div>
+
+      <SystemCustomizer />
+
+
 
 
       <section className="space-y-3">
