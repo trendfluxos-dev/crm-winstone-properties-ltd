@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <nav className="ml-2 hidden items-center gap-0.5 rounded-full border border-border bg-surface-2/70 p-1 lg:flex">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -96,6 +96,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               {adminToken ? <LockOpen className="size-3.5" /> : <Lock className="size-3.5" />}
               <span className="hidden lg:inline">{adminToken ? "Authority unlocked" : "Master PIN"}</span>
             </button>
+
+            {scope !== "none" && !adminToken && (
+              <button
+                type="button"
+                onClick={() => {
+                  void signOut().then(() => toast.info("Signed out"));
+                }}
+                className="inline-flex h-8 items-center rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:text-foreground hover:shadow-sm"
+              >
+                Sign out
+              </button>
+            )}
 
             <Button
               size="sm"
