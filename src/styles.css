@@ -166,9 +166,9 @@
   }
 }
 
-/* Faint dot grid on the slate foundation */
+/* Faint dot grid on the cream foundation */
 @utility grid-noise {
-  background-image: radial-gradient(oklch(0.2 0.02 260 / 5%) 1px, transparent 1px);
+  background-image: radial-gradient(oklch(0.25 0.02 95 / 5%) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 
