@@ -4,11 +4,20 @@ function sha(input: string) {
   return createHash("sha256").update(input, "utf8").digest();
 }
 
-/** Constant-time comparison of the submitted PIN against the server-only ADMIN_PIN. */
+/**
+ * Constant-time comparison of the submitted PIN against the master ADMIN_PIN
+ * or the IT console PIN. Either one unlocks the boards on this device.
+ */
 export function pinMatches(input: string): boolean {
-  const expected = process.env["ADMIN_PIN"];
-  if (!expected) throw new Error("ADMIN_PIN is not configured");
-  return timingSafeEqual(sha(input), sha(expected));
+  const master = process.env["ADMIN_PIN"];
+  const itConsole = process.env["IT_CONSOLE_PIN"];
+  if (!master && !itConsole) throw new Error("ADMIN_PIN is not configured");
+  const candidate = sha(input);
+  let ok = false;
+  for (const expected of [master, itConsole]) {
+    if (expected && timingSafeEqual(candidate, sha(expected))) ok = true;
+  }
+  return ok;
 }
 
 /** Opaque token handed to the browser after a successful PIN unlock. */
