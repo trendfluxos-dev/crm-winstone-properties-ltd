@@ -243,7 +243,10 @@ export function leadSources(leads: Lead[]): string[] {
 }
 
 function csvCell(value: unknown): string {
-  const text = value === null || value === undefined ? "" : String(value);
+  let text = value === null || value === undefined ? "" : String(value);
+  // Spreadsheet programs execute cells beginning with these characters as formulas.
+  // Prefix even when whitespace/control characters precede the formula marker.
+  if (/^[\t\r]|^[\s]*[=+\-@]/.test(text)) text = `'${text}`;
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 

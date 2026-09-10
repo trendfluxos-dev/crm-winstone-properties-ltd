@@ -70,6 +70,7 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 60,
+              "pattern": "^[\\p{L}\\p{N}\\s+.'-]+$",
               "description": "Match on lead name or phone number."
             },
             "limit": {

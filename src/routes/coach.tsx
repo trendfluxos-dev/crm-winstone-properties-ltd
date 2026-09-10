@@ -69,7 +69,7 @@ function CoachPage() {
   const [briefing, setBriefing] = useState<Briefing | null>(null);
 
   const run = useMutation({
-    mutationFn: (id: string) => getCoachBriefing({ data: { token, operatorId, agentId: id } }),
+    mutationFn: (id: string) => getCoachBriefing({ data: { token, agentId: id } }),
     onSuccess: (result) => setBriefing(result),
   });
 

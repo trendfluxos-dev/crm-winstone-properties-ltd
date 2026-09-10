@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
-            <AgentSelector />
+            {adminToken && <AgentSelector />}
 
 
             <button

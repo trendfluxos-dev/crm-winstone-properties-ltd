@@ -24,11 +24,10 @@ export type CrmSnapshot = Awaited<ReturnType<typeof getCrmSnapshot>>;
  * Authority (IT console / HQ / coordinator PIN) sees the whole floor;
  * a plain agent only ever receives their own leads and logs.
  */
-export const snapshotQueryFor = (scope: { token: string | null; operatorId: string | null }) =>
+export const snapshotQueryFor = (scope: { token: string | null }) =>
   queryOptions({
-    queryKey: ["crm-snapshot", scope.token ? "authority" : (scope.operatorId ?? "observer")],
-    queryFn: () =>
-      getCrmSnapshot({ data: { token: scope.token, operatorId: scope.operatorId } }),
+    queryKey: ["crm-snapshot", scope.token ? "authority" : "locked"],
+    queryFn: () => getCrmSnapshot({ data: { token: scope.token } }),
     refetchInterval: 15_000,
     staleTime: 5_000,
   });
@@ -43,8 +42,8 @@ const EMPTY_SNAPSHOT = {
 /** Snapshot for the current device: authority token if unlocked, else the selected agent. */
 export function useSnapshot() {
   const token = useAdminToken();
-  const operatorId = useOperatorId();
-  const query = useQuery(snapshotQueryFor({ token, operatorId }));
+  useOperatorId();
+  const query = useQuery(snapshotQueryFor({ token }));
   return { ...(query.data ?? EMPTY_SNAPSHOT), isPending: query.isPending };
 }
 

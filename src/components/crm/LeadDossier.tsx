@@ -191,7 +191,6 @@ export function CallEntry({ call }: { call: CallRecording }) {
         {call.audio_url ? (
           <CallAudioPlayer
             recordingId={call.id}
-            audioPath={call.audio_url}
             fallbackDuration={call.duration_seconds}
             seekRequest={seekRequest}
             onTimeUpdate={setCurrentTime}
