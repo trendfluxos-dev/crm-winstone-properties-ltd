@@ -118,24 +118,34 @@ function LeadQueue() {
               className="pl-9"
             />
           </div>
-          <Select value={agentFilter} onValueChange={setAgentFilter}>
-            <SelectTrigger className="w-full sm:w-[220px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All agents</SelectItem>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
-              {agents.map((agent) => (
-                <SelectItem key={agent.id} value={agent.id}>
-                  {agent.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {isAuthority && (
+            <Select value={agentFilter} onValueChange={setAgentFilter}>
+              <SelectTrigger className="w-full sm:w-[220px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All agents</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {agents.map((agent) => (
+                  <SelectItem key={agent.id} value={agent.id}>
+                    {agent.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {!isAuthority && !operatorId && (
+          <p className="rounded-xl border border-dashed border-border bg-card p-4 text-center text-sm text-muted-foreground">
+            Pick your name in “Operating as” at the top to load your own leads. Other agents’ leads
+            stay private.
+          </p>
+        )}
 
+        {isPending && <SnapshotSkeleton />}
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {LEAD_STATUSES.map((status) => {
             const columnLeads = filtered.filter((lead) => lead.status === status.key);
             return (
