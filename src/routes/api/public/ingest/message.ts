@@ -5,6 +5,8 @@ const Payload = z.object({
   lead_id: z.string().uuid().optional(),
   phone_number: z.string().min(5).optional(),
   agent_id: z.string().uuid().nullable().optional(),
+  employee_id: z.string().min(2).max(20).nullable().optional(),
+  lead_name: z.string().trim().min(1).max(120).nullable().optional(),
   sender_type: z.enum(["agent", "customer"]),
   message_type: z.enum(["text", "voice_note", "image", "document"]).default("text"),
   message_content: z.string().min(1),
@@ -39,21 +41,25 @@ export const Route = createFileRoute("/api/public/ingest/message")({
         const body = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
 
-        let leadId = body.lead_id ?? null;
-        if (!leadId && body.phone_number) {
-          const { data: lead } = await supabaseAdmin
-            .from("leads")
-            .select("id")
-            .eq("phone_number", body.phone_number)
-            .maybeSingle();
-          leadId = lead?.id ?? null;
-        }
+        const agent = await resolveAgent({
+          agentId: body.agent_id ?? null,
+          employeeId: body.employee_id ?? null,
+        });
+
+        const { leadId, created } = await resolveLeadId({
+          leadId: body.lead_id ?? null,
+          phoneNumber: body.phone_number ?? null,
+          agentId: agent?.id ?? null,
+          source: "whatsapp",
+          fallbackName: body.lead_name ?? null,
+        });
         if (!leadId) return json({ error: "Unknown lead" }, 404);
 
         const { error } = await supabaseAdmin.from("whatsapp_interactions").insert({
           lead_id: leadId,
-          agent_id: body.agent_id ?? null,
+          agent_id: agent?.id ?? null,
           sender_type: body.sender_type,
           message_type: body.message_type,
           message_content: body.message_content,
@@ -62,7 +68,7 @@ export const Route = createFileRoute("/api/public/ingest/message")({
         });
         if (error) return json({ error: error.message }, 500);
 
-        return json({ ok: true }, 201);
+        return json({ ok: true, lead_id: leadId, lead_created: created, agent_id: agent?.id ?? null }, 201);
       },
     },
   },

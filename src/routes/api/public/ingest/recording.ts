@@ -5,6 +5,8 @@ const Payload = z.object({
   lead_id: z.string().uuid().optional(),
   phone_number: z.string().min(5).optional(),
   agent_id: z.string().uuid().nullable().optional(),
+  employee_id: z.string().min(2).max(20).nullable().optional(),
+  lead_name: z.string().trim().min(1).max(120).nullable().optional(),
   audio_base64: z.string().min(1),
   file_extension: z.string().min(1).max(5).default("mp3"),
   duration_seconds: z.number().int().min(0),
@@ -38,24 +40,27 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
         if (!parsed.success) return json({ error: "Invalid payload" }, 400);
         const body = parsed.data;
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { ingestRecording, processRecording } = await import("@/lib/call-intel.server");
+        const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
 
-        let leadId = body.lead_id ?? null;
-        if (!leadId && body.phone_number) {
-          const { data: lead } = await supabaseAdmin
-            .from("leads")
-            .select("id")
-            .eq("phone_number", body.phone_number)
-            .maybeSingle();
-          leadId = lead?.id ?? null;
-        }
+        const agent = await resolveAgent({
+          agentId: body.agent_id ?? null,
+          employeeId: body.employee_id ?? null,
+        });
+
+        const { leadId } = await resolveLeadId({
+          leadId: body.lead_id ?? null,
+          phoneNumber: body.phone_number ?? null,
+          agentId: agent?.id ?? null,
+          source: "call",
+          fallbackName: body.lead_name ?? null,
+        });
         if (!leadId) return json({ error: "Unknown lead" }, 404);
 
         try {
           const recordingId = await ingestRecording({
             leadId,
-            agentId: body.agent_id ?? null,
+            agentId: agent?.id ?? null,
             audioBase64: body.audio_base64,
             fileExtension: body.file_extension,
             durationSeconds: body.duration_seconds,
