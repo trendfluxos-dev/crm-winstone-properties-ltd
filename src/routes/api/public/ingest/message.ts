@@ -41,21 +41,25 @@ export const Route = createFileRoute("/api/public/ingest/message")({
         const body = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
 
-        let leadId = body.lead_id ?? null;
-        if (!leadId && body.phone_number) {
-          const { data: lead } = await supabaseAdmin
-            .from("leads")
-            .select("id")
-            .eq("phone_number", body.phone_number)
-            .maybeSingle();
-          leadId = lead?.id ?? null;
-        }
+        const agent = await resolveAgent({
+          agentId: body.agent_id ?? null,
+          employeeId: body.employee_id ?? null,
+        });
+
+        const { leadId, created } = await resolveLeadId({
+          leadId: body.lead_id ?? null,
+          phoneNumber: body.phone_number ?? null,
+          agentId: agent?.id ?? null,
+          source: "whatsapp",
+          fallbackName: body.lead_name ?? null,
+        });
         if (!leadId) return json({ error: "Unknown lead" }, 404);
 
         const { error } = await supabaseAdmin.from("whatsapp_interactions").insert({
           lead_id: leadId,
-          agent_id: body.agent_id ?? null,
+          agent_id: agent?.id ?? null,
           sender_type: body.sender_type,
           message_type: body.message_type,
           message_content: body.message_content,
