@@ -5,6 +5,8 @@ const Payload = z.object({
   lead_id: z.string().uuid().optional(),
   phone_number: z.string().min(5).optional(),
   agent_id: z.string().uuid().nullable().optional(),
+  employee_id: z.string().min(2).max(20).nullable().optional(),
+  lead_name: z.string().trim().min(1).max(120).nullable().optional(),
   audio_base64: z.string().min(1),
   file_extension: z.string().min(1).max(5).default("mp3"),
   duration_seconds: z.number().int().min(0),
