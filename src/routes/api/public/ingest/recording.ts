@@ -40,24 +40,27 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
         if (!parsed.success) return json({ error: "Invalid payload" }, 400);
         const body = parsed.data;
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { ingestRecording, processRecording } = await import("@/lib/call-intel.server");
+        const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
 
-        let leadId = body.lead_id ?? null;
-        if (!leadId && body.phone_number) {
-          const { data: lead } = await supabaseAdmin
-            .from("leads")
-            .select("id")
-            .eq("phone_number", body.phone_number)
-            .maybeSingle();
-          leadId = lead?.id ?? null;
-        }
+        const agent = await resolveAgent({
+          agentId: body.agent_id ?? null,
+          employeeId: body.employee_id ?? null,
+        });
+
+        const { leadId } = await resolveLeadId({
+          leadId: body.lead_id ?? null,
+          phoneNumber: body.phone_number ?? null,
+          agentId: agent?.id ?? null,
+          source: "call",
+          fallbackName: body.lead_name ?? null,
+        });
         if (!leadId) return json({ error: "Unknown lead" }, 404);
 
         try {
           const recordingId = await ingestRecording({
             leadId,
-            agentId: body.agent_id ?? null,
+            agentId: agent?.id ?? null,
             audioBase64: body.audio_base64,
             fileExtension: body.file_extension,
             durationSeconds: body.duration_seconds,
