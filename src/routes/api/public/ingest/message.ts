@@ -68,7 +68,7 @@ export const Route = createFileRoute("/api/public/ingest/message")({
         });
         if (error) return json({ error: error.message }, 500);
 
-        return json({ ok: true }, 201);
+        return json({ ok: true, lead_id: leadId, lead_created: created, agent_id: agent?.id ?? null }, 201);
       },
     },
   },
