@@ -173,6 +173,7 @@ function DeskPage() {
     <AppShell>
       <div className="space-y-6">
         <PostCallReportGate />
+        <LeadDeadlineBanner />
         <MyProfileCard />
         <MyPhoneSetup />
         <div className="flex flex-wrap items-center justify-between gap-3">
