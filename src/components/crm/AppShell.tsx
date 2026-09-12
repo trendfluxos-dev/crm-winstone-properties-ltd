@@ -33,6 +33,8 @@ const NAV = [
   { to: "/reports", label: "Reports", scopes: ["authority", "coordinator", "agent"] },
   { to: "/system", label: "IT Console", scopes: ["authority"] },
   { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
+  { to: "/docs", label: "Docs", scopes: ["authority", "coordinator", "agent", "none"] },
+  { to: "/docs-admin", label: "Docs Admin", scopes: ["authority", "coordinator"] },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;
 
 export function AppShell({ children }: { children: ReactNode }) {

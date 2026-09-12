@@ -14,6 +14,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as DeskRouteImport } from './routes/desk'
 import { Route as DispatchRouteImport } from './routes/dispatch'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as DocsAdminRouteImport } from './routes/docs-admin'
 import { Route as HqRouteImport } from './routes/hq'
 import { Route as IngestRouteImport } from './routes/ingest'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -22,7 +24,9 @@ import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as DocsSlugRouteImport } from './routes/docs_.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as DocsAdminEditorSlugRouteImport } from './routes/docs-admin_.editor.$slug'
 import { Route as ApiPublicAgentCallStartRouteImport } from './routes/api/public/agent/call-start'
 import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
@@ -66,6 +70,16 @@ const DispatchRoute = DispatchRouteImport.update({
   path: '/dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsAdminRoute = DocsAdminRouteImport.update({
+  id: '/docs-admin',
+  path: '/docs-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HqRoute = HqRouteImport.update({
   id: '/hq',
   path: '/hq',
@@ -107,9 +121,19 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DocsSlugRoute = DocsSlugRouteImport.update({
+  id: '/docs_/$slug',
+  path: '/docs/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsAdminEditorSlugRoute = DocsAdminEditorSlugRouteImport.update({
+  id: '/docs-admin_/editor/$slug',
+  path: '/docs-admin/editor/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAgentCallStartRoute = ApiPublicAgentCallStartRouteImport.update({
@@ -206,6 +230,8 @@ export interface FileRoutesByFullPath {
   '/coach': typeof CoachRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
+  '/docs': typeof DocsRoute
+  '/docs-admin': typeof DocsAdminRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
@@ -214,7 +240,9 @@ export interface FileRoutesByFullPath {
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
@@ -239,6 +267,8 @@ export interface FileRoutesByTo {
   '/coach': typeof CoachRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
+  '/docs': typeof DocsRoute
+  '/docs-admin': typeof DocsAdminRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
@@ -247,7 +277,9 @@ export interface FileRoutesByTo {
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
@@ -273,6 +305,8 @@ export interface FileRoutesById {
   '/coach': typeof CoachRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
+  '/docs': typeof DocsRoute
+  '/docs-admin': typeof DocsAdminRoute
   '/hq': typeof HqRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
@@ -281,7 +315,9 @@ export interface FileRoutesById {
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/docs_/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/docs-admin_/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
@@ -308,6 +344,8 @@ export interface FileRouteTypes {
     | '/coach'
     | '/desk'
     | '/dispatch'
+    | '/docs'
+    | '/docs-admin'
     | '/hq'
     | '/ingest'
     | '/mcp'
@@ -316,7 +354,9 @@ export interface FileRouteTypes {
     | '/system'
     | '/terms'
     | '/.well-known/oauth-protected-resource'
+    | '/docs/$slug'
     | '/.lovable/oauth/consent'
+    | '/docs-admin/editor/$slug'
     | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
@@ -341,6 +381,8 @@ export interface FileRouteTypes {
     | '/coach'
     | '/desk'
     | '/dispatch'
+    | '/docs'
+    | '/docs-admin'
     | '/hq'
     | '/ingest'
     | '/mcp'
@@ -349,7 +391,9 @@ export interface FileRouteTypes {
     | '/system'
     | '/terms'
     | '/.well-known/oauth-protected-resource'
+    | '/docs/$slug'
     | '/.lovable/oauth/consent'
+    | '/docs-admin/editor/$slug'
     | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
@@ -374,6 +418,8 @@ export interface FileRouteTypes {
     | '/coach'
     | '/desk'
     | '/dispatch'
+    | '/docs'
+    | '/docs-admin'
     | '/hq'
     | '/ingest'
     | '/mcp'
@@ -382,7 +428,9 @@ export interface FileRouteTypes {
     | '/system'
     | '/terms'
     | '/.well-known/oauth-protected-resource'
+    | '/docs_/$slug'
     | '/.lovable/oauth/consent'
+    | '/docs-admin_/editor/$slug'
     | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
@@ -408,6 +456,8 @@ export interface RootRouteChildren {
   CoachRoute: typeof CoachRoute
   DeskRoute: typeof DeskRoute
   DispatchRoute: typeof DispatchRoute
+  DocsRoute: typeof DocsRoute
+  DocsAdminRoute: typeof DocsAdminRoute
   HqRoute: typeof HqRoute
   IngestRoute: typeof IngestRoute
   McpRoute: typeof McpRoute
@@ -416,7 +466,9 @@ export interface RootRouteChildren {
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DocsSlugRoute: typeof DocsSlugRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  DocsAdminEditorSlugRoute: typeof DocsAdminEditorSlugRoute
   ApiPublicAgentCallStartRoute: typeof ApiPublicAgentCallStartRoute
   ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
@@ -471,6 +523,20 @@ declare module '@tanstack/react-router' {
       path: '/dispatch'
       fullPath: '/dispatch'
       preLoaderRoute: typeof DispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs-admin': {
+      id: '/docs-admin'
+      path: '/docs-admin'
+      fullPath: '/docs-admin'
+      preLoaderRoute: typeof DocsAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hq': {
@@ -529,11 +595,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs_/$slug': {
+      id: '/docs_/$slug'
+      path: '/docs/$slug'
+      fullPath: '/docs/$slug'
+      preLoaderRoute: typeof DocsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
       fullPath: '/.lovable/oauth/consent'
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs-admin_/editor/$slug': {
+      id: '/docs-admin_/editor/$slug'
+      path: '/docs-admin/editor/$slug'
+      fullPath: '/docs-admin/editor/$slug'
+      preLoaderRoute: typeof DocsAdminEditorSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/agent/call-start': {
@@ -664,6 +744,8 @@ const rootRouteChildren: RootRouteChildren = {
   CoachRoute: CoachRoute,
   DeskRoute: DeskRoute,
   DispatchRoute: DispatchRoute,
+  DocsRoute: DocsRoute,
+  DocsAdminRoute: DocsAdminRoute,
   HqRoute: HqRoute,
   IngestRoute: IngestRoute,
   McpRoute: McpRoute,
@@ -673,7 +755,9 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DocsSlugRoute: DocsSlugRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  DocsAdminEditorSlugRoute: DocsAdminEditorSlugRoute,
   ApiPublicAgentCallStartRoute: ApiPublicAgentCallStartRoute,
   ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,

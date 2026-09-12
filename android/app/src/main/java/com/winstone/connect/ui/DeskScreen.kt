@@ -47,7 +47,10 @@ import com.winstone.connect.data.Lead
 import com.winstone.connect.data.MessageRow
 import com.winstone.connect.data.shortTime
 import com.winstone.connect.data.statusLabel
+import com.winstone.connect.data.remote.WinstoneApi
 import com.winstone.connect.telephony.LiveCallLauncher
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.winstone.connect.ui.theme.WinAmber
 import com.winstone.connect.ui.theme.WinBorder
 import com.winstone.connect.ui.theme.WinGreen
@@ -61,6 +64,8 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
     val state by vm.state.collectAsStateSafe()
     val snackbar = remember { SnackbarHostState() }
     var tab by remember { mutableStateOf(0) }
+    val callScope = rememberCoroutineScope()
+    var callBlocked by remember { mutableStateOf<String?>(null) }
     var showNewLead by remember { mutableStateOf(false) }
     var waLead by remember { mutableStateOf<Lead?>(null) }
 
@@ -99,6 +104,15 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                 )
             }
 
+            callBlocked?.let { message ->
+                Text(
+                    message,
+                    color = WinRed,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                )
+            }
+
             StatsRow(state)
 
             TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.background) {
@@ -123,7 +137,18 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                 LeadCard(
                                     lead = lead,
                                     onCall = {
-                                        LiveCallLauncher.call(activity, lead.id, lead.phone, data?.agentId, lead.name)
+                                        // The server decides: an unfinished post-call
+                                        // report blocks the next outbound call.
+                                        callScope.launch {
+                                            val gate = runCatching { WinstoneApi.startCall(lead.id) }.getOrNull()
+                                            val blocked = gate?.optBoolean("blocked", false) == true
+                                            if (blocked) {
+                                                callBlocked = gate?.optString("reason")
+                                                    ?: "আগের কলের রিপোর্ট জমা দিন"
+                                            } else {
+                                                LiveCallLauncher.call(activity, lead.id, lead.phone, data?.agentId, lead.name)
+                                            }
+                                        }
                                     },
                                     onWhatsApp = { waLead = lead },
                                 )
