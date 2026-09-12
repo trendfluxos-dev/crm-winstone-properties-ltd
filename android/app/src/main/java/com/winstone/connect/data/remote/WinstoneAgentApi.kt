@@ -37,6 +37,10 @@ object WinstoneAgentApi {
             put("email", phone.trim())
             put("password", password)
             put("device_label", android.os.Build.MODEL)
+            // The agent signs in with their own SIM number, so the CRM can bind
+            // that SIM to this desk and never sync a SIM call to another agent.
+            val simDigits = phone.filter { it.isDigit() }
+            if (simDigits.length >= 10) put("sim_number", phone.trim())
         }
         val req = Request.Builder()
             .url(WinstoneApi.BASE_URL + "/api/public/agent/login")
