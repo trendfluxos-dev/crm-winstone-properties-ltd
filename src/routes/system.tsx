@@ -109,6 +109,8 @@ function SystemBoard() {
 
       <CallOpsPanel showControls />
 
+      <DocSummaryPanel />
+
       <ReportSheetPanel />
 
       <StaffAccountsTable />
