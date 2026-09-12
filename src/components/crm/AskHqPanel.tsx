@@ -21,10 +21,10 @@ import { askHq } from "@/lib/hq-ask.functions";
 import { getAdminToken } from "@/lib/local-session";
 
 const SUGGESTIONS = [
-  "Compare connected calls per agent this month",
-  "Which agent has the most pending leads?",
-  "Show the daily dial trend",
-  "How is talk time spread across the floor?",
+  "এই মাসে প্রতি এজেন্টের কথা হওয়া কল তুলনা করো",
+  "কোন এজেন্টের কাছে সবচেয়ে বেশি অমীমাংসিত লিড আছে?",
+  "দৈনিক কলের ধারাটা দেখাও",
+  "ফ্লোরে কথার সময় কেমন ভাগ হয়েছে?",
 ];
 
 /** Ask HQ: type a question, get a written answer plus a live chart. */
@@ -46,17 +46,17 @@ export function AskHqPanel() {
     <section className="card-elevated p-4">
       <header className="flex items-center gap-2">
         <Sparkles className="size-4 text-primary" />
-        <h2 className="text-sm font-semibold">Ask HQ</h2>
+        <h2 className="text-sm font-semibold">এইচকিউ-কে জিজ্ঞেস করুন</h2>
       </header>
       <p className="mt-1 text-xs text-muted-foreground">
-        Ask for any report in plain language. The answer and chart are built from live floor data.
+        সাধারণ ভাষায় যে কোনো রিপোর্ট চান। উত্তর আর চার্ট তৈরি হবে সরাসরি লাইভ তথ্য থেকে।
       </p>
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="e.g. Which agent closed the most leads this week?"
+          placeholder="যেমন: এই সপ্তাহে কোন এজেন্ট সবচেয়ে বেশি লিড শেষ করেছে?"
           className="min-w-0 flex-1"
           onKeyDown={(e) => {
             if (e.key === "Enter" && question.trim().length > 2 && !run.isPending) {
@@ -69,7 +69,7 @@ export function AskHqPanel() {
           onClick={() => run.mutate(question.trim())}
         >
           {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-          Ask
+          জিজ্ঞেস করুন
         </Button>
       </div>
 
