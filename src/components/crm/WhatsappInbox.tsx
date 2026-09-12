@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { logMyWhatsappMessage } from "@/lib/agent-desk.functions";
+import { getWhatsappIntegrationStatus } from "@/lib/whatsapp.functions";
 import type { Lead, WhatsappMessage } from "@/lib/crm-data";
 import { useSnapshot } from "@/lib/crm-data";
 import { clockTime, dayLabel, relativeTime } from "@/lib/crm-format";
@@ -28,6 +29,12 @@ export function WhatsappInbox() {
   const adminToken = useAdminToken();
   const queryClient = useQueryClient();
   const send = useServerFn(logMyWhatsappMessage);
+  const { data: integration } = useQuery({
+    queryKey: ["whatsapp-integration-status"],
+    queryFn: () => getWhatsappIntegrationStatus(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const integrationStatus = integration?.status ?? "not_configured";
   const [search, setSearch] = useState("");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
