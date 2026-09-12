@@ -194,6 +194,7 @@ export const importLeads = createServerFn({ method: "POST" })
       notes: string | null;
       source: string;
       assigned_to: string | null;
+      assignment_source: string | null;
     }[] = [];
     let skipped = 0;
     for (const row of data.rows) {
