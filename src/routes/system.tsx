@@ -3,6 +3,7 @@ import { Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AccountApprovals } from "@/components/crm/AccountApprovals";
+import { ApkInstallCard } from "@/components/crm/ApkInstallCard";
 import { AuditTrail } from "@/components/crm/AuditTrail";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
@@ -107,6 +108,8 @@ function SystemBoard() {
       <AccountApprovals />
 
       <SystemCustomizer />
+
+      <ApkInstallCard />
 
       <AuditTrail />
 
