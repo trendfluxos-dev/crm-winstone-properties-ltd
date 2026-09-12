@@ -237,21 +237,27 @@ private fun ReportSheet(notes: String) {
                 ) { Text(if (category == value) "✓ $label" else label) }
             }
 
-            if (needsSchedule) {
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it },
-                    label = { Text("ফলো-আপ তারিখ (2026-05-20)") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = time,
-                    onValueChange = { time = it },
-                    label = { Text("সময় (14:30)") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = summary,
+                onValueChange = { summary = it },
+                label = { Text("কলের সারাংশ (বাধ্যতামূলক)") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = date,
+                onValueChange = { date = it },
+                label = { Text("ফলো-আপ তারিখ (2026-05-20) — বাধ্যতামূলক") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = time,
+                onValueChange = { time = it },
+                label = { Text("সময় (14:30) — বাধ্যতামূলক") },
+                modifier = Modifier.fillMaxWidth(),
+            )
             if (needsReason) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
@@ -265,7 +271,7 @@ private fun ReportSheet(notes: String) {
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text(if (needsNote) "নোট (বাধ্যতামূলক)" else "নোট") },
+                label = { Text("নোট (বাধ্যতামূলক)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
