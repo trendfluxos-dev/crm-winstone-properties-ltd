@@ -31,8 +31,8 @@ export const snapshotQueryFor = (scope: { token: string | null }) =>
   queryOptions({
     queryKey: ["crm-snapshot", scope.token ? "authority" : "session"],
     queryFn: () => getCrmSnapshot({ data: { token: scope.token } }),
-    refetchInterval: 15_000,
-    staleTime: 5_000,
+    refetchInterval: 10_000,
+    staleTime: 2_000,
   });
 
 const EMPTY_SNAPSHOT = {
@@ -40,12 +40,42 @@ const EMPTY_SNAPSHOT = {
   leads: [] as Lead[],
   calls: [] as CallRecording[],
   messages: [] as WhatsappMessage[],
+  events: [] as LeadEvent[],
 };
+
+/**
+ * Live push refresh: whenever the phone app writes a call lifecycle event, a
+ * recording or a WhatsApp message, the board reloads itself — no manual refresh.
+ * The 10s poll above stays as a safety net for PIN-only (not signed-in) boards.
+ */
+function useLiveCrmRefresh() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const invalidate = () => {
+      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
+    };
+    const channel = supabase
+      .channel("crm-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "lead_events" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "call_recordings" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, invalidate)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "whatsapp_interactions" },
+        invalidate,
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+}
 
 /** Snapshot for the current device; customer data requires an authority token. */
 export function useSnapshot() {
   const token = useAdminToken();
   const query = useQuery(snapshotQueryFor({ token }));
+  useLiveCrmRefresh();
   return { ...(query.data ?? EMPTY_SNAPSHOT), isPending: query.isPending };
 }
 
