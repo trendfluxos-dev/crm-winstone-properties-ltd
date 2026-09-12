@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, LogOut, Palette } from "lucide-react";
+import { Check, KeyRound, Loader2, LogOut, Palette } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 import { updateMyProfile } from "@/lib/accounts.functions";
 import { useMyAccount, useSignOut } from "@/lib/session";
 
@@ -24,6 +25,23 @@ export function MyProfileCard() {
   const [name, setName] = useState(profile?.name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
   const [hue, setHue] = useState(profile?.avatar_hue ?? 200);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pw1, setPw1] = useState("");
+  const [pw2, setPw2] = useState("");
+
+  const changePassword = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.auth.updateUser({ password: pw1 });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("পাসওয়ার্ড পরিবর্তন হয়েছে");
+      setPw1("");
+      setPw2("");
+      setPwOpen(false);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const mutation = useMutation({
     mutationFn: () => save({ data: { name, phone, avatarHue: hue } }),
@@ -57,6 +75,9 @@ export function MyProfileCard() {
         </div>
         <Button variant="secondary" size="sm" onClick={() => setOpen((v) => !v)}>
           <Palette className="size-4" /> Edit profile
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => setPwOpen((v) => !v)}>
+          <KeyRound className="size-4" /> পাসওয়ার্ড বদল
         </Button>
         <Button variant="ghost" size="sm" onClick={() => void signOut()}>
           <LogOut className="size-4" /> Sign out
@@ -99,6 +120,48 @@ export function MyProfileCard() {
               {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
               Save profile
             </Button>
+          </div>
+        </div>
+      )}
+
+      {pwOpen && (
+        <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="my-pw1">নতুন পাসওয়ার্ড</Label>
+            <Input
+              id="my-pw1"
+              type="password"
+              autoComplete="new-password"
+              value={pw1}
+              onChange={(e) => setPw1(e.target.value)}
+              placeholder="কমপক্ষে ৬ অক্ষর"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="my-pw2">আবার লিখুন</Label>
+            <Input
+              id="my-pw2"
+              type="password"
+              autoComplete="new-password"
+              value={pw2}
+              onChange={(e) => setPw2(e.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Button
+              disabled={pw1.length < 6 || pw1 !== pw2 || changePassword.isPending}
+              onClick={() => changePassword.mutate()}
+            >
+              {changePassword.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <KeyRound className="size-4" />
+              )}
+              পাসওয়ার্ড সংরক্ষণ
+            </Button>
+            {pw1.length > 0 && pw1 !== pw2 && (
+              <p className="mt-2 text-xs text-destructive">দুইটি পাসওয়ার্ড মিলছে না</p>
+            )}
           </div>
         </div>
       )}
