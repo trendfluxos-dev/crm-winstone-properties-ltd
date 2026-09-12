@@ -122,7 +122,7 @@ export const Route = createFileRoute("/api/public/agent/report")({
             reminderMinutes: body.reminder_minutes,
             aiDecision: body.ai_decision ?? null,
           });
-          return json({ ok: true, ...result });
+          return json({ ...result, ok: true });
         } catch (error) {
           return json(
             { error: error instanceof Error ? error.message : "রিপোর্ট জমা হয়নি" },
