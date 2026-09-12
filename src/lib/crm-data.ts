@@ -54,8 +54,11 @@ function useLiveCrmRefresh() {
     const invalidate = () => {
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
     };
+    // Each snapshot consumer mounts its own listener. Reusing one channel name
+    // makes the client return an already-subscribed channel, then adding another
+    // callback throws and takes down the whole desk.
     const channel = supabase
-      .channel("crm-live")
+      .channel(`crm-snapshot-${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "lead_events" }, invalidate)
       .on("postgres_changes", { event: "*", schema: "public", table: "call_recordings" }, invalidate)
       .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, invalidate)
