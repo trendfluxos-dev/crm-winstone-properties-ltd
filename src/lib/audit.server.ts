@@ -32,7 +32,8 @@ export type AuditAction =
   | "twilio_number_wired"
   | "twilio_number_purchased"
   | "do_not_contact_added"
-  | "do_not_contact_removed";
+  | "do_not_contact_removed"
+  | "ai_voice_settings_updated";
 
 export async function logAudit(input: {
   action: AuditAction;

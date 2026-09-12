@@ -277,6 +277,29 @@ export function buildInboundTwiML(input: {
 <Response>${say}<Dial${recordAttr}${recordingCallback}>${escapeXml(input.agentPhone)}</Dial></Response>`;
 }
 
+/**
+ * TwiML that hands the live call to our ConversationRelay WebSocket so the AI
+ * assistant can talk to the caller in real time.
+ */
+export function buildConversationRelayTwiML(input: {
+  websocketUrl: string;
+  actionUrl: string;
+  welcomeGreeting: string;
+  language: string;
+  ttsLanguage: string;
+  voice: string | null;
+  leadId: string | null;
+  consentNotice: string | null;
+}): string {
+  const say = input.consentNotice ? `<Say language="bn-IN">${escapeXml(input.consentNotice)}</Say>` : "";
+  const voiceAttr = input.voice ? ` voice="${escapeXml(input.voice)}"` : "";
+  const parameter = input.leadId
+    ? `<Parameter name="leadId" value="${escapeXml(input.leadId)}"/>`
+    : "";
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>${say}<Connect action="${escapeXml(input.actionUrl)}"><ConversationRelay url="${escapeXml(input.websocketUrl)}" welcomeGreeting="${escapeXml(input.welcomeGreeting)}" language="${escapeXml(input.language)}" ttsLanguage="${escapeXml(input.ttsLanguage)}"${voiceAttr} transcriptionLanguage="${escapeXml(input.language)}" dtmfDetection="true" interruptible="true">${parameter}</ConversationRelay></Connect></Response>`;
+}
+
 /** Validates the X-Twilio-Signature header for both GET and POST requests. */
 export function validateSignature(
   cfg: TwilioConfig,

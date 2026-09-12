@@ -116,6 +116,28 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
         }
 
         const recordingUrl = cfg.webhookBase ? `${cfg.webhookBase}/api/public/twilio/recording` : "";
+
+        // Live AI voice assistant, when an admin has turned it on.
+        const { relaySettings } = await import("@/lib/relay.server");
+        const ai = await relaySettings();
+        if (ai.enabled && cfg.webhookBase) {
+          const { buildConversationRelayTwiML } = await import("@/lib/twilio.server");
+          const wsBase = cfg.webhookBase.replace(/^http/, "ws");
+          await markWebhookProcessed(claim.id, "ai voice session");
+          return twiML(
+            buildConversationRelayTwiML({
+              websocketUrl: `${wsBase}/api/public/twilio/relay`,
+              actionUrl: `${cfg.webhookBase}/api/public/twilio/relay-action`,
+              welcomeGreeting: ai.greeting,
+              language: ai.language,
+              ttsLanguage: ai.ttsLanguage,
+              voice: ai.voice,
+              leadId: lead?.id ?? null,
+              consentNotice: cfg.recordingConsentNotice,
+            }),
+          );
+        }
+
         const args: Parameters<typeof buildInboundTwiML>[0] = {
           record: cfg.recordingEnabled,
           recordingStatusCallback: recordingUrl,

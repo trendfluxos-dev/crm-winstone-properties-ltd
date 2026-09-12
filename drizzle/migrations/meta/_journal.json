@@ -113,6 +113,13 @@
       "when": 1789246008640,
       "tag": "0015_comms_consent_dnc_webhook_deliveries",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1789246632197,
+      "tag": "0016_ai_voice_sessions",
+      "breakpoints": true
     }
   ]
 }

@@ -85,6 +85,119 @@ export type Database = {
           },
         ]
       }
+      ai_voice_sessions: {
+        Row: {
+          call_sid: string | null
+          direction: string
+          ended_at: string | null
+          error_message: string | null
+          from_number: string | null
+          handoff_agent_id: string | null
+          handoff_reason: string | null
+          id: string
+          language: string
+          lead_id: string | null
+          session_id: string | null
+          started_at: string
+          status: string
+          to_number: string | null
+          turn_count: number
+          updated_at: string
+        }
+        Insert: {
+          call_sid?: string | null
+          direction?: string
+          ended_at?: string | null
+          error_message?: string | null
+          from_number?: string | null
+          handoff_agent_id?: string | null
+          handoff_reason?: string | null
+          id?: string
+          language?: string
+          lead_id?: string | null
+          session_id?: string | null
+          started_at?: string
+          status?: string
+          to_number?: string | null
+          turn_count?: number
+          updated_at?: string
+        }
+        Update: {
+          call_sid?: string | null
+          direction?: string
+          ended_at?: string | null
+          error_message?: string | null
+          from_number?: string | null
+          handoff_agent_id?: string | null
+          handoff_reason?: string | null
+          id?: string
+          language?: string
+          lead_id?: string | null
+          session_id?: string | null
+          started_at?: string
+          status?: string
+          to_number?: string | null
+          turn_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_voice_sessions_handoff_agent_id_fkey"
+            columns: ["handoff_agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_voice_sessions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_voice_turns: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          interrupted: boolean
+          language: string | null
+          role: string
+          session_row_id: string
+          turn_index: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          interrupted?: boolean
+          language?: string | null
+          role: string
+          session_row_id: string
+          turn_index: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          interrupted?: boolean
+          language?: string | null
+          role?: string
+          session_row_id?: string
+          turn_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_voice_turns_session_row_id_fkey"
+            columns: ["session_row_id"]
+            isOneToOne: false
+            referencedRelation: "ai_voice_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_config: {
         Row: {
           data: Json
