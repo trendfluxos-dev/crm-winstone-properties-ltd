@@ -34,6 +34,7 @@ object CallSyncQueue {
         durationSeconds: Int,
         twoSided: Boolean,
         incoming: Boolean = false,
+        recorderSource: String = "unknown",
     ) {
         enqueue(
             context,
@@ -46,6 +47,29 @@ object CallSyncQueue {
                 .putInt(KEY_DURATION, durationSeconds)
                 .putBoolean(KEY_TWO_SIDED, twoSided)
                 .putBoolean(KEY_INCOMING, incoming)
+                .putString(KEY_SOURCE, recorderSource)
+                .putString(KEY_UPLOAD_ID, file.name)
+                .build(),
+        )
+    }
+
+    /** Opens the mandatory post-call report for a finished call. */
+    fun queueReportOpen(
+        context: Context,
+        leadId: String,
+        phoneNumber: String,
+        durationSeconds: Int,
+        connected: Boolean,
+    ) {
+        enqueue(
+            context,
+            unique = "report_${leadId}_${System.currentTimeMillis() / 1000}",
+            data = Data.Builder()
+                .putString(KEY_KIND, KIND_REPORT_OPEN)
+                .putString(KEY_LEAD, leadId)
+                .putString(KEY_PHONE, phoneNumber)
+                .putInt(KEY_DURATION, durationSeconds)
+                .putBoolean(KEY_CONNECTED, connected)
                 .build(),
         )
     }
@@ -96,10 +120,13 @@ object CallSyncQueue {
     const val KEY_TEXT = "text"
     const val KEY_OUTCOME = "outcome"
     const val KEY_CONNECTED = "connected"
+    const val KEY_SOURCE = "recorder_source"
+    const val KEY_UPLOAD_ID = "client_upload_id"
 
     const val KIND_RECORDING = "recording"
     const val KIND_WHATSAPP = "whatsapp"
     const val KIND_OUTCOME = "outcome"
+    const val KIND_REPORT_OPEN = "report_open"
 }
 
 class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {

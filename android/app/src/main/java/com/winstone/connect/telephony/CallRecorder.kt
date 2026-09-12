@@ -21,6 +21,9 @@ class CallRecorder(private val context: Context) {
     private var startedAt: Long = 0L
     var twoSided: Boolean = true; private set
 
+    /** voice_call = call audio source accepted, mic = OEM refused and we fell back. */
+    var recorderSource: String = "unknown"; private set
+
     val isRecording: Boolean get() = recorder != null
 
     fun start(leadId: String?): Boolean {
@@ -32,6 +35,7 @@ class CallRecorder(private val context: Context) {
         return try {
             rec.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
             twoSided = true
+            recorderSource = "voice_call"
             rec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             rec.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
             rec.setAudioSamplingRate(44_100)
@@ -50,6 +54,7 @@ class CallRecorder(private val context: Context) {
             return try {
                 rec.setAudioSource(MediaRecorder.AudioSource.MIC)
                 twoSided = false
+                recorderSource = "mic"
                 rec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 rec.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 rec.setOutputFile(file.absolutePath)
