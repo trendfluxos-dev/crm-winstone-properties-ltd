@@ -189,6 +189,41 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "get_call_intel",
+        "title": "Call intelligence",
+        "description": "Call recordings for one lead: duration, sync status, AI summary, sentiment, deal stage and transcript for each synced call.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "lead_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The lead's ID."
+            },
+            "phone_number": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 24,
+              "description": "The lead's phone number."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Max recordings to return (default 5)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }

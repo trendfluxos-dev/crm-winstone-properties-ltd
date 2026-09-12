@@ -16,10 +16,10 @@ export default defineMcp({
   title: "WEB CRM WINSTONE",
   version: "0.1.0",
   instructions:
-    "Tools for the Winstone Connect tele-sales CRM. Use list_agents for the roster, list_leads to browse or search leads, lead_history for one lead's calls and WhatsApp trail, floor_summary for activity totals and per-agent scorecards, and create_lead to add a lead. Callers must be signed in and approved in the IT Console allow-list.",
+    "Tools for the Winstone Connect tele-sales CRM. Use list_agents for the roster, list_leads to browse or search leads, lead_history for one lead's calls and WhatsApp trail, get_call_intel for a lead's call recordings and AI analysis, floor_summary for activity totals and per-agent scorecards, and create_lead to add a lead. Callers must be signed in and approved in the IT Console allow-list.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listAgents, listLeads, leadHistory, floorSummary, createLead],
+  tools: [listAgents, listLeads, leadHistory, floorSummary, createLead, getCallIntel],
 });
