@@ -112,13 +112,12 @@ export function LeadDossier({
                 </p>
               )}
 
-              {timeline.map((entry) =>
-                entry.kind === "call" ? (
-                  <CallEntry key={entry.call.id} call={entry.call} />
-                ) : (
-                  <MessageEntry key={entry.message.id} message={entry.message} />
-                ),
-              )}
+              {timeline.map((entry) => {
+                if (entry.kind === "call") return <CallEntry key={entry.call.id} call={entry.call} />;
+                if (entry.kind === "message")
+                  return <MessageEntry key={entry.message.id} message={entry.message} />;
+                return <LifecycleEntry key={entry.event.id} event={entry.event} />;
+              })}
             </div>
           </>
         )}
