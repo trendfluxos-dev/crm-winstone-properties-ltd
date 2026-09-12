@@ -117,8 +117,143 @@ class NotConfiguredWhatsApp implements WhatsAppProvider {
   }
 }
 
+const GRAPH = "https://graph.facebook.com/v21.0";
+
+/**
+ * Official Meta WhatsApp Cloud API implementation. Only ever constructed when
+ * real credentials exist; no unofficial WhatsApp automation is used anywhere.
+ */
+class MetaWhatsApp implements WhatsAppProvider {
+  readonly name = "meta-cloud-api";
+  readonly status: WhatsAppStatus = "configured";
+
+  constructor(
+    private readonly token: string,
+    private readonly phoneNumberId: string,
+  ) {}
+
+  private async post(body: unknown): Promise<WhatsAppSendResult> {
+    try {
+      const response = await fetch(`${GRAPH}/${this.phoneNumberId}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messaging_product: "whatsapp", ...(body as object) }),
+      });
+      const json = (await response.json().catch(() => ({}))) as {
+        messages?: Array<{ id?: string }>;
+        error?: { message?: string };
+      };
+      if (!response.ok) {
+        const detail = json.error?.message ?? `HTTP ${response.status}`;
+        await logWhatsAppFailure({
+          code: "whatsapp_send_failed",
+          title: "WhatsApp মেসেজ পাঠানো যায়নি",
+          detail,
+        });
+        return { ok: false, error: detail, status: this.status };
+      }
+      return { ok: true, providerMessageId: json.messages?.[0]?.id ?? "" };
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "unknown error";
+      await logWhatsAppFailure({
+        code: "whatsapp_send_failed",
+        title: "WhatsApp সংযোগে সমস্যা",
+        detail,
+      });
+      return { ok: false, error: detail, status: this.status };
+    }
+  }
+
+  sendMessage(input: { to: string; body: string }) {
+    return this.post({ to: input.to, type: "text", text: { preview_url: false, body: input.body } });
+  }
+
+  sendTemplate(input: { to: string; template: string; variables?: Record<string, string> }) {
+    const params = Object.values(input.variables ?? {}).map((text) => ({ type: "text", text }));
+    return this.post({
+      to: input.to,
+      type: "template",
+      template: {
+        name: input.template,
+        language: { code: "en" },
+        ...(params.length ? { components: [{ type: "body", parameters: params }] } : {}),
+      },
+    });
+  }
+
+  /** Stores one inbound message against the matching lead, if any. */
+  async receiveMessage(payload: unknown): Promise<{ handled: boolean; reason?: string }> {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { normalizeWhatsAppNumber } = await import("@/lib/whatsapp");
+
+    const entries = (payload as { entry?: Array<{ changes?: Array<{ value?: unknown }> }> }).entry ?? [];
+    let handled = 0;
+    for (const entry of entries) {
+      for (const change of entry.changes ?? []) {
+        const value = (change.value ?? {}) as {
+          messages?: Array<{ from?: string; type?: string; text?: { body?: string }; id?: string }>;
+          statuses?: Array<{ id?: string; status?: string }>;
+        };
+        for (const message of value.messages ?? []) {
+          const msisdn = normalizeWhatsAppNumber(message.from ?? null);
+          if (!msisdn) continue;
+          const tail = msisdn.slice(-9);
+          const { data: lead } = await supabaseAdmin
+            .from("leads")
+            .select("id, assigned_to")
+            .ilike("phone_number", `%${tail}`)
+            .limit(1)
+            .maybeSingle();
+          await supabaseAdmin.from("whatsapp_interactions").insert({
+            lead_id: lead?.id ?? null,
+            agent_id: lead?.assigned_to ?? null,
+            sender_type: "customer",
+            message_type: message.type === "text" ? "text" : "text",
+            message_content: message.text?.body ?? `[${message.type ?? "media"}]`,
+          });
+          handled += 1;
+        }
+      }
+    }
+    return handled > 0 ? { handled: true } : { handled: false, reason: "no inbound message in payload" };
+  }
+
+  async processWebhook(input: { rawBody: string; signature: string | null }) {
+    const appSecret = process.env["WHATSAPP_APP_SECRET"] ?? whatsAppCredentials().webhookSecret;
+    if (appSecret) {
+      if (!input.signature) return { ok: false, reason: "missing signature" };
+      const { createHmac, timingSafeEqual } = await import("crypto");
+      const expected = `sha256=${createHmac("sha256", appSecret).update(input.rawBody).digest("hex")}`;
+      const got = Buffer.from(input.signature);
+      const exp = Buffer.from(expected);
+      if (got.length !== exp.length || !timingSafeEqual(got, exp)) {
+        return { ok: false, reason: "invalid signature" };
+      }
+    }
+    let payload: unknown;
+    try {
+      payload = JSON.parse(input.rawBody);
+    } catch {
+      return { ok: false, reason: "invalid json" };
+    }
+    const result = await this.receiveMessage(payload);
+    return { ok: true, reason: result.reason };
+  }
+
+  async getConversation(leadId: string) {
+    return new NotConfiguredWhatsApp().getConversation(leadId);
+  }
+
+  async getMessageStatus() {
+    return "unknown" as WhatsAppMessageStatus;
+  }
+}
+
 export function getWhatsAppProvider(): WhatsAppProvider {
-  // Only the not-configured provider exists until real Meta credentials and a
-  // verified webhook are in place; no unofficial automation is ever used.
+  const { token, phoneNumberId } = whatsAppCredentials();
+  if (token && phoneNumberId) return new MetaWhatsApp(token, phoneNumberId);
   return new NotConfiguredWhatsApp();
 }
