@@ -91,6 +91,7 @@ export function WhatsappInbox() {
           </h2>
           <p className="text-xs text-muted-foreground sm:text-sm">
             {threads.length}টি কথা · ফোন থেকে আসা প্রতিটি মেসেজ নিজে নিজেই এখানে জমা হয়
+            <MyPhoneLine />
           </p>
         </div>
         <div className="relative w-full sm:w-64">

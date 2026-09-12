@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
 import { MyCallLog } from "@/components/crm/MyCallLog";
+import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
 import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
 import { QueueBoard } from "@/components/crm/QueueBoard";
@@ -166,6 +167,7 @@ function DeskPage() {
     <AppShell>
       <div className="space-y-6">
         <MyProfileCard />
+        <MyPhoneSetup />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl">আমার ডেস্ক</h1>
