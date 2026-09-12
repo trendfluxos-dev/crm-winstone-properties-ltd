@@ -9,15 +9,30 @@ export const Route = createFileRoute("/api/public/hooks/shift-summary")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const accepted = [
-          process.env["SHIFT_CRON_SECRET"],
-          process.env["LOVABLE_CRON_SECRET"],
-        ].filter((value): value is string => Boolean(value));
         const header =
           request.headers.get("x-cron-secret") ??
           request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
           "";
-        if (accepted.length === 0 || !accepted.includes(header)) {
+
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        // The database scheduler reads its own shared secret from settings, so the
+        // schedule can be created without ever exposing an environment value.
+        const { data: stored } = await supabaseAdmin
+          .from("system_settings")
+          .select("value")
+          .eq("key", "shift_cron_secret")
+          .maybeSingle();
+        const storedSecret =
+          stored && typeof stored.value === "object" && stored.value !== null
+            ? (stored.value as { secret?: string }).secret
+            : undefined;
+
+        const accepted = [
+          process.env["SHIFT_CRON_SECRET"],
+          process.env["LOVABLE_CRON_SECRET"],
+          storedSecret,
+        ].filter((value): value is string => Boolean(value));
+        if (accepted.length === 0 || !header || !accepted.includes(header)) {
           return new Response(JSON.stringify({ error: "unauthorized" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },
