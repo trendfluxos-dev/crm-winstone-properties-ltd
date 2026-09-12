@@ -25,7 +25,9 @@ async function inflateRaw(bytes: Uint8Array): Promise<Uint8Array> {
 function xmlToText(xml: string): string {
   return xml
     // Keep row/paragraph/cell boundaries as separators so a table stays a table.
-    .replace(/<\/(w:p|w:tr|row|a:p)>/g, "\n")
+    // Excel keeps its cell text in a shared-strings list; one string per line
+    // keeps the reading order of the sheet intact.
+    .replace(/<\/(w:p|w:tr|row|a:p|si)>/g, "\n")
     .replace(/<\/(w:tc|c|a:t)>/g, "\t")
     .replace(/<[^>]+>/g, "")
     .replace(/&amp;/g, "&")
