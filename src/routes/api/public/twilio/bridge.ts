@@ -43,7 +43,7 @@ export const Route = createFileRoute("/api/public/twilio/bridge")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         // Upsert a lifecycle row keyed by the parent CallSid Twilio sends us.
-        const form = await twilioFormData(request).catch(() => ({}));
+        const form = (await twilioFormData(request).catch(() => ({}))) as Record<string, string>;
         const callSid = form["CallSid"];
         if (callSid) {
           const { data: existing } = await supabaseAdmin
