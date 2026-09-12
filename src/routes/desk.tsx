@@ -7,6 +7,7 @@ import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
 import { FollowUpCalendar } from "@/components/crm/FollowUpCalendar";
+import { MyReports } from "@/components/crm/MyReports";
 import { PostCallReportGate } from "@/components/crm/PostCallReportGate";
 import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
 import { OpenLeadsCard } from "@/components/crm/OpenLeadsCard";
@@ -190,6 +191,7 @@ function DeskPage() {
             <TabsTrigger value="calls">কল রেকর্ড</TabsTrigger>
             <TabsTrigger value="whatsapp">হোয়াটসঅ্যাপ</TabsTrigger>
             <TabsTrigger value="calendar">ফলো-আপ</TabsTrigger>
+            <TabsTrigger value="reports">আমার রিপোর্ট</TabsTrigger>
           </TabsList>
           <TabsContent value="leads" className="space-y-4">
             <OpenLeadsCard />
@@ -207,6 +209,9 @@ function DeskPage() {
           </TabsContent>
           <TabsContent value="calendar">
             <FollowUpCalendar />
+          </TabsContent>
+          <TabsContent value="reports">
+            <MyReports />
           </TabsContent>
         </Tabs>
       </div>

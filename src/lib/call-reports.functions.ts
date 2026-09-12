@@ -162,3 +162,41 @@ export const completeFollowUp = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** The agent's own submitted call reports plus the next upcoming follow-ups. */
+export const myCallReports = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Base.extend({ limit: z.number().int().min(1).max(100).optional() }).parse(input))
+  .handler(async ({ data }) => {
+    const me = await agentOf(data.adminToken ?? null);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: reports } = await supabaseAdmin
+      .from("call_reports")
+      .select(
+        "id, lead_id, status, category, note, reason, follow_up_at, connected, duration_seconds, call_ended_at, submitted_at, recording_id",
+      )
+      .eq("agent_id", me.id)
+      .order("call_ended_at", { ascending: false })
+      .limit(data.limit ?? 50);
+
+    const leadIds = [...new Set((reports ?? []).map((r) => r.lead_id).filter(Boolean))] as string[];
+    const { data: leads } = leadIds.length
+      ? await supabaseAdmin.from("leads").select("id, name, phone_number, company").in("id", leadIds)
+      : { data: [] };
+    const leadById = new Map((leads ?? []).map((l) => [l.id, l]));
+
+    const nowIso = new Date().toISOString();
+    const { data: upcoming } = await supabaseAdmin
+      .from("follow_up_events")
+      .select("id, lead_id, customer_name, phone_number, category, priority, note, scheduled_at, status")
+      .eq("agent_id", me.id)
+      .neq("status", "done")
+      .order("scheduled_at", { ascending: true })
+      .limit(20);
+
+    return {
+      reports: (reports ?? []).map((r) => ({ ...r, lead: leadById.get(r.lead_id ?? "") ?? null })),
+      upcoming: upcoming ?? [],
+      overdueCount: (upcoming ?? []).filter((e) => e.scheduled_at < nowIso).length,
+    };
+  });
