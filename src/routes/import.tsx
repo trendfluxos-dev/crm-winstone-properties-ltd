@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, FileUp, Loader2, Trash2, Upload } from "lucide-react";
+import { Download, FileUp, Loader2, Sheet, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEMO_CSV, parseCsv, toLeadRows, type CsvLeadRow } from "@/lib/csv-leads";
 import { importLeads } from "@/lib/crm.functions";
+import { previewSheetLeads } from "@/lib/lead-sheet.functions";
 import { getAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/import")({
@@ -67,6 +68,26 @@ function ImportScreen() {
   const [rows, setRows] = useState<CsvLeadRow[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
   const [autoAssign, setAutoAssign] = useState(true);
+  const [sheetUrl, setSheetUrl] = useState("");
+  const [sheetTabs, setSheetTabs] = useState<string[]>([]);
+  const [sheetTab, setSheetTab] = useState<string | null>(null);
+  const loadSheet = useServerFn(previewSheetLeads);
+
+  const sheetMutation = useMutation({
+    mutationFn: (tab: string | null) =>
+      loadSheet({ data: { adminToken: getAdminToken() ?? "", sheetUrl, tab } }),
+    onSuccess: (result) => {
+      setSheetTabs(result.tabs);
+      setSheetTab(result.tab);
+      setRows(result.rows);
+      setFileName(`Google Sheet · ${result.tab}`);
+      if (result.rows.length === 0)
+        toast.error("এই ট্যাবে নাম ও ফোন নম্বরসহ কোনো সারি পাওয়া যায়নি");
+      else toast.success(`${result.rows.length}টি লিড প্রিভিউতে এলো`);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
 
   const load = (text: string, label: string) => {
     const parsed = toLeadRows(parseCsv(text));
@@ -134,6 +155,57 @@ function ImportScreen() {
           <Label>চালু এজেন্টদের মধ্যে সমানভাবে ভাগ করে দিন</Label>
         </label>
       </section>
+
+      <section className="card-elevated space-y-3 p-4">
+        <header className="space-y-1">
+          <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
+            <Sheet className="size-4 text-primary" /> Google Sheet থেকে লিড আনুন
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            শিটের লিংক দিন। শিটটি সংযুক্ত Google অ্যাকাউন্টের সাথে শেয়ার করা থাকতে হবে।
+          </p>
+        </header>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={sheetUrl}
+            onChange={(event) => setSheetUrl(event.target.value)}
+            placeholder="https://docs.google.com/spreadsheets/d/..."
+            className="sm:flex-1"
+          />
+          <Button
+            size="sm"
+            variant="secondary"
+            className="gap-1.5"
+            disabled={sheetUrl.trim().length < 20 || sheetMutation.isPending}
+            onClick={() => sheetMutation.mutate(sheetTab)}
+          >
+            {sheetMutation.isPending ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Sheet className="size-3.5" />
+            )}
+            শিট পড়ুন
+          </Button>
+        </div>
+
+        {sheetTabs.length > 1 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {sheetTabs.map((tab) => (
+              <Button
+                key={tab}
+                size="sm"
+                variant={tab === sheetTab ? "default" : "outline"}
+                disabled={sheetMutation.isPending}
+                onClick={() => sheetMutation.mutate(tab)}
+              >
+                {tab}
+              </Button>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
 
       {fileName ? (
         <section className="card-elevated space-y-3 p-4">
