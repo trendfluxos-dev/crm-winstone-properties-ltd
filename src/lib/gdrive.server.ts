@@ -22,23 +22,25 @@ function gatewayHeaders(extra?: Record<string, string>) {
   };
 }
 
-async function parseResponse(res: Response) {
+async function parseResponse<T = Record<string, unknown>>(res: Response): Promise<T | null> {
   const text = await res.text();
   if (!res.ok) {
     console.error(`[gdrive] ${res.status}: ${text.slice(0, 500)}`);
     throw new Error(`Google Drive ত্রুটি [${res.status}]: ${text.slice(0, 300)}`);
   }
-  return text ? (JSON.parse(text) as Record<string, unknown>) : null;
+  return text ? (JSON.parse(text) as T) : null;
 }
 
-export async function driveFetch(path: string, init?: RequestInit) {
+export async function driveFetch<T = Record<string, unknown>>(path: string, init?: RequestInit) {
   const url = `${DRIVE_GATEWAY}${path}`;
   const res = await fetch(url, {
     ...init,
     headers: { ...gatewayHeaders(), ...(init?.headers ?? {}) },
   });
-  return parseResponse(res);
+  return parseResponse<T>(res);
 }
+
+type UploadResult = { id: string; name: string; webViewLink?: string; size?: string };
 
 export async function uploadToDrive(opts: {
   name: string;
@@ -68,11 +70,15 @@ export async function uploadToDrive(opts: {
     headers: gatewayHeaders({ "Content-Type": `multipart/related; boundary=${boundary}` }),
     body,
   });
-  return parseResponse(res) as { id: string; name: string; webViewLink?: string; size?: string };
+  const result = await parseResponse<UploadResult>(res);
+  if (!result) throw new Error("Google Drive আপলোড ফলাফল ফাঁকা");
+  return result;
 }
 
+type DocMetadata = { id: string; name: string; webViewLink?: string };
+
 export async function createDriveDoc(name: string, folderId?: string | null) {
-  const created = (await driveFetch(`/files`, {
+  const created = await driveFetch<DocMetadata>(`/files`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -80,7 +86,7 @@ export async function createDriveDoc(name: string, folderId?: string | null) {
       mimeType: "application/vnd.google-apps.document",
       parents: folderId ? [folderId] : undefined,
     }),
-  })) as { id: string; name: string; webViewLink?: string } | null;
+  });
   if (!created?.id) throw new Error("Google Drive ডকুমেন্ট তৈরি হয়নি");
   return created;
 }
@@ -89,12 +95,12 @@ export async function getOrCreateDriveFolder(name: string, parentId?: string | n
   const escaped = name.replace(/'/g, "\\'").replace(/\\/g, "\\\\");
   const parentClause = parentId ? ` and '${parentId}' in parents` : "";
   const q = `mimeType='application/vnd.google-apps.folder' and name='${escaped}' and trashed=false${parentClause}`;
-  const list = (await driveFetch(
+  const list = await driveFetch<{ files?: { id: string; name: string }[] }>(
     `/files?q=${encodeURIComponent(q)}&pageSize=1&fields=files(id,name)`,
-  )) as { files?: { id: string; name: string }[] } | null;
+  );
   if (list?.files?.[0]) return list.files[0].id;
 
-  const created = (await driveFetch(`/files`, {
+  const created = await driveFetch<{ id: string }>(`/files`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -102,7 +108,7 @@ export async function getOrCreateDriveFolder(name: string, parentId?: string | n
       mimeType: "application/vnd.google-apps.folder",
       parents: parentId ? [parentId] : undefined,
     }),
-  })) as { id: string } | null;
+  });
   if (!created?.id) throw new Error("Google Drive ফোল্ডার তৈরি হয়নি");
   return created.id;
 }
