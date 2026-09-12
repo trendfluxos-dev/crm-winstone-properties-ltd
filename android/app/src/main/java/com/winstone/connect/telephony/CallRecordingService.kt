@@ -33,7 +33,7 @@ class CallRecordingService : Service() {
 
     private fun notification(context: Context): Notification =
         NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setContentTitle("কল রেকর্ড হচ্ছে")
             .setContentText("Winstone Connect চলমান কলটি রেকর্ড করছে")
             .setOngoing(true)
