@@ -30,6 +30,8 @@ data class DeskUiState(
     val sync: SyncStatus.Snapshot = SyncStatus.Snapshot(),
     /** Set when the CRM refused this phone (device access removed by IT). */
     val deviceRevoked: Boolean = false,
+    /** Lead whose Twilio cloud call is being set up right now. */
+    val twilioCallingLeadId: String? = null,
 )
 
 class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -154,6 +156,30 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
                     refresh(silent = true)
                 }
                 .onFailure { _state.value = _state.value.copy(toast = it.message ?: "লিড জমা হয়নি") }
+        }
+    }
+
+    /**
+     * Twilio cloud call. The phone only asks; Twilio rings this agent back and
+     * bridges the customer, so the call and recording reach the CRM on their own.
+     */
+    fun twilioCall(leadId: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(twilioCallingLeadId = leadId)
+            runCatching { WinstoneAgentApi.twilioCall(leadId) }
+                .onSuccess { body ->
+                    _state.value = _state.value.copy(
+                        twilioCallingLeadId = null,
+                        toast = body.optString("message").ifBlank { "Twilio কল শুরু হয়েছে" },
+                    )
+                    refresh(silent = true)
+                }
+                .onFailure {
+                    _state.value = _state.value.copy(
+                        twilioCallingLeadId = null,
+                        toast = it.message ?: "Twilio কল শুরু করা যায়নি",
+                    )
+                }
         }
     }
 
