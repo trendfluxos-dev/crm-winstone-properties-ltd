@@ -148,6 +148,15 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                 কল {row.totals.called} · সংযুক্ত {row.totals.connected} · আপডেট {row.totals.reports} · বাকি{" "}
                 {row.totals.pending} · ফলো-আপ {row.totals.followUps}
               </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 gap-1 px-2 text-xs"
+                onClick={() => downloadCsv([row], `winstone-shift-${row.shift_key}.csv`)}
+              >
+                <Download className="size-3" />
+                CSV
+              </Button>
             </div>
 
             <div className="mt-2 overflow-x-auto">
