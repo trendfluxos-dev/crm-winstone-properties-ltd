@@ -114,6 +114,23 @@ export function LeadDossier({
                 সব মাধ্যমের টাইমলাইন
               </h3>
 
+              {(() => {
+                const calls = timeline.filter((e) => e.kind === "call");
+                if (calls.length === 0) return null;
+                const totalSeconds = calls.reduce(
+                  (sum, e) => sum + (e.kind === "call" ? e.call.duration_seconds ?? 0 : 0),
+                  0,
+                );
+                return (
+                  <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm">
+                    <span className="font-semibold">মোট {calls.length}টি কল</span>
+                    <span className="text-muted-foreground">
+                      মোট কথা {formatDuration(totalSeconds)}
+                    </span>
+                  </div>
+                );
+              })()}
+
               {timeline.length === 0 && (
                 <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                   এই লিডের এখনো কোনো কল বা মেসেজ জমা হয়নি।
