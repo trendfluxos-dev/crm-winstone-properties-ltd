@@ -6,9 +6,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const RequestedRole = z.enum(["agent", "coordinator"]);
 
 /**
- * Called right after sign-up / first sign-in. Staff already on the pre-approved
- * roster are linked to their existing desk profile (or created as approved);
- * everyone else lands in "pending" for the IT Console to decide. Idempotent.
+ * Called right after sign-up / first sign-in. Everybody — roster staff
+ * included — lands in "pending" and waits for the IT Console to approve the
+ * account. The roster only pre-fills the role the approval will grant.
+ * Idempotent.
  */
 export const registerMyAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -32,10 +33,11 @@ export const registerMyAccount = createServerFn({ method: "POST" })
 
     const email = typeof context.claims["email"] === "string" ? context.claims["email"] : null;
     const { rosterRole, normalizeName } = await import("@/lib/roster.server");
-    const preApproved = rosterRole(data.name);
+    const rostered = rosterRole(data.name);
 
-    if (preApproved) {
-      // Claim the roster profile that is waiting for this person, if there is one.
+    if (rostered) {
+      // Link this sign-up to the desk profile waiting for this person, but keep
+      // it pending until the IT Console approves.
       const { data: unclaimed } = await supabaseAdmin
         .from("profiles")
         .select("id, name")
@@ -52,9 +54,9 @@ export const registerMyAccount = createServerFn({ method: "POST" })
             user_id: context.userId,
             email,
             phone: data.phone || null,
-            role: preApproved,
-            requested_role: preApproved,
-            approval_status: "approved",
+            role: rostered,
+            requested_role: rostered,
+            approval_status: "pending",
             is_active: true,
           })
           .eq("id", match.id);
@@ -68,15 +70,15 @@ export const registerMyAccount = createServerFn({ method: "POST" })
       name: data.name,
       phone: data.phone || null,
       email,
-      role: preApproved ?? "agent",
-      requested_role:
-        preApproved ?? (data.requestedRole === "coordinator" ? "team_leader" : "agent"),
-      approval_status: preApproved ? "approved" : "pending",
+      role: rostered ?? "agent",
+      requested_role: rostered ?? (data.requestedRole === "coordinator" ? "team_leader" : "agent"),
+      approval_status: "pending",
       is_active: true,
     });
     if (error) throw new Error(error.message);
     return { ok: true as const, created: true as const };
   });
+
 
 
 /** Who am I? Drives the role-aware shell, nav and landing redirect. */
