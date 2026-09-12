@@ -76,19 +76,47 @@ object WinstoneApi {
         incoming: Boolean = false,
         leadName: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
-        val payload = JSONObject().apply {
-            leadId?.let { put("lead_id", it) }
-            if (phoneNumber.isNotBlank()) put("phone_number", phoneNumber)
-            agentId?.let { put("agent_id", it) }
-            put("employee_id", employeeId)
-            leadName?.let { put("lead_name", it) }
-            put("audio_base64", Base64.encodeToString(file.readBytes(), Base64.NO_WRAP))
-            put("file_extension", file.extension.ifBlank { "m4a" })
-            put("duration_seconds", durationSeconds)
-            put("call_direction", if (incoming) "incoming_callback" else "outgoing")
-            put("is_two_sided", twoSided)
+        // Multipart: the audio streams straight up, no base64 bloat in memory.
+        val ext = file.extension.ifBlank { "m4a" }
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .apply {
+                leadId?.let { addFormDataPart("lead_id", it) }
+                if (phoneNumber.isNotBlank()) addFormDataPart("phone_number", phoneNumber)
+                agentId?.let { addFormDataPart("agent_id", it) }
+                addFormDataPart("employee_id", employeeId)
+                leadName?.let { addFormDataPart("lead_name", it) }
+                addFormDataPart("file_extension", ext)
+                addFormDataPart("duration_seconds", durationSeconds.toString())
+                addFormDataPart("call_direction", if (incoming) "incoming_callback" else "outgoing")
+                addFormDataPart("is_two_sided", twoSided.toString())
+                addFormDataPart(
+                    "file",
+                    file.name,
+                    file.asRequestBody(mimeFor(ext).toMediaType()),
+                )
+            }
+            .build()
+
+        val req = Request.Builder()
+            .url("$BASE_URL/api/public/ingest/recording")
+            .header("x-ingest-secret", INGEST_SECRET)
+            .post(body)
+            .build()
+
+        client.newCall(req).execute().use { res ->
+            val json = JSONObject(res.body?.string() ?: "{}")
+            if (!res.isSuccessful) error(json.optString("error", "HTTP ${res.code}"))
+            json
         }
-        post("/api/public/ingest/recording", payload)
+    }
+
+    private fun mimeFor(ext: String): String = when (ext.lowercase()) {
+        "wav" -> "audio/wav"
+        "m4a", "mp4" -> "audio/mp4"
+        "ogg" -> "audio/ogg"
+        "amr" -> "audio/amr"
+        else -> "audio/mpeg"
     }
 
     /** Log a WhatsApp touch (sent from the app's WhatsApp button). */
