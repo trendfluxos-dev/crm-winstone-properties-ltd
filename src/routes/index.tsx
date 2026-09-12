@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Headphones, Lock, Server, Users } from "lucide-react";
+import { BarChart3, Headphones, Lock, Mic, Server, Users } from "lucide-react";
 import { useState } from "react";
 
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
@@ -131,6 +131,10 @@ function EntryHall() {
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
             <span className="hidden sm:inline">·</span>
             <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
+            <span className="hidden sm:inline">·</span>
+            <Link to="/voice-transcription" className="inline-flex items-center gap-1 hover:text-foreground">
+              <Mic className="size-3" /> Voice Transcription
+            </Link>
           </div>
         </footer>
       </main>

@@ -24,6 +24,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as VoiceTranscriptionRouteImport } from './routes/voice-transcription'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DocsSlugRouteImport } from './routes/docs_.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -124,6 +125,11 @@ const SystemRoute = SystemRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VoiceTranscriptionRoute = VoiceTranscriptionRouteImport.update({
+  id: '/voice-transcription',
+  path: '/voice-transcription',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs_/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -411,6 +420,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/system'
     | '/terms'
+    | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/.lovable/oauth/consent'
@@ -454,6 +464,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/system'
     | '/terms'
+    | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/.lovable/oauth/consent'
@@ -497,6 +508,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/system'
     | '/terms'
+    | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs_/$slug'
     | '/.lovable/oauth/consent'
@@ -541,6 +553,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
+  VoiceTranscriptionRoute: typeof VoiceTranscriptionRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DocsSlugRoute: typeof DocsSlugRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -674,6 +687,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voice-transcription': {
+      id: '/voice-transcription'
+      path: '/voice-transcription'
+      fullPath: '/voice-transcription'
+      preLoaderRoute: typeof VoiceTranscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/oauth-protected-resource': {
@@ -877,6 +897,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
+  VoiceTranscriptionRoute: VoiceTranscriptionRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DocsSlugRoute: DocsSlugRoute,
