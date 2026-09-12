@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { readDocForEdit, saveDoc } from "@/lib/docs.functions";
 import { useAdminToken } from "@/lib/local-session";
 
-export const Route = createFileRoute("/docs-admin/editor/$slug")({
+export const Route = createFileRoute("/docs-admin_/editor/$slug")({
   head: () => ({
     meta: [
       { title: "পাতা সম্পাদনা — Winstone CRM ডকুমেন্টেশন" },

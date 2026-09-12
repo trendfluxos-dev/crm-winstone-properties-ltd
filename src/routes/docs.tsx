@@ -7,7 +7,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { Input } from "@/components/ui/input";
 import { listPublishedDocs } from "@/lib/docs.functions";
 
-export const Route = createFileRoute("/docs/")({
+export const Route = createFileRoute("/docs")({
   head: () => ({
     meta: [
       { title: "Winstone CRM ডকুমেন্টেশন" },

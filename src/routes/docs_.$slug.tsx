@@ -6,7 +6,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { MarkdownView } from "@/components/crm/MarkdownView";
 import { listPublishedDocs, readPublishedDoc } from "@/lib/docs.functions";
 
-export const Route = createFileRoute("/docs/$slug")({
+export const Route = createFileRoute("/docs_/$slug")({
   head: () => ({
     meta: [
       { title: "নির্দেশিকা — Winstone CRM ডকুমেন্টেশন" },

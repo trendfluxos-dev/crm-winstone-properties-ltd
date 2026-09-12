@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { listAllDocs } from "@/lib/docs.functions";
 import { useAdminToken } from "@/lib/local-session";
 
-export const Route = createFileRoute("/docs-admin/")({
+export const Route = createFileRoute("/docs-admin")({
   head: () => ({
     meta: [
       { title: "ডকুমেন্টেশন ব্যবস্থাপনা — Winstone CRM" },
