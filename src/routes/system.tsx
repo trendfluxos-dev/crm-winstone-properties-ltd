@@ -9,6 +9,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { SystemCustomizer } from "@/components/crm/SystemCustomizer";
 import { SystemNoticeBar } from "@/components/crm/SystemNoticeBar";
+import { CallOpsPanel } from "@/components/crm/CallOpsPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buildBillingSummary, DEFAULT_RATE_PER_MINUTE, useSnapshot } from "@/lib/crm-data";
@@ -99,6 +100,8 @@ function SystemBoard() {
       </div>
 
       <SystemNoticeBar surface="it" />
+
+      <CallOpsPanel showControls />
 
       <AccountApprovals />
 

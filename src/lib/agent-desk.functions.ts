@@ -116,6 +116,9 @@ export const claimLead = createServerFn({ method: "POST" })
       kind: "self_claimed",
       detail: `${caller.profile.name} নিজে লিড নিয়েছেন`,
     });
+    await supabaseAdmin
+      .from("lead_assignments")
+      .insert({ lead_id: updated.id, to_agent_id: me, changed_by: me, source: "self" });
 
     return { leadId: updated.id };
   });

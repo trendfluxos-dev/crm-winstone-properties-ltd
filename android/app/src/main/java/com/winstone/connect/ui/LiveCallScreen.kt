@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -315,57 +314,6 @@ private val CATEGORIES = listOf(
     "wrong_number" to "WRONG NUMBER — ভুল নম্বর",
     "closed_converted" to "CLOSED / CONVERTED — বিক্রি হয়েছে",
 )
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun OutcomeSheetUnused(@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun OutcomeSheet(
-    notes: String,
-    onSubmit: (String, String, Boolean) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var text by remember { mutableStateOf(notes) }
-    var connected by remember { mutableStateOf(true) }
-
-    val options = listOf(
-        "interested" to "আগ্রহী",
-        "follow_up" to "পরে যোগাযোগ",
-        "not_interested" to "আগ্রহী নয়",
-        "wrong_number" to "ভুল নম্বর",
-        "no_answer" to "ধরেনি",
-    )
-
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
-        Column(Modifier.padding(20.dp)) {
-            Text("কলের ফলাফল", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text("নোট") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-            )
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = connected, onCheckedChange = { connected = it })
-                Text("কথা হয়েছে")
-            }
-            Spacer(Modifier.height(8.dp))
-            options.forEach { (value, label) ->
-                Button(
-                    onClick = { onSubmit(value, text, connected) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                ) { Text(label) }
-            }
-            Spacer(Modifier.height(24.dp))
-        }
-    }
-}
 
 private fun formatDuration(seconds: Long): String {
     val m = seconds / 60

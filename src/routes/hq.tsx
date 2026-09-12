@@ -14,6 +14,7 @@ import {
 import { AgentDossier } from "@/components/crm/AgentDossier";
 import { AgentRadar } from "@/components/crm/AgentRadar";
 import { AskHqPanel } from "@/components/crm/AskHqPanel";
+import { CallOpsPanel } from "@/components/crm/CallOpsPanel";
 import { SelfClaimsFeed } from "@/components/crm/SelfClaimsFeed";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
@@ -119,6 +120,8 @@ function ControlBoard() {
         </div>
 
         <SystemNoticeBar surface="hq" />
+
+        <CallOpsPanel />
 
         <AskHqPanel />
 

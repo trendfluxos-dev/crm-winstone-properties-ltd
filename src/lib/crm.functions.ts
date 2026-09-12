@@ -152,6 +152,14 @@ export const autoDistributeLeads = createServerFn({ method: "POST" })
       ),
     );
 
+    await supabaseAdmin.from("lead_assignments").insert(
+      leads.map((lead, index) => ({
+        lead_id: lead.id,
+        to_agent_id: agents[index % agents.length]!.id,
+        source: "auto_distribute",
+      })),
+    );
+
     return { assigned: leads.length, agents: agents.length };
   });
 
@@ -332,5 +340,14 @@ export const assignLeadsToAgent = createServerFn({ method: "POST" })
         pool.map((l) => l.id),
       );
     if (updateError) throw new Error(updateError.message);
+
+    // Audit trail so the Coordinator Deck can show who moved what.
+    await supabaseAdmin.from("lead_assignments").insert(
+      pool.map((l) => ({
+        lead_id: l.id,
+        to_agent_id: data.agentId,
+        source: "coordinator",
+      })),
+    );
     return { assigned: pool.length };
   });

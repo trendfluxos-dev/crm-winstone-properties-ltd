@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { QueueBoard } from "@/components/crm/QueueBoard";
+import { AssignmentHistory } from "@/components/crm/AssignmentHistory";
 import { SelfClaimsFeed } from "@/components/crm/SelfClaimsFeed";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
@@ -170,6 +171,8 @@ function Dispatcher() {
           </Button>
         </div>
       </section>
+
+      <AssignmentHistory />
 
       <SelfClaimsFeed />
 
