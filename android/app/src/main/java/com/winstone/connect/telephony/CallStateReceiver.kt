@@ -37,8 +37,19 @@ class CallStateReceiver : BroadcastReceiver() {
                 if (lastState == TelephonyManager.EXTRA_STATE_OFFHOOK) return
                 lastState = state
                 CallRecordingService.start(app)
-                recorder(app).start(LiveCallLauncher.activeLeadId)
-                LiveCallLauncher.recording = true
+                val rec = recorder(app)
+                val started = rec.start(LiveCallLauncher.activeLeadId)
+                LiveCallLauncher.recording = started
+                if (!started) {
+                    val capability = RecordingCapabilityCheck.cachedOrNull()
+                    LiveCallLauncher.recordingIssue =
+                        capability?.label ?: "এই ফোনে কল রেকর্ডিং সম্ভব নয়"
+                    android.util.Log.w(
+                        "WinstoneRecording",
+                        "recording unavailable: " + (rec.unavailableReason ?: "unknown"),
+                    )
+                    CallRecordingService.stop(app)
+                }
                 LiveCallLauncher.setPhase(CallPhase.Connected)
                 scope.launch {
                     runCatching { WinstoneApi.postPresence(employeeId, "on_call", leadId = LiveCallLauncher.activeLeadId) }

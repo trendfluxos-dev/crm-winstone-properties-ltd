@@ -7,19 +7,16 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.winstone.connect.data.sync.CallSyncQueue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Real "Call" and "WhatsApp" buttons.
+ * The real "Call" button.
  *
- * call()     places the call over the SIM. CallStateReceiver picks it up from
- *            there: OFFHOOK starts the recorder and marks the agent on-call,
- *            IDLE stops it and queues the upload to the CRM.
- * whatsApp() opens WhatsApp *and* queues the message into the lead timeline,
- *            so the web CRM shows the touch even if the network drops.
+ * call() places the call over the normal SIM dialer. CallStateReceiver picks it
+ * up from there: OFFHOOK starts the recorder and marks the agent on-call, IDLE
+ * stops it and queues the upload plus the mandatory report to the CRM.
  *
  * The phase flow drives the in-call overlay (LiveCallScreen).
  */
@@ -37,6 +34,9 @@ object LiveCallLauncher {
     /** When the call went off-hook (millis), for the live timer. */
     @Volatile var connectedAt: Long = 0L
     @Volatile var recording: Boolean = false
+
+    /** Bengali line shown in-call when this device cannot record. */
+    @Volatile var recordingIssue: String? = null
 
     private val _phase = MutableStateFlow(CallPhase.Idle)
     val phase: StateFlow<CallPhase> = _phase.asStateFlow()
@@ -70,23 +70,6 @@ object LiveCallLauncher {
         activity.startActivity(Intent(Intent.ACTION_CALL, Uri.parse("tel:$clean")))
     }
 
-    /** Opens WhatsApp with the text and logs the same text against the lead. */
-    fun whatsApp(activity: Activity, leadId: String?, phone: String, text: String) {
-        CallSyncQueue.queueWhatsApp(activity.applicationContext, leadId, phone, text)
-        val msisdn = normalizeBdMsisdn(phone) ?: return
-        // wa.me is the supported external deep link: Android hands it to the
-        // installed WhatsApp app, and falls back to the browser otherwise.
-        val uri = Uri.parse("https://wa.me/$msisdn?text=" + Uri.encode(text))
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            setPackage("com.whatsapp")
-        }
-        try {
-            activity.startActivity(intent)
-        } catch (_: Exception) {
-            activity.startActivity(Intent(Intent.ACTION_VIEW, uri))
-        }
-    }
-
     /**
      * Bangladesh-first msisdn normalisation: 01XXXXXXXXX / +8801XXXXXXXXX /
      * 008801XXXXXXXXX / 8801XXXXXXXXX all become 8801XXXXXXXXX. Returns null
@@ -110,7 +93,7 @@ object LiveCallLauncher {
     /** Called after the outcome sheet is submitted or dismissed. */
     fun clear() {
         activeLeadId = null; activePhone = null; activeAgentId = null; activeLeadName = null
-        connectedAt = 0L; recording = false
+        connectedAt = 0L; recording = false; recordingIssue = null
         _phase.value = CallPhase.Idle
     }
 }
