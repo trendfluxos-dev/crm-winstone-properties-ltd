@@ -105,11 +105,12 @@ object CallSyncQueue {
 class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val employeeId = AgentSession.employeeId ?: return Result.retry()
+        val employeeId = AgentSession.employeeIdNow(applicationContext) ?: return Result.retry()
         val leadId = inputData.getString(CallSyncQueue.KEY_LEAD)
+        val kind = inputData.getString(CallSyncQueue.KEY_KIND)
 
         return try {
-            when (inputData.getString(CallSyncQueue.KEY_KIND)) {
+            when (kind) {
                 CallSyncQueue.KIND_RECORDING -> {
                     val path = inputData.getString(CallSyncQueue.KEY_FILE) ?: return Result.failure()
                     val file = File(path)
@@ -118,7 +119,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         leadId = leadId,
                         phoneNumber = inputData.getString(CallSyncQueue.KEY_PHONE).orEmpty(),
                         employeeId = employeeId,
-                        agentId = AgentSession.agentId,
+                        agentId = AgentSession.agentIdNow(applicationContext),
                         file = file,
                         durationSeconds = inputData.getInt(CallSyncQueue.KEY_DURATION, 0),
                         twoSided = inputData.getBoolean(CallSyncQueue.KEY_TWO_SIDED, true),
@@ -133,7 +134,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         leadId = leadId,
                         phoneNumber = inputData.getString(CallSyncQueue.KEY_PHONE).orEmpty(),
                         employeeId = employeeId,
-                        agentId = AgentSession.agentId,
+                        agentId = AgentSession.agentIdNow(applicationContext),
                         text = inputData.getString(CallSyncQueue.KEY_TEXT).orEmpty(),
                     )
                     Result.success()
@@ -143,7 +144,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                     if (leadId == null) return Result.failure()
                     WinstoneApi.postCallOutcome(
                         leadId = leadId,
-                        agentId = AgentSession.agentId,
+                        agentId = AgentSession.agentIdNow(applicationContext),
                         outcome = inputData.getString(CallSyncQueue.KEY_OUTCOME).orEmpty(),
                         notes = inputData.getString(CallSyncQueue.KEY_TEXT).orEmpty(),
                         connected = inputData.getBoolean(CallSyncQueue.KEY_CONNECTED, false),
@@ -157,6 +158,8 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             // 4xx = bad payload, retrying will not help; anything else is transient.
             val message = error.message.orEmpty()
             if (message.contains("Invalid payload") || message.contains("Unauthorized")) Result.failure()
+            // A call recording is the audit trail of the call: never give up on it.
+            else if (kind == CallSyncQueue.KIND_RECORDING) Result.retry()
             else if (runAttemptCount < 12) Result.retry()
             else Result.failure()
         }

@@ -28,14 +28,17 @@ class CallStateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != TelephonyManager.ACTION_PHONE_STATE_CHANGED) return
         val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE) ?: return
-        val employeeId = AgentSession.employeeId ?: return
         val app = context.applicationContext
+        // Cold start (incoming call wakes the process): read the synchronous mirror.
+        val employeeId = AgentSession.employeeIdNow(app) ?: return
 
         when (state) {
             TelephonyManager.EXTRA_STATE_OFFHOOK -> {
                 if (lastState == TelephonyManager.EXTRA_STATE_OFFHOOK) return
                 lastState = state
                 recorder(app).start(LiveCallLauncher.activeLeadId)
+                LiveCallLauncher.recording = true
+                LiveCallLauncher.setPhase(CallPhase.Connected)
                 scope.launch {
                     runCatching { WinstoneApi.postPresence(employeeId, "on_call", leadId = LiveCallLauncher.activeLeadId) }
                 }
@@ -62,7 +65,9 @@ class CallStateReceiver : BroadcastReceiver() {
                 scope.launch {
                     runCatching { WinstoneApi.postPresence(employeeId, "idle", leadId = endedLeadId) }
                 }
-                LiveCallLauncher.clear()
+                LiveCallLauncher.recording = false
+                // The overlay collects the outcome, then calls LiveCallLauncher.clear().
+                if (wasOnCall) LiveCallLauncher.setPhase(CallPhase.Ended) else LiveCallLauncher.clear()
             }
 
             else -> lastState = state

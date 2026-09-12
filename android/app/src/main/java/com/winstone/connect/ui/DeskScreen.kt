@@ -123,7 +123,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                 LeadCard(
                                     lead = lead,
                                     onCall = {
-                                        LiveCallLauncher.call(activity, lead.id, lead.phone, data?.agentId)
+                                        LiveCallLauncher.call(activity, lead.id, lead.phone, data?.agentId, lead.name)
                                     },
                                     onWhatsApp = { waLead = lead },
                                 )
