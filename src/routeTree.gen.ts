@@ -27,6 +27,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DocsSlugRouteImport } from './routes/docs_.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicSmokeRouteImport } from './routes/api/public/smoke'
 import { Route as DocsAdminEditorSlugRouteImport } from './routes/docs-admin_.editor.$slug'
 import { Route as ApiPublicAgentCallStartRouteImport } from './routes/api/public/agent/call-start'
 import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
@@ -136,6 +137,11 @@ const DocsSlugRoute = DocsSlugRouteImport.update({
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSmokeRoute = ApiPublicSmokeRouteImport.update({
+  id: '/api/public/smoke',
+  path: '/api/public/smoke',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsAdminEditorSlugRoute = DocsAdminEditorSlugRouteImport.update({
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
@@ -335,6 +343,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs_/$slug': typeof DocsSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin_/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
@@ -376,6 +385,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/.lovable/oauth/consent'
+    | '/api/public/smoke'
     | '/docs-admin/editor/$slug'
     | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/.lovable/oauth/consent'
+    | '/api/public/smoke'
     | '/docs-admin/editor/$slug'
     | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/docs_/$slug'
     | '/.lovable/oauth/consent'
+    | '/api/public/smoke'
     | '/docs-admin_/editor/$slug'
     | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
@@ -494,6 +506,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DocsSlugRoute: typeof DocsSlugRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  ApiPublicSmokeRoute: typeof ApiPublicSmokeRoute
   DocsAdminEditorSlugRoute: typeof DocsAdminEditorSlugRoute
   ApiPublicAgentCallStartRoute: typeof ApiPublicAgentCallStartRoute
   ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
@@ -641,6 +654,13 @@ declare module '@tanstack/react-router' {
       path: '/.lovable/oauth/consent'
       fullPath: '/.lovable/oauth/consent'
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/smoke': {
+      id: '/api/public/smoke'
+      path: '/api/public/smoke'
+      fullPath: '/api/public/smoke'
+      preLoaderRoute: typeof ApiPublicSmokeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs-admin_/editor/$slug': {
@@ -799,6 +819,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DocsSlugRoute: DocsSlugRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  ApiPublicSmokeRoute: ApiPublicSmokeRoute,
   DocsAdminEditorSlugRoute: DocsAdminEditorSlugRoute,
   ApiPublicAgentCallStartRoute: ApiPublicAgentCallStartRoute,
   ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
