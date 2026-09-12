@@ -19,6 +19,8 @@ import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { SystemCustomizer } from "@/components/crm/SystemCustomizer";
 import { SystemNoticeBar } from "@/components/crm/SystemNoticeBar";
 import { CallOpsPanel } from "@/components/crm/CallOpsPanel";
+import { SyncedCallsPanel } from "@/components/crm/SyncedCallsPanel";
+import { DayCallExportPanel } from "@/components/crm/DayCallExportPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buildBillingSummary, DEFAULT_RATE_PER_MINUTE, useSnapshot } from "@/lib/crm-data";
@@ -111,6 +113,10 @@ function SystemBoard() {
       <SystemNoticeBar surface="it" />
 
       <CallOpsPanel showControls />
+
+      <SyncedCallsPanel />
+
+      <DayCallExportPanel />
 
       <DocSummaryPanel />
 
