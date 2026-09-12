@@ -133,8 +133,46 @@ class CallStateReceiver : BroadcastReceiver() {
             }
 
 
+            TelephonyManager.EXTRA_STATE_RINGING -> {
+                lastState = state
+                // Only a call the app did not dial is an incoming call.
+                if (!outgoing) {
+                    IncomingCallTracker.begin(intent.incomingNumber())
+                    reportIncoming(app, CallLifecycle.incomingState(CallLifecycle.ANDROID_RINGING, false))
+                }
+            }
+
             else -> lastState = state
         }
+    }
+
+    /** The caller's number, when Android is willing to tell us (needs READ_CALL_LOG). */
+    private fun Intent.incomingNumber(): String? =
+        getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)?.trim()?.takeIf { it.isNotBlank() }
+
+    /**
+     * Queues one observed state of an incoming call. There is no lead id yet —
+     * the CRM resolves the lead from the caller's number, and creates it when the
+     * number is new, so a callback is never lost.
+     */
+    private fun reportIncoming(
+        app: Context,
+        callState: CallState,
+        durationSeconds: Int = 0,
+        recordingCaptured: Boolean? = null,
+    ) {
+        val wire = callState.wire ?: return
+        val callUid = IncomingCallTracker.callUid ?: return
+        val number = IncomingCallTracker.number ?: return
+        CallSyncQueue.queueIncomingCall(
+            context = app,
+            callUid = callUid,
+            phoneNumber = number,
+            state = wire,
+            durationSeconds = durationSeconds,
+            recordingSupported = recordingCaptured,
+            recordingNote = RecordingCapabilityCheck.cachedOrNull()?.reason,
+        )
     }
 
     /**
