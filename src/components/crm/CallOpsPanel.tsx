@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, BellRing, Check, Loader2, RefreshCw, Smartphone } from "lucide-react";
+import {
+  Activity,
+  BellRing,
+  Check,
+  Loader2,
+  RefreshCw,
+  ShieldOff,
+  Smartphone,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -171,16 +179,27 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
             ) : (
               <ul className="space-y-1 text-xs">
                 {data.devices.slice(0, 8).map((device) => (
-                  <li key={device.id} className="flex flex-wrap justify-between gap-2">
+                  <li key={device.id} className="flex flex-wrap items-center justify-between gap-2">
                     <span>
                       {device.label ?? "ফোন"} {device.appVersion ? `· v${device.appVersion}` : ""}
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="flex items-center gap-2 text-muted-foreground">
                       {device.revoked
                         ? "বাতিল"
                         : device.lastSeenAt
                           ? new Date(device.lastSeenAt).toLocaleString("bn-BD")
                           : "—"}
+                      {showControls && !device.revoked ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 gap-1 px-2 text-[11px]"
+                          disabled={revokeDevice.isPending}
+                          onClick={() => revokeDevice.mutate(device.id)}
+                        >
+                          <ShieldOff className="size-3" /> বাতিল করুন
+                        </Button>
+                      ) : null}
                     </span>
                   </li>
                 ))}
