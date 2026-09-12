@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { QueueBoard } from "@/components/crm/QueueBoard";
 import { AssignmentHistory } from "@/components/crm/AssignmentHistory";
+import { CallOpsPanel } from "@/components/crm/CallOpsPanel";
 import { SelfClaimsFeed } from "@/components/crm/SelfClaimsFeed";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
@@ -171,6 +172,8 @@ function Dispatcher() {
           </Button>
         </div>
       </section>
+
+      <CallOpsPanel />
 
       <AssignmentHistory />
 
