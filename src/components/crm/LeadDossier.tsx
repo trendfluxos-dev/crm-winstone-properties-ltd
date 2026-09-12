@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  Activity,
   AlertTriangle,
   BadgeCheck,
   FileText,
@@ -123,6 +124,35 @@ export function LeadDossier({
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+const EVENT_TONE: Record<string, string> = {
+  call_started: "border-primary/30 bg-primary/5 text-primary",
+  call_connected: "border-live/30 bg-live/10 text-live",
+  call_ended: "border-border bg-surface-2 text-muted-foreground",
+  recording_saved: "border-verified/30 bg-verified/10 text-verified",
+  transcript_ready: "border-primary/30 bg-primary/5 text-primary",
+  transcript_failed: "border-destructive/30 bg-destructive/10 text-destructive",
+  outcome_logged: "border-border bg-surface-2 text-foreground",
+  whatsapp_message: "border-whatsapp/25 bg-whatsapp/10 text-whatsapp",
+  self_claimed: "border-idle/30 bg-idle/10 text-idle-foreground",
+};
+
+/** Automatic lifecycle step reported by the phone app (no manual entry). */
+function LifecycleEntry({ event }: { event: LeadEvent }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-2 rounded-full border px-3.5 py-2 text-xs",
+        EVENT_TONE[event.kind] ?? "border-border bg-surface-2 text-muted-foreground",
+      )}
+    >
+      <Activity className="size-3.5 shrink-0" />
+      <span className="font-medium">{LEAD_EVENT_LABELS[event.kind] ?? event.kind}</span>
+      {event.detail && <span className="opacity-80">· {event.detail}</span>}
+      <span className="tabular ml-auto opacity-70">{clockTime(event.created_at)}</span>
+    </div>
   );
 }
 
