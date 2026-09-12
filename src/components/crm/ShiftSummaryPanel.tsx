@@ -1,14 +1,80 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, Loader2, RefreshCw } from "lucide-react";
+import { CalendarClock, Download, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import type { ShiftSummaryRow } from "@/lib/shift-summary.server";
 import { generateShiftSummaryNow, shiftSummaries } from "@/lib/shift-summary.functions";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
 function dhaka(iso: string) {
   return new Date(iso).toLocaleString("bn-BD", { timeZone: "Asia/Dhaka" });
+}
+
+const EXPORT_HEADER = [
+  "শিফট",
+  "উইন্ডো শেষ",
+  "এজেন্ট",
+  "আইডি",
+  "অ্যাসাইন লিড",
+  "কল",
+  "ধরেছে",
+  "আপডেট",
+  "বাকি",
+  "ফলো-আপ",
+  "ক্যাটাগরি",
+];
+
+function csvCell(value: string | number) {
+  const text = String(value ?? "");
+  // Keep spreadsheet formulas inert.
+  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+/** One CSV of the given summaries, one line per agent per shift. */
+function buildCsv(rows: ShiftSummaryRow[]) {
+  const lines = [EXPORT_HEADER.map(csvCell).join(",")];
+  for (const row of rows) {
+    for (const agent of row.agents) {
+      lines.push(
+        [
+          row.shift_label,
+          dhaka(row.window_end),
+          agent.name,
+          agent.employeeId ?? "",
+          agent.assigned,
+          agent.called,
+          agent.connected,
+          agent.reports,
+          agent.pending,
+          agent.followUps,
+          Object.entries(agent.categories)
+            .map(([label, count]) => `${label} ${count}`)
+            .join(" | "),
+        ]
+          .map(csvCell)
+          .join(","),
+      );
+    }
+  }
+  return `\ufeff${lines.join("\r\n")}`;
+}
+
+function downloadCsv(rows: ShiftSummaryRow[], fileName: string) {
+  if (rows.length === 0) {
+    toast.error("এক্সপোর্ট করার মতো কিছু নেই");
+    return;
+  }
+  const blob = new Blob([buildCsv(rows)], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+  toast.success("সামারি ফাইল নামানো হয়েছে");
 }
 
 /**
@@ -46,6 +112,14 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
           শিফট সামারি {scope === "hq" ? "(চলতি মাস)" : "(সম্পূর্ণ সংরক্ষণ)"}
         </h2>
         <span className="ml-auto text-xs text-muted-foreground">{rows.length}টি</span>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => downloadCsv(rows, `winstone-shift-summary-${new Date().toISOString().slice(0, 10)}.csv`)}
+        >
+          <Download className="size-4" />
+          সব এক্সপোর্ট
+        </Button>
         {scope === "it" && (
           <Button size="sm" variant="secondary" disabled={run.isPending} onClick={() => run.mutate()}>
             {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
@@ -55,7 +129,7 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
       </header>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        ১২:৫০ ও ৫:৩০-এ স্বয়ংক্রিয়ভাবে তৈরি হয় — এজেন্টদের দেওয়া আপডেট অনুযায়ী।
+        ১২:৫০, ১:৫০ ও ৫:৩০-এ স্বয়ংক্রিয়ভাবে তৈরি ও এক্সপোর্টের জন্য প্রস্তুত হয় — এজেন্টদের দেওয়া আপডেট অনুযায়ী।
         {scope === "hq" && " প্রতি মাসের ৫ তারিখে এখান থেকে সরে যায়, আইটি কনসোলে সব থাকে।"}
       </p>
 
