@@ -6,7 +6,7 @@
 - [x] Build a voice transcription app route (`/voice-transcription`) with Web Audio recording + Bengali STT via server function + auto-scroll UI.
 
 ## In progress
-- [ ] Twilio live phone call integration: connect Twilio, TwiML Stream webhook, inbound/outbound call routing, store calls in CRM, streaming ASR foundation.
+- [ ] Twilio integration: inspect codebase/schema, then implement Voice call lifecycle, dual-channel recording callbacks, X-Twilio-Signature validation, WhatsApp Business messages, unified call records, retry/idempotency, AI pipeline hooks, IT/HQ health view.
 
 ## Pending
 - [ ] Verify voice transcription end-to-end with real microphone input on the published site.
