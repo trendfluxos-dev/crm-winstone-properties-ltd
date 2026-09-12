@@ -66,6 +66,20 @@ object LiveCallLauncher {
             return
         }
         connectedAt = 0L
+        // One id for this whole attempt: the CRM keys the call row on it, so a
+        // retried state update updates that row instead of adding another call.
+        val uid = CallLifecycle.newCallUid(leadId)
+        activeCallUid = uid
+        val capability = RecordingCapabilityCheck.check(activity)
+        CallSyncQueue.queueCallState(
+            context = activity.applicationContext,
+            callUid = uid,
+            leadId = leadId,
+            state = CallState.INITIATED.wire!!,
+            phoneNumber = clean,
+            recordingSupported = capability.support == RecordingSupport.TWO_SIDED,
+            recordingNote = capability.reason,
+        )
         setPhase(CallPhase.Dialing)
         activity.startActivity(Intent(Intent.ACTION_CALL, Uri.parse("tel:$clean")))
     }
