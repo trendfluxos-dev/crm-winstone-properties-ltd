@@ -32,6 +32,9 @@ export function NewLeadDialog() {
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [notes, setNotes] = useState("");
+  const [address, setAddress] = useState("");
+  const [serialNo, setSerialNo] = useState("");
+  const [referenceBy, setReferenceBy] = useState("");
 
   const phoneOk = BD_PHONE.test(phone.trim());
   const valid = name.trim().length > 0 && phoneOk;
@@ -45,6 +48,9 @@ export function NewLeadDialog() {
           phoneNumber: phone.trim(),
           company: company.trim() || null,
           notes: notes.trim() || null,
+          address: address.trim() || null,
+          serialNo: serialNo.trim() || null,
+          referenceBy: referenceBy.trim() || null,
         },
       }),
     onSuccess: () => {
