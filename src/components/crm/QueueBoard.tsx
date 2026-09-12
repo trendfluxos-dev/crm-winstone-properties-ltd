@@ -28,7 +28,7 @@ export function QueueBoard({
   canSeeAllAgents?: boolean;
   showManualLog?: boolean;
 }) {
-  const { profiles, leads, calls, messages, isPending } = useSnapshot();
+  const { profiles, leads, calls, messages, events, isPending } = useSnapshot();
   const [search, setSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
@@ -136,7 +136,7 @@ export function QueueBoard({
       <LeadDossier
         lead={openLead}
         agents={profiles}
-        timeline={openLead ? buildTimeline(calls, messages, openLead.id) : []}
+        timeline={openLead ? buildTimeline(calls, messages, openLead.id, events) : []}
         open={openLeadId !== null}
         onOpenChange={(next) => !next && setOpenLeadId(null)}
       />
