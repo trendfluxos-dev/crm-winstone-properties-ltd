@@ -50,6 +50,7 @@ export type ReportValidationError = { field: string; message: string };
 /** Same rules as the database trigger, so the UI can show them before submit. */
 export function validateReport(input: {
   category: string | null;
+  summary?: string | null;
   note?: string | null;
   reason?: string | null;
   followUpAt?: string | null;
@@ -58,15 +59,15 @@ export function validateReport(input: {
   if (!category || !CALL_CATEGORIES.includes(category)) {
     return { field: "category", message: "কল ক্যাটেগরি বাছাই করুন" };
   }
+  const summary = (input.summary ?? "").trim();
   const note = (input.note ?? "").trim();
   const reason = (input.reason ?? "").trim();
 
-  if (category === "follow_up" || category === "callback") {
-    if (!input.followUpAt) return { field: "followUpAt", message: "তারিখ ও সময় দিন" };
-    if (!note) return { field: "note", message: "সংক্ষিপ্ত নোট লিখুন" };
-  }
-  if (category === "hot_lead" && !note) {
-    return { field: "note", message: "HOT LEAD-এর জন্য স্টেটাস নোট দিন" };
+  // Every call, every category: summary + note + follow-up date are mandatory.
+  if (summary.length < 2) return { field: "summary", message: "কলের সারাংশ লিখুন" };
+  if (note.length < 2) return { field: "note", message: "নোট লিখুন" };
+  if (!input.followUpAt) {
+    return { field: "followUpAt", message: "ফলো-আপের তারিখ ও সময় দিন" };
   }
   if ((category === "not_interested" || category === "wrong_number") && !reason) {
     return { field: "reason", message: "কারণ লিখুন" };
