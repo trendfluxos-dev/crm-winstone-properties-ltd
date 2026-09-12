@@ -22,6 +22,11 @@ import { Button } from "@/components/ui/button";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { CallRecording, Lead, LeadEvent, Profile, TimelineEntry, WhatsappMessage } from "@/lib/crm-data";
+import {
+  whatsappStatusLabel,
+  whatsappStatusTicks,
+  whatsappStatusTone,
+} from "@/lib/whatsapp-status";
 import { LEAD_EVENT_LABELS } from "@/lib/crm-data";
 import { reanalyzeRecording } from "@/lib/crm.functions";
 import { getAdminToken } from "@/lib/local-session";
@@ -362,8 +367,13 @@ function MessageEntry({ message }: { message: WhatsappMessage }) {
             : ""}
         </p>
         <p className="mt-1 text-sm">{message.message_content}</p>
-        <p className="tabular mt-1 text-right text-[11px] text-muted-foreground">
-          {clockTime(message.created_at)}
+        <p className="tabular mt-1 flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
+          <span>{clockTime(message.created_at)}</span>
+          {fromAgent && (
+            <span className={whatsappStatusTone(message.status)} title={whatsappStatusLabel(message.status)}>
+              {whatsappStatusTicks(message.status)}
+            </span>
+          )}
         </p>
       </div>
     </div>

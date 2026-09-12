@@ -71,6 +71,82 @@ export async function logWhatsAppFailure(input: {
 
 const NOT_CONFIGURED = "WhatsApp Business API সংযুক্ত নয় — INTEGRATION REQUIRED";
 
+const STATUSES: WhatsAppMessageStatus[] = ["queued", "sent", "delivered", "read", "failed", "unknown"];
+
+function asStatus(raw: string | null | undefined): WhatsAppMessageStatus {
+  const value = (raw ?? "").toLowerCase();
+  return (STATUSES as string[]).includes(value) ? (value as WhatsAppMessageStatus) : "unknown";
+}
+
+/** One lead's stored WhatsApp thread, newest last, with delivery/read status. */
+export async function readStoredConversation(leadId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("whatsapp_interactions")
+    .select(
+      "id, sender_type, message_type, message_content, created_at, status, provider, provider_message_id, delivered_at, read_at, error_detail",
+    )
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: true });
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    direction: row.sender_type === "agent" ? ("out" as const) : ("in" as const),
+    body: row.message_content,
+    at: row.created_at,
+    status: asStatus(row.status),
+    provider: row.provider,
+    providerMessageId: row.provider_message_id,
+    deliveredAt: row.delivered_at,
+    readAt: row.read_at,
+    errorDetail: row.error_detail,
+    messageType: row.message_type,
+  }));
+}
+
+/** Latest stored status of one provider message id. */
+export async function readStoredStatus(providerMessageId: string): Promise<WhatsAppMessageStatus> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("whatsapp_interactions")
+    .select("status")
+    .eq("provider_message_id", providerMessageId)
+    .maybeSingle();
+  return asStatus(data?.status ?? null);
+}
+
+/** Applies one Meta status callback (sent → delivered → read, or failed). */
+export async function applyStatusCallback(input: {
+  providerMessageId: string;
+  status: string;
+  errorDetail?: string | null;
+}): Promise<boolean> {
+  const status = asStatus(input.status);
+  const now = new Date().toISOString();
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: existing } = await supabaseAdmin
+    .from("whatsapp_interactions")
+    .select("id, status")
+    .eq("provider_message_id", input.providerMessageId)
+    .maybeSingle();
+  if (!existing) return false;
+
+  // Never move a message backwards (a late "sent" must not undo "read").
+  const rank: Record<string, number> = { queued: 0, sent: 1, delivered: 2, read: 3 };
+  if (status !== "failed" && (rank[status] ?? -1) < (rank[existing.status ?? ""] ?? -1)) return true;
+
+  await supabaseAdmin
+    .from("whatsapp_interactions")
+    .update({
+      status,
+      status_updated_at: now,
+      ...(status === "delivered" ? { delivered_at: now } : {}),
+      ...(status === "read" ? { delivered_at: now, read_at: now } : {}),
+      ...(status === "failed" ? { error_detail: input.errorDetail ?? "delivery failed" } : {}),
+    })
+    .eq("id", existing.id);
+  return true;
+}
+
 class NotConfiguredWhatsApp implements WhatsAppProvider {
   readonly name = "meta-cloud-api";
   readonly status: WhatsAppStatus = "not_configured";
@@ -98,22 +174,10 @@ class NotConfiguredWhatsApp implements WhatsAppProvider {
   }
   /** Reads whatever the CRM already logged locally; nothing is fetched from Meta. */
   async getConversation(leadId: string) {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("whatsapp_interactions")
-      .select("id, sender_type, message_content, created_at")
-      .eq("lead_id", leadId)
-      .order("created_at", { ascending: true });
-    return (data ?? []).map((row) => ({
-      id: row.id,
-      direction: row.sender_type === "agent" ? ("out" as const) : ("in" as const),
-      body: row.message_content,
-      at: row.created_at,
-      status: "unknown" as WhatsAppMessageStatus,
-    }));
+    return readStoredConversation(leadId);
   }
-  async getMessageStatus() {
-    return "unknown" as WhatsAppMessageStatus;
+  async getMessageStatus(providerMessageId: string) {
+    return readStoredStatus(providerMessageId);
   }
 }
 
@@ -195,7 +259,11 @@ class MetaWhatsApp implements WhatsAppProvider {
       for (const change of entry.changes ?? []) {
         const value = (change.value ?? {}) as {
           messages?: Array<{ from?: string; type?: string; text?: { body?: string }; id?: string }>;
-          statuses?: Array<{ id?: string; status?: string }>;
+          statuses?: Array<{
+            id?: string;
+            status?: string;
+            errors?: Array<{ title?: string; message?: string }>;
+          }>;
         };
         for (const message of value.messages ?? []) {
           const msisdn = normalizeWhatsAppNumber(message.from ?? null);
@@ -207,18 +275,45 @@ class MetaWhatsApp implements WhatsAppProvider {
             .ilike("phone_number", `%${tail}`)
             .limit(1)
             .maybeSingle();
-          await supabaseAdmin.from("whatsapp_interactions").insert({
-            lead_id: lead?.id ?? null,
-            agent_id: lead?.assigned_to ?? null,
-            sender_type: "customer",
-            message_type: message.type === "text" ? "text" : "text",
-            message_content: message.text?.body ?? `[${message.type ?? "media"}]`,
-          });
+          const now = new Date().toISOString();
+          // Meta can retry a delivery; provider_message_id is unique so the
+          // same inbound message never lands twice in the thread.
+          await supabaseAdmin.from("whatsapp_interactions").upsert(
+            {
+              lead_id: lead?.id ?? null,
+              agent_id: lead?.assigned_to ?? null,
+              sender_type: "customer",
+              message_type: message.type === "text" ? "text" : "text",
+              message_content: message.text?.body ?? `[${message.type ?? "media"}]`,
+              provider: "meta-cloud-api",
+              provider_message_id: message.id ?? null,
+              status: "delivered",
+              status_updated_at: now,
+              delivered_at: now,
+            },
+            { onConflict: "provider_message_id", ignoreDuplicates: true },
+          );
           handled += 1;
+        }
+        for (const status of value.statuses ?? []) {
+          if (!status.id) continue;
+          const applied = await applyStatusCallback({
+            providerMessageId: status.id,
+            status: status.status ?? "unknown",
+            errorDetail: status.errors?.[0]?.message ?? status.errors?.[0]?.title ?? null,
+          });
+          if (applied) handled += 1;
+          if (status.status === "failed") {
+            await logWhatsAppFailure({
+              code: "whatsapp_delivery_failed",
+              title: "WhatsApp মেসেজ পৌঁছায়নি",
+              detail: status.errors?.[0]?.message ?? "Meta delivery failure",
+            });
+          }
         }
       }
     }
-    return handled > 0 ? { handled: true } : { handled: false, reason: "no inbound message in payload" };
+    return handled > 0 ? { handled: true } : { handled: false, reason: "no message or status in payload" };
   }
 
   async processWebhook(input: { rawBody: string; signature: string | null }) {
@@ -244,11 +339,11 @@ class MetaWhatsApp implements WhatsAppProvider {
   }
 
   async getConversation(leadId: string) {
-    return new NotConfiguredWhatsApp().getConversation(leadId);
+    return readStoredConversation(leadId);
   }
 
-  async getMessageStatus() {
-    return "unknown" as WhatsAppMessageStatus;
+  async getMessageStatus(providerMessageId: string) {
+    return readStoredStatus(providerMessageId);
   }
 }
 

@@ -15,6 +15,13 @@
       "when": 1789217186145,
       "tag": "0001_production_hardening_devices_reports_calendar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789221072841,
+      "tag": "0002_whatsapp_message_status",
+      "breakpoints": true
     }
   ]
 }
