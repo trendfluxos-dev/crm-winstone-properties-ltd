@@ -13,9 +13,15 @@
  */
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
-const GEMINI_STT_MODEL = "google/gemini-3.5-transcribe";
 
-export type SttProviderName = "gemini" | "sarvam";
+
+export type SttProviderName = "gemini" | "openai" | "sarvam";
+
+/** Gateway-served models per provider; both work from Bangladesh. */
+const GATEWAY_MODELS: Record<"gemini" | "openai", string> = {
+  gemini: "google/gemini-3.5-transcribe",
+  openai: "openai/gpt-4o-transcribe",
+};
 
 export type SttResult = {
   transcript: string;
@@ -46,16 +52,20 @@ class SttProviderError extends Error {
 }
 
 export function sttPrimaryProvider(): SttProviderName {
-  return process.env["STT_PRIMARY_PROVIDER"] === "sarvam" && sarvamEnabled() ? "sarvam" : "gemini";
+  const wanted = process.env["STT_PRIMARY_PROVIDER"];
+  if (wanted === "sarvam" && sarvamEnabled()) return "sarvam";
+  if (wanted === "openai") return "openai";
+  return "gemini";
 }
 
 export function sarvamEnabled(): boolean {
   return process.env["STT_SARVAM_ENABLED"] === "true" && Boolean(process.env["SARVAM_API_KEY"]);
 }
 
-/* ------------------------------- Gemini ---------------------------------- */
+/* --------------------- Gateway providers (Gemini / OpenAI) ---------------- */
 
-async function transcribeWithGemini(
+async function transcribeWithGateway(
+  provider: "gemini" | "openai",
   bytes: Uint8Array,
   filename: string,
   contentType: string,
@@ -69,8 +79,9 @@ async function transcribeWithGemini(
     });
   }
 
+  const model = GATEWAY_MODELS[provider];
   const form = new FormData();
-  form.append("model", GEMINI_STT_MODEL);
+  form.append("model", model);
   form.append("file", new Blob([bytes as BlobPart], { type: contentType }), filename);
 
   const res = await fetch(`${GATEWAY}/audio/transcriptions`, {
@@ -82,7 +93,7 @@ async function transcribeWithGemini(
   if (!res.ok) {
     const retryable = res.status === 429 || res.status >= 500;
     throw new SttProviderError({
-      code: `GEMINI_${res.status}`,
+      code: `${provider.toUpperCase()}_${res.status}`,
       message: retryable ? "ট্রান্সক্রিপশন সেবা ব্যস্ত, পরে আবার চেষ্টা হবে" : "অডিও ট্রান্সক্রাইব করা যায়নি",
       retryable,
     });
@@ -91,7 +102,7 @@ async function transcribeWithGemini(
   const json = (await res.json()) as { text?: string; request_id?: string };
   return {
     transcript: (json.text ?? "").trim(),
-    model: GEMINI_STT_MODEL,
+    model,
     requestId: json.request_id ?? null,
   };
 }
@@ -153,8 +164,12 @@ export async function transcribeWithAdapter(
   contentType: string,
 ): Promise<SttResult> {
   const primary = sttPrimaryProvider();
-  const order: SttProviderName[] =
-    primary === "sarvam" ? ["sarvam", "gemini"] : sarvamEnabled() ? ["gemini", "sarvam"] : ["gemini"];
+  // Chain: preferred provider first, then the other Bangladesh-reachable
+  // gateway provider, and Sarvam only when it is explicitly enabled.
+  const chain: SttProviderName[] = [primary, "gemini", "openai", ...(sarvamEnabled() ? ["sarvam" as const] : [])];
+  const order: SttProviderName[] = chain.filter(
+    (p, i) => chain.indexOf(p) === i && (p !== "sarvam" || sarvamEnabled()),
+  );
 
   const startedAt = Date.now();
   let lastFailure: SttFailure = {
@@ -169,7 +184,7 @@ export async function transcribeWithAdapter(
       const out =
         provider === "sarvam"
           ? await transcribeWithSarvam(bytes, filename, contentType)
-          : { ...(await transcribeWithGemini(bytes, filename, contentType)), language: null };
+          : { ...(await transcribeWithGateway(provider, bytes, filename, contentType)), language: null };
 
       return {
         transcript: out.transcript,
@@ -196,7 +211,10 @@ export async function transcribeWithAdapter(
   return {
     transcript: "",
     provider: order[0]!,
-    model: order[0] === "sarvam" ? (process.env["SARVAM_STT_MODEL"] ?? "saaras:v4") : GEMINI_STT_MODEL,
+    model:
+      order[0] === "sarvam"
+        ? (process.env["SARVAM_STT_MODEL"] ?? "saaras:v4")
+        : GATEWAY_MODELS[order[0] as "gemini" | "openai"],
     language: null,
     status: "failed",
     requestId: null,

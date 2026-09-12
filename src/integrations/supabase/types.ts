@@ -150,6 +150,9 @@ export type Database = {
       call_recordings: {
         Row: {
           agent_id: string | null
+          ai_intent: string | null
+          ai_lead_category: string | null
+          ai_next_action: string | null
           ai_summary: string | null
           analysis_attempts: number
           analysis_error: string | null
@@ -180,6 +183,9 @@ export type Database = {
         }
         Insert: {
           agent_id?: string | null
+          ai_intent?: string | null
+          ai_lead_category?: string | null
+          ai_next_action?: string | null
           ai_summary?: string | null
           analysis_attempts?: number
           analysis_error?: string | null
@@ -210,6 +216,9 @@ export type Database = {
         }
         Update: {
           agent_id?: string | null
+          ai_intent?: string | null
+          ai_lead_category?: string | null
+          ai_next_action?: string | null
           ai_summary?: string | null
           analysis_attempts?: number
           analysis_error?: string | null

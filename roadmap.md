@@ -53,3 +53,6 @@
 - [x] Lead dashboard table (serial/name/address/phone/reference + Call beside each row, কল বাকি / আবার যোগাযোগ / কথা হয়েছে filters)
 - [x] AI lead import from CSV/TXT/Word/Excel/PDF/photo with reviewable rows, saved into the agent's own list (verified with xlsx + csv)
 - [x] leads.address / serial_no / reference_by columns (migration 0003)
+- [x] Provider-agnostic STT layer (Gemini primary, OpenAI fallback, Sarvam optional/off — geo-blocked in BD); CRM never blocks on Sarvam
+- [x] AI call analysis now returns intent + lead category + next action (ai_intent / ai_lead_category / ai_next_action, migration 0006) and shows them on the lead timeline
+- [ ] Ask Sarvam support (support@sarvam.ai) about Bangladesh access before enabling STT_SARVAM_ENABLED

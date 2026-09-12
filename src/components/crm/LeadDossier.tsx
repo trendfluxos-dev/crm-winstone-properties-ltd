@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { CallAudioPlayer } from "@/components/crm/CallAudioPlayer";
+import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { Button } from "@/components/ui/button";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -270,8 +271,26 @@ export function CallEntry({ call }: { call: CallRecording }) {
                 ))}
               </div>
             )}
-            {call.deal_stage && (
+            {call.ai_lead_category && (
               <p className="mt-3 text-xs text-muted-foreground">
+                এআই ক্যাটাগরি:{" "}
+                <span className="text-foreground">
+                  {CATEGORY_LABEL_CLIENT[call.ai_lead_category] ?? call.ai_lead_category}
+                </span>
+              </p>
+            )}
+            {call.ai_intent && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                ক্রেতার উদ্দেশ্য: <span className="text-foreground">{call.ai_intent}</span>
+              </p>
+            )}
+            {call.ai_next_action && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                পরের ধাপ: <span className="text-foreground">{call.ai_next_action}</span>
+              </p>
+            )}
+            {call.deal_stage && (
+              <p className="mt-1 text-xs text-muted-foreground">
                 ডিলের অবস্থা: <span className="text-foreground">{call.deal_stage.replace(/_/g, " ")}</span>
               </p>
             )}

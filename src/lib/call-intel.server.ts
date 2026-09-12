@@ -28,19 +28,51 @@ export async function transcribeAudio(bytes: Uint8Array, filename: string): Prom
   return result.transcript;
 }
 
+export const AI_LEAD_CATEGORIES = [
+  "hot_lead",
+  "follow_up",
+  "interested",
+  "not_interested",
+  "callback",
+  "no_answer",
+  "wrong_number",
+  "closed_converted",
+] as const;
+
 export type CallAnalysis = {
   summary_bullets: string[];
   sentiment: "positive" | "neutral" | "negative" | "critical";
   objections: string[];
   deal_stage: string;
+  intent: string;
+  lead_category: (typeof AI_LEAD_CATEGORIES)[number];
+  next_action: string;
   timestamped_transcript: string;
 };
 
 const ANALYSIS_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["summary_bullets", "sentiment", "objections", "deal_stage", "timestamped_transcript"],
+  required: [
+    "summary_bullets",
+    "sentiment",
+    "objections",
+    "deal_stage",
+    "intent",
+    "lead_category",
+    "next_action",
+    "timestamped_transcript",
+  ],
   properties: {
+    intent: {
+      type: "string",
+      description: "Customer's intent in one short Bangla sentence.",
+    },
+    lead_category: { type: "string", enum: [...AI_LEAD_CATEGORIES] },
+    next_action: {
+      type: "string",
+      description: "Recommended next step for the agent, one short Bangla sentence.",
+    },
     summary_bullets: {
       type: "array",
       items: { type: "string" },
@@ -79,7 +111,7 @@ export async function analyzeTranscript(
           content: [
             {
               type: "input_text",
-              text: "You analyse tele-sales phone calls for a Bangladeshi B2B sales team. Calls are in Bangla. Write summary_bullets, objections and deal_stage in Bangla, and keep the transcript in its original Bangla wording. Be concise and factual, never invent facts that are not in the transcript.",
+              text: "You analyse tele-sales phone calls for a Bangladeshi B2B sales team. Calls are in Bangla. Write summary_bullets, objections, deal_stage, intent and next_action in Bangla, and keep the transcript in its original Bangla wording. lead_category must be the single best-fitting category id for the call outcome. Be concise and factual, never invent facts that are not in the transcript.",
             },
           ],
         },
@@ -200,6 +232,9 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
         sentiment: analysis.sentiment,
         customer_objections: analysis.objections,
         deal_stage: analysis.deal_stage,
+        ai_intent: analysis.intent,
+        ai_lead_category: analysis.lead_category,
+        ai_next_action: analysis.next_action,
         sync_status: recording.is_two_sided ? "verified" : "uploaded",
       })
       .eq("id", recordingId);
