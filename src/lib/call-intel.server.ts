@@ -10,7 +10,20 @@ function apiKey(): string {
 
 export const AUDIO_BUCKET = "call-audio";
 
+/**
+ * Bangla-first transcription. Sarvam AI runs the speech-to-text when its key is
+ * configured; otherwise the built-in transcription model is used so calls never
+ * stall waiting on an external account.
+ */
 export async function transcribeAudio(bytes: Uint8Array, filename: string): Promise<string> {
+  const ext = filename.split(".").pop() ?? "mp3";
+  const { sarvamConfigured, sarvamTranscribe } = await import("@/lib/sarvam-stt.server");
+
+  if (sarvamConfigured()) {
+    const text = await sarvamTranscribe(bytes, filename, mimeFor(ext));
+    if (text) return text;
+  }
+
   const form = new FormData();
   form.append("model", "google/gemini-3.5-transcribe");
   form.append("file", new Blob([bytes as BlobPart]), filename);
@@ -80,7 +93,7 @@ export async function analyzeTranscript(
           content: [
             {
               type: "input_text",
-              text: "You analyse tele-sales phone calls for a B2B sales team. Be concise and factual, never invent facts that are not in the transcript.",
+              text: "You analyse tele-sales phone calls for a Bangladeshi B2B sales team. Calls are in Bangla. Write summary_bullets, objections and deal_stage in Bangla, and keep the transcript in its original Bangla wording. Be concise and factual, never invent facts that are not in the transcript.",
             },
           ],
         },
