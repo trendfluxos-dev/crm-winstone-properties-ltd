@@ -112,6 +112,14 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
           শিফট সামারি {scope === "hq" ? "(চলতি মাস)" : "(সম্পূর্ণ সংরক্ষণ)"}
         </h2>
         <span className="ml-auto text-xs text-muted-foreground">{rows.length}টি</span>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => downloadCsv(rows, `winstone-shift-summary-${new Date().toISOString().slice(0, 10)}.csv`)}
+        >
+          <Download className="size-4" />
+          সব এক্সপোর্ট
+        </Button>
         {scope === "it" && (
           <Button size="sm" variant="secondary" disabled={run.isPending} onClick={() => run.mutate()}>
             {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
@@ -121,7 +129,7 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
       </header>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        ১২:৫০ ও ৫:৩০-এ স্বয়ংক্রিয়ভাবে তৈরি হয় — এজেন্টদের দেওয়া আপডেট অনুযায়ী।
+        ১২:৫০, ১:৫০ ও ৫:৩০-এ স্বয়ংক্রিয়ভাবে তৈরি ও এক্সপোর্টের জন্য প্রস্তুত হয় — এজেন্টদের দেওয়া আপডেট অনুযায়ী।
         {scope === "hq" && " প্রতি মাসের ৫ তারিখে এখান থেকে সরে যায়, আইটি কনসোলে সব থাকে।"}
       </p>
 
