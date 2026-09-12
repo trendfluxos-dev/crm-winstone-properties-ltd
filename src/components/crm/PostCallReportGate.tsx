@@ -203,19 +203,30 @@ export function PostCallReportGate() {
           </div>
         </div>
 
-        {scheduleRequired ? (
-          <div className="space-y-1.5">
-            <Label htmlFor="follow-when" className="text-xs">
-              ফলো-আপের তারিখ ও সময় (বাধ্যতামূলক)
-            </Label>
-            <Input
-              id="follow-when"
-              type="datetime-local"
-              value={when}
-              onChange={(event) => setWhen(event.target.value)}
-            />
-          </div>
-        ) : null}
+        <div className="space-y-1.5">
+          <Label htmlFor="call-summary" className="text-xs">
+            কলের সারাংশ (বাধ্যতামূলক)
+          </Label>
+          <Textarea
+            id="call-summary"
+            rows={3}
+            value={summary}
+            onChange={(event) => setSummary(event.target.value)}
+            placeholder="কল-এ কী কথা হলো, সংক্ষেপে"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="follow-when" className="text-xs">
+            ফলো-আপের তারিখ ও সময় (বাধ্যতামূলক)
+          </Label>
+          <Input
+            id="follow-when"
+            type="datetime-local"
+            value={when}
+            onChange={(event) => setWhen(event.target.value)}
+          />
+        </div>
 
         {reasonRequired ? (
           <div className="space-y-1.5">
@@ -234,7 +245,7 @@ export function PostCallReportGate() {
 
         <div className="space-y-1.5">
           <Label htmlFor="note" className="text-xs">
-            নোট {noteRequired ? "(বাধ্যতামূলক)" : "(ঐচ্ছিক)"}
+            নোট (বাধ্যতামূলক)
           </Label>
           <Textarea
             id="note"
