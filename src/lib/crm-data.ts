@@ -145,12 +145,27 @@ export function buildAgentStats(
 
 export type TimelineEntry =
   | { kind: "call"; at: string; call: CallRecording }
-  | { kind: "message"; at: string; message: WhatsappMessage };
+  | { kind: "message"; at: string; message: WhatsappMessage }
+  | { kind: "event"; at: string; event: LeadEvent };
+
+/** Bengali labels for the automatic call lifecycle trail. */
+export const LEAD_EVENT_LABELS: Record<string, string> = {
+  call_started: "কল শুরু হয়েছে",
+  call_connected: "কল সংযুক্ত হয়েছে",
+  call_ended: "কল শেষ হয়েছে",
+  recording_saved: "রেকর্ডিং সার্ভারে জমা হয়েছে",
+  transcript_ready: "ট্রান্সক্রিপ্ট প্রস্তুত",
+  transcript_failed: "ট্রান্সক্রিপ্ট তৈরি হয়নি",
+  outcome_logged: "কলের ফল জমা হয়েছে",
+  whatsapp_message: "হোয়াটসঅ্যাপ কথা হয়েছে",
+  self_claimed: "এজেন্ট নিজে লিড নিয়েছেন",
+};
 
 export function buildTimeline(
   calls: CallRecording[],
   messages: WhatsappMessage[],
   leadId: string,
+  events: LeadEvent[] = [],
 ): TimelineEntry[] {
   const entries: TimelineEntry[] = [
     ...calls
@@ -159,6 +174,9 @@ export function buildTimeline(
     ...messages
       .filter((m) => m.lead_id === leadId)
       .map((message) => ({ kind: "message" as const, at: message.created_at, message })),
+    ...events
+      .filter((e) => e.lead_id === leadId)
+      .map((event) => ({ kind: "event" as const, at: event.created_at, event })),
   ];
   return entries.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
 }
