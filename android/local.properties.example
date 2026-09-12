@@ -1,0 +1,3 @@
+# Copy to local.properties before building.
+sdk.dir=/root/android-sdk
+INGEST_SECRET=put-the-ingest-secret-here
