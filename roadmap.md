@@ -32,4 +32,5 @@
 
 ## Open tasks
 - [ ] Verify Android app wiring end to end (call, WhatsApp, lead, AI Copilot)
-- [ ] Bengali UI for Executive HQ + IT Console (in progress)
+- [x] Bengali UI for Executive HQ + IT Console
+- [x] Agent dashboard (/desk): own stats, lead queue, call log, WhatsApp inbox, submit new lead
