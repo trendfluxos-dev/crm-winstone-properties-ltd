@@ -396,6 +396,12 @@ private fun StatusCards(state: DeskUiState) {
                 fontSize = 12.sp,
                 color = WinInkMuted,
             )
+            Text(
+                state.recordingStatus?.let { "CRM-এ জানানো হয়েছে: $it" }
+                    ?: "রেকর্ডিং ক্ষমতা CRM-এ পাঠানোর অপেক্ষায়",
+                fontSize = 12.sp,
+                color = if (state.recordingStatus != null) WinGreen else WinInkMuted,
+            )
         }
 
         WinCard {
