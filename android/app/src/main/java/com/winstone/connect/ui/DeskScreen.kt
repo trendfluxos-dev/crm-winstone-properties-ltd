@@ -44,11 +44,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.winstone.connect.data.CallRow
 import com.winstone.connect.data.Lead
-import com.winstone.connect.data.MessageRow
 import com.winstone.connect.data.shortTime
 import com.winstone.connect.data.statusLabel
 import com.winstone.connect.data.remote.WinstoneApi
+import androidx.compose.ui.platform.LocalContext
+import com.winstone.connect.data.AgentSession
 import com.winstone.connect.telephony.LiveCallLauncher
+import com.winstone.connect.telephony.RecordingCapabilityCheck
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.winstone.connect.ui.theme.WinAmber
@@ -58,7 +60,7 @@ import com.winstone.connect.ui.theme.WinGreenSoft
 import com.winstone.connect.ui.theme.WinInkMuted
 import com.winstone.connect.ui.theme.WinRed
 
-/** Mirrors the web CRM /desk screen: stats, lead queue, call log, WhatsApp inbox, AI copilot. */
+/** Mirrors the web CRM /desk screen: stats, lead queue, call log, device/sync status, AI copilot. */
 @Composable
 fun DeskScreen(activity: Activity, vm: DeskViewModel) {
     val state by vm.state.collectAsStateSafe()
@@ -67,7 +69,6 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
     val callScope = rememberCoroutineScope()
     var callBlocked by remember { mutableStateOf<String?>(null) }
     var showNewLead by remember { mutableStateOf(false) }
-    var waLead by remember { mutableStateOf<Lead?>(null) }
 
     LaunchedEffect(state.toast) {
         state.toast?.let {
@@ -116,7 +117,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
             StatsRow(state)
 
             TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.background) {
-                listOf("লিড", "কল লগ", "WhatsApp", "AI কোচ").forEachIndexed { i, label ->
+                listOf("লিড", "কল লগ", "স্টেটাস", "AI কোচ").forEachIndexed { i, label ->
                     Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label, fontSize = 13.sp) })
                 }
             }
@@ -150,7 +151,6 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                             }
                                         }
                                     },
-                                    onWhatsApp = { waLead = lead },
                                 )
                             }
                         }
@@ -160,9 +160,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                             items(calls) { CallCard(it, data?.leads.orEmpty()) }
                         }
                         2 -> {
-                            val msgs = data?.messages.orEmpty()
-                            if (msgs.isEmpty()) item { EmptyNote("কোনো WhatsApp বার্তা নেই।") }
-                            items(msgs) { MessageCard(it, data?.leads.orEmpty()) }
+                            item { StatusCards(state) }
                         }
                         else -> {
                             if (state.coachLoading) item { EmptyNote("AI কোচ তৈরি হচ্ছে…") }
@@ -190,16 +188,6 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
         )
     }
 
-    waLead?.let { lead ->
-        WhatsAppDialog(
-            lead = lead,
-            onDismiss = { waLead = null },
-            onSend = { text ->
-                LiveCallLauncher.whatsApp(activity, lead.id, lead.phone, text)
-                waLead = null
-            },
-        )
-    }
 }
 
 @Composable
@@ -230,7 +218,7 @@ private fun StatsRow(state: DeskUiState) {
         StatChip("কল", calls.size.toString(), Modifier.weight(1f))
         StatChip("কথা (মিনিট)", talkMinutes.toString(), Modifier.weight(1f))
         StatChip("অপেক্ষমাণ লিড", pending.toString(), Modifier.weight(1f))
-        StatChip("WhatsApp", state.data?.messages.orEmpty().size.toString(), Modifier.weight(1f))
+        StatChip("ফলো-আপ", state.data?.leads.orEmpty().count { it.status == "follow_up" }.toString(), Modifier.weight(1f))
     }
 }
 
@@ -261,7 +249,7 @@ private fun WinCard(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun LeadCard(lead: Lead, onCall: () -> Unit, onWhatsApp: () -> Unit) {
+private fun LeadCard(lead: Lead, onCall: () -> Unit) {
     WinCard {
         Text(lead.name, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         Text(
@@ -276,10 +264,10 @@ private fun LeadCard(lead: Lead, onCall: () -> Unit, onWhatsApp: () -> Unit) {
         )
         lead.notes?.let { Text(it, fontSize = 12.sp, color = WinInkMuted) }
         Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            androidx.compose.material3.Button(onClick = onCall) { Text("কল করুন") }
-            OutlinedButton(onClick = onWhatsApp) { Text("WhatsApp") }
-        }
+        androidx.compose.material3.Button(
+            onClick = onCall,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("কল করুন") }
     }
 }
 
@@ -304,21 +292,6 @@ private fun CallCard(call: CallRow, leads: List<Lead>) {
         )
         call.summary?.let { Text(it, fontSize = 13.sp) }
         call.sentiment?.let { Text("AI মনোভাব: $it", fontSize = 12.sp, color = WinInkMuted) }
-    }
-}
-
-@Composable
-private fun MessageCard(msg: MessageRow, leads: List<Lead>) {
-    val leadName = leads.firstOrNull { it.id == msg.leadId }?.name ?: "অজানা লিড"
-    WinCard {
-        Text(leadName, fontWeight = FontWeight.SemiBold)
-        Text(
-            if (msg.senderType == "agent") "এজেন্ট → কাস্টমার" else "কাস্টমার → এজেন্ট",
-            fontSize = 11.sp,
-            color = WinInkMuted,
-        )
-        Text(msg.content, fontSize = 13.sp)
-        Text(shortTime(msg.createdAt), fontSize = 11.sp, color = WinInkMuted)
     }
 }
 
@@ -362,16 +335,72 @@ private fun NewLeadDialog(onDismiss: () -> Unit, onSubmit: (String, String, Stri
     )
 }
 
+/**
+ * Device + sync status, so an agent can see at a glance whether this phone is
+ * bound, whether recording works on it, and whether anything is still waiting
+ * to reach the CRM.
+ */
 @Composable
-private fun WhatsAppDialog(lead: Lead, onDismiss: () -> Unit, onSend: (String) -> Unit) {
-    var text by remember { mutableStateOf("আসসালামু আলাইকুম ${lead.name}, Winstone থেকে বলছি।") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("WhatsApp বার্তা") },
-        text = { OutlinedTextField(text, { text = it }, label = { Text("বার্তা") }) },
-        confirmButton = {
-            TextButton(enabled = text.isNotBlank(), onClick = { onSend(text.trim()) }) { Text("পাঠান") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("বাতিল") } },
-    )
+private fun StatusCards(state: DeskUiState) {
+    val context = LocalContext.current
+    var capability by remember { mutableStateOf(RecordingCapabilityCheck.cachedOrNull()) }
+    LaunchedEffect(Unit) {
+        if (capability == null) capability = RecordingCapabilityCheck.check(context)
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        WinCard {
+            Text("ডিভাইস", fontWeight = FontWeight.Bold)
+            Text("এজেন্ট: ${state.data?.agentName ?: "—"}", fontSize = 13.sp)
+            Text("Employee ID: ${state.employeeId ?: "—"}", fontSize = 13.sp, color = WinInkMuted)
+            Text(
+                "ডিভাইস আইডি: ${AgentSession.deviceId ?: "—"}",
+                fontSize = 12.sp,
+                color = WinInkMuted,
+            )
+            Text(
+                if (AgentSession.deviceToken != null) "এই ফোনটি CRM-এ যুক্ত আছে"
+                else "এই ফোনটি এখনও যুক্ত হয়নি — আবার সাইন ইন করুন",
+                fontSize = 12.sp,
+                color = if (AgentSession.deviceToken != null) WinGreen else WinRed,
+            )
+        }
+
+        WinCard {
+            Text("সিঙ্ক", fontWeight = FontWeight.Bold)
+            Text(
+                if (state.error == null) "সার্ভারের সাথে সংযোগ ঠিক আছে"
+                else "সংযোগে সমস্যা: ${state.error}",
+                fontSize = 13.sp,
+                color = if (state.error == null) WinGreen else WinRed,
+            )
+            Text(
+                "শেষ আপডেট: ${state.lastSyncedAt ?: "—"}",
+                fontSize = 12.sp,
+                color = WinInkMuted,
+            )
+            Text(
+                "ইন্টারনেট না থাকলে কল, রেকর্ডিং ও রিপোর্ট ফোনে জমা থাকে এবং নেটওয়ার্ক ফিরলে নিজে থেকেই পাঠানো হয়।",
+                fontSize = 12.sp,
+                color = WinInkMuted,
+            )
+        }
+
+        WinCard {
+            Text("কল রেকর্ডিং", fontWeight = FontWeight.Bold)
+            Text(
+                capability?.label ?: "পরীক্ষা করা হচ্ছে…",
+                fontSize = 13.sp,
+                color = if (capability?.available == false) WinRed else WinGreen,
+            )
+            capability?.reason?.let {
+                Text(it, fontSize = 11.sp, color = WinInkMuted)
+            }
+            Text(
+                "রেকর্ডিং সম্ভব না হলেও কলের তথ্য ও বাধ্যতামূলক রিপোর্ট আগের মতোই CRM-এ যাবে।",
+                fontSize = 12.sp,
+                color = WinInkMuted,
+            )
+        }
+    }
 }
