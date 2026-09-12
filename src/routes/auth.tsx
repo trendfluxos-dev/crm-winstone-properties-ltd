@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveSignInEmail } from "@/lib/accounts.functions";
 import { ensureRegistered, saveSignupDraft } from "@/lib/session";
+
 
 const SearchSchema = z.object({
   role: z.enum(["agent", "coordinator"]).catch("agent"),
