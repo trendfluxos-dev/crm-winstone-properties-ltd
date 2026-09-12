@@ -92,6 +92,13 @@
       "when": 1789236420007,
       "tag": "0012_create_shift_summaries",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789236857471,
+      "tag": "0013_enable_cron_net",
+      "breakpoints": true
     }
   ]
 }
