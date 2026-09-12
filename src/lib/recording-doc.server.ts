@@ -174,8 +174,15 @@ type DocState = { docId?: string; updatedAt?: string };
 /**
  * Creates (or rewrites) the day's recording document and returns its link.
  * Re-running the same day replaces the content so repeats stay idempotent.
+ *
+ * @param folderId optional Google Drive folder where a new doc should be created.
+ * @param preferredDocId optional existing doc id to reuse (used by Drive backup).
  */
-export async function syncRecordingDoc(dateKey: string) {
+export async function syncRecordingDoc(
+  dateKey: string,
+  folderId?: string | null,
+  preferredDocId?: string,
+) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const configId = `recording_doc:${dateKey}`;
   const { data: config } = await supabaseAdmin
@@ -188,7 +195,7 @@ export async function syncRecordingDoc(dateKey: string) {
   const { lines } = await buildRecordingDocLines(dateKey);
   const text = docText(dateKey, lines);
 
-  let docId = state.docId;
+  let docId = preferredDocId ?? state.docId;
   if (docId) {
     // Confirm the remembered document still exists before rewriting it.
     try {
@@ -212,11 +219,16 @@ export async function syncRecordingDoc(dateKey: string) {
   }
 
   if (!docId) {
-    const created = (await docsFetch(`/documents`, {
-      method: "POST",
-      body: JSON.stringify({ title: `Winstone রেকর্ডিং · ${dateKey}` }),
-    })) as { documentId?: string } | null;
-    docId = created?.documentId;
+    if (folderId) {
+      const created = await createDriveDoc(`Winstone রেকর্ডিং · ${dateKey}`, folderId);
+      docId = created.id;
+    } else {
+      const created = (await docsFetch(`/documents`, {
+        method: "POST",
+        body: JSON.stringify({ title: `Winstone রেকর্ডিং · ${dateKey}` }),
+      })) as { documentId?: string } | null;
+      docId = created?.documentId;
+    }
     if (!docId) throw new Error("Google Docs ডকুমেন্ট তৈরি হয়নি");
   }
 
