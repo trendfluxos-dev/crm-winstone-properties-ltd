@@ -269,7 +269,18 @@ export async function submitCallReport(input: {
     payload: { leadId: report.lead_id, category },
   });
 
-  return { ok: true, followUpId };
+  // The spreadsheet is updated as soon as the agent's update is accepted.
+  // Best effort: a spreadsheet outage must never reject an accepted report.
+  let sheet: { appended: number } | null = null;
+  try {
+    const { syncReportsToSheet } = await import("@/lib/report-sheet.server");
+    const result = await syncReportsToSheet();
+    sheet = { appended: result.appended };
+  } catch (error) {
+    console.error("report sheet sync after submit failed:", error);
+  }
+
+  return { ok: true, followUpId, sheet };
 }
 
 /**

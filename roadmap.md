@@ -1,58 +1,17 @@
-# Roadmap
+# Winstone CRM roadmap
+
+## In progress (এই ধাপ)
+- [ ] IT Console: এজেন্ট অ্যাকাউন্ট টেবিল (নাম / Agent ID / ফোন / পাসওয়ার্ড — তৈরি ও এডিট)
+- [ ] Coordinator Deck: এজেন্ট নামের পাশে অ্যাসাইন করা লিড সংখ্যা + অ্যাসাইন + লিড ইমপোর্ট
+- [ ] রিপোর্ট জমা হলেই সাথে সাথে স্প্রেডশিট আপডেট
+- [ ] শিফট উইন্ডো ৯:০০–১২:৪৫ ও ১৪:০০–১৭:২০ (ঢাকা)
+- [ ] ১২:৫০ ও ১৭:৩০-এ শিফট সামারি → IT Console + Executive HQ
+- [ ] HQ-তে এক মাসের সামারি, প্রতি মাসের ৫ তারিখে HQ থেকে সরে যাবে; IT Console-এ সব সেভ
 
 ## Done
-- [x] Theme: white / green / cream palette across the web CRM (+ colors.xml for Android)
-- [x] Lead privacy: agents only ever receive their own leads and logs; authority PIN sees the floor
-- [x] Custom Reports screen (/reports): charts, filters, CSV export, + /api/public/reports/summary
-- [x] IT customizer (/system → Customizer): extra lead fields, floor rules, agent permissions
-      + /api/public/config/rules so the phone app reads the live rules (WinstoneRules.kt)
-- [x] AI Coach screen (/coach): per-agent summary, strengths, risks and next steps from real
-      call transcripts + WhatsApp logs, + /api/public/agent/coach for the phone app
-- [x] Ingest validation screen (/ingest): pipe health, data problems, payload tester
+- Phase 1/2: কল লাইফসাইকল, বাধ্যতামূলক রিপোর্ট লক, ডিভাইস অথ, রেকর্ডিং/AI পাইপলাইন
+- Phase 3 step 1: প্রতি লিডে AI প্রি-কল ব্রিফিং
 
-- [x] Android live call screen (LiveCallScreen.kt): in-call timer, REC chip, live notes,
-      mute/speaker, End call, outcome sheet -> presence + recording + outcome endpoints
-- [x] /api/public/agent/presence (live on-call radar) and /api/public/ingest/outcome
-
-- [x] Agent integrations (MCP) at /mcp: sign-in required (Google + consent page), email allow-list in
-      IT Console → Customizer; tools list_agents, list_leads, lead_history, floor_summary, create_lead
-
-- [x] Entry hall home (/) with four doors: Sales Agent, Coordinator Deck, Executive HQ, IT Console
-- [x] Agent + coordinator accounts (/auth, /desk) with approval-before-access, editable own profile
-- [x] Coordinator Deck owns lead assignment, balancing, CSV import and the full Agent Queue
-- [x] Executive HQ is read-only + Ask HQ panel (natural-language answers with charts)
-- [x] IT Console approves / rejects new accounts and keeps system configuration
-
-## Queued
-- [x] Android agent app: real Gradle project at android/ (Compose desk mirroring /desk: stats,
-      lead queue, call log, WhatsApp inbox, AI coach, new-lead form), SIM call + call recording,
-      WorkManager upload queue; APK built and served from the web CRM download button
-- [ ] Install APK on a real phone, place a live call, confirm recording + WhatsApp log land in the
-      agent workspace (needs the physical handset — cannot be done from this environment)
----ADD---
-
-## Open tasks
-- [ ] Verify Android app wiring end to end (call, WhatsApp, lead, AI Copilot)
-- [x] Bengali UI for Executive HQ + IT Console
-- [x] Agent dashboard (/desk): own stats, lead queue, call log, WhatsApp inbox, submit new lead
-- [x] Android app signs in with CRM email + password (/api/public/agent/login) — no employee id typing
-- [x] Agents self-assign: open (unassigned) leads list on /desk with one-tap claim, web only
-- [x] Real call-recording backend: multipart audio upload, storage + transcription + AI audit, retry endpoint (/api/public/ingest/reprocess) — verified end to end with real speech
-- [x] Per-device auth for the phone app (agent_devices + x-device-token); shared ingest secret removed from the APK
-- [x] Mandatory post-call report gate: 8 categories, conditional fields, DB-enforced next-call lock (verified with a live DB rule test)
-- [x] Follow-up calendar (day/week/month/agenda) + follow_up_events
-- [x] Report/recording/AI/device/alert panel on Executive HQ + IT Console; assignment history on Coordinator Deck
-- [x] Documentation CMS: /docs, /docs/:slug, /docs-admin, /docs-admin/editor/:slug (real persistence, draft→published)
-- [x] APK v1.4 (versionCode 5) built, uploaded, and registered in app_releases for in-app update notice
-- [ ] Physical handset run: install v1.4, place a live call, confirm report + recording + AI land in HQ (needs the phone)
-- [ ] Official Meta WhatsApp Business API: needs a business account + credentials before delivery can be claimed
-- [x] Desk tab "আমার রিপোর্ট": own call reports + upcoming/overdue follow-up work (web + phone data)
-- [x] Official Meta WhatsApp Cloud API send + webhook receive implemented (activates when credentials are saved)
-- [x] Recording → stored audio → transcription → AI summary verified again with real speech; duplicate upload de-duplicated, retry endpoint returns complete, durable pending/processing/completed/failed/not_available states
-- [x] Per-lead WhatsApp conversation panel with delivery/read status (sent/delivered/read/failed, stored per message, Meta status webhook applies updates; verified against the live database)
-- [x] Lead dashboard table (serial/name/address/phone/reference + Call beside each row, কল বাকি / আবার যোগাযোগ / কথা হয়েছে filters)
-- [x] AI lead import from CSV/TXT/Word/Excel/PDF/photo with reviewable rows, saved into the agent's own list (verified with xlsx + csv)
-- [x] leads.address / serial_no / reference_by columns (migration 0003)
-- [x] Provider-agnostic STT layer (Gemini primary, OpenAI fallback, Sarvam optional/off — geo-blocked in BD); CRM never blocks on Sarvam
-- [x] AI call analysis now returns intent + lead category + next action (ai_intent / ai_lead_category / ai_next_action, migration 0006) and shows them on the lead timeline
-- [ ] Ask Sarvam support (support@sarvam.ai) about Bangladesh access before enabling STT_SARVAM_ENABLED
+## Blocked
+- আসল ফোনে SIM কল + রেকর্ডিং পরীক্ষা (হ্যান্ডসেট দরকার)
+- Meta WhatsApp Business অনুমোদন

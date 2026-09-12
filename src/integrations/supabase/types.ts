@@ -932,6 +932,45 @@ export type Database = {
         }
         Relationships: []
       }
+      shift_summaries: {
+        Row: {
+          agents: Json
+          created_at: string
+          generated_at: string
+          hq_visible: boolean
+          id: string
+          shift_key: string
+          shift_label: string
+          totals: Json
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          agents?: Json
+          created_at?: string
+          generated_at?: string
+          hq_visible?: boolean
+          id?: string
+          shift_key: string
+          shift_label: string
+          totals?: Json
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          agents?: Json
+          created_at?: string
+          generated_at?: string
+          hq_visible?: boolean
+          id?: string
+          shift_key?: string
+          shift_label?: string
+          totals?: Json
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           buyer_email: string | null
