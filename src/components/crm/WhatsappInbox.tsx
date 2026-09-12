@@ -4,6 +4,7 @@ import { Loader2, MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { MyPhoneLine } from "@/components/crm/MyPhoneSetup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,6 +92,7 @@ export function WhatsappInbox() {
           </h2>
           <p className="text-xs text-muted-foreground sm:text-sm">
             {threads.length}টি কথা · ফোন থেকে আসা প্রতিটি মেসেজ নিজে নিজেই এখানে জমা হয়
+            <MyPhoneLine />
           </p>
         </div>
         <div className="relative w-full sm:w-64">

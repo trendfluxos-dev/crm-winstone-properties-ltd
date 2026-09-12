@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Pause, Play, RotateCcw, RotateCw } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { getAudioUrl } from "@/lib/crm.functions";
@@ -10,16 +10,34 @@ import { useAdminToken } from "@/lib/local-session";
 import { cn } from "@/lib/utils";
 
 const SPEEDS = [1, 1.25, 1.5, 2] as const;
+const BAR_COUNT = 72;
+const FLAT_BARS = Array.from({ length: BAR_COUNT }, () => 0.14);
 
-function waveformBars(seed: string, count = 72): number[] {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) % 100000;
-  return Array.from({ length: count }, (_, i) => {
-    hash = (hash * 1103515245 + 12345) % 2147483648;
-    const base = 0.25 + ((hash >>> 8) % 100) / 133;
-    const envelope = Math.sin((i / count) * Math.PI) * 0.5 + 0.5;
-    return Math.min(1, base * envelope + 0.12);
-  });
+/** Real loudness peaks read from the downloaded recording itself. */
+async function realWaveform(url: string): Promise<number[]> {
+  const response = await fetch(url);
+  const bytes = await response.arrayBuffer();
+  const AudioCtx =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) throw new Error("no audio context");
+  const ctx = new AudioCtx();
+  try {
+    const buffer = await ctx.decodeAudioData(bytes);
+    const channel = buffer.getChannelData(0);
+    const block = Math.max(1, Math.floor(channel.length / BAR_COUNT));
+    const peaks: number[] = [];
+    for (let i = 0; i < BAR_COUNT; i += 1) {
+      let sum = 0;
+      const start = i * block;
+      for (let j = 0; j < block; j += 1) sum += Math.abs(channel[start + j] ?? 0);
+      peaks.push(sum / block);
+    }
+    const loudest = Math.max(...peaks, 0.0001);
+    return peaks.map((peak) => Math.min(1, Math.max(0.08, peak / loudest)));
+  } finally {
+    void ctx.close();
+  }
 }
 
 export function CallAudioPlayer({
@@ -38,7 +56,7 @@ export function CallAudioPlayer({
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(fallbackDuration);
   const [speed, setSpeed] = useState<number>(1);
-  const bars = useMemo(() => waveformBars(recordingId), [recordingId]);
+  const [bars, setBars] = useState<number[]>(FLAT_BARS);
   const adminToken = useAdminToken();
 
   const resolveUrl = useServerFn(getAudioUrl);
@@ -48,15 +66,28 @@ export function CallAudioPlayer({
     isPending,
     isError,
   } = useMutation({
-    mutationFn: () => {
-      if (!adminToken) throw new Error("Authority access is required to play recordings");
-      return resolveUrl({ data: { adminToken, recordingId } });
-    },
+    mutationFn: () => resolveUrl({ data: { adminToken, recordingId } }),
   });
 
   useEffect(() => {
+    setBars(FLAT_BARS);
     loadUrl();
   }, [loadUrl, recordingId, adminToken]);
+
+  // Draw the scrubber from the actual audio, not a decorative pattern.
+  useEffect(() => {
+    const url = source?.url;
+    if (!url) return;
+    let live = true;
+    realWaveform(url)
+      .then((peaks) => {
+        if (live) setBars(peaks);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [source?.url]);
 
   useEffect(() => {
     if (!seekRequest || !audioRef.current) return;

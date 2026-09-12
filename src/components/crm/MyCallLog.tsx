@@ -2,6 +2,7 @@ import { PhoneCall } from "lucide-react";
 import { useMemo } from "react";
 
 import { CallEntry } from "@/components/crm/LeadDossier";
+import { MyPhoneLine } from "@/components/crm/MyPhoneSetup";
 import { useSnapshot } from "@/lib/crm-data";
 
 /** Every recording synced for the agent's own calls, newest first. */
@@ -24,6 +25,7 @@ export function MyCallLog() {
         </h2>
         <p className="text-xs text-muted-foreground sm:text-sm">
           {ordered.length}টি কল · ফোন থেকে অডিও আসার পর এআই সারমর্ম যোগ হয়
+          <MyPhoneLine />
         </p>
       </div>
 
