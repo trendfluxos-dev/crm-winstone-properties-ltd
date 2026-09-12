@@ -16,36 +16,63 @@ export type Database = {
     Tables: {
       agent_devices: {
         Row: {
+          android_version: string | null
           app_version: string | null
           created_at: string
           device_label: string | null
+          device_uid: string | null
           id: string
           last_seen_at: string
+          manufacturer: string | null
+          model: string | null
+          phone_number: string | null
           platform: string
           profile_id: string
+          recording_capable: boolean | null
+          recording_note: string | null
+          recording_tested: boolean
           revoked_at: string | null
+          status: string
           token_hash: string
         }
         Insert: {
+          android_version?: string | null
           app_version?: string | null
           created_at?: string
           device_label?: string | null
+          device_uid?: string | null
           id?: string
           last_seen_at?: string
+          manufacturer?: string | null
+          model?: string | null
+          phone_number?: string | null
           platform?: string
           profile_id: string
+          recording_capable?: boolean | null
+          recording_note?: string | null
+          recording_tested?: boolean
           revoked_at?: string | null
+          status?: string
           token_hash: string
         }
         Update: {
+          android_version?: string | null
           app_version?: string | null
           created_at?: string
           device_label?: string | null
+          device_uid?: string | null
           id?: string
           last_seen_at?: string
+          manufacturer?: string | null
+          model?: string | null
+          phone_number?: string | null
           platform?: string
           profile_id?: string
+          recording_capable?: boolean | null
+          recording_note?: string | null
+          recording_tested?: boolean
           revoked_at?: string | null
+          status?: string
           token_hash?: string
         }
         Relationships: [
@@ -147,9 +174,60 @@ export type Database = {
           },
         ]
       }
+      call_processing_jobs: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_type: string
+          provider: string | null
+          recording_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type: string
+          provider?: string | null
+          recording_id: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          provider?: string | null
+          recording_id?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_processing_jobs_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_recordings: {
         Row: {
           agent_id: string | null
+          agent_phone: string | null
           ai_intent: string | null
           ai_lead_category: string | null
           ai_next_action: string | null
@@ -157,20 +235,33 @@ export type Database = {
           analysis_attempts: number
           analysis_error: string | null
           analysis_status: string
+          answered_at: string | null
           audio_url: string | null
           call_direction: Database["public"]["Enums"]["call_direction"]
+          call_source: string
+          call_status: string
+          checksum: string | null
           client_upload_id: string | null
           created_at: string
           customer_objections: string[]
           deal_stage: string | null
           device_id: string | null
           duration_seconds: number
+          external_call_id: string | null
+          file_name: string | null
+          file_size_bytes: number | null
+          finished_at: string | null
           id: string
           is_two_sided: boolean
           lead_id: string | null
+          mime_type: string | null
           phone_number: string
           recorder_source: string | null
+          recording_status: string
           sentiment: Database["public"]["Enums"]["call_sentiment"] | null
+          started_at: string | null
+          storage_bucket: string | null
+          storage_path: string | null
           stt_duration_ms: number | null
           stt_error_code: string | null
           stt_error_message: string | null
@@ -183,9 +274,12 @@ export type Database = {
           sync_status: Database["public"]["Enums"]["sync_status"]
           transcribed_at: string | null
           transcription_text: string | null
+          updated_at: string
+          upload_status: string
         }
         Insert: {
           agent_id?: string | null
+          agent_phone?: string | null
           ai_intent?: string | null
           ai_lead_category?: string | null
           ai_next_action?: string | null
@@ -193,20 +287,33 @@ export type Database = {
           analysis_attempts?: number
           analysis_error?: string | null
           analysis_status?: string
+          answered_at?: string | null
           audio_url?: string | null
           call_direction?: Database["public"]["Enums"]["call_direction"]
+          call_source?: string
+          call_status?: string
+          checksum?: string | null
           client_upload_id?: string | null
           created_at?: string
           customer_objections?: string[]
           deal_stage?: string | null
           device_id?: string | null
           duration_seconds?: number
+          external_call_id?: string | null
+          file_name?: string | null
+          file_size_bytes?: number | null
+          finished_at?: string | null
           id?: string
           is_two_sided?: boolean
           lead_id?: string | null
+          mime_type?: string | null
           phone_number: string
           recorder_source?: string | null
+          recording_status?: string
           sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          started_at?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
           stt_duration_ms?: number | null
           stt_error_code?: string | null
           stt_error_message?: string | null
@@ -219,9 +326,12 @@ export type Database = {
           sync_status?: Database["public"]["Enums"]["sync_status"]
           transcribed_at?: string | null
           transcription_text?: string | null
+          updated_at?: string
+          upload_status?: string
         }
         Update: {
           agent_id?: string | null
+          agent_phone?: string | null
           ai_intent?: string | null
           ai_lead_category?: string | null
           ai_next_action?: string | null
@@ -229,20 +339,33 @@ export type Database = {
           analysis_attempts?: number
           analysis_error?: string | null
           analysis_status?: string
+          answered_at?: string | null
           audio_url?: string | null
           call_direction?: Database["public"]["Enums"]["call_direction"]
+          call_source?: string
+          call_status?: string
+          checksum?: string | null
           client_upload_id?: string | null
           created_at?: string
           customer_objections?: string[]
           deal_stage?: string | null
           device_id?: string | null
           duration_seconds?: number
+          external_call_id?: string | null
+          file_name?: string | null
+          file_size_bytes?: number | null
+          finished_at?: string | null
           id?: string
           is_two_sided?: boolean
           lead_id?: string | null
+          mime_type?: string | null
           phone_number?: string
           recorder_source?: string | null
+          recording_status?: string
           sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          started_at?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
           stt_duration_ms?: number | null
           stt_error_code?: string | null
           stt_error_message?: string | null
@@ -255,6 +378,8 @@ export type Database = {
           sync_status?: Database["public"]["Enums"]["sync_status"]
           transcribed_at?: string | null
           transcription_text?: string | null
+          updated_at?: string
+          upload_status?: string
         }
         Relationships: [
           {
@@ -860,6 +985,69 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      sync_events: {
+        Row: {
+          agent_id: string | null
+          created_at: string
+          device_id: string | null
+          entity_id: string | null
+          entity_type: string
+          error_message: string | null
+          event_type: string
+          id: string
+          idempotency_key: string | null
+          payload: Json
+          processed_at: string | null
+          retry_count: number
+          status: string
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string
+          device_id?: string | null
+          entity_id?: string | null
+          entity_type: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          idempotency_key?: string | null
+          payload?: Json
+          processed_at?: string | null
+          retry_count?: number
+          status?: string
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string
+          device_id?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          idempotency_key?: string | null
+          payload?: Json
+          processed_at?: string | null
+          retry_count?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sync_events_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "agent_devices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_alerts: {
         Row: {
