@@ -148,11 +148,13 @@ object WinstoneApi {
         employeeId: String,
         presence: String,                      // on_call | idle | offline
         callStartedAt: String? = null,         // ISO-8601, defaults to now server-side
+        leadId: String? = null,                // stamps the lead timeline (Started / Ended)
     ): JSONObject = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("employee_id", employeeId)
             put("presence", presence)
             callStartedAt?.let { put("call_started_at", it) }
+            leadId?.let { put("lead_id", it) }
         }
         post("/api/public/agent/presence", payload)
     }
