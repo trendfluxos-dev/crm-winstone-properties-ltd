@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
- * Scheduled shift summary: runs at 12:50 and 17:30 Dhaka time, writes the
+ * Scheduled shift summary: runs at 12:50, 13:50 and 17:30 Dhaka time, writes the
  * summary of the window that just closed and clears HQ's month on the 5th.
  * Caller must present the cron secret.
  */
