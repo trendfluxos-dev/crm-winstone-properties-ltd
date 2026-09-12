@@ -75,7 +75,7 @@ export function TwilioStatusCard() {
   );
 }
 
-function StatusRow({ label, ok, value }: { label: string; ok: boolean; value?: string }) {
+function StatusRow({ label, ok, value }: { label: string; ok: boolean; value?: string | undefined }) {
   return (
     <div className="flex items-center justify-between gap-2 rounded-md border border-border px-2.5 py-1.5">
       <span className="text-muted-foreground">{label}</span>
