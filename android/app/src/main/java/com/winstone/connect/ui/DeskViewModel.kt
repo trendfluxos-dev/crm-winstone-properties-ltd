@@ -42,16 +42,26 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun signIn(typed: String) {
-        val id = typed.trim().uppercase()
-        if (id.length < 4) {
-            _state.value = _state.value.copy(error = "সঠিক এজেন্ট আইডি দিন (যেমন WIN2601)")
+    fun signIn(email: String, password: String) {
+        if (!email.contains("@") || password.length < 6) {
+            _state.value = _state.value.copy(error = "সঠিক ইমেইল ও পাসওয়ার্ড দিন")
             return
         }
         viewModelScope.launch {
-            AgentSession.saveEmployeeId(app, id)
-            _state.value = _state.value.copy(employeeId = id, error = null)
-            refresh()
+            _state.value = _state.value.copy(loading = true, error = null)
+            runCatching { WinstoneAgentApi.signIn(email, password) }
+                .onSuccess { me ->
+                    AgentSession.saveEmployeeId(app, me.employeeId)
+                    AgentSession.cacheAgent(app, me.agentId, me.name)
+                    _state.value = _state.value.copy(employeeId = me.employeeId, error = null)
+                    refresh()
+                }
+                .onFailure { e ->
+                    _state.value = _state.value.copy(
+                        loading = false,
+                        error = e.message ?: "সাইন ইন করা যায়নি",
+                    )
+                }
         }
     }
 

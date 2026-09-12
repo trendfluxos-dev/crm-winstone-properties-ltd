@@ -25,7 +25,11 @@ class MainActivity : ComponentActivity() {
                 val vm: DeskViewModel = viewModel { DeskViewModel(application) }
                 val state by vm.state.collectAsStateSafe()
                 if (state.employeeId.isNullOrBlank()) {
-                    SignInScreen(error = state.error, onSignIn = vm::signIn)
+                    SignInScreen(
+                        error = state.error,
+                        loading = state.loading,
+                        onSignIn = vm::signIn,
+                    )
                 } else {
                     DeskScreen(activity = this, vm = vm)
                 }
