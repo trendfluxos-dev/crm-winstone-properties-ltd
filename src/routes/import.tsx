@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEMO_CSV, parseCsv, toLeadRows, type CsvLeadRow } from "@/lib/csv-leads";
 import { importLeads } from "@/lib/crm.functions";
+import { previewSheetLeads } from "@/lib/lead-sheet.functions";
 import { getAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/import")({
