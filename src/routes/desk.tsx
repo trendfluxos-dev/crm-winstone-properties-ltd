@@ -180,20 +180,27 @@ function DeskPage() {
               নিজের লিড, কল, হোয়াটসঅ্যাপ কথা আর নতুন লিড — সব এক জায়গায়।
             </p>
           </div>
-          <NewLeadDialog />
+          <div className="flex flex-wrap gap-2">
+            <LeadImportDialog />
+            <NewLeadDialog />
+          </div>
         </div>
 
         <DeskStats />
 
         <Tabs defaultValue="leads" className="space-y-4">
           <TabsList className="flex w-full flex-wrap">
-            <TabsTrigger value="leads">লিড তালিকা</TabsTrigger>
+            <TabsTrigger value="leads">লিড ড্যাশবোর্ড</TabsTrigger>
+            <TabsTrigger value="queue">কার্ড ভিউ</TabsTrigger>
             <TabsTrigger value="calls">কল রেকর্ড</TabsTrigger>
             <TabsTrigger value="whatsapp">হোয়াটসঅ্যাপ</TabsTrigger>
             <TabsTrigger value="calendar">ফলো-আপ</TabsTrigger>
             <TabsTrigger value="reports">আমার রিপোর্ট</TabsTrigger>
           </TabsList>
           <TabsContent value="leads" className="space-y-4">
+            <LeadTable />
+          </TabsContent>
+          <TabsContent value="queue" className="space-y-4">
             <OpenLeadsCard />
             <QueueBoard
               title={scope === "agent" ? "আমার লিড" : "ফ্লোর কিউ"}
