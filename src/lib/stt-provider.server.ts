@@ -15,7 +15,13 @@
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const GEMINI_STT_MODEL = "google/gemini-3.5-transcribe";
 
-export type SttProviderName = "gemini" | "sarvam";
+export type SttProviderName = "gemini" | "openai" | "sarvam";
+
+/** Gateway-served models per provider; both work from Bangladesh. */
+const GATEWAY_MODELS: Record<"gemini" | "openai", string> = {
+  gemini: "google/gemini-3.5-transcribe",
+  openai: "openai/gpt-4o-transcribe",
+};
 
 export type SttResult = {
   transcript: string;
