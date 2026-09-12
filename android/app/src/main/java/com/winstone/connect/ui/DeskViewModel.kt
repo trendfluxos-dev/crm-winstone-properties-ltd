@@ -34,6 +34,10 @@ data class DeskUiState(
     val twilioCallingLeadId: String? = null,
     /** Honest recording capability of this phone, as reported to the CRM. */
     val recordingStatus: String? = null,
+    /** two_sided / mic_only / unavailable — drives the per-lead recording badge. */
+    val recordingMode: String? = null,
+    /** Technical reason behind the verdict, shown when recording is blocked. */
+    val recordingReason: String? = null,
 )
 
 class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -108,6 +112,12 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
             com.winstone.connect.telephony.RecordingSupport.AGENT_SIDE_ONLY -> "mic_only"
             com.winstone.connect.telephony.RecordingSupport.UNAVAILABLE -> "unavailable"
         }
+        // The lead list must show the real verdict even when the CRM is offline,
+        // so the local state is updated before the report is attempted.
+        _state.value = _state.value.copy(
+            recordingMode = mode,
+            recordingReason = capability.reason,
+        )
         if (mode == lastCapability && !stale) return
         runCatching { WinstoneAgentApi.reportRecordingCapability(mode, capability.reason) }
             .onSuccess {

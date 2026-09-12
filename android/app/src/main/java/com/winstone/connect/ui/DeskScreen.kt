@@ -138,6 +138,8 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                 LeadCard(
                                     lead = lead,
                                     twilioBusy = state.twilioCallingLeadId == lead.id,
+                                    recordingMode = state.recordingMode,
+                                    recordingReason = state.recordingReason,
                                     onCall = {
                                         // The server decides: an unfinished post-call
                                         // report blocks the next outbound call.
@@ -254,9 +256,25 @@ private fun WinCard(content: @Composable () -> Unit) {
 private fun LeadCard(
     lead: Lead,
     twilioBusy: Boolean,
+    recordingMode: String?,
+    recordingReason: String?,
     onCall: () -> Unit,
     onTwilioCall: () -> Unit,
 ) {
+    // Honest per-lead recording state, straight from this phone's own probe.
+    val blocked = recordingMode == "unavailable"
+    val recordingLine = when (recordingMode) {
+        "two_sided" -> "রেকর্ডিং: দুই পাশের কথা জমা হবে"
+        "mic_only" -> "রেকর্ডিং: শুধু এজেন্টের পাশ জমা হবে"
+        "unavailable" -> "এই ফোনে রেকর্ডিং সম্ভব নয় — রেকর্ড কল বন্ধ"
+        else -> "রেকর্ডিং ক্ষমতা যাচাই হচ্ছে…"
+    }
+    val recordingColor = when (recordingMode) {
+        "two_sided" -> WinGreen
+        "mic_only" -> WinAmber
+        "unavailable" -> WinAmber
+        else -> WinInkMuted
+    }
     WinCard {
         Text(lead.name, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         Text(
@@ -270,17 +288,30 @@ private fun LeadCard(
             fontSize = 12.sp,
         )
         lead.notes?.let { Text(it, fontSize = 12.sp, color = WinInkMuted) }
+        Spacer(Modifier.height(6.dp))
+        Text(recordingLine, fontSize = 12.sp, color = recordingColor)
+        if (blocked) {
+            recordingReason?.let { Text(it, fontSize = 10.sp, color = WinInkMuted) }
+        }
         Spacer(Modifier.height(10.dp))
         androidx.compose.material3.Button(
             onClick = onCall,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("কল করুন") }
+        ) { Text(if (blocked) "কল করুন (রেকর্ডিং ছাড়া)" else "কল করুন") }
         Spacer(Modifier.height(6.dp))
         OutlinedButton(
             onClick = onTwilioCall,
-            enabled = !twilioBusy,
+            enabled = !twilioBusy && !blocked,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(if (twilioBusy) "Twilio কল শুরু হচ্ছে…" else "Twilio কল (রেকর্ড হবে)") }
+        ) {
+            Text(
+                when {
+                    blocked -> "রেকর্ড কল বন্ধ"
+                    twilioBusy -> "Twilio কল শুরু হচ্ছে…"
+                    else -> "Twilio কল (রেকর্ড হবে)"
+                },
+            )
+        }
     }
 }
 
