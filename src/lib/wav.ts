@@ -34,7 +34,9 @@ export function encodeWav(chunks: Float32Array[], inputSampleRate: number): Blob
 
   let offset = 44;
   for (let i = 0; i < mono.length; i++) {
-    const s = Math.max(-1, Math.min(1, mono[i]));
+    const raw = mono[i];
+    if (raw === undefined) continue;
+    const s = Math.max(-1, Math.min(1, raw));
     view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
     offset += bytesPerSample;
   }
