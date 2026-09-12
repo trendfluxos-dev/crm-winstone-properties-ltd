@@ -10,6 +10,7 @@ import com.winstone.connect.data.parseLeads
 import com.winstone.connect.data.parseMessages
 import com.winstone.connect.data.remote.WinstoneAgentApi
 import com.winstone.connect.data.remote.WinstoneApi
+import com.winstone.connect.data.sync.SyncStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,10 @@ data class DeskUiState(
     val coachLoading: Boolean = false,
     /** Local time of the last successful CRM sync, for the status screen. */
     val lastSyncedAt: String? = null,
+    /** Items still waiting on this phone / given up on, plus the last error. */
+    val sync: SyncStatus.Snapshot = SyncStatus.Snapshot(),
+    /** Set when the CRM refused this phone (device access removed by IT). */
+    val deviceRevoked: Boolean = false,
 )
 
 class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
