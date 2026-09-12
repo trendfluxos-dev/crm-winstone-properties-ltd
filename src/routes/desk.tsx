@@ -7,6 +7,7 @@ import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
 import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
+import { OpenLeadsCard } from "@/components/crm/OpenLeadsCard";
 import { QueueBoard } from "@/components/crm/QueueBoard";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsappInbox } from "@/components/crm/WhatsappInbox";
@@ -186,7 +187,8 @@ function DeskPage() {
             <TabsTrigger value="calls">কল রেকর্ড</TabsTrigger>
             <TabsTrigger value="whatsapp">হোয়াটসঅ্যাপ</TabsTrigger>
           </TabsList>
-          <TabsContent value="leads">
+          <TabsContent value="leads" className="space-y-4">
+            <OpenLeadsCard />
             <QueueBoard
               title={scope === "agent" ? "আমার লিড" : "ফ্লোর কিউ"}
               canSeeAllAgents={scope !== "agent"}

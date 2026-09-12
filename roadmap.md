@@ -35,3 +35,5 @@
 - [ ] Verify Android app wiring end to end (call, WhatsApp, lead, AI Copilot)
 - [x] Bengali UI for Executive HQ + IT Console
 - [x] Agent dashboard (/desk): own stats, lead queue, call log, WhatsApp inbox, submit new lead
+- [x] Android app signs in with CRM email + password (/api/public/agent/login) — no employee id typing
+- [x] Agents self-assign: open (unassigned) leads list on /desk with one-tap claim, web only
