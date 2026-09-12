@@ -22,6 +22,11 @@ import { Button } from "@/components/ui/button";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { CallRecording, Lead, LeadEvent, Profile, TimelineEntry, WhatsappMessage } from "@/lib/crm-data";
+import {
+  whatsappStatusLabel,
+  whatsappStatusTicks,
+  whatsappStatusTone,
+} from "@/lib/whatsapp-status";
 import { LEAD_EVENT_LABELS } from "@/lib/crm-data";
 import { reanalyzeRecording } from "@/lib/crm.functions";
 import { getAdminToken } from "@/lib/local-session";
