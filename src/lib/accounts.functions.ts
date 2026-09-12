@@ -229,3 +229,191 @@ export const decideAccount = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+const StaffRole = z.enum(["agent", "coordinator"]);
+
+function fallbackEmail(employeeId: string | null, phone: string | null) {
+  const local = (employeeId || phone || "").replace(/[^A-Za-z0-9]/g, "").toLowerCase();
+  if (!local) return null;
+  return `${local}@winstonebd.com`;
+}
+
+/** Staff roster for the IT Console table: name, Agent ID, phone, live status. */
+export const listStaffAccounts = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
+    requireAuthority(await resolveCaller(data.adminToken ?? null));
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [staffRes, leadsRes] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("id, user_id, name, email, phone, employee_id, role, is_active, approval_status, created_at")
+        .order("employee_id", { ascending: true }),
+      supabaseAdmin.from("leads").select("assigned_to"),
+    ]);
+    if (staffRes.error) throw new Error(staffRes.error.message);
+    if (leadsRes.error) throw new Error(leadsRes.error.message);
+
+    const assigned = new Map<string, number>();
+    for (const lead of leadsRes.data ?? []) {
+      if (lead.assigned_to) assigned.set(lead.assigned_to, (assigned.get(lead.assigned_to) ?? 0) + 1);
+    }
+    return {
+      staff: (staffRes.data ?? []).map((row) => ({
+        ...row,
+        assignedLeads: assigned.get(row.id) ?? 0,
+      })),
+    };
+  });
+
+/**
+ * Opens a live desk account straight from the IT Console: creates the sign-in
+ * user, then an approved active profile. The agent signs in with the phone
+ * number or Agent ID plus this password.
+ */
+export const createStaffAccount = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        adminToken: z.string().nullable().optional(),
+        name: z.string().trim().min(2).max(80),
+        employeeId: z.string().trim().min(2).max(24),
+        phone: z.string().trim().min(6).max(24),
+        password: z.string().min(6).max(72),
+        email: z.string().trim().email().optional().nullable(),
+        role: StaffRole.default("agent"),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    requireAuthority(caller);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const employeeId = data.employeeId.toUpperCase().replace(/\s+/g, "");
+    const email = data.email?.trim() || fallbackEmail(employeeId, data.phone);
+    if (!email) throw new Error("ইমেইল বা Agent ID দরকার");
+
+    const { data: clash } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("employee_id", employeeId)
+      .maybeSingle();
+    if (clash) throw new Error("এই Agent ID আগেই আছে");
+
+    const created = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: { name: data.name, employee_id: employeeId },
+    });
+    if (created.error || !created.data.user) {
+      throw new Error(created.error?.message ?? "সাইন-ইন অ্যাকাউন্ট তৈরি হয়নি");
+    }
+
+    const role = data.role === "coordinator" ? ("team_leader" as const) : ("agent" as const);
+    const { data: profile, error } = await supabaseAdmin
+      .from("profiles")
+      .insert({
+        user_id: created.data.user.id,
+        name: data.name,
+        phone: data.phone,
+        email,
+        employee_id: employeeId,
+        role,
+        requested_role: role,
+        approval_status: "approved",
+        is_active: true,
+      })
+      .select("id")
+      .single();
+    if (error) {
+      await supabaseAdmin.auth.admin.deleteUser(created.data.user.id);
+      throw new Error(error.message);
+    }
+
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "agent_account_created",
+      entityType: "profile",
+      entityId: profile.id,
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.name ?? "Authority PIN",
+      metadata: { employeeId, role },
+    });
+
+    return { ok: true, profileId: profile.id, email };
+  });
+
+/** Edit name / Agent ID / phone / password, or deactivate a desk account. */
+export const updateStaffAccount = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        adminToken: z.string().nullable().optional(),
+        profileId: z.string().uuid(),
+        name: z.string().trim().min(2).max(80).optional(),
+        employeeId: z.string().trim().min(2).max(24).optional(),
+        phone: z.string().trim().min(6).max(24).optional(),
+        password: z.string().min(6).max(72).optional(),
+        isActive: z.boolean().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    requireAuthority(caller);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: profile, error: readError } = await supabaseAdmin
+      .from("profiles")
+      .select("id, user_id")
+      .eq("id", data.profileId)
+      .maybeSingle();
+    if (readError) throw new Error(readError.message);
+    if (!profile) throw new Error("অ্যাকাউন্ট পাওয়া যায়নি");
+
+    const patch: {
+      name?: string;
+      employee_id?: string;
+      phone?: string;
+      is_active?: boolean;
+    } = {};
+    if (data.name) patch["name"] = data.name;
+    if (data.employeeId) patch["employee_id"] = data.employeeId.toUpperCase().replace(/\s+/g, "");
+    if (data.phone) patch["phone"] = data.phone;
+    if (typeof data.isActive === "boolean") patch["is_active"] = data.isActive;
+
+    if (Object.keys(patch).length) {
+      const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", profile.id);
+      if (error) throw new Error(error.message);
+    }
+
+    if (data.password) {
+      if (!profile.user_id) throw new Error("এই প্রোফাইলে সাইন-ইন অ্যাকাউন্ট নেই");
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(profile.user_id, {
+        password: data.password,
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "agent_account_updated",
+      entityType: "profile",
+      entityId: profile.id,
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.name ?? "Authority PIN",
+      metadata: {
+        fields: Object.keys(patch),
+        passwordChanged: Boolean(data.password),
+      },
+    });
+
+    return { ok: true };
+  });

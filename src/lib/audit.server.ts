@@ -23,7 +23,11 @@ export type AuditAction =
   | "device_revoked"
   | "recording_reprocessed"
   | "alert_acknowledged"
-  | "report_sheet_sync";
+  | "report_sheet_sync"
+  | "agent_account_created"
+  | "agent_account_updated"
+  | "shift_summary_generated"
+  | "shift_summary_hq_cleared";
 
 export async function logAudit(input: {
   action: AuditAction;

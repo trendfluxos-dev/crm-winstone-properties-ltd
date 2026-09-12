@@ -6,6 +6,8 @@ import { AccountApprovals } from "@/components/crm/AccountApprovals";
 import { ApkInstallCard } from "@/components/crm/ApkInstallCard";
 import { AuditTrail } from "@/components/crm/AuditTrail";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
+import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
+import { StaffAccountsTable } from "@/components/crm/StaffAccountsTable";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
@@ -107,6 +109,10 @@ function SystemBoard() {
       <CallOpsPanel showControls />
 
       <ReportSheetPanel />
+
+      <StaffAccountsTable />
+
+      <ShiftSummaryPanel scope="it" />
 
       <AccountApprovals />
 

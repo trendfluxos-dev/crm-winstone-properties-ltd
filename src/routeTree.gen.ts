@@ -39,6 +39,7 @@ import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/a
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
+import { Route as ApiPublicHooksShiftSummaryRouteImport } from './routes/api/public/hooks/shift-summary'
 import { Route as ApiPublicIngestAnalyzeRouteImport } from './routes/api/public/ingest/analyze'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
@@ -200,6 +201,12 @@ const ApiPublicDownloadApkRoute = ApiPublicDownloadApkRouteImport.update({
   path: '/api/public/download/apk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksShiftSummaryRoute =
+  ApiPublicHooksShiftSummaryRouteImport.update({
+    id: '/api/public/hooks/shift-summary',
+    path: '/api/public/hooks/shift-summary',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicIngestAnalyzeRoute = ApiPublicIngestAnalyzeRouteImport.update({
   id: '/api/public/ingest/analyze',
   path: '/api/public/ingest/analyze',
@@ -280,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
   '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
@@ -321,6 +329,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
   '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
@@ -363,6 +372,7 @@ export interface FileRoutesById {
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
   '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
@@ -406,6 +416,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/hooks/shift-summary'
     | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
@@ -447,6 +458,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/hooks/shift-summary'
     | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
@@ -488,6 +500,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/hooks/shift-summary'
     | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
@@ -530,6 +543,7 @@ export interface RootRouteChildren {
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
+  ApiPublicHooksShiftSummaryRoute: typeof ApiPublicHooksShiftSummaryRoute
   ApiPublicIngestAnalyzeRoute: typeof ApiPublicIngestAnalyzeRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
@@ -753,6 +767,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDownloadApkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/shift-summary': {
+      id: '/api/public/hooks/shift-summary'
+      path: '/api/public/hooks/shift-summary'
+      fullPath: '/api/public/hooks/shift-summary'
+      preLoaderRoute: typeof ApiPublicHooksShiftSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ingest/analyze': {
       id: '/api/public/ingest/analyze'
       path: '/api/public/ingest/analyze'
@@ -851,6 +872,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
+  ApiPublicHooksShiftSummaryRoute: ApiPublicHooksShiftSummaryRoute,
   ApiPublicIngestAnalyzeRoute: ApiPublicIngestAnalyzeRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
