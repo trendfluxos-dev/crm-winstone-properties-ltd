@@ -28,19 +28,51 @@ export async function transcribeAudio(bytes: Uint8Array, filename: string): Prom
   return result.transcript;
 }
 
+export const AI_LEAD_CATEGORIES = [
+  "hot_lead",
+  "follow_up",
+  "interested",
+  "not_interested",
+  "callback",
+  "no_answer",
+  "wrong_number",
+  "closed_converted",
+] as const;
+
 export type CallAnalysis = {
   summary_bullets: string[];
   sentiment: "positive" | "neutral" | "negative" | "critical";
   objections: string[];
   deal_stage: string;
+  intent: string;
+  lead_category: (typeof AI_LEAD_CATEGORIES)[number];
+  next_action: string;
   timestamped_transcript: string;
 };
 
 const ANALYSIS_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["summary_bullets", "sentiment", "objections", "deal_stage", "timestamped_transcript"],
+  required: [
+    "summary_bullets",
+    "sentiment",
+    "objections",
+    "deal_stage",
+    "intent",
+    "lead_category",
+    "next_action",
+    "timestamped_transcript",
+  ],
   properties: {
+    intent: {
+      type: "string",
+      description: "Customer's intent in one short Bangla sentence.",
+    },
+    lead_category: { type: "string", enum: [...AI_LEAD_CATEGORIES] },
+    next_action: {
+      type: "string",
+      description: "Recommended next step for the agent, one short Bangla sentence.",
+    },
     summary_bullets: {
       type: "array",
       items: { type: "string" },
