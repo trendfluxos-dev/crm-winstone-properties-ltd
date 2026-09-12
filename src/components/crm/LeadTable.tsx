@@ -188,10 +188,10 @@ export function LeadTable() {
 
       <LeadDossier
         lead={openLead}
-        agent={profiles.find((p) => p.id === openLead?.assigned_to)}
-        timeline={openLead ? buildTimeline(openLead.id, calls, messages, events) : []}
-        verifiedCall={openLead ? latestVerifiedCall(openLead.id, calls) : undefined}
-        onClose={() => setOpenLeadId(null)}
+        agents={profiles}
+        timeline={openLead ? buildTimeline(calls, messages, openLead.id, events) : []}
+        open={openLeadId !== null}
+        onOpenChange={(next) => !next && setOpenLeadId(null)}
       />
     </section>
   );
