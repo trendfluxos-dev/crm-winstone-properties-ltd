@@ -17,6 +17,7 @@ import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DocsAdminRouteImport } from './routes/docs-admin'
 import { Route as HqRouteImport } from './routes/hq'
+import { Route as ImportRouteImport } from './routes/import'
 import { Route as IngestRouteImport } from './routes/ingest'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -84,6 +85,11 @@ const DocsAdminRoute = DocsAdminRouteImport.update({
 const HqRoute = HqRouteImport.update({
   id: '/hq',
   path: '/hq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IngestRoute = IngestRouteImport.update({
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
   '/hq': typeof HqRoute
+  '/import': typeof ImportRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
   '/hq': typeof HqRoute
+  '/import': typeof ImportRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
   '/hq': typeof HqRoute
+  '/import': typeof ImportRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/docs-admin'
     | '/hq'
+    | '/import'
     | '/ingest'
     | '/mcp'
     | '/privacy'
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/docs-admin'
     | '/hq'
+    | '/import'
     | '/ingest'
     | '/mcp'
     | '/privacy'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/docs-admin'
     | '/hq'
+    | '/import'
     | '/ingest'
     | '/mcp'
     | '/privacy'
@@ -472,6 +484,7 @@ export interface RootRouteChildren {
   DocsRoute: typeof DocsRoute
   DocsAdminRoute: typeof DocsAdminRoute
   HqRoute: typeof HqRoute
+  ImportRoute: typeof ImportRoute
   IngestRoute: typeof IngestRoute
   McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -558,6 +571,13 @@ declare module '@tanstack/react-router' {
       path: '/hq'
       fullPath: '/hq'
       preLoaderRoute: typeof HqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ingest': {
@@ -768,6 +788,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsRoute: DocsRoute,
   DocsAdminRoute: DocsAdminRoute,
   HqRoute: HqRoute,
+  ImportRoute: ImportRoute,
   IngestRoute: IngestRoute,
   McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
