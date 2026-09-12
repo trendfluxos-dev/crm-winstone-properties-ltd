@@ -40,12 +40,17 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch {
             AgentSession.load(app)
+            SyncStatus.load(app)
             _state.value = _state.value.copy(employeeId = AgentSession.employeeId)
             if (AgentSession.isSignedIn()) refresh()
             while (true) {
                 delay(20_000)
                 if (AgentSession.isSignedIn()) refresh(silent = true)
             }
+        }
+        // Live pending / failed / last-error counters for the status screen.
+        viewModelScope.launch {
+            SyncStatus.state.collect { snap -> _state.value = _state.value.copy(sync = snap) }
         }
     }
 
