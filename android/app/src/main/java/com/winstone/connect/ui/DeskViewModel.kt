@@ -44,10 +44,16 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
             AgentSession.load(app)
             SyncStatus.load(app)
             _state.value = _state.value.copy(employeeId = AgentSession.employeeId)
-            if (AgentSession.isSignedIn()) refresh()
+            if (AgentSession.isSignedIn()) {
+                refresh()
+                reportRecordingCapability()
+            }
             while (true) {
                 delay(20_000)
-                if (AgentSession.isSignedIn()) refresh(silent = true)
+                if (AgentSession.isSignedIn()) {
+                    refresh(silent = true)
+                    reportRecordingCapability()
+                }
             }
         }
         // Live pending / failed / last-error counters for the status screen.
