@@ -37,7 +37,9 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         .select("id, agent_id, status, scheduled_at, reminder_minutes"),
       supabaseAdmin
         .from("agent_devices")
-        .select("id, profile_id, device_label, app_version, last_seen_at, revoked_at"),
+        .select(
+          "id, profile_id, device_label, app_version, last_seen_at, revoked_at, model, manufacturer, android_version, recording_mode, recording_capable, recording_tested, recording_note, recording_checked_at",
+        ),
       supabaseAdmin
         .from("system_alerts")
         .select("*")
