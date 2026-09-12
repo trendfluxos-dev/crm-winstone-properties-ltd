@@ -54,6 +54,137 @@ async function twilioFetch(path: string, init?: RequestInit): Promise<Response> 
   return fetch(url, { ...init, headers: { ...gatewayHeaders(), ...init?.headers } });
 }
 
+export type TwilioNumber = {
+  sid: string;
+  phoneNumber: string;
+  friendlyName: string | null;
+  voiceUrl: string | null;
+  statusCallback: string | null;
+  smsUrl: string | null;
+  capabilities: { voice?: boolean; sms?: boolean; mms?: boolean };
+};
+
+/** Live list of the account's phone numbers, straight from Twilio. */
+export async function listIncomingNumbers(): Promise<TwilioNumber[]> {
+  const res = await twilioFetch("/IncomingPhoneNumbers.json?PageSize=50");
+  const text = await res.text();
+  const json = parseTwilioResponse(text);
+  if (!res.ok) throw new Error(`Twilio number list failed (${res.status}): ${json["message"] ?? text}`);
+  const rows = (json["incoming_phone_numbers"] as Array<Record<string, unknown>>) ?? [];
+  return rows.map((row) => ({
+    sid: String(row["sid"] ?? ""),
+    phoneNumber: String(row["phone_number"] ?? ""),
+    friendlyName: (row["friendly_name"] as string) ?? null,
+    voiceUrl: (row["voice_url"] as string) ?? null,
+    statusCallback: (row["status_callback"] as string) ?? null,
+    smsUrl: (row["sms_url"] as string) ?? null,
+    capabilities: (row["capabilities"] as { voice?: boolean; sms?: boolean; mms?: boolean }) ?? {},
+  }));
+}
+
+/** Points a number's voice/SMS/status webhooks at this CRM. */
+export async function updateNumberWebhooks(input: {
+  sid: string;
+  voiceUrl: string;
+  statusCallback: string;
+  smsUrl: string;
+}): Promise<TwilioNumber> {
+  const params = new URLSearchParams({
+    VoiceUrl: input.voiceUrl,
+    VoiceMethod: "POST",
+    StatusCallback: input.statusCallback,
+    StatusCallbackMethod: "POST",
+    SmsUrl: input.smsUrl,
+    SmsMethod: "POST",
+  });
+  const res = await twilioFetch(`/IncomingPhoneNumbers/${input.sid}.json`, {
+    method: "POST",
+    body: params.toString(),
+  });
+  const text = await res.text();
+  const json = parseTwilioResponse(text);
+  if (!res.ok) throw new Error(`Twilio webhook update failed (${res.status}): ${json["message"] ?? text}`);
+  return {
+    sid: String(json["sid"] ?? input.sid),
+    phoneNumber: String(json["phone_number"] ?? ""),
+    friendlyName: (json["friendly_name"] as string) ?? null,
+    voiceUrl: (json["voice_url"] as string) ?? null,
+    statusCallback: (json["status_callback"] as string) ?? null,
+    smsUrl: (json["sms_url"] as string) ?? null,
+    capabilities: (json["capabilities"] as { voice?: boolean; sms?: boolean }) ?? {},
+  };
+}
+
+/** Search purchasable numbers in a country (default US, cheapest voice+SMS). */
+export async function searchAvailableNumbers(country = "US"): Promise<
+  Array<{ phoneNumber: string; friendlyName: string; locality: string | null }>
+> {
+  const res = await twilioFetch(
+    `/AvailablePhoneNumbers/${encodeURIComponent(country)}/Local.json?VoiceEnabled=true&SmsEnabled=true&PageSize=10`,
+  );
+  const text = await res.text();
+  const json = parseTwilioResponse(text);
+  if (!res.ok) throw new Error(`Twilio number search failed (${res.status}): ${json["message"] ?? text}`);
+  const rows = (json["available_phone_numbers"] as Array<Record<string, unknown>>) ?? [];
+  return rows.map((row) => ({
+    phoneNumber: String(row["phone_number"] ?? ""),
+    friendlyName: String(row["friendly_name"] ?? row["phone_number"] ?? ""),
+    locality: (row["locality"] as string) ?? null,
+  }));
+}
+
+/** Buys a number and wires its webhooks in one step. Costs real money. */
+export async function purchaseNumber(input: {
+  phoneNumber: string;
+  voiceUrl: string;
+  statusCallback: string;
+  smsUrl: string;
+}): Promise<TwilioNumber> {
+  const params = new URLSearchParams({
+    PhoneNumber: input.phoneNumber,
+    VoiceUrl: input.voiceUrl,
+    VoiceMethod: "POST",
+    StatusCallback: input.statusCallback,
+    StatusCallbackMethod: "POST",
+    SmsUrl: input.smsUrl,
+    SmsMethod: "POST",
+  });
+  const res = await twilioFetch("/IncomingPhoneNumbers.json", {
+    method: "POST",
+    body: params.toString(),
+  });
+  const text = await res.text();
+  const json = parseTwilioResponse(text);
+  if (!res.ok) throw new Error(`Twilio number purchase failed (${res.status}): ${json["message"] ?? text}`);
+  return {
+    sid: String(json["sid"] ?? ""),
+    phoneNumber: String(json["phone_number"] ?? input.phoneNumber),
+    friendlyName: (json["friendly_name"] as string) ?? null,
+    voiceUrl: (json["voice_url"] as string) ?? null,
+    statusCallback: (json["status_callback"] as string) ?? null,
+    smsUrl: (json["sms_url"] as string) ?? null,
+    capabilities: (json["capabilities"] as { voice?: boolean; sms?: boolean }) ?? {},
+  };
+}
+
+/** Sends an SMS through Twilio; returns the provider's own message state. */
+export async function sendSms(input: {
+  to: string;
+  body: string;
+  statusCallback?: string;
+}): Promise<{ sid: string; status: string }> {
+  const cfg = twilioConfig();
+  const from = cfg.phoneNumber ?? (await resolvePhoneNumber(cfg));
+  if (!from) throw new Error("No Twilio phone number is configured");
+  const params = new URLSearchParams({ To: input.to, From: from, Body: input.body });
+  if (input.statusCallback) params.set("StatusCallback", input.statusCallback);
+  const res = await twilioFetch("/Messages.json", { method: "POST", body: params.toString() });
+  const text = await res.text();
+  const json = parseTwilioResponse(text);
+  if (!res.ok) throw new Error(`Twilio SMS failed (${res.status}): ${json["message"] ?? text}`);
+  return { sid: String(json["sid"] ?? ""), status: String(json["status"] ?? "queued") };
+}
+
 /** Fetch the first active incoming phone number if TWILIO_PHONE_NUMBER is not set. */
 export async function resolvePhoneNumber(cfg = twilioConfig()): Promise<string | null> {
   if (cfg.phoneNumber) return cfg.phoneNumber;
