@@ -59,6 +59,9 @@ export function NewLeadDialog() {
       setPhone("");
       setCompany("");
       setNotes("");
+      setAddress("");
+      setSerialNo("");
+      setReferenceBy("");
       setOpen(false);
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
     },
