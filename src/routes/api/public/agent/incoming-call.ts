@@ -196,7 +196,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
             await logLeadEvent({
               leadId,
               agentId: caller.profile.id,
-              kind: "call_missed",
+              kind: "call_ended",
               detail: "ইনকামিং কল ধরা হয়নি",
             });
           }
