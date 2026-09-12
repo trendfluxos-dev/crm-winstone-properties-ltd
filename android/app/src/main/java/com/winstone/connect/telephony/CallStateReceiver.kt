@@ -122,6 +122,31 @@ class CallStateReceiver : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Queues one observed call state. States we cannot observe are dropped, and
+     * a call that was never started from the app has no id to report against.
+     */
+    private fun reportState(
+        app: Context,
+        callState: CallState,
+        durationSeconds: Int = 0,
+        recordingCaptured: Boolean? = null,
+    ) {
+        val wire = callState.wire ?: return
+        val callUid = LiveCallLauncher.activeCallUid ?: return
+        val leadId = LiveCallLauncher.activeLeadId ?: return
+        CallSyncQueue.queueCallState(
+            context = app,
+            callUid = callUid,
+            leadId = leadId,
+            state = wire,
+            durationSeconds = durationSeconds,
+            phoneNumber = LiveCallLauncher.activePhone,
+            recordingSupported = recordingCaptured,
+            recordingNote = RecordingCapabilityCheck.cachedOrNull()?.reason,
+        )
+    }
+
     companion object {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         private var lastState: String? = null
