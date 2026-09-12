@@ -38,6 +38,7 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.CALL_PHONE,
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_CALL_LOG,
         )
         if (Build.VERSION.SDK_INT >= 33) wanted += Manifest.permission.POST_NOTIFICATIONS
         ActivityCompat.requestPermissions(this, wanted.toTypedArray(), 9001)
