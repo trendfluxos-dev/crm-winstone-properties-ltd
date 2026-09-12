@@ -19,6 +19,8 @@ const Body = z.object({
   password: z.string().min(6).max(200),
   device_label: z.string().trim().max(120).nullable().optional(),
   app_version: z.string().trim().max(40).nullable().optional(),
+  /** The SIM the phone actually calls from; bound to this desk on first login. */
+  sim_number: z.string().trim().max(25).nullable().optional(),
 });
 
 function phoneKey(value: string): string | null {
