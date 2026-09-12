@@ -6,15 +6,6 @@ const Query = z.object({
   agent_id: z.string().uuid().optional(),
 });
 
-function authorized(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret || provided.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
-  return diff === 0;
-}
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -27,13 +18,19 @@ export const Route = createFileRoute("/api/public/agent/coach")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
+        const { resolveApiCaller } = await import("@/lib/device-auth.server");
+        const caller = await resolveApiCaller(request);
+        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
 
         const url = new URL(request.url);
-        const parsed = Query.safeParse({
-          employee_id: url.searchParams.get("employee_id") ?? undefined,
-          agent_id: url.searchParams.get("agent_id") ?? undefined,
-        });
+        const parsed = Query.safeParse(
+          caller.kind === "device"
+            ? { agent_id: caller.profile.id }
+            : {
+                employee_id: url.searchParams.get("employee_id") ?? undefined,
+                agent_id: url.searchParams.get("agent_id") ?? undefined,
+              },
+        );
         if (!parsed.success) return json({ error: "Invalid query" }, 400);
         if (!parsed.data.employee_id && !parsed.data.agent_id) {
           return json({ error: "Send employee_id or agent_id" }, 400);

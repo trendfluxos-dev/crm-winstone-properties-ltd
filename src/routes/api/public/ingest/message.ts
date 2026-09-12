@@ -14,15 +14,6 @@ const Payload = z.object({
   duration_seconds: z.number().int().min(0).nullable().optional(),
 });
 
-function authorized(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret || provided.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
-  return diff === 0;
-}
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -34,7 +25,9 @@ export const Route = createFileRoute("/api/public/ingest/message")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
+        const { resolveApiCaller } = await import("@/lib/device-auth.server");
+        const caller = await resolveApiCaller(request);
+        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
 
         const parsed = Payload.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Invalid payload" }, 400);
