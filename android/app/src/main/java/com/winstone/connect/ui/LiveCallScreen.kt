@@ -112,6 +112,15 @@ fun LiveCallScreen(phase: CallPhase) {
                 }
             }
 
+            LiveCallLauncher.recordingIssue?.let { issue ->
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "$issue — কলের তথ্য ও রিপোর্ট ঠিকই CRM-এ যাবে",
+                    fontSize = 12.sp,
+                    color = Color(0xFFB3261E),
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
             OutlinedTextField(
                 value = notes,
