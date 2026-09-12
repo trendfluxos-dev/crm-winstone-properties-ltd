@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { logMyWhatsappMessage } from "@/lib/agent-desk.functions";
 import type { Lead, WhatsappMessage } from "@/lib/crm-data";
 import { useSnapshot } from "@/lib/crm-data";
-import { clockTime, dayLabel, digitsOnly, relativeTime } from "@/lib/crm-format";
+import { clockTime, dayLabel, relativeTime } from "@/lib/crm-format";
+import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { useAdminToken } from "@/lib/local-session";
 import { cn } from "@/lib/utils";
 
@@ -152,15 +153,11 @@ export function WhatsappInbox() {
                   <p className="truncate text-sm font-semibold">{active.lead.name}</p>
                   <p className="tabular text-xs text-muted-foreground">{active.lead.phone_number}</p>
                 </div>
-                <Button asChild size="sm" variant="secondary">
-                  <a
-                    href={`https://wa.me/${digitsOnly(active.lead.phone_number)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <MessageCircle className="size-4" /> হোয়াটসঅ্যাপে খুলুন
-                  </a>
-                </Button>
+                <WhatsAppAction
+                  phone={active.lead.phone_number}
+                  leadId={active.lead.id}
+                  label="হোয়াটসঅ্যাপে খুলুন"
+                />
               </header>
 
               <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">

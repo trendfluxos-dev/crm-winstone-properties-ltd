@@ -1,7 +1,6 @@
 import {
   BadgeCheck,
   FolderOpen,
-  MessageCircle,
   PhoneOutgoing,
   Repeat,
   Sparkles,
