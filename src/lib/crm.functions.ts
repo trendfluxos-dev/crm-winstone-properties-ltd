@@ -21,9 +21,10 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
     const { resolveCaller } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.token ?? null);
 
-    if (caller.scope === "none") return { profiles: [], leads: [], calls: [], messages: [] };
+    if (caller.scope === "none")
+      return { profiles: [], leads: [], calls: [], messages: [], events: [] };
 
-    const [profiles, leads, calls, messages] = await Promise.all([
+    const [profiles, leads, calls, messages, events] = await Promise.all([
       supabaseAdmin.from("profiles").select("*").order("name"),
       supabaseAdmin.from("leads").select("*").order("updated_at", { ascending: false }),
       supabaseAdmin
@@ -36,8 +37,13 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
         .select("*")
         .order("created_at", { ascending: true })
         .limit(1000),
+      supabaseAdmin
+        .from("lead_events")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1000),
     ]);
-    const failed = [profiles, leads, calls, messages].find((r) => r.error);
+    const failed = [profiles, leads, calls, messages, events].find((r) => r.error);
     if (failed?.error) throw new Error(failed.error.message);
 
     if (caller.scope === "agent" && caller.profile) {
@@ -51,6 +57,9 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
         messages: (messages.data ?? []).filter(
           (m) => m.agent_id === me || (m.lead_id && myLeadIds.has(m.lead_id)),
         ),
+        events: (events.data ?? []).filter(
+          (e) => e.agent_id === me || (e.lead_id && myLeadIds.has(e.lead_id)),
+        ),
       };
     }
 
@@ -59,6 +68,7 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       leads: leads.data ?? [],
       calls: calls.data ?? [],
       messages: messages.data ?? [],
+      events: events.data ?? [],
     };
   });
 
