@@ -46,3 +46,6 @@
 - [x] APK v1.4 (versionCode 5) built, uploaded, and registered in app_releases for in-app update notice
 - [ ] Physical handset run: install v1.4, place a live call, confirm report + recording + AI land in HQ (needs the phone)
 - [ ] Official Meta WhatsApp Business API: needs a business account + credentials before delivery can be claimed
+- [x] Desk tab "আমার রিপোর্ট": own call reports + upcoming/overdue follow-up work (web + phone data)
+- [x] Official Meta WhatsApp Cloud API send + webhook receive implemented (activates when credentials are saved)
+- [ ] Re-verify recording → stored audio → transcription → AI summary with retry/error states (in progress)
