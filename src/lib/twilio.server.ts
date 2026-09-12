@@ -97,13 +97,13 @@ export async function createOutboundCall(input: {
   const text = await res.text();
   const json = parseTwilioResponse(text);
   if (!res.ok) {
-    throw new Error(`Twilio call failed (${res.status}): ${json.message ?? text}`);
+    throw new Error(`Twilio call failed (${res.status}): ${json["message"] ?? text}`);
   }
   return {
-    callSid: json.sid as string,
-    status: json.status as string,
-    to: json.to as string,
-    from: json.from as string,
+    callSid: json["sid"] as string,
+    status: json["status"] as string,
+    to: json["to"] as string,
+    from: json["from"] as string,
   };
 }
 
