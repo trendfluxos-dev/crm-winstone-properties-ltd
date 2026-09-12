@@ -239,3 +239,114 @@ export async function submitCallReport(input: {
 
   return { ok: true, followUpId };
 }
+
+/**
+ * AI report assistant.
+ *
+ * Built from the analysis already stored on the recording (Lovable AI
+ * transcription + call analysis) — no second model call, no invented data. The
+ * suggestion is advisory only: it is persisted separately in
+ * `call_reports.ai_suggestion` and never written into `category`, which stays
+ * the agent's decision.
+ */
+export type AiSuggestion = {
+  summary: string[];
+  requirements: string[];
+  objections: string[];
+  interest: "high" | "medium" | "low" | "unknown";
+  suggestedCategory: CallCategory | null;
+  nextAction: string;
+  suggestedFollowUpAt: string | null;
+  source: "call_analysis";
+};
+
+function suggestionFrom(recording: {
+  ai_summary: string | null;
+  sentiment: string | null;
+  customer_objections: string[] | null;
+  deal_stage: string | null;
+  duration_seconds: number;
+}): AiSuggestion {
+  const summary = (recording.ai_summary ?? "")
+    .split("\n")
+    .map((line) => line.replace(/^[•\-\s]+/, "").trim())
+    .filter(Boolean);
+  const objections = recording.customer_objections ?? [];
+  const stage = (recording.deal_stage ?? "").toLowerCase();
+
+  const interest: AiSuggestion["interest"] =
+    recording.sentiment === "positive" ? "high"
+    : recording.sentiment === "neutral" ? "medium"
+    : recording.sentiment ? "low"
+    : "unknown";
+
+  let suggested: CallCategory | null = null;
+  if (recording.duration_seconds < 6) suggested = "no_answer";
+  else if (stage.includes("won") || stage.includes("closed")) suggested = "closed_converted";
+  else if (recording.sentiment === "positive") suggested = "hot_lead";
+  else if (recording.sentiment === "critical") suggested = "not_interested";
+  else if (objections.length > 0) suggested = "follow_up";
+  else if (recording.sentiment === "neutral") suggested = "interested";
+
+  const followUp = new Date();
+  followUp.setDate(followUp.getDate() + 1);
+  followUp.setHours(11, 0, 0, 0);
+
+  return {
+    summary,
+    requirements: summary.filter((line) => /দরকার|প্রয়োজন|চাই|need|want|require/i.test(line)),
+    objections,
+    interest,
+    suggestedCategory: suggested,
+    nextAction:
+      suggested === "closed_converted"
+        ? "চুক্তির কাগজপত্র পাঠান"
+        : suggested === "not_interested"
+          ? "এই লিড বন্ধ করে কারণ লিখুন"
+          : "আগামীকাল সকালে ফলো-আপ কল দিন",
+    suggestedFollowUpAt:
+      suggested === "follow_up" || suggested === "hot_lead" || suggested === "callback"
+        ? followUp.toISOString()
+        : null,
+    source: "call_analysis",
+  };
+}
+
+/** The open report plus lead, recording state and the AI suggestion. */
+export async function loadPendingReportDetail(agentId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: report } = await supabaseAdmin
+    .from("call_reports")
+    .select("*")
+    .eq("agent_id", agentId)
+    .eq("status", "pending")
+    .maybeSingle();
+  if (!report) return null;
+
+  const { data: lead } = await supabaseAdmin
+    .from("leads")
+    .select("id, name, phone_number, company")
+    .eq("id", report.lead_id)
+    .maybeSingle();
+
+  const { data: recording } = report.recording_id
+    ? await supabaseAdmin
+        .from("call_recordings")
+        .select(
+          "id, analysis_status, analysis_error, ai_summary, sentiment, customer_objections, deal_stage, duration_seconds, is_two_sided, recorder_source",
+        )
+        .eq("id", report.recording_id)
+        .maybeSingle()
+    : { data: null };
+
+  let suggestion = (report.ai_suggestion as AiSuggestion | null) ?? null;
+  if (!suggestion && recording && recording.analysis_status === "completed") {
+    suggestion = suggestionFrom(recording);
+    await supabaseAdmin
+      .from("call_reports")
+      .update({ ai_suggestion: suggestion })
+      .eq("id", report.id);
+  }
+
+  return { report, lead, recording, suggestion };
+}
