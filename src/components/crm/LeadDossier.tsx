@@ -75,7 +75,7 @@ export function LeadDossier({
                   </span>
                 )}
                 <span className="rounded-full border border-border bg-card px-2.5 py-1">
-                  {lead.call_attempts} attempt{lead.call_attempts === 1 ? "" : "s"}
+                  {lead.call_attempts}টি চেষ্টা
                 </span>
                 {agent && (
                   <span className="rounded-full border border-border bg-card px-2.5 py-1">
@@ -86,7 +86,7 @@ export function LeadDossier({
               <div className="mt-3 flex gap-2">
                 <Button asChild size="sm" className="flex-1">
                   <a href={`tel:${lead.phone_number}`}>
-                    <PhoneOutgoing className="size-4" /> Direct Dial
+                    <PhoneOutgoing className="size-4" /> সরাসরি কল
                   </a>
                 </Button>
                 <Button asChild size="sm" variant="secondary" className="flex-1">
@@ -95,7 +95,7 @@ export function LeadDossier({
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <MessageCircle className="size-4" /> WhatsApp Chat
+                    <MessageCircle className="size-4" /> হোয়াটসঅ্যাপ চ্যাট
                   </a>
                 </Button>
               </div>
@@ -103,12 +103,12 @@ export function LeadDossier({
 
             <div className="space-y-4 px-5 py-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Omnichannel timeline
+                সব মাধ্যমের টাইমলাইন
               </h3>
 
               {timeline.length === 0 && (
                 <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                  No calls or messages logged for this lead yet.
+                  এই লিডের এখনো কোনো কল বা মেসেজ জমা হয়নি।
                 </p>
               )}
 
@@ -138,11 +138,11 @@ export function CallEntry({ call }: { call: CallRecording }) {
   const analysis = useMutation({
     mutationFn: () => {
       const adminToken = getAdminToken();
-      if (!adminToken) throw new Error("Unlock the control board with the admin PIN first");
+      if (!adminToken) throw new Error("আগে মাস্টার পিন দিয়ে কন্ট্রোল বোর্ড আনলক করুন");
       return runAnalysis({ data: { adminToken, recordingId: call.id } });
     },
     onSuccess: () => {
-      toast.success("AI analysis updated");
+      toast.success("এআই বিশ্লেষণ হালনাগাদ হয়েছে");
       void queryClient.invalidateQueries({ queryKey: ["call_recordings"] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -160,7 +160,7 @@ export function CallEntry({ call }: { call: CallRecording }) {
         </span>
         <div className="min-w-0">
           <p className="text-sm font-medium">
-            {call.call_direction === "outgoing" ? "SIM call placed" : "Customer called back"}
+            {call.call_direction === "outgoing" ? "সিম থেকে কল করা হয়েছে" : "ক্রেতা ফিরতি কল করেছেন"}
           </p>
           <p className="tabular text-xs text-muted-foreground">
             {dayLabel(call.created_at)} · {clockTime(call.created_at)} ·{" "}
@@ -177,11 +177,11 @@ export function CallEntry({ call }: { call: CallRecording }) {
         >
           {call.is_two_sided ? (
             <>
-              <BadgeCheck className="size-3.5" /> Two-Sided Audio Verified
+              <BadgeCheck className="size-3.5" /> দুই পক্ষের অডিও যাচাই হয়েছে
             </>
           ) : (
             <>
-              <ShieldAlert className="size-3.5" /> One-Sided / Review Needed
+              <ShieldAlert className="size-3.5" /> এক পক্ষের অডিও · পর্যালোচনা দরকার
             </>
           )}
         </span>
@@ -197,7 +197,7 @@ export function CallEntry({ call }: { call: CallRecording }) {
           />
         ) : (
           <p className="flex items-center gap-2 rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-            <AlertTriangle className="size-4" /> No audio synced from the device for this call.
+            <AlertTriangle className="size-4" /> এই কলের অডিও ফোন থেকে সিঙ্ক হয়নি।
           </p>
         )}
 
@@ -205,7 +205,7 @@ export function CallEntry({ call }: { call: CallRecording }) {
           <div className="rounded-xl border border-primary/25 bg-primary/5 p-4">
             <div className="flex items-center justify-between gap-2">
               <p className="flex items-center gap-2 text-sm font-medium text-primary">
-                <Sparkles className="size-4" /> AI call intelligence
+                <Sparkles className="size-4" /> এআই কল বিশ্লেষণ
               </p>
               {call.sentiment && (
                 <span
@@ -240,7 +240,7 @@ export function CallEntry({ call }: { call: CallRecording }) {
             )}
             {call.deal_stage && (
               <p className="mt-3 text-xs text-muted-foreground">
-                Deal stage: <span className="text-foreground">{call.deal_stage.replace(/_/g, " ")}</span>
+                ডিলের অবস্থা: <span className="text-foreground">{call.deal_stage.replace(/_/g, " ")}</span>
               </p>
             )}
           </div>
@@ -249,7 +249,7 @@ export function CallEntry({ call }: { call: CallRecording }) {
         {transcript.length > 0 ? (
           <div>
             <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-              Transcript — click a line to listen
+              ট্রান্সক্রিপ্ট — যেকোনো লাইনে চাপ দিয়ে শুনুন
             </p>
             <ol className="space-y-1">
               {transcript.map((line, index) => {
@@ -297,7 +297,7 @@ export function CallEntry({ call }: { call: CallRecording }) {
               ) : (
                 <Sparkles className="size-4" />
               )}
-              Run AI transcription
+              এআই ট্রান্সক্রিপ্ট চালান
             </Button>
           )
         )}
@@ -329,7 +329,7 @@ function MessageEntry({ message }: { message: WhatsappMessage }) {
       >
         <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <Icon className="size-3" />
-          {fromAgent ? "Agent" : "Customer"} · WhatsApp
+          {fromAgent ? "এজেন্ট" : "ক্রেতা"} · হোয়াটসঅ্যাপ
           {message.message_type === "voice_note" && message.duration_seconds
             ? ` · ${formatDuration(message.duration_seconds)}`
             : ""}

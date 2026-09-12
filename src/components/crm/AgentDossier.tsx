@@ -47,24 +47,24 @@ export function AgentDossier({
                 <span className="capitalize">{agent.role.replace("_", " ")}</span>
                 {" · "}
                 <span className="capitalize">{agent.presence.replace("_", " ")}</span>
-                {" · last active "}
+                {" · শেষ সক্রিয় "}
                 {relativeTime(agent.last_active_at)}
               </p>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-                <Stat icon={<PhoneCall className="size-3" />} label="Dials / connected" value={`${agentCalls.length} / ${connected.length}`} />
-                <Stat icon={<Timer className="size-3" />} label="Talk · avg" value={`${formatTalkTime(talk)} · ${connected.length ? formatDuration(talk / connected.length) : "--:--"}`} />
-                <Stat icon={<MessageCircle className="size-3" />} label="WhatsApp" value={String(touches)} />
-                <Stat icon={<BadgeCheck className="size-3 text-verified" />} label="Verified audio" value={String(verified)} />
+                <Stat icon={<PhoneCall className="size-3" />} label="কল / কথা হয়েছে" value={`${agentCalls.length} / ${connected.length}`} />
+                <Stat icon={<Timer className="size-3" />} label="কথা · গড়" value={`${formatTalkTime(talk)} · ${connected.length ? formatDuration(talk / connected.length) : "--:--"}`} />
+                <Stat icon={<MessageCircle className="size-3" />} label="হোয়াটসঅ্যাপ" value={String(touches)} />
+                <Stat icon={<BadgeCheck className="size-3 text-verified" />} label="যাচাই হওয়া অডিও" value={String(verified)} />
               </dl>
             </SheetHeader>
 
             <div className="space-y-4 px-5 py-5">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Call audit trail
+                কলের অডিট রেকর্ড
               </h3>
               {agentCalls.length === 0 && (
                 <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                  No recordings synced from this agent yet.
+                  এই এজেন্টের ফোন থেকে এখনো কোনো রেকর্ডিং আসেনি।
                 </p>
               )}
               {agentCalls.map((call) => {
@@ -72,8 +72,8 @@ export function AgentDossier({
                 return (
                   <div key={call.id} className="space-y-1.5">
                     <p className="text-xs text-muted-foreground">
-                      Lead:{" "}
-                      <span className="font-medium text-foreground">{lead?.name ?? "Unknown"}</span>
+                      লিড:{" "}
+                      <span className="font-medium text-foreground">{lead?.name ?? "অজানা"}</span>
                       {lead?.company ? ` · ${lead.company}` : ""}
                     </p>
                     <CallEntry call={call} />

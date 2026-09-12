@@ -16,21 +16,21 @@ function useNow(intervalMs = 1000) {
 
 const PRESENCE = {
   on_call: {
-    label: "On Call",
+    label: "কলে আছে",
     dot: "bg-live",
     text: "text-live",
     ring: "border-live/40",
     pill: "bg-live/10 text-live border-live/25",
   },
   idle: {
-    label: "Idle",
+    label: "খালি",
     dot: "bg-idle",
     text: "text-idle-foreground",
     ring: "border-border",
     pill: "bg-idle/15 text-idle-foreground border-idle/30",
   },
   offline: {
-    label: "Offline",
+    label: "অফলাইন",
     dot: "bg-offline",
     text: "text-muted-foreground",
     ring: "border-border",
@@ -53,13 +53,13 @@ export function AgentRadar({
     <section className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold sm:text-lg">Live Agent Radar</h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">Who is talking right now, and for how long</p>
+          <h2 className="text-base font-semibold sm:text-lg">লাইভ এজেন্ট রাডার</h2>
+          <p className="text-xs text-muted-foreground sm:text-sm">এই মুহূর্তে কে কথা বলছে, কতক্ষণ ধরে</p>
 
         </div>
         <span className="tabular text-xs text-muted-foreground">
-          {agents.filter((a) => a.presence === "on_call").length} on call /{" "}
-          {agents.length} agents
+          {agents.filter((a) => a.presence === "on_call").length} জন কলে /{" "}
+          {agents.length} জন এজেন্ট
         </span>
       </div>
 
@@ -145,7 +145,7 @@ export function AgentRadar({
                 <div className="rounded-lg bg-surface-2 p-2.5">
                   <dt className="flex items-center gap-1 text-muted-foreground">
                     <Timer className="size-3" />
-                    {liveSeconds !== null ? "Current call" : "Last call"}
+                    {liveSeconds !== null ? "চলতি কল" : "শেষ কল"}
                   </dt>
                   <dd className="tabular mt-1 text-base font-semibold">
                     {liveSeconds !== null
@@ -162,7 +162,7 @@ export function AgentRadar({
                     ) : (
                       <PhoneCall className="size-3" />
                     )}
-                    Last active
+                    শেষ সক্রিয়
                   </dt>
                   <dd className="mt-1 text-base font-semibold">
                     {relativeTime(agent.last_active_at)}

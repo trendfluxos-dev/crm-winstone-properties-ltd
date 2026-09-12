@@ -52,7 +52,7 @@ export function SystemCustomizer() {
     onSuccess: async () => {
       setDirty(false);
       await queryClient.invalidateQueries({ queryKey: ["app-config"] });
-      toast.success("Rules saved — every device picks them up on next sync");
+      toast.success("নিয়ম সংরক্ষিত — পরের সিঙ্কে প্রতিটি ডিভাইসে চলে যাবে");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -63,7 +63,7 @@ export function SystemCustomizer() {
       setDraft(result.config);
       setDirty(false);
       await queryClient.invalidateQueries({ queryKey: ["app-config"] });
-      toast.success("Restored the shipped defaults");
+      toast.success("ডিফল্ট সেটিং ফেরত আনা হয়েছে");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -73,7 +73,7 @@ export function SystemCustomizer() {
       ...c,
       fields: [
         ...c.fields,
-        { key: `field_${c.fields.length + 1}`, label: "New field", type: "text", required: false, options: [] },
+        { key: `field_${c.fields.length + 1}`, label: "নতুন ফিল্ড", type: "text", required: false, options: [] },
       ],
     }));
 
@@ -90,12 +90,12 @@ export function SystemCustomizer() {
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <Settings2 className="size-4 text-primary" /> Customizer
+          <Settings2 className="size-4 text-primary" /> সিস্টেম কাস্টমাইজার
         </h2>
         <div className="flex flex-wrap items-center gap-2">
           {data?.updatedAt && (
             <span className="text-xs text-muted-foreground">
-              Last saved {new Date(data.updatedAt).toLocaleString()}
+              সর্বশেষ সংরক্ষণ {new Date(data.updatedAt).toLocaleString("bn-BD")}
             </span>
           )}
           <Button
@@ -104,49 +104,49 @@ export function SystemCustomizer() {
             onClick={() => reset.mutate()}
             disabled={reset.isPending || !adminToken}
           >
-            <RotateCcw className="size-4" /> Defaults
+            <RotateCcw className="size-4" /> ডিফল্টে ফিরুন
           </Button>
           <Button size="sm" onClick={() => save.mutate()} disabled={!dirty || save.isPending || !adminToken}>
-            <Save className="size-4" /> {save.isPending ? "Saving…" : "Save rules"}
+            <Save className="size-4" /> {save.isPending ? "সংরক্ষণ হচ্ছে…" : "নিয়ম সংরক্ষণ"}
           </Button>
         </div>
       </div>
 
-      {isPending && <p className="text-sm text-muted-foreground">Loading current rules…</p>}
+      {isPending && <p className="text-sm text-muted-foreground">বর্তমান নিয়ম লোড হচ্ছে…</p>}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card-elevated space-y-4 p-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold">
-            <Sliders className="size-4 text-primary" /> Floor rules
+            <Sliders className="size-4 text-primary" /> ফ্লোরের নিয়ম
           </h3>
           <div className="grid gap-3 sm:grid-cols-2">
             <NumberRow
-              label="Counts as connected after"
-              suffix="sec"
+              label="এত সেকেন্ড পর কল 'কথা হয়েছে' গণ্য"
+              suffix="সেকেন্ড"
               value={draft.rules.minConnectedSeconds}
               onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, minConnectedSeconds: v } }))}
             />
             <NumberRow
-              label="Follow-up callback deadline"
-              suffix="hrs"
+              label="ফলো-আপ কলের সময়সীমা"
+              suffix="ঘণ্টা"
               value={draft.rules.followUpSlaHours}
               onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, followUpSlaHours: v } }))}
             />
             <NumberRow
-              label="Daily dial target"
-              suffix="calls"
+              label="দৈনিক কলের লক্ষ্য"
+              suffix="টি কল"
               value={draft.rules.dailyDialTarget}
               onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, dailyDialTarget: v } }))}
             />
             <NumberRow
-              label="Attempts before parking a lead"
-              suffix="tries"
+              label="এতবার চেষ্টার পর লিড পার্ক হবে"
+              suffix="বার"
               value={draft.rules.maxAttemptsBeforeDrop}
               onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, maxAttemptsBeforeDrop: v } }))}
             />
             <NumberRow
-              label="Carrier rate"
-              suffix="৳/min"
+              label="সিম কলের খরচ"
+              suffix="৳/মিনিট"
               
               value={draft.rules.ratePerMinute}
               onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, ratePerMinute: v } }))}

@@ -21,9 +21,9 @@ type Card = { title: string; rows: { label: string; value: string }[] };
 type Entry = { role: "user" | "assistant"; content: string; cards?: Card[] };
 
 const SUGGESTIONS = [
-  "Show today's top 3 agents with talk time",
-  "Generate this month's telephony billing report",
-  "Assign 20 pending leads to Soniya",
+  "আজকের সেরা ৩ এজেন্টকে কথার সময়সহ দেখাও",
+  "এই মাসের টেলিফোন বিলের রিপোর্ট বানাও",
+  "সোনিয়াকে ২০টি অমীমাংসিত লিড দাও",
 ];
 
 /** Floating natural-language command console for HQ and coordinators. */
@@ -71,10 +71,10 @@ export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
       <SheetContent side="right" className="flex w-full flex-col gap-0 sm:max-w-md">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" /> Executive AI Copilot
+            <Sparkles className="size-4 text-primary" /> এক্সিকিউটিভ এআই কোপাইলট
           </SheetTitle>
           <SheetDescription>
-            Ask for performance, billing or lead dispatch in plain language.
+            সাধারণ ভাষায় পারফরম্যান্স, বিল বা লিড বণ্টন চান।
           </SheetDescription>
         </SheetHeader>
 
@@ -128,7 +128,7 @@ export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
           ))}
           {send.isPending && (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" /> Working on it…
+              <Loader2 className="size-4 animate-spin" /> কাজ চলছে…
             </p>
           )}
           <div ref={endRef} />
@@ -139,7 +139,7 @@ export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
             <Textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="e.g. Assign 30 pending leads to Nazrin"
+              placeholder="যেমন: নাজরিনকে ৩০টি অমীমাংসিত লিড দাও"
               rows={2}
               className="resize-none"
               onKeyDown={(e) => {

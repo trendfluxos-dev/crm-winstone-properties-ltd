@@ -46,12 +46,12 @@ export function RoleGate({
       <div className="flex flex-wrap justify-center gap-2">
         {pinAllowed && (
           <Button size="lg" onClick={() => setPinOpen(true)}>
-            <Lock className="size-4" /> Enter PIN
+            <Lock className="size-4" /> পিন দিন
           </Button>
         )}
         <Button size="lg" variant={pinAllowed ? "secondary" : "default"} asChild>
           <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
-            <LogIn className="size-4" /> Sign in
+            <LogIn className="size-4" /> সাইন ইন
           </Link>
         </Button>
       </div>
