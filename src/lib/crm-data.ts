@@ -1,5 +1,7 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCrmSnapshot } from "@/lib/crm.functions";
 import { useAdminToken } from "@/lib/local-session";
@@ -8,6 +10,7 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
 export type CallRecording = Database["public"]["Tables"]["call_recordings"]["Row"];
 export type WhatsappMessage = Database["public"]["Tables"]["whatsapp_interactions"]["Row"];
+export type LeadEvent = Database["public"]["Tables"]["lead_events"]["Row"];
 export type LeadStatus = Database["public"]["Enums"]["lead_status"];
 
 export const LEAD_STATUSES: { key: LeadStatus; label: string }[] = [
