@@ -87,7 +87,7 @@ function StatusRow({ label, ok, value }: { label: string; ok: boolean; value?: s
   );
 }
 
-function WebhookRow({ label, value }: { label: string; value: string | null }) {
+function WebhookRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (
     <div className="flex items-start justify-between gap-3 rounded-md bg-muted/50 px-2.5 py-1.5">
