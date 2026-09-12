@@ -99,16 +99,15 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
         }
 
         const recordingUrl = cfg.webhookBase ? `${cfg.webhookBase}/api/public/twilio/recording` : "";
-        return twiML(
-          buildInboundTwiML({
-            agentPhone: agentPhone ?? undefined,
-            record: cfg.recordingEnabled,
-            recordingStatusCallback: recordingUrl,
-            consentNotice: cfg.recordingConsentNotice,
-            fallbackMessage:
-              "ধন্যবাদ, কিন্তু এখন কোনো এজেন্ট যুক্ত নেই। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
-          }),
-        );
+        const args: Parameters<typeof buildInboundTwiML>[0] = {
+          record: cfg.recordingEnabled,
+          recordingStatusCallback: recordingUrl,
+          consentNotice: cfg.recordingConsentNotice,
+          fallbackMessage:
+            "ধন্যবাদ, কিন্তু এখন কোনো এজেন্ট যুক্ত নেই। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
+        };
+        if (agentPhone) args.agentPhone = agentPhone;
+        return twiML(buildInboundTwiML(args));
       },
     },
   },
