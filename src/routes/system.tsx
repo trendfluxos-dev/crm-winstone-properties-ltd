@@ -107,6 +107,8 @@ function SystemBoard() {
 
       <SystemCustomizer />
 
+      <AuditTrail />
+
 
 
 
