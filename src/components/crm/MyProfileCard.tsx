@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, LogOut, Palette } from "lucide-react";
+import { Check, KeyRound, Loader2, LogOut, Palette } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 import { updateMyProfile } from "@/lib/accounts.functions";
 import { useMyAccount, useSignOut } from "@/lib/session";
 
