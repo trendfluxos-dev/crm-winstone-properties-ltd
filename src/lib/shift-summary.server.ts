@@ -4,7 +4,7 @@
  * Executive HQ keeps one month of these; the IT Console keeps all of them.
  */
 import { CATEGORY_LABEL } from "@/lib/report-sheet.server";
-import { dhakaParts, shiftDueForSummary } from "@/lib/shift.server";
+import { SHIFTS, currentShift, dhakaInstant, dhakaParts, shiftDueForSummary } from "@/lib/shift.server";
 
 export type ShiftAgentLine = {
   agentId: string;
@@ -31,14 +31,23 @@ export type ShiftSummaryRow = {
   agents: ShiftAgentLine[];
 };
 
-/** Builds (or refreshes) the summary for the window that just closed. */
-export async function generateShiftSummary(at: Date = new Date()) {
-  const due = shiftDueForSummary(at);
-  if (!due) return { generated: false as const, reason: "এখনো কোনো শিফট শেষ হয়নি" };
+export type ShiftSheet = {
+  shiftKey: string;
+  shiftLabel: string;
+  live: boolean;
+  windowStart: string;
+  windowEnd: string;
+  generatedAt: string;
+  totals: { called: number; connected: number; reports: number; pending: number; followUps: number };
+  agents: ShiftAgentLine[];
+};
 
+/**
+ * Counts every approved agent's own updates inside one window. Used both for the
+ * stored shift summary and for the live sheet the IT Console watches.
+ */
+async function buildShiftLines(startIso: string, endIso: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const startIso = due.windowStart.toISOString();
-  const endIso = due.windowEnd.toISOString();
 
   const [agentsRes, reportsRes, leadsRes, followRes] = await Promise.all([
     supabaseAdmin
@@ -105,6 +114,46 @@ export async function generateShiftSummary(at: Date = new Date()) {
     }),
     { called: 0, connected: 0, reports: 0, pending: 0, followUps: 0 },
   );
+
+  return { lines, totals };
+}
+
+/**
+ * The sheet for the window happening right now (or the last window that closed
+ * today). Recomputed on every call, so an update an agent submits this minute
+ * shows up in the IT Console immediately — nothing is stored yet.
+ */
+export async function liveShiftSheet(at: Date = new Date()): Promise<ShiftSheet> {
+  const { minutes, dateKey } = dhakaParts(at);
+  const open = currentShift(at);
+  const shift =
+    open ??
+    [...SHIFTS].filter((s) => minutes > s.endMinutes).sort((a, b) => b.endMinutes - a.endMinutes)[0] ??
+    SHIFTS[0]!;
+  const windowStart = dhakaInstant(dateKey, shift.startMinutes);
+  const windowEnd = open ? at : dhakaInstant(dateKey, shift.endMinutes);
+  const { lines, totals } = await buildShiftLines(windowStart.toISOString(), windowEnd.toISOString());
+  return {
+    shiftKey: `${dateKey}:${shift.id}:live`,
+    shiftLabel: shift.label,
+    live: Boolean(open),
+    windowStart: windowStart.toISOString(),
+    windowEnd: windowEnd.toISOString(),
+    generatedAt: new Date().toISOString(),
+    totals,
+    agents: lines,
+  };
+}
+
+/** Builds (or refreshes) the summary for the window that just closed. */
+export async function generateShiftSummary(at: Date = new Date()) {
+  const due = shiftDueForSummary(at);
+  if (!due) return { generated: false as const, reason: "এখনো কোনো শিফট শেষ হয়নি" };
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const startIso = due.windowStart.toISOString();
+  const endIso = due.windowEnd.toISOString();
+  const { lines, totals } = await buildShiftLines(startIso, endIso);
 
   const { error } = await supabaseAdmin.from("shift_summaries").upsert(
     {
