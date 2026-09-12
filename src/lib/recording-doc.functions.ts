@@ -21,11 +21,13 @@ export const recordingDocSync = createServerFn({ method: "POST" })
     const { syncRecordingDoc } = await import("@/lib/recording-doc.server");
     const result = await syncRecordingDoc(data.dateKey);
 
-    const { recordAudit } = await import("@/lib/audit.server");
-    await recordAudit({
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
       action: "recording_doc_synced",
-      actorId: caller.profileId ?? null,
-      detail: { dateKey: result.dateKey, calls: result.calls, recordings: result.recordings },
+      entityType: "recording_doc",
+      entityId: result.dateKey,
+      actorProfileId: caller.profile?.id ?? null,
+      metadata: { calls: result.calls, recordings: result.recordings, docId: result.docId },
     });
 
     return result;
