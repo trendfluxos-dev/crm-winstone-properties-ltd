@@ -122,6 +122,7 @@ export const Route = createFileRoute("/api/public/smoke")({
             checkedAt: new Date().toISOString(),
             passed: checks.length - failed.length,
             total: checks.length,
+            note: "পেজগুলো লগইন দেয়ালের পেছনে, তাই সার্ভার নিজে থেকে খুলে দেখতে পারে না — এখানে যাচাই হয় পেজটি এই ভার্সনে আছে কি না।",
             checks,
           },
           {
