@@ -46,7 +46,8 @@ export const PermissionsSchema = z.object({
   agentCanExportData: z.boolean().default(false),
   agentCanLogManualCall: z.boolean().default(true),
   agentCanReassignLead: z.boolean().default(false),
-  agentCanUseAiCoach: z.boolean().default(true),
+  /** AI Coach stays on for every agent — kept as a constant, not a toggle. */
+  agentCanUseAiCoach: z.literal(true).default(true),
 });
 export type Permissions = z.infer<typeof PermissionsSchema>;
 
