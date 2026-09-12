@@ -37,6 +37,7 @@ import { Route as ApiPublicAgentIncomingCallRouteImport } from './routes/api/pub
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
 import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
+import { Route as ApiPublicAgentTwilioCallRouteImport } from './routes/api/public/agent/twilio-call'
 import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/agent/version'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
@@ -201,6 +202,12 @@ const ApiPublicAgentReportRoute = ApiPublicAgentReportRouteImport.update({
   path: '/api/public/agent/report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentTwilioCallRoute =
+  ApiPublicAgentTwilioCallRouteImport.update({
+    id: '/api/public/agent/twilio-call',
+    path: '/api/public/agent/twilio-call',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAgentVersionRoute = ApiPublicAgentVersionRouteImport.update({
   id: '/api/public/agent/version',
   path: '/api/public/agent/version',
@@ -343,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
+  '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
@@ -394,6 +402,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
+  '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
@@ -446,6 +455,7 @@ export interface FileRoutesById {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
+  '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
@@ -499,6 +509,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
+    | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
@@ -550,6 +561,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
+    | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
@@ -601,6 +613,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
+    | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
@@ -653,6 +666,7 @@ export interface RootRouteChildren {
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
   ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
+  ApiPublicAgentTwilioCallRoute: typeof ApiPublicAgentTwilioCallRoute
   ApiPublicAgentVersionRoute: typeof ApiPublicAgentVersionRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
@@ -874,6 +888,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/twilio-call': {
+      id: '/api/public/agent/twilio-call'
+      path: '/api/public/agent/twilio-call'
+      fullPath: '/api/public/agent/twilio-call'
+      preLoaderRoute: typeof ApiPublicAgentTwilioCallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/version': {
       id: '/api/public/agent/version'
       path: '/api/public/agent/version'
@@ -1054,6 +1075,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
   ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
+  ApiPublicAgentTwilioCallRoute: ApiPublicAgentTwilioCallRoute,
   ApiPublicAgentVersionRoute: ApiPublicAgentVersionRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
