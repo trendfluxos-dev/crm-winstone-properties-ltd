@@ -5,4 +5,5 @@
 - [ ] Reconnect Google Sheets in the new workspace (required for report sheet sync and doc summary integration).
 
 ## Pending
+- [ ] Build a voice transcription app route with Web Audio recording + Bengali STT via server route (not Edge Function) + auto-scroll UI.
 - [ ] Re-run smoke tests after Google Sheets reconnect.
