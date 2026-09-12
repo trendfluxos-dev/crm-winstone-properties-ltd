@@ -83,11 +83,14 @@ class CallStateReceiver : BroadcastReceiver() {
                 if (wasOnCall && captured != null && uploadable) {
                     CallSyncQueue.queueRecording(
                         context = app,
-                        leadId = LiveCallLauncher.activeLeadId,
-                        phoneNumber = LiveCallLauncher.activePhone.orEmpty(),
+                        leadId = if (outgoing) LiveCallLauncher.activeLeadId else null,
+                        phoneNumber =
+                            if (outgoing) LiveCallLauncher.activePhone.orEmpty()
+                            else IncomingCallTracker.number.orEmpty(),
                         file = captured.first,
                         durationSeconds = captured.second,
                         twoSided = twoSided,
+                        incoming = !outgoing,
                         recorderSource = recorderSource,
                     )
                 } else if (captured != null) {
