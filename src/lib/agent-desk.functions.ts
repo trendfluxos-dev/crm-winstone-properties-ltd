@@ -26,36 +26,19 @@ export const submitMyLead = createServerFn({ method: "POST" })
     const caller = await resolveCaller(data.adminToken ?? null);
     if (caller.scope === "none") throw new Error("অনুমোদিত অ্যাকাউন্ট দিয়ে সাইন ইন করুন");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const owner = caller.profile?.id ?? null;
-
-    const { data: created, error } = await supabaseAdmin
-      .from("leads")
-      .insert({
-        name: data.name,
-        phone_number: data.phoneNumber,
-        company: data.company?.trim() || null,
-        notes: data.notes?.trim() || null,
-        source: "agent_app",
-        status: "pending",
-        assigned_to: owner,
-        assigned_agent_id: owner,
-        assignment_source: "self",
-      })
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-
-    // Show it immediately in Coordinator Deck / HQ self-claims — no approval step.
-    const { logLeadEvent } = await import("@/lib/lead-events.server");
-    await logLeadEvent({
-      leadId: created.id,
-      agentId: owner,
-      kind: "self_claimed",
-      detail: `${caller.profile?.name ?? "এজেন্ট"} নতুন লিড যোগ করেছেন — ${data.name}`,
+    // Same intake path as the phone app — identical number cleanup, duplicate
+    // check, ownership and timeline entry, so web and mobile leads look alike.
+    const { intakeLead } = await import("@/lib/lead-intake.server");
+    const result = await intakeLead({
+      name: data.name,
+      phoneNumber: data.phoneNumber,
+      company: data.company ?? null,
+      notes: data.notes ?? null,
+      ownerId: caller.profile?.id ?? null,
+      ownerName: caller.profile?.name ?? null,
     });
 
-    return { leadId: created.id };
+    return { leadId: result.leadId, duplicate: result.duplicate };
   });
 
 const OpenLeadsInput = z.object({
