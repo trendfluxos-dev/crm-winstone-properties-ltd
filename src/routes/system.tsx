@@ -60,6 +60,15 @@ const ENDPOINTS = [
   { path: "/api/public/ingest/lead", what: "ওয়েবসাইট / বিজ্ঞাপনের লিড (নিজে থেকে ভাগ হয়)" },
 ];
 
+const SOURCE_LABELS: Record<string, string> = {
+  manual: "হাতে দেওয়া",
+  call: "কল",
+  whatsapp: "হোয়াটসঅ্যাপ",
+  webhook: "ওয়েবসাইট",
+  csv: "সিএসভি ইমপোর্ট",
+  facebook_ads: "ফেসবুক বিজ্ঞাপন",
+};
+
 function SystemBoard() {
   const { profiles, leads, calls, messages } = useSnapshot();
   const [rate, setRate] = useState(String(DEFAULT_RATE_PER_MINUTE));

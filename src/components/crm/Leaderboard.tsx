@@ -16,9 +16,9 @@ export function Leaderboard({
     <section className="space-y-3">
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Daily Performance Leaderboard</h2>
+          <h2 className="text-lg font-semibold">দৈনিক পারফরম্যান্স লিডারবোর্ড</h2>
           <p className="text-sm text-muted-foreground">
-            Connected calls count conversations longer than 10 seconds
+            ১০ সেকেন্ডের বেশি কথা হলে কলটি গণনা হয়
           </p>
         </div>
         <Trophy className="size-5 text-idle" />
@@ -30,14 +30,14 @@ export function Leaderboard({
             <thead className="bg-surface-2 text-left text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">#</th>
-                <th className="px-4 py-3 font-medium">Agent</th>
-                <th className="px-4 py-3 text-right font-medium">Total dials</th>
-                <th className="px-4 py-3 text-right font-medium">Connected</th>
-                <th className="px-4 py-3 text-right font-medium">Talk time</th>
-                <th className="px-4 py-3 text-right font-medium">Avg call</th>
-                <th className="px-4 py-3 text-right font-medium">WhatsApp</th>
-                <th className="px-4 py-3 text-right font-medium">Conversion</th>
-                <th className="px-4 py-3 text-right font-medium">Synced audio</th>
+                <th className="px-4 py-3 font-medium">এজেন্ট</th>
+                <th className="px-4 py-3 text-right font-medium">মোট কল</th>
+                <th className="px-4 py-3 text-right font-medium">কথা হয়েছে</th>
+                <th className="px-4 py-3 text-right font-medium">কথার সময়</th>
+                <th className="px-4 py-3 text-right font-medium">গড় কল</th>
+                <th className="px-4 py-3 text-right font-medium">হোয়াটসঅ্যাপ</th>
+                <th className="px-4 py-3 text-right font-medium">রূপান্তর</th>
+                <th className="px-4 py-3 text-right font-medium">সিঙ্ক হওয়া অডিও</th>
               </tr>
             </thead>
             <tbody className="zebra">
