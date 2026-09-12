@@ -104,7 +104,7 @@ export function FollowUpCalendar() {
                 <p className="truncate text-sm font-semibold">
                   {event.customer_name ?? "ক্রেতা"}{" "}
                   <span className="text-xs font-normal text-muted-foreground">
-                    {event.customer_phone ?? ""}
+                    {event.phone_number ?? ""}
                   </span>
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -115,16 +115,16 @@ export function FollowUpCalendar() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className={STATE_TONE[event.state]}>{STATE_LABEL[event.state]}</Badge>
-                {event.customer_phone ? (
+                {event.phone_number ? (
                   <>
                     <Button asChild size="sm" variant="secondary" className="gap-1">
-                      <a href={`tel:${event.customer_phone}`}>
+                      <a href={`tel:${event.phone_number}`}>
                         <PhoneCall className="size-3.5" /> কল
                       </a>
                     </Button>
                     <Button asChild size="sm" variant="ghost" className="gap-1">
                       <a
-                        href={`https://api.whatsapp.com/send?phone=${event.customer_phone.replace(/[^\d]/g, "")}`}
+                        href={`https://api.whatsapp.com/send?phone=${event.phone_number.replace(/[^\d]/g, "")}`}
                         target="_blank"
                         rel="noreferrer"
                       >

@@ -6,6 +6,8 @@ import { AppShell } from "@/components/crm/AppShell";
 import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
+import { FollowUpCalendar } from "@/components/crm/FollowUpCalendar";
+import { PostCallReportGate } from "@/components/crm/PostCallReportGate";
 import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
 import { OpenLeadsCard } from "@/components/crm/OpenLeadsCard";
 import { QueueBoard } from "@/components/crm/QueueBoard";
@@ -167,6 +169,7 @@ function DeskPage() {
   return (
     <AppShell>
       <div className="space-y-6">
+        <PostCallReportGate />
         <MyProfileCard />
         <MyPhoneSetup />
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -186,6 +189,7 @@ function DeskPage() {
             <TabsTrigger value="leads">লিড তালিকা</TabsTrigger>
             <TabsTrigger value="calls">কল রেকর্ড</TabsTrigger>
             <TabsTrigger value="whatsapp">হোয়াটসঅ্যাপ</TabsTrigger>
+            <TabsTrigger value="calendar">ফলো-আপ</TabsTrigger>
           </TabsList>
           <TabsContent value="leads" className="space-y-4">
             <OpenLeadsCard />
@@ -200,6 +204,9 @@ function DeskPage() {
           </TabsContent>
           <TabsContent value="whatsapp">
             <WhatsappInbox />
+          </TabsContent>
+          <TabsContent value="calendar">
+            <FollowUpCalendar />
           </TabsContent>
         </Tabs>
       </div>
