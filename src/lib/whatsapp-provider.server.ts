@@ -98,22 +98,10 @@ class NotConfiguredWhatsApp implements WhatsAppProvider {
   }
   /** Reads whatever the CRM already logged locally; nothing is fetched from Meta. */
   async getConversation(leadId: string) {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("whatsapp_interactions")
-      .select("id, sender_type, message_content, created_at")
-      .eq("lead_id", leadId)
-      .order("created_at", { ascending: true });
-    return (data ?? []).map((row) => ({
-      id: row.id,
-      direction: row.sender_type === "agent" ? ("out" as const) : ("in" as const),
-      body: row.message_content,
-      at: row.created_at,
-      status: "unknown" as WhatsAppMessageStatus,
-    }));
+    return readStoredConversation(leadId);
   }
-  async getMessageStatus() {
-    return "unknown" as WhatsAppMessageStatus;
+  async getMessageStatus(providerMessageId: string) {
+    return readStoredStatus(providerMessageId);
   }
 }
 
