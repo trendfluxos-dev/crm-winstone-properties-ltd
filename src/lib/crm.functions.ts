@@ -137,7 +137,7 @@ export const autoDistributeLeads = createServerFn({ method: "POST" })
       leads.map((lead, index) =>
         supabaseAdmin
           .from("leads")
-          .update({ assigned_to: agents[index % agents.length]!.id })
+          .update({ assigned_to: agents[index % agents.length]!.id, assignment_source: "coordinator" })
           .eq("id", lead.id),
       ),
     );
@@ -194,6 +194,7 @@ export const importLeads = createServerFn({ method: "POST" })
       notes: string | null;
       source: string;
       assigned_to: string | null;
+      assignment_source: string | null;
     }[] = [];
     let skipped = 0;
     for (const row of data.rows) {
@@ -210,6 +211,7 @@ export const importLeads = createServerFn({ method: "POST" })
         notes: row.notes || null,
         source: "csv_import",
         assigned_to: agents.length ? agents[toInsert.length % agents.length]!.id : null,
+        assignment_source: agents.length ? "coordinator" : null,
       });
     }
 
@@ -314,7 +316,7 @@ export const assignLeadsToAgent = createServerFn({ method: "POST" })
 
     const { error: updateError } = await supabaseAdmin
       .from("leads")
-      .update({ assigned_to: data.agentId })
+      .update({ assigned_to: data.agentId, assignment_source: "coordinator" })
       .in(
         "id",
         pool.map((l) => l.id),

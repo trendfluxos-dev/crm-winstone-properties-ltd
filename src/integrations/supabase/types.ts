@@ -135,6 +135,7 @@ export type Database = {
         Row: {
           assigned_agent_id: string | null
           assigned_to: string | null
+          assignment_source: string | null
           call_attempts: number
           call_count: number | null
           company: string | null
@@ -153,6 +154,7 @@ export type Database = {
         Insert: {
           assigned_agent_id?: string | null
           assigned_to?: string | null
+          assignment_source?: string | null
           call_attempts?: number
           call_count?: number | null
           company?: string | null
@@ -171,6 +173,7 @@ export type Database = {
         Update: {
           assigned_agent_id?: string | null
           assigned_to?: string | null
+          assignment_source?: string | null
           call_attempts?: number
           call_count?: number | null
           company?: string | null

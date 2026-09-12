@@ -150,7 +150,7 @@ async function runTool(
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("leads")
-      .update({ assigned_to: agent.id })
+      .update({ assigned_to: agent.id, assignment_source: "coordinator" })
       .in(
         "id",
         pool.map((l) => l.id),
