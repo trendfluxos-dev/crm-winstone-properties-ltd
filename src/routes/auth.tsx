@@ -133,7 +133,7 @@ function AuthPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {isSignup
             ? "A supervisor approves new accounts before the floor data opens up."
-            : "Use the email and password for your Winstone Connect account."}
+            : "ফোন নম্বর, Employee ID অথবা ইমেইল — যেটা সহজ, সেটাই দিন।"}
         </p>
 
         <div className="mt-5 space-y-3">
@@ -150,16 +150,17 @@ function AuthPage() {
             </>
           )}
           <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{isSignup ? "Email" : "ফোন / Employee ID / ইমেইল"}</Label>
             <Input
               id="email"
-              type="email"
-              autoComplete="email"
+              type={isSignup ? "email" : "text"}
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@winstonebd.com"
+              placeholder={isSignup ? "you@winstonebd.com" : "01805049668 বা WIN2601"}
             />
           </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
             <Input
