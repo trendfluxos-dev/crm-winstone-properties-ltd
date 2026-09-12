@@ -257,6 +257,18 @@ export async function submitCallReport(input: {
     },
   });
 
+  // Sync trail for the phone: report accepted -> next lead unlocked.
+  const { recordSyncEvent } = await import("@/lib/call-jobs.server");
+  await recordSyncEvent({
+    agentId: input.agentId,
+    deviceId: report.device_id,
+    eventType: "report_submitted",
+    entityType: "call_report",
+    entityId: report.id,
+    idempotencyKey: `report_submitted:${report.id}`,
+    payload: { leadId: report.lead_id, category },
+  });
+
   return { ok: true, followUpId };
 }
 

@@ -33,6 +33,7 @@ export async function analyzeOne(recordingId: string): Promise<AnalysisState> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { processRecording } = await import("@/lib/call-intel.server");
   const { logLeadEvent } = await import("@/lib/lead-events.server");
+  const { upsertCallJob } = await import("@/lib/call-jobs.server");
 
   const { data: row } = await supabaseAdmin
     .from("call_recordings")
@@ -45,8 +46,18 @@ export async function analyzeOne(recordingId: string): Promise<AnalysisState> {
   if (!row.audio_url) {
     await supabaseAdmin
       .from("call_recordings")
-      .update({ analysis_status: "not_available", analysis_error: "no audio file" })
+      .update({
+        analysis_status: "not_available",
+        analysis_error: "no audio file",
+        recording_status: "not_available",
+      })
       .eq("id", recordingId);
+    await upsertCallJob({
+      recordingId,
+      jobType: "transcription",
+      status: "failed",
+      errorMessage: "no audio file",
+    });
     return "not_available";
   }
 
@@ -55,6 +66,12 @@ export async function analyzeOne(recordingId: string): Promise<AnalysisState> {
     .from("call_recordings")
     .update({ analysis_status: "processing", analysis_attempts: attempts })
     .eq("id", recordingId);
+  await upsertCallJob({
+    recordingId,
+    jobType: "transcription",
+    status: "processing",
+    countAttempt: true,
+  });
 
   try {
     const outcome = await processRecording(recordingId);
@@ -73,6 +90,8 @@ export async function analyzeOne(recordingId: string): Promise<AnalysisState> {
       .from("call_recordings")
       .update({ analysis_status: "completed", analysis_error: null })
       .eq("id", recordingId);
+    await upsertCallJob({ recordingId, jobType: "transcription", status: "completed" });
+    await upsertCallJob({ recordingId, jobType: "ai_analysis", status: "completed" });
     await logLeadEvent({
       leadId: row.lead_id,
       agentId: row.agent_id,
@@ -90,6 +109,12 @@ export async function analyzeOne(recordingId: string): Promise<AnalysisState> {
         analysis_error: message.slice(0, 500),
       })
       .eq("id", recordingId);
+    await upsertCallJob({
+      recordingId,
+      jobType: "transcription",
+      status: "failed",
+      errorMessage: message,
+    });
     await logLeadEvent({
       leadId: row.lead_id,
       agentId: row.agent_id,
