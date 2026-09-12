@@ -34,7 +34,8 @@ export type AuditAction =
   | "do_not_contact_added"
   | "do_not_contact_removed"
   | "ai_voice_settings_updated"
-  | "recording_doc_synced";
+  | "recording_doc_synced"
+  | "agent_sim_bound";
 
 export async function logAudit(input: {
   action: AuditAction;
