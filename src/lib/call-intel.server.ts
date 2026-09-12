@@ -251,7 +251,8 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
   } catch (err) {
     await supabaseAdmin
       .from("call_recordings")
-      .update({ sync_status: "failed" })
+      .update({ stt_status: "failed", sync_status: "failed" })
+
       .eq("id", recordingId);
     throw err;
   }
