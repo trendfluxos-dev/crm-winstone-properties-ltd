@@ -28,7 +28,11 @@ export type AuditAction =
   | "agent_account_updated"
   | "shift_summary_generated"
   | "shift_summary_hq_cleared"
-  | "document_summarized";
+  | "document_summarized"
+  | "twilio_number_wired"
+  | "twilio_number_purchased"
+  | "do_not_contact_added"
+  | "do_not_contact_removed";
 
 export async function logAudit(input: {
   action: AuditAction;

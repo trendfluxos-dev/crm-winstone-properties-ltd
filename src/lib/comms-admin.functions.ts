@@ -78,8 +78,8 @@ export const wireTwilioNumber = createServerFn({ method: "POST" })
       smsUrl: expected.smsUrl,
     });
 
-    const { recordAudit } = await import("@/lib/audit.server");
-    await recordAudit({
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
       action: "twilio_number_wired",
       entityType: "twilio_number",
       entityId: updated.sid,
@@ -116,8 +116,8 @@ export const buyTwilioNumber = createServerFn({ method: "POST" })
       smsUrl: expected.smsUrl,
     });
 
-    const { recordAudit } = await import("@/lib/audit.server");
-    await recordAudit({
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
       action: "twilio_number_purchased",
       entityType: "twilio_number",
       entityId: bought.sid,
@@ -196,8 +196,8 @@ export const upsertDoNotContact = createServerFn({ method: "POST" })
       });
     }
 
-    const { recordAudit } = await import("@/lib/audit.server");
-    await recordAudit({
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
       action: data.remove ? "do_not_contact_removed" : "do_not_contact_added",
       entityType: "do_not_contact",
       entityId: data.phoneNumber,
