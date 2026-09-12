@@ -10,7 +10,20 @@ function apiKey(): string {
 
 export const AUDIO_BUCKET = "call-audio";
 
+/**
+ * Bangla-first transcription. Sarvam AI runs the speech-to-text when its key is
+ * configured; otherwise the built-in transcription model is used so calls never
+ * stall waiting on an external account.
+ */
 export async function transcribeAudio(bytes: Uint8Array, filename: string): Promise<string> {
+  const ext = filename.split(".").pop() ?? "mp3";
+  const { sarvamConfigured, sarvamTranscribe } = await import("@/lib/sarvam-stt.server");
+
+  if (sarvamConfigured()) {
+    const text = await sarvamTranscribe(bytes, filename, mimeFor(ext));
+    if (text) return text;
+  }
+
   const form = new FormData();
   form.append("model", "google/gemini-3.5-transcribe");
   form.append("file", new Blob([bytes as BlobPart]), filename);
