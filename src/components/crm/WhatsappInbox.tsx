@@ -29,6 +29,7 @@ export function WhatsappInbox() {
   const adminToken = useAdminToken();
   const queryClient = useQueryClient();
   const send = useServerFn(logMyWhatsappMessage);
+  const sendApi = useServerFn(sendWhatsappMessage);
   const { data: integration } = useQuery({
     queryKey: ["whatsapp-integration-status"],
     queryFn: () => getWhatsappIntegrationStatus(),
@@ -221,7 +222,7 @@ export function WhatsappInbox() {
                     onChange={(e) => setDraft(e.target.value)}
                     rows={2}
                     className="resize-none"
-                    placeholder="যে মেসেজটি পাঠিয়েছেন তা এখানে লিখে রাখুন"
+                    placeholder={integrationStatus === "configured" ? "মেসেজ লিখে পাঠান" : "যে মেসেজটি পাঠিয়েছেন তা এখানে লিখে রাখুন"}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
