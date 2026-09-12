@@ -8,21 +8,13 @@ const InitiateInput = z.object({
 });
 
 export const initiateTwilioCall = createServerFn({ method: "POST" })
-  .middleware([async ({ context, next }) => {
-    const caller = await resolveCaller(context.adminToken);
+  .inputValidator((data: { leadId: string }) => InitiateInput.parse(data))
+  .handler(async ({ data }) => {
+    const caller = await resolveCaller(null);
     if (caller.scope !== "agent" || !caller.profile) {
       throw new Error("শুধুমাত্র এজেন্ট Twilio কল শুরু করতে পারেন");
     }
-    return next({
-      context: {
-        ...context,
-        caller,
-        adminToken: null as string | null,
-      } as typeof context & { caller: NonNullable<typeof caller>; adminToken: string | null },
-    });
-  }])
-  .inputValidator((data: { leadId: string }) => InitiateInput.parse(data))
-  .handler(async ({ data, context }) => {
+
     const { createOutboundCall, normalizePhone, twilioConfig, resolvePhoneNumber, isConfigured } = await import(
       "@/lib/twilio.server"
     );
@@ -32,7 +24,7 @@ export const initiateTwilioCall = createServerFn({ method: "POST" })
 
     const cfg = twilioConfig();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const profile = context.caller.profile;
+    const profile = caller.profile;
 
     const { data: lead } = await supabaseAdmin
       .from("leads")
@@ -42,7 +34,6 @@ export const initiateTwilioCall = createServerFn({ method: "POST" })
 
     if (!lead) throw new Error("লিড পাওয়া যায়নি");
 
-    // An agent may call their own leads or any lead assigned to them.
     const assignedId = lead.assigned_to ?? lead.assigned_agent_id;
     if (assignedId && assignedId !== profile.id) {
       throw new Error("আপনি অন্যের লিডে কল করতে পারবেন না");
@@ -57,34 +48,31 @@ export const initiateTwilioCall = createServerFn({ method: "POST" })
     const from = cfg.phoneNumber ?? (await resolvePhoneNumber(cfg));
     if (!from) throw new Error("কোনো Twilio ফোন নম্বর কনফিগার করা নেই");
 
-    const result = await createOutboundCall({
+    return await createOutboundCall({
       agentPhone,
       customerPhone,
       leadId: lead.id,
       agentId: profile.id,
       record: true,
     });
-
-    return result;
   });
 
-const HealthInput = z.object({});
+const HealthInput = z.object({
+  adminToken: z.string().nullable().optional(),
+});
 
 export const twilioHealth = createServerFn({ method: "POST" })
-  .middleware([async ({ context, next }) => {
-    const caller = await resolveCaller(context.adminToken);
+  .inputValidator((data: object) => HealthInput.parse(data))
+  .handler(async ({ data }) => {
+    const caller = await resolveCaller((data as { adminToken?: string | null }).adminToken ?? null);
     if (caller.scope !== "authority" && caller.scope !== "coordinator") {
       throw new Error("শুধুমাত্র HQ/Coordinator দেখতে পারবেন");
     }
-    return next({ context });
-  }])
-  .inputValidator((data: object) => HealthInput.parse(data))
-  .handler(async () => {
+
     const { twilioConfig, isConfigured } = await import("@/lib/twilio.server");
     const cfg = twilioConfig();
     const configured = isConfigured();
-    const projectUrls = await import("@/lib/project-urls");
-    const webhookBase = cfg.webhookBase || projectUrls.publicBaseUrl();
+    const webhookBase = cfg.webhookBase || getPublicBaseUrl();
 
     return {
       configured,
@@ -101,3 +89,10 @@ export const twilioHealth = createServerFn({ method: "POST" })
       whatsappUrl: `${webhookBase}/api/public/twilio/whatsapp`,
     };
   });
+
+function getPublicBaseUrl(): string {
+  const fromEnv = process.env["PUBLIC_BASE_URL"] || process.env["VITE_PUBLIC_BASE_URL"];
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  // Published production URL for this project.
+  return "https://webcrm.winstonebd.com";
+}
