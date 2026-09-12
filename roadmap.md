@@ -38,3 +38,11 @@
 - [x] Android app signs in with CRM email + password (/api/public/agent/login) — no employee id typing
 - [x] Agents self-assign: open (unassigned) leads list on /desk with one-tap claim, web only
 - [x] Real call-recording backend: multipart audio upload, storage + transcription + AI audit, retry endpoint (/api/public/ingest/reprocess) — verified end to end with real speech
+- [x] Per-device auth for the phone app (agent_devices + x-device-token); shared ingest secret removed from the APK
+- [x] Mandatory post-call report gate: 8 categories, conditional fields, DB-enforced next-call lock (verified with a live DB rule test)
+- [x] Follow-up calendar (day/week/month/agenda) + follow_up_events
+- [x] Report/recording/AI/device/alert panel on Executive HQ + IT Console; assignment history on Coordinator Deck
+- [x] Documentation CMS: /docs, /docs/:slug, /docs-admin, /docs-admin/editor/:slug (real persistence, draft→published)
+- [x] APK v1.4 (versionCode 5) built, uploaded, and registered in app_releases for in-app update notice
+- [ ] Physical handset run: install v1.4, place a live call, confirm report + recording + AI land in HQ (needs the phone)
+- [ ] Official Meta WhatsApp Business API: needs a business account + credentials before delivery can be claimed
