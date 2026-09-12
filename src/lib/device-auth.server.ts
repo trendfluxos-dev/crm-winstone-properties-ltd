@@ -65,6 +65,14 @@ export async function issueDeviceToken(input: {
   deviceLabel?: string | null;
   appVersion?: string | null;
   platform?: string;
+  /** Optional inventory the phone reports at binding time. */
+  deviceUid?: string | null;
+  manufacturer?: string | null;
+  model?: string | null;
+  androidVersion?: string | null;
+  phoneNumber?: string | null;
+  recordingCapable?: boolean | null;
+  recordingNote?: string | null;
 }): Promise<{ token: string; deviceId: string }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const token = newDeviceToken();
@@ -78,6 +86,15 @@ export async function issueDeviceToken(input: {
       device_label: input.deviceLabel ?? null,
       app_version: input.appVersion ?? null,
       platform: input.platform ?? "android",
+      device_uid: input.deviceUid ?? null,
+      manufacturer: input.manufacturer ?? null,
+      model: input.model ?? null,
+      android_version: input.androidVersion ?? null,
+      phone_number: input.phoneNumber ?? null,
+      recording_capable: input.recordingCapable ?? null,
+      recording_tested: input.recordingCapable != null,
+      recording_note: input.recordingNote ?? null,
+      status: "active",
     })
     .select("id")
     .single();
@@ -93,6 +110,20 @@ export async function issueDeviceToken(input: {
       platform: input.platform ?? "android",
       appVersion: input.appVersion ?? null,
       deviceLabel: input.deviceLabel ?? null,
+    },
+  });
+
+  const { recordSyncEvent } = await import("@/lib/call-jobs.server");
+  await recordSyncEvent({
+    agentId: input.profileId,
+    deviceId: data.id,
+    eventType: "device_bound",
+    entityType: "agent_device",
+    entityId: data.id,
+    payload: {
+      model: input.model ?? null,
+      android_version: input.androidVersion ?? null,
+      recording_capable: input.recordingCapable ?? null,
     },
   });
 
