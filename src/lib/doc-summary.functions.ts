@@ -148,7 +148,7 @@ export const summarizeDocument = createServerFn({ method: "POST" })
       action: "document_summarized",
       entityType: "document",
       entityId: data.fileName,
-      actorProfileId: caller.profile?.id,
+      actorProfileId: caller.profile?.id ?? null,
       actorLabel: caller.profile?.name ?? "অজানা",
       metadata: { title: summary.title, agents: summary.agents.map((a) => a.name) },
     });
