@@ -35,7 +35,7 @@ export async function upsertCallJob(input: {
     status: input.status,
     provider: input.provider ?? null,
     error_message: input.errorMessage ? input.errorMessage.slice(0, 500) : null,
-    started_at: input.status === "processing" ? now : undefined,
+    started_at: input.status === "queued" ? null : now,
     completed_at: input.status === "completed" || input.status === "failed" ? now : null,
   };
 
