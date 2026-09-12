@@ -367,6 +367,25 @@ private fun StatusCards(state: DeskUiState) {
         }
 
         WinCard {
+            Text("ফোনের তথ্য", fontWeight = FontWeight.Bold)
+            Text(
+                "অ্যাপ ভার্সন: ${com.winstone.connect.BuildConfig.VERSION_NAME}",
+                fontSize = 12.sp,
+                color = WinInkMuted,
+            )
+            Text(
+                "ফোন: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}",
+                fontSize = 12.sp,
+                color = WinInkMuted,
+            )
+            Text(
+                "অ্যান্ড্রয়েড: ${android.os.Build.VERSION.RELEASE}",
+                fontSize = 12.sp,
+                color = WinInkMuted,
+            )
+        }
+
+        WinCard {
             Text("সিঙ্ক", fontWeight = FontWeight.Bold)
             Text(
                 if (state.error == null) "সার্ভারের সাথে সংযোগ ঠিক আছে"
@@ -379,6 +398,14 @@ private fun StatusCards(state: DeskUiState) {
                 fontSize = 12.sp,
                 color = WinInkMuted,
             )
+            Text(
+                "পাঠানোর অপেক্ষায়: ${state.sync.pending} · ব্যর্থ: ${state.sync.failed}",
+                fontSize = 12.sp,
+                color = if (state.sync.failed > 0) WinRed else WinInkMuted,
+            )
+            state.sync.lastError?.let {
+                Text("শেষ সমস্যা: $it", fontSize = 11.sp, color = WinRed)
+            }
             Text(
                 "ইন্টারনেট না থাকলে কল, রেকর্ডিং ও রিপোর্ট ফোনে জমা থাকে এবং নেটওয়ার্ক ফিরলে নিজে থেকেই পাঠানো হয়।",
                 fontSize = 12.sp,
