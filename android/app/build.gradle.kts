@@ -20,8 +20,8 @@ android {
         applicationId = "com.winstone.connect"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
         buildConfigField("String", "INGEST_SECRET", "\"$ingestSecret\"")
     }
 
@@ -30,9 +30,22 @@ android {
         buildConfig = true
     }
 
+    signingConfigs {
+        create("winstone") {
+            // Project-internal distribution key (not a Play Store upload key):
+            // kept in the repo so every rebuild keeps the same signature and
+            // agents can update the app without uninstalling first.
+            storeFile = rootProject.file("winstone-release.jks")
+            storePassword = "winstone2026"
+            keyAlias = "winstone"
+            keyPassword = "winstone2026"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("winstone")
         }
     }
 
