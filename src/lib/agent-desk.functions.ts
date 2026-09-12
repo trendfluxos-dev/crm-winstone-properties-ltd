@@ -98,6 +98,15 @@ export const claimLead = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!updated) throw new Error("এই লিড আগেই অন্য কেউ নিয়ে নিয়েছে");
+
+    const { logLeadEvent } = await import("@/lib/lead-events.server");
+    await logLeadEvent({
+      leadId: updated.id,
+      agentId: me,
+      kind: "self_claimed",
+      detail: `${caller.profile.name} নিজে লিড নিয়েছেন`,
+    });
+
     return { leadId: updated.id };
   });
 
