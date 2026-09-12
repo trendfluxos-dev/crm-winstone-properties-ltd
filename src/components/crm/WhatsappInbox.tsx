@@ -117,8 +117,8 @@ export function WhatsappInbox() {
           </p>
           <p className="mt-1 text-[11px] text-muted-foreground">
             {integrationStatus === "configured"
-              ? "WhatsApp Business API: সংযুক্ত"
-              : "WhatsApp Business API: সংযুক্ত নয় (INTEGRATION REQUIRED) — মেসেজ এজেন্টের নিজের হোয়াটসঅ্যাপ থেকে যাবে"}
+              ? "WhatsApp Business API: সংযুক্ত · ✓ পাঠানো · ✓✓ পৌঁছেছে · নীল ✓✓ পড়া হয়েছে · ! পৌঁছায়নি"
+              : "WhatsApp Business API: সংযুক্ত নয় (INTEGRATION REQUIRED) — মেসেজ এজেন্টের নিজের হোয়াটসঅ্যাপ থেকে যাবে, তাই শুধু “সংরক্ষিত” দেখাবে"}
           </p>
 
         </div>
