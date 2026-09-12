@@ -107,10 +107,23 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
                     )
                 }
                 .onFailure { e ->
-                    _state.value = _state.value.copy(
-                        loading = false,
-                        error = e.message ?: "সার্ভারে সংযোগ করা যাচ্ছে না",
-                    )
+                    val message = e.message.orEmpty()
+                    // IT removed this phone's access: stop using the stored token
+                    // and send the agent back to sign-in with a clear reason.
+                    val revoked = message.contains("Unauthorized", ignoreCase = true) ||
+                        message.contains("device", ignoreCase = true) && message.contains("revoke", ignoreCase = true)
+                    if (revoked) {
+                        AgentSession.clear(app)
+                        _state.value = DeskUiState(
+                            deviceRevoked = true,
+                            error = "এই ফোনের অনুমতি বাতিল করা হয়েছে — আবার সাইন ইন করুন",
+                        )
+                    } else {
+                        _state.value = _state.value.copy(
+                            loading = false,
+                            error = message.ifBlank { "সার্ভারে সংযোগ করা যাচ্ছে না" },
+                        )
+                    }
                 }
         }
     }
