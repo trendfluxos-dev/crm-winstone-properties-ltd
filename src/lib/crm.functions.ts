@@ -137,7 +137,7 @@ export const autoDistributeLeads = createServerFn({ method: "POST" })
       leads.map((lead, index) =>
         supabaseAdmin
           .from("leads")
-          .update({ assigned_to: agents[index % agents.length]!.id })
+          .update({ assigned_to: agents[index % agents.length]!.id, assignment_source: "coordinator" })
           .eq("id", lead.id),
       ),
     );

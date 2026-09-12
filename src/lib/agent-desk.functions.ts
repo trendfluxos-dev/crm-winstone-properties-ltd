@@ -91,7 +91,7 @@ export const claimLead = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: updated, error } = await supabaseAdmin
       .from("leads")
-      .update({ assigned_to: me, assigned_agent_id: me })
+      .update({ assigned_to: me, assigned_agent_id: me, assignment_source: "self" })
       .eq("id", data.leadId)
       .is("assigned_to", null)
       .select("id")
