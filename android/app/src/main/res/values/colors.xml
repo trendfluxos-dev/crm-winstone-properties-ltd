@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Winstone Connect — white / green / cream palette.
+  Drop into app/src/main/res/values/colors.xml so the phone app matches
+  webcrm.winstonebd.com exactly. Hex values are the sRGB equivalents of the
+  OKLCH tokens used in the web CRM (src/styles.css).
+-->
+<resources>
+    <!-- Foundation -->
+    <color name="win_cream">#FBF8F0</color>          <!-- app background -->
+    <color name="win_cream_deep">#F4EFE2</color>     <!-- muted / surface-2 -->
+    <color name="win_white">#FFFFFF</color>          <!-- cards, sheets -->
+    <color name="win_ink">#2B2A25</color>            <!-- primary text -->
+    <color name="win_ink_muted">#6F6B60</color>      <!-- secondary text -->
+    <color name="win_border">#E4DECE</color>         <!-- hairline borders -->
+
+    <!-- Green accents -->
+    <color name="win_green">#2E9E64</color>          <!-- primary action -->
+    <color name="win_green_dark">#217A4C</color>     <!-- pressed state -->
+    <color name="win_green_soft">#E4F4EA</color>     <!-- tinted pill background -->
+    <color name="win_live">#35B473</color>           <!-- on-call pulse -->
+
+    <!-- Status -->
+    <color name="win_amber">#D89A2B</color>          <!-- pending / idle -->
+    <color name="win_red">#C4503F</color>            <!-- failed sync / critical -->
+    <color name="win_on_green">#FFFFFF</color>
+</resources>

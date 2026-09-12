@@ -1,0 +1,122 @@
+package com.winstone.connect.ui
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.winstone.connect.data.AgentSession
+import com.winstone.connect.data.DeskData
+import com.winstone.connect.data.parseCalls
+import com.winstone.connect.data.parseLeads
+import com.winstone.connect.data.parseMessages
+import com.winstone.connect.data.remote.WinstoneAgentApi
+import com.winstone.connect.data.remote.WinstoneApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
+data class DeskUiState(
+    val employeeId: String? = null,
+    val loading: Boolean = false,
+    val data: DeskData? = null,
+    val error: String? = null,
+    val toast: String? = null,
+    val coach: WinstoneAgentApi.Coach? = null,
+    val coachLoading: Boolean = false,
+)
+
+class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
+
+    private val _state = MutableStateFlow(DeskUiState(employeeId = AgentSession.employeeId))
+    val state: StateFlow<DeskUiState> = _state
+
+    init {
+        viewModelScope.launch {
+            AgentSession.load(app)
+            _state.value = _state.value.copy(employeeId = AgentSession.employeeId)
+            if (AgentSession.isSignedIn()) refresh()
+            while (true) {
+                delay(20_000)
+                if (AgentSession.isSignedIn()) refresh(silent = true)
+            }
+        }
+    }
+
+    fun signIn(typed: String) {
+        val id = typed.trim().uppercase()
+        if (id.length < 4) {
+            _state.value = _state.value.copy(error = "সঠিক এজেন্ট আইডি দিন (যেমন WIN2601)")
+            return
+        }
+        viewModelScope.launch {
+            AgentSession.saveEmployeeId(app, id)
+            _state.value = _state.value.copy(employeeId = id, error = null)
+            refresh()
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch {
+            AgentSession.clear(app)
+            _state.value = DeskUiState()
+        }
+    }
+
+    fun refresh(silent: Boolean = false) {
+        val employeeId = AgentSession.employeeId ?: return
+        viewModelScope.launch {
+            if (!silent) _state.value = _state.value.copy(loading = true, error = null)
+            runCatching { WinstoneApi.fetchWorkspace(employeeId) }
+                .onSuccess { ws ->
+                    AgentSession.cacheAgent(app, ws.agentId, ws.agentName)
+                    _state.value = _state.value.copy(
+                        loading = false,
+                        error = null,
+                        data = DeskData(
+                            agentId = ws.agentId,
+                            agentName = ws.agentName,
+                            leads = parseLeads(ws.leads),
+                            calls = parseCalls(ws.calls),
+                            messages = parseMessages(ws.whatsapp),
+                        ),
+                    )
+                }
+                .onFailure { e ->
+                    _state.value = _state.value.copy(
+                        loading = false,
+                        error = e.message ?: "সার্ভারে সংযোগ করা যাচ্ছে না",
+                    )
+                }
+        }
+    }
+
+    fun loadCoach() {
+        val employeeId = AgentSession.employeeId ?: return
+        viewModelScope.launch {
+            _state.value = _state.value.copy(coachLoading = true)
+            runCatching { WinstoneAgentApi.fetchCoach(employeeId) }
+                .onSuccess { _state.value = _state.value.copy(coachLoading = false, coach = it) }
+                .onFailure {
+                    _state.value = _state.value.copy(
+                        coachLoading = false,
+                        toast = it.message ?: "AI কোচ আনা যায়নি",
+                    )
+                }
+        }
+    }
+
+    fun submitLead(name: String, phone: String, company: String, notes: String) {
+        viewModelScope.launch {
+            runCatching { WinstoneAgentApi.submitLead(name, phone, company, notes) }
+                .onSuccess {
+                    _state.value = _state.value.copy(toast = "লিড জমা হয়েছে")
+                    refresh(silent = true)
+                }
+                .onFailure { _state.value = _state.value.copy(toast = it.message ?: "লিড জমা হয়নি") }
+        }
+    }
+
+    fun clearToast() {
+        _state.value = _state.value.copy(toast = null)
+    }
+}
