@@ -236,6 +236,7 @@ object WinstoneApi {
     suspend fun submitReport(
         reportId: String,
         category: String,
+        summary: String?,
         note: String?,
         reason: String?,
         followUpAtIso: String?,
@@ -245,6 +246,7 @@ object WinstoneApi {
             put("action", "submit")
             put("report_id", reportId)
             put("category", category)
+            summary?.let { if (it.isNotBlank()) put("summary", it) }
             note?.let { if (it.isNotBlank()) put("note", it) }
             reason?.let { if (it.isNotBlank()) put("reason", it) }
             followUpAtIso?.let { put("follow_up_at", it) }

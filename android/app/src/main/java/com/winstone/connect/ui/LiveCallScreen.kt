@@ -176,6 +176,7 @@ private fun ReportSheet(notes: String) {
 
     var reportId by remember { mutableStateOf<String?>(null) }
     var category by remember { mutableStateOf("") }
+    var summary by remember { mutableStateOf("") }
     var note by remember { mutableStateOf(notes) }
     var reason by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
@@ -203,13 +204,13 @@ private fun ReportSheet(notes: String) {
         }
     }
 
-    val needsSchedule = category == "follow_up" || category == "callback"
+    // প্রতিটি কলে: ক্যাটাগরি + সারাংশ + নোট + ফলো-আপ তারিখ — সবই বাধ্যতামূলক
     val needsReason = category == "not_interested" || category == "wrong_number"
-    val needsNote = needsSchedule || category == "hot_lead"
     val ready = category.isNotBlank() &&
-        (!needsSchedule || (date.length == 10 && time.length == 5)) &&
-        (!needsReason || reason.trim().length > 1) &&
-        (!needsNote || note.trim().length > 1)
+        date.length == 10 && time.length == 5 &&
+        summary.trim().length > 1 &&
+        note.trim().length > 1 &&
+        (!needsReason || reason.trim().length > 1)
 
     ModalBottomSheet(onDismissRequest = { /* বাধ্যতামূলক — বন্ধ করা যাবে না */ }, sheetState = sheet) {
         Column(Modifier.padding(20.dp)) {
@@ -236,21 +237,27 @@ private fun ReportSheet(notes: String) {
                 ) { Text(if (category == value) "✓ $label" else label) }
             }
 
-            if (needsSchedule) {
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it },
-                    label = { Text("ফলো-আপ তারিখ (2026-05-20)") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = time,
-                    onValueChange = { time = it },
-                    label = { Text("সময় (14:30)") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = summary,
+                onValueChange = { summary = it },
+                label = { Text("কলের সারাংশ (বাধ্যতামূলক)") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = date,
+                onValueChange = { date = it },
+                label = { Text("ফলো-আপ তারিখ (2026-05-20) — বাধ্যতামূলক") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = time,
+                onValueChange = { time = it },
+                label = { Text("সময় (14:30) — বাধ্যতামূলক") },
+                modifier = Modifier.fillMaxWidth(),
+            )
             if (needsReason) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
@@ -264,7 +271,7 @@ private fun ReportSheet(notes: String) {
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text(if (needsNote) "নোট (বাধ্যতামূলক)" else "নোট") },
+                label = { Text("নোট (বাধ্যতামূলক)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
@@ -281,11 +288,12 @@ private fun ReportSheet(notes: String) {
                     val id = reportId ?: return@Button
                     busy = true; error = null
                     scope.launch {
-                        val followUp = if (needsSchedule) "${'$'}{date}T${'$'}{time}:00+06:00" else null
+                        val followUp = "${'$'}{date}T${'$'}{time}:00+06:00"
                         val result = runCatching {
                             WinstoneApi.submitReport(
                                 reportId = id,
                                 category = category,
+                                summary = summary,
                                 note = note,
                                 reason = reason,
                                 followUpAtIso = followUp,
