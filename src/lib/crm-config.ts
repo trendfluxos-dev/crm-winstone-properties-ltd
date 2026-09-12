@@ -107,9 +107,4 @@ export const PERMISSION_LABELS: { key: keyof Permissions; label: string; hint: s
     label: "Export / download data",
     hint: "Off blocks CSV downloads on agent devices.",
   },
-  {
-    key: "agentCanUseAiCoach",
-    label: "Use the AI Coach",
-    hint: "Personal performance summary and next steps.",
-  },
 ];
