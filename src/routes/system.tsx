@@ -3,6 +3,7 @@ import { Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AccountApprovals } from "@/components/crm/AccountApprovals";
+import { AuditTrail } from "@/components/crm/AuditTrail";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
