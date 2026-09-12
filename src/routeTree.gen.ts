@@ -50,6 +50,7 @@ import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/publi
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
 import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
+import { Route as ApiPublicTwilioBridgeRouteImport } from './routes/api/public/twilio/bridge'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -262,6 +263,11 @@ const ApiPublicReportsSummaryRoute = ApiPublicReportsSummaryRouteImport.update({
   path: '/api/public/reports/summary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTwilioBridgeRoute = ApiPublicTwilioBridgeRouteImport.update({
+  id: '/api/public/twilio/bridge',
+  path: '/api/public/twilio/bridge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWhatsappWebhookRoute =
   ApiPublicWhatsappWebhookRouteImport.update({
     id: '/api/public/whatsapp/webhook',
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
+  '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -355,6 +362,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
+  '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesById {
@@ -400,6 +408,7 @@ export interface FileRoutesById {
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
+  '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRouteTypes {
@@ -446,6 +455,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
+    | '/api/public/twilio/bridge'
     | '/api/public/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
+    | '/api/public/twilio/bridge'
     | '/api/public/whatsapp/webhook'
   id:
     | '__root__'
@@ -534,6 +545,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
+    | '/api/public/twilio/bridge'
     | '/api/public/whatsapp/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -579,6 +591,7 @@ export interface RootRouteChildren {
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
   ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
+  ApiPublicTwilioBridgeRoute: typeof ApiPublicTwilioBridgeRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
 }
 
@@ -871,6 +884,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReportsSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/twilio/bridge': {
+      id: '/api/public/twilio/bridge'
+      path: '/api/public/twilio/bridge'
+      fullPath: '/api/public/twilio/bridge'
+      preLoaderRoute: typeof ApiPublicTwilioBridgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/whatsapp/webhook': {
       id: '/api/public/whatsapp/webhook'
       path: '/api/public/whatsapp/webhook'
@@ -924,6 +944,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
   ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,
+  ApiPublicTwilioBridgeRoute: ApiPublicTwilioBridgeRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
 }
 export const routeTree = rootRouteImport
