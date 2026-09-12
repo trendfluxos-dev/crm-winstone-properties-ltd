@@ -45,6 +45,14 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false })
         .limit(20),
       supabaseAdmin.from("leads").select("id, assigned_to, status"),
+      supabaseAdmin
+        .from("call_processing_jobs")
+        .select("id, job_type, status, attempts, error_message")
+        .gte("created_at", since),
+      supabaseAdmin
+        .from("sync_events")
+        .select("id, event_type, status, created_at")
+        .gte("created_at", since),
     ]);
 
     const count = <T>(rows: T[] | null, predicate: (row: T) => boolean) =>
