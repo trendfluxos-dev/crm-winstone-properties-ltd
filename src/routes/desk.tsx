@@ -10,6 +10,8 @@ import { FollowUpCalendar } from "@/components/crm/FollowUpCalendar";
 import { MyReports } from "@/components/crm/MyReports";
 import { PostCallReportGate } from "@/components/crm/PostCallReportGate";
 import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
+import { LeadImportDialog } from "@/components/crm/LeadImportDialog";
+import { LeadTable } from "@/components/crm/LeadTable";
 import { OpenLeadsCard } from "@/components/crm/OpenLeadsCard";
 import { QueueBoard } from "@/components/crm/QueueBoard";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
