@@ -1,103 +1,103 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const InitiateSchema = z.object({ leadId: z.string().uuid() });
+import { resolveCaller } from "@/lib/access.server";
 
-/**
- * Starts a bridged Twilio call from the CRM.
- * The agent's profile phone rings first; when answered Twilio dials the lead
- * and records the conversation (when recording consent is enabled).
- */
+const InitiateInput = z.object({
+  leadId: z.string().uuid(),
+});
+
 export const initiateTwilioCall = createServerFn({ method: "POST" })
-  .middleware([(await import("@/integrations/supabase/auth-middleware")).requireSupabaseAuth])
-  .inputValidator((input: unknown) => InitiateSchema.parse(input))
+  .middleware([async ({ context, next }) => {
+    const caller = await resolveCaller(context.adminToken);
+    if (caller.scope !== "agent" || !caller.profile) {
+      throw new Error("শুধুমাত্র এজেন্ট Twilio কল শুরু করতে পারেন");
+    }
+    return next({
+      context: {
+        ...context,
+        caller,
+        adminToken: null as string | null,
+      } as typeof context & { caller: NonNullable<typeof caller>; adminToken: string | null },
+    });
+  }])
+  .inputValidator((data: { leadId: string }) => InitiateInput.parse(data))
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { twilioConfig, isConfigured, createOutboundCall, normalizePhone } = await import(
+    const { createOutboundCall, normalizePhone, twilioConfig, resolvePhoneNumber, isConfigured } = await import(
       "@/lib/twilio.server"
     );
-
-    if (!isConfigured()) throw new Error("Twilio is not configured");
+    if (!isConfigured()) {
+      throw new Error("Twilio কনফিগার করা নেই। IT Console-এ সেটআপ করুন।");
+    }
 
     const cfg = twilioConfig();
-    const [profile, lead] = await Promise.all([
-      supabaseAdmin.from("profiles").select("*").eq("id", context.userId).single(),
-      supabaseAdmin.from("leads").select("*").eq("id", data.leadId).single(),
-    ]);
-    if (profile.error || !profile.data) throw new Error("Agent profile not found");
-    if (lead.error || !lead.data) throw new Error("Lead not found");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const profile = context.caller.profile;
 
-    // Agents can only call leads assigned to them.
-    if (profile.data.role === "agent" && lead.data.assigned_to !== profile.data.id) {
-      throw new Error("This lead is not assigned to you");
+    const { data: lead } = await supabaseAdmin
+      .from("leads")
+      .select("id, phone_number, assigned_to, assigned_agent_id, name")
+      .eq("id", data.leadId)
+      .maybeSingle();
+
+    if (!lead) throw new Error("লিড পাওয়া যায়নি");
+
+    // An agent may call their own leads or any lead assigned to them.
+    const assignedId = lead.assigned_to ?? lead.assigned_agent_id;
+    if (assignedId && assignedId !== profile.id) {
+      throw new Error("আপনি অন্যের লিডে কল করতে পারবেন না");
     }
-    if (!profile.data.phone) throw new Error("Agent phone number is not set");
+
+    if (!profile.phone) {
+      throw new Error("আপনার প্রোফাইলে ফোন নম্বর নেই");
+    }
+
+    const agentPhone = normalizePhone(profile.phone);
+    const customerPhone = normalizePhone(lead.phone_number);
+    const from = cfg.phoneNumber ?? (await resolvePhoneNumber(cfg));
+    if (!from) throw new Error("কোনো Twilio ফোন নম্বর কনফিগার করা নেই");
 
     const result = await createOutboundCall({
-      agentPhone: normalizePhone(profile.data.phone),
-      customerPhone: normalizePhone(lead.data.phone_number),
-      leadId: lead.data.id,
-      agentId: profile.data.id,
-      record: cfg.recordingEnabled,
+      agentPhone,
+      customerPhone,
+      leadId: lead.id,
+      agentId: profile.id,
+      record: true,
     });
 
-    // Record the lifecycle row immediately so the desk can show "ringing".
-    const { data: inserted } = await supabaseAdmin
-      .from("call_recordings")
-      .insert({
-        lead_id: lead.data.id,
-        agent_id: profile.data.id,
-        phone_number: lead.data.phone_number,
-        call_direction: "outgoing",
-        duration_seconds: 0,
-        is_two_sided: true,
-        sync_status: "uploaded",
-        analysis_status: "pending",
-        call_source: "twilio",
-        call_status: "initiated",
-        external_call_id: result.callSid,
-        agent_phone: profile.data.phone,
-        started_at: new Date().toISOString(),
-        recording_status: cfg.recordingEnabled ? "pending" : "not_available",
-        upload_status: "pending",
-      })
-      .select("id")
-      .single();
-
-    return {
-      callSid: result.callSid,
-      status: result.status,
-      recordingId: inserted?.id ?? null,
-    };
+    return result;
   });
 
-const HealthTokenSchema = z.object({ adminToken: z.string().nullable().optional() });
+const HealthInput = z.object({});
 
-/** Health/status summary shown only to IT/HQ. */
 export const twilioHealth = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => HealthTokenSchema.parse(input ?? {}))
-  .handler(async ({ data }) => {
-    const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
-    const caller = await resolveCaller(data.adminToken ?? null);
-    requireAuthority(caller);
-
-    const { twilioConfig, isConfigured, resolvePhoneNumber } = await import("@/lib/twilio.server");
+  .middleware([async ({ context, next }) => {
+    const caller = await resolveCaller(context.adminToken);
+    if (caller.scope !== "authority" && caller.scope !== "coordinator") {
+      throw new Error("শুধুমাত্র HQ/Coordinator দেখতে পারবেন");
+    }
+    return next({ context });
+  }])
+  .inputValidator((data: object) => HealthInput.parse(data))
+  .handler(async () => {
+    const { twilioConfig, isConfigured } = await import("@/lib/twilio.server");
     const cfg = twilioConfig();
-    const phone = cfg.phoneNumber ?? (await resolvePhoneNumber().catch(() => null));
+    const configured = isConfigured();
+    const projectUrls = await import("@/lib/project-urls");
+    const webhookBase = cfg.webhookBase || projectUrls.publicBaseUrl();
 
     return {
-      configured: isConfigured(cfg),
+      configured,
       hasApiKey: !!cfg.apiKey,
       hasAccountSid: !!cfg.accountSid,
       hasAuthToken: !!cfg.authToken,
-      hasPhoneNumber: !!phone,
-      phoneNumber: phone,
-      webhookBase: cfg.webhookBase,
+      hasPhoneNumber: !!cfg.phoneNumber,
+      phoneNumber: cfg.phoneNumber,
       recordingEnabled: cfg.recordingEnabled,
       consentNotice: cfg.recordingConsentNotice,
-      voiceUrl: cfg.webhookBase ? `${cfg.webhookBase}/api/public/twilio/voice` : null,
-      statusUrl: cfg.webhookBase ? `${cfg.webhookBase}/api/public/twilio/call-status` : null,
-      recordingUrl: cfg.webhookBase ? `${cfg.webhookBase}/api/public/twilio/recording` : null,
-      whatsappUrl: cfg.webhookBase ? `${cfg.webhookBase}/api/public/twilio/whatsapp` : null,
+      voiceUrl: `${webhookBase}/api/public/twilio/voice`,
+      statusUrl: `${webhookBase}/api/public/twilio/call-status`,
+      recordingUrl: `${webhookBase}/api/public/twilio/recording`,
+      whatsappUrl: `${webhookBase}/api/public/twilio/whatsapp`,
     };
   });
