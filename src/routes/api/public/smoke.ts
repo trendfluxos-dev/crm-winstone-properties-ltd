@@ -1,13 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { routeTree } from "@/routeTree.gen";
+
 /**
  * Post-publish smoke test.
  *
- * Verifies that the agent APK is present in storage and that the key CRM pages
- * respond. Read-only and safe for external monitors — it never returns lead or
- * user data, only route names and HTTP statuses.
+ * Verifies that the agent APK is present in storage, that every key CRM page is
+ * really built into this deployment, and that the public API layer answers over
+ * HTTP. Read-only and safe for external monitors — it never returns lead or user
+ * data, only route names and statuses.
+ *
+ * Why pages are not fetched over HTTP: only `/api/public/*` bypasses the site
+ * login wall, so a request the server makes to `/desk` or `/hq` comes back 401
+ * even while the page works perfectly in a signed-in browser. That 401 said
+ * nothing about the page, so the check now proves the route is deployed instead
+ * of reporting a false failure.
  */
 const ROUTES = ["/", "/auth", "/desk", "/dispatch", "/hq", "/system", "/import", "/docs"] as const;
+
+/** Every route path compiled into this build. */
+function deployedPaths(): Set<string> {
+  const found = new Set<string>();
+  const walk = (node: unknown) => {
+    const route = node as { options?: { path?: string }; children?: unknown };
+    const path = route?.options?.path;
+    if (typeof path === "string") found.add(path);
+    const children = route?.children;
+    const list = Array.isArray(children)
+      ? children
+      : children && typeof children === "object"
+        ? Object.values(children as Record<string, unknown>)
+        : [];
+    for (const child of list) walk(child);
+  };
+  walk(routeTree);
+  return found;
+}
 
 type Check = {
   name: string;
