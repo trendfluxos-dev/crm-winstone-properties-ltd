@@ -35,25 +35,66 @@ export function TwilioStatusCard() {
         ) : (
           <>
             <div className="flex items-center gap-2">
-              {data.configured ? (
-                <>
-                  <CheckCircle2 className="size-4 text-live" />
-                  <span className="font-medium">সংযুক্ত</span>
-                </>
+              {data.status === "connected" ? (
+                <CheckCircle2 className="size-4 text-live" />
+              ) : data.status === "not_verified" ? (
+                <ShieldAlert className="size-4 text-idle" />
               ) : (
-                <>
-                  <XCircle className="size-4 text-destructive" />
-                  <span className="font-medium">কনফিগার করা হয়নি</span>
-                </>
+                <XCircle className="size-4 text-destructive" />
+              )}
+              <span className="font-medium">
+                {data.status === "connected"
+                  ? "যাচাই হয়েছে — সংযুক্ত"
+                  : data.status === "webhook_error"
+                    ? "সংযুক্ত, কিন্তু ওয়েবহুক সেট নেই"
+                    : data.status === "config_error"
+                      ? "কনফিগারেশন সমস্যা"
+                      : data.status === "not_connected"
+                        ? "সংযুক্ত নয়"
+                        : "যাচাই করা হয়নি"}
+              </span>
+            </div>
+            {data.statusDetail && <p className="text-xs text-muted-foreground">{data.statusDetail}</p>}
+            <p className="text-xs text-muted-foreground">
+              {data.verifiedAt
+                ? `সর্বশেষ যাচাই: ${new Date(data.verifiedAt).toLocaleString("bn-BD")}`
+                : "Twilio থেকে এখনো কোনো সফল যাচাই আসেনি।"}
+            </p>
+
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Twilio নম্বর (লাইভ তালিকা)
+              </p>
+              {data.numbers.length === 0 ? (
+                <p className="text-xs text-muted-foreground">এখন কোনো Twilio নম্বর কনফিগার করা নেই।</p>
+              ) : (
+                data.numbers.map((n) => (
+                  <div key={n.sid} className="rounded-md border border-border px-2.5 py-1.5 text-xs">
+                    <p className="font-mono">{n.phoneNumber}</p>
+                    <p className="text-muted-foreground">
+                      কল: {n.voice ? "আছে" : "নেই"} · মেসেজ: {n.sms ? "আছে" : "নেই"} · ওয়েবহুক:{" "}
+                      {n.voiceWired && n.statusWired ? "সেট আছে" : "সেট নেই"}
+                    </p>
+                  </div>
+                ))
               )}
             </div>
 
-            <dl className="grid gap-2 sm:grid-cols-2">
-              <StatusRow label="API Key" ok={data.hasApiKey} />
-              <StatusRow label="Account SID" ok={data.hasAccountSid} />
-              <StatusRow label="Auth Token" ok={data.hasAuthToken} />
-              <StatusRow label="Phone Number" ok={data.hasPhoneNumber} value={data.phoneNumber ?? undefined} />
-            </dl>
+            <div className="rounded-md border border-border px-2.5 py-1.5 text-xs">
+              <p className="font-semibold">ওয়েবহুক ইভেন্ট</p>
+              {data.webhooks.total === 0 ? (
+                <p className="text-muted-foreground">এখনো কোনো ওয়েবহুক ইভেন্ট আসেনি — যাচাই করা হয়নি।</p>
+              ) : (
+                <p className="text-muted-foreground">
+                  সম্পন্ন {data.webhooks.processed} · ব্যর্থ {data.webhooks.failed} · বাতিল{" "}
+                  {data.webhooks.rejected}
+                  {data.webhooks.lastEventAt
+                    ? ` · সর্বশেষ ${new Date(data.webhooks.lastEventAt).toLocaleString("bn-BD")}`
+                    : ""}
+                </p>
+              )}
+            </div>
+
 
             {data.recordingEnabled ? (
               <p className="text-xs text-muted-foreground">

@@ -93,6 +93,7 @@ export function LeadDossier({
                   </span>
                 )}
               </div>
+              <ContactSuppressionNotice leadId={lead.id} />
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button asChild size="sm" className="flex-1 min-w-[100px]">
                   <a href={`tel:${lead.phone_number}`}>
