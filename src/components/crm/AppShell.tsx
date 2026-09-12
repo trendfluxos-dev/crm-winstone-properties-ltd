@@ -15,7 +15,9 @@ import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
 import { useMyAccount, useSignOut } from "@/lib/session";
 
-const APK_URL = apkAsset.url;
+// Latest build is streamed from the backend; the bundled asset stays as a fallback.
+const APK_URL = "/api/public/download/apk";
+void apkAsset;
 
 
 
