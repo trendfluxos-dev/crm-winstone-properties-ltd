@@ -18,6 +18,7 @@ const Body = z.object({
   agent_id: z.string().uuid().optional(),
   presence: z.enum(["on_call", "idle", "offline"]),
   call_started_at: z.string().datetime({ offset: true }).optional(),
+  lead_id: z.string().uuid().optional(),
 });
 
 function authorized(request: Request): boolean {

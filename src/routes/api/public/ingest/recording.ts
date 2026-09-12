@@ -109,6 +109,8 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
         });
         if (!leadId) return json({ error: "Unknown lead" }, 404);
 
+        const { logLeadEvent } = await import("@/lib/lead-events.server");
+
         try {
           const recordingId = await ingestRecording({
             leadId,
@@ -120,12 +122,44 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             isTwoSided: body.is_two_sided,
           });
 
+          if (body.duration_seconds > 10) {
+            await logLeadEvent({
+              leadId,
+              agentId: agent?.id ?? null,
+              recordingId,
+              kind: "call_connected",
+              detail: `${body.duration_seconds} সেকেন্ড কথা হয়েছে`,
+            });
+          }
+          await logLeadEvent({
+            leadId,
+            agentId: agent?.id ?? null,
+            recordingId,
+            kind: "recording_saved",
+            detail: body.is_two_sided ? "দুই পক্ষের অডিও" : "এক পক্ষের অডিও",
+          });
+
           try {
             await processRecording(recordingId);
           } catch (aiError) {
             console.error("[ingest] AI analysis failed", aiError);
+            await logLeadEvent({
+              leadId,
+              agentId: agent?.id ?? null,
+              recordingId,
+              kind: "transcript_failed",
+              detail: "এআই বিশ্লেষণ ব্যর্থ — পরে আবার চেষ্টা হবে",
+            });
             return json({ recording_id: recordingId, analysis: "failed" }, 202);
           }
+
+          await logLeadEvent({
+            leadId,
+            agentId: agent?.id ?? null,
+            recordingId,
+            kind: "transcript_ready",
+            detail: "ট্রান্সক্রিপ্ট ও এআই বিশ্লেষণ তৈরি",
+          });
 
           return json({ recording_id: recordingId, analysis: "complete" }, 201);
         } catch (error) {
