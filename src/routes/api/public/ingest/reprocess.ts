@@ -57,9 +57,23 @@ export const Route = createFileRoute("/api/public/ingest/reprocess")({
         }
 
         const results: { recording_id: string; status: "complete" | "failed"; error?: string }[] = [];
+        const { logLeadEvent } = await import("@/lib/lead-events.server");
+
         for (const id of ids) {
           try {
             await processRecording(id);
+            const { data: rec } = await supabaseAdmin
+              .from("call_recordings")
+              .select("lead_id, agent_id")
+              .eq("id", id)
+              .maybeSingle();
+            await logLeadEvent({
+              leadId: rec?.lead_id ?? null,
+              agentId: rec?.agent_id ?? null,
+              recordingId: id,
+              kind: "transcript_ready",
+              detail: "পুনরায় চেষ্টায় ট্রান্সক্রিপ্ট তৈরি",
+            });
             results.push({ recording_id: id, status: "complete" });
           } catch (error) {
             console.error("[reprocess] failed", id, error);
