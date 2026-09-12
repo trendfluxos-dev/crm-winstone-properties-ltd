@@ -9,6 +9,8 @@ const Payload = z.object({
   notes: z.string().trim().max(2000).nullable().optional(),
   source: z.string().trim().max(40).default("webhook"),
   assign: z.boolean().default(true),
+  /** Profile id of the agent adding their own lead from the phone app. */
+  agent_id: z.string().uuid().nullable().optional(),
 });
 
 function authorized(request: Request): boolean {
@@ -48,9 +50,25 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
           .maybeSingle();
         if (existing) return json({ ok: true, duplicate: true, lead_id: existing.id }, 200);
 
-        // Round-robin: hand the lead to whichever active agent currently owns the fewest.
+        // An agent adding their own lead keeps it — no approval, no round-robin.
         let assignedTo: string | null = null;
-        if (body.assign) {
+        let selfAdded = false;
+        if (body.agent_id) {
+          const { data: agent } = await supabaseAdmin
+            .from("profiles")
+            .select("id, name")
+            .eq("id", body.agent_id)
+            .eq("is_active", true)
+            .in("role", ["agent", "team_leader"])
+            .maybeSingle();
+          if (agent) {
+            assignedTo = agent.id;
+            selfAdded = true;
+          }
+        }
+
+        // Round-robin: hand the lead to whichever active agent currently owns the fewest.
+        if (!assignedTo && body.assign) {
           const [{ data: agents }, { data: openLeads }] = await Promise.all([
             supabaseAdmin
               .from("profiles")
@@ -80,10 +98,22 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
             notes: body.notes || null,
             source: body.source,
             assigned_to: assignedTo,
+            assigned_agent_id: assignedTo,
+            assignment_source: selfAdded ? "self" : assignedTo ? "coordinator" : null,
           })
           .select("id")
           .single();
         if (error) return json({ error: error.message }, 500);
+
+        if (selfAdded) {
+          const { logLeadEvent } = await import("@/lib/lead-events.server");
+          await logLeadEvent({
+            leadId: inserted.id,
+            agentId: assignedTo,
+            kind: "self_claimed",
+            detail: `এজেন্ট ফোন অ্যাপ থেকে নতুন লিড যোগ করেছেন — ${body.name}`,
+          });
+        }
 
         return json({ ok: true, lead_id: inserted.id, assigned_to: assignedTo }, 201);
       },
