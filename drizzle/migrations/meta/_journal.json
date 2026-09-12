@@ -71,6 +71,13 @@
       "when": 1789228066911,
       "tag": "0009_call_report_summary_required",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789228426092,
+      "tag": "0010_realtime_call_reports_follow_ups",
+      "breakpoints": true
     }
   ]
 }
