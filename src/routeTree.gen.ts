@@ -23,12 +23,16 @@ import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicAgentCallStartRouteImport } from './routes/api/public/agent/call-start'
 import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
+import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
+import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/agent/version'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
+import { Route as ApiPublicIngestAnalyzeRouteImport } from './routes/api/public/ingest/analyze'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/ingest/outcome'
@@ -108,6 +112,11 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentCallStartRoute = ApiPublicAgentCallStartRouteImport.update({
+  id: '/api/public/agent/call-start',
+  path: '/api/public/agent/call-start',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentCoachRoute = ApiPublicAgentCoachRouteImport.update({
   id: '/api/public/agent/coach',
   path: '/api/public/agent/coach',
@@ -123,6 +132,16 @@ const ApiPublicAgentPresenceRoute = ApiPublicAgentPresenceRouteImport.update({
   path: '/api/public/agent/presence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentReportRoute = ApiPublicAgentReportRouteImport.update({
+  id: '/api/public/agent/report',
+  path: '/api/public/agent/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAgentVersionRoute = ApiPublicAgentVersionRouteImport.update({
+  id: '/api/public/agent/version',
+  path: '/api/public/agent/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentWorkspaceRoute = ApiPublicAgentWorkspaceRouteImport.update({
   id: '/api/public/agent/workspace',
   path: '/api/public/agent/workspace',
@@ -136,6 +155,11 @@ const ApiPublicConfigRulesRoute = ApiPublicConfigRulesRouteImport.update({
 const ApiPublicDownloadApkRoute = ApiPublicDownloadApkRouteImport.update({
   id: '/api/public/download/apk',
   path: '/api/public/download/apk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIngestAnalyzeRoute = ApiPublicIngestAnalyzeRouteImport.update({
+  id: '/api/public/ingest/analyze',
+  path: '/api/public/ingest/analyze',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicIngestLeadRoute = ApiPublicIngestLeadRouteImport.update({
@@ -191,12 +215,16 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
+  '/api/public/agent/report': typeof ApiPublicAgentReportRoute
+  '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
@@ -220,12 +248,16 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
+  '/api/public/agent/report': typeof ApiPublicAgentReportRoute
+  '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
@@ -250,12 +282,16 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
+  '/api/public/agent/report': typeof ApiPublicAgentReportRoute
+  '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
@@ -281,12 +317,16 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
+    | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
+    | '/api/public/agent/report'
+    | '/api/public/agent/version'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
@@ -310,12 +350,16 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
+    | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
+    | '/api/public/agent/report'
+    | '/api/public/agent/version'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
@@ -339,12 +383,16 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
+    | '/api/public/agent/call-start'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
+    | '/api/public/agent/report'
+    | '/api/public/agent/version'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
@@ -369,12 +417,16 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  ApiPublicAgentCallStartRoute: typeof ApiPublicAgentCallStartRoute
   ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
+  ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
+  ApiPublicAgentVersionRoute: typeof ApiPublicAgentVersionRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
+  ApiPublicIngestAnalyzeRoute: typeof ApiPublicIngestAnalyzeRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestOutcomeRoute: typeof ApiPublicIngestOutcomeRoute
@@ -484,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/call-start': {
+      id: '/api/public/agent/call-start'
+      path: '/api/public/agent/call-start'
+      fullPath: '/api/public/agent/call-start'
+      preLoaderRoute: typeof ApiPublicAgentCallStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/coach': {
       id: '/api/public/agent/coach'
       path: '/api/public/agent/coach'
@@ -505,6 +564,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentPresenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/report': {
+      id: '/api/public/agent/report'
+      path: '/api/public/agent/report'
+      fullPath: '/api/public/agent/report'
+      preLoaderRoute: typeof ApiPublicAgentReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/agent/version': {
+      id: '/api/public/agent/version'
+      path: '/api/public/agent/version'
+      fullPath: '/api/public/agent/version'
+      preLoaderRoute: typeof ApiPublicAgentVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/workspace': {
       id: '/api/public/agent/workspace'
       path: '/api/public/agent/workspace'
@@ -524,6 +597,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/download/apk'
       fullPath: '/api/public/download/apk'
       preLoaderRoute: typeof ApiPublicDownloadApkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ingest/analyze': {
+      id: '/api/public/ingest/analyze'
+      path: '/api/public/ingest/analyze'
+      fullPath: '/api/public/ingest/analyze'
+      preLoaderRoute: typeof ApiPublicIngestAnalyzeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ingest/lead': {
@@ -594,12 +674,16 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  ApiPublicAgentCallStartRoute: ApiPublicAgentCallStartRoute,
   ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
+  ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
+  ApiPublicAgentVersionRoute: ApiPublicAgentVersionRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
+  ApiPublicIngestAnalyzeRoute: ApiPublicIngestAnalyzeRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestOutcomeRoute: ApiPublicIngestOutcomeRoute,
