@@ -60,7 +60,11 @@ function AuthPage() {
 
   const signIn = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const loginId = email.trim();
+      const resolved = loginId.includes("@")
+        ? loginId
+        : (await resolveSignInEmail({ data: { identifier: loginId } })).email;
+      const { error } = await supabase.auth.signInWithPassword({ email: resolved, password });
       if (error) throw new Error(error.message);
       await ensureRegistered(name);
     },
@@ -70,6 +74,7 @@ function AuthPage() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
 
   const signUp = useMutation({
     mutationFn: async () => {
