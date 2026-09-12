@@ -33,7 +33,9 @@ export function VoiceRecorder() {
   const transcribe = useServerFn(transcribeAudio);
 
   useEffect(() => {
-    return () => stopRecording(true);
+    return () => {
+      void stopRecording(true);
+    };
   }, []);
 
   useEffect(() => {
