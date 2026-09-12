@@ -15,11 +15,36 @@ import type { Database } from "@/integrations/supabase/types";
  * the desk identity (employee id / agent id / name) the app posts afterwards.
  */
 const Body = z.object({
-  email: z.string().trim().email().max(160),
+  email: z.string().trim().min(3).max(160),
   password: z.string().min(6).max(200),
   device_label: z.string().trim().max(120).nullable().optional(),
   app_version: z.string().trim().max(40).nullable().optional(),
 });
+
+function phoneKey(value: string): string | null {
+  const digits = value.replace(/\D+/g, "");
+  return digits.length >= 10 ? digits.slice(-10) : null;
+}
+
+/** Phone number or Employee ID → the email of that desk account. */
+async function resolveLoginEmail(raw: string): Promise<string | null> {
+  if (raw.includes("@")) return raw;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: rows } = await supabaseAdmin
+    .from("profiles")
+    .select("email, phone, employee_id")
+    .not("email", "is", null)
+    .limit(500);
+  const wantId = raw.toUpperCase().replace(/\s+/g, "");
+  const wantPhone = phoneKey(raw);
+  const match = (rows ?? []).find(
+    (row) =>
+      (row.employee_id ?? "").toUpperCase().replace(/\s+/g, "") === wantId ||
+      (wantPhone !== null && row.phone !== null && phoneKey(row.phone) === wantPhone),
+  );
+  return match?.email ?? null;
+}
+
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
