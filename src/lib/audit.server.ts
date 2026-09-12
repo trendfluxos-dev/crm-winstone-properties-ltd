@@ -21,7 +21,8 @@ export type AuditAction =
   | "call_report_submitted"
   | "device_registered"
   | "recording_reprocessed"
-  | "alert_acknowledged";
+  | "alert_acknowledged"
+  | "report_sheet_sync";
 
 export async function logAudit(input: {
   action: AuditAction;
