@@ -34,6 +34,7 @@ object CallSyncQueue {
         durationSeconds: Int,
         twoSided: Boolean,
         incoming: Boolean = false,
+        recorderSource: String = "unknown",
     ) {
         enqueue(
             context,
@@ -46,6 +47,29 @@ object CallSyncQueue {
                 .putInt(KEY_DURATION, durationSeconds)
                 .putBoolean(KEY_TWO_SIDED, twoSided)
                 .putBoolean(KEY_INCOMING, incoming)
+                .putString(KEY_SOURCE, recorderSource)
+                .putString(KEY_UPLOAD_ID, file.name)
+                .build(),
+        )
+    }
+
+    /** Opens the mandatory post-call report for a finished call. */
+    fun queueReportOpen(
+        context: Context,
+        leadId: String,
+        phoneNumber: String,
+        durationSeconds: Int,
+        connected: Boolean,
+    ) {
+        enqueue(
+            context,
+            unique = "report_${leadId}_${System.currentTimeMillis() / 1000}",
+            data = Data.Builder()
+                .putString(KEY_KIND, KIND_REPORT_OPEN)
+                .putString(KEY_LEAD, leadId)
+                .putString(KEY_PHONE, phoneNumber)
+                .putInt(KEY_DURATION, durationSeconds)
+                .putBoolean(KEY_CONNECTED, connected)
                 .build(),
         )
     }
@@ -96,10 +120,13 @@ object CallSyncQueue {
     const val KEY_TEXT = "text"
     const val KEY_OUTCOME = "outcome"
     const val KEY_CONNECTED = "connected"
+    const val KEY_SOURCE = "recorder_source"
+    const val KEY_UPLOAD_ID = "client_upload_id"
 
     const val KIND_RECORDING = "recording"
     const val KIND_WHATSAPP = "whatsapp"
     const val KIND_OUTCOME = "outcome"
+    const val KIND_REPORT_OPEN = "report_open"
 }
 
 class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -124,6 +151,8 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         durationSeconds = inputData.getInt(CallSyncQueue.KEY_DURATION, 0),
                         twoSided = inputData.getBoolean(CallSyncQueue.KEY_TWO_SIDED, true),
                         incoming = inputData.getBoolean(CallSyncQueue.KEY_INCOMING, false),
+                        clientUploadId = inputData.getString(CallSyncQueue.KEY_UPLOAD_ID),
+                        recorderSource = inputData.getString(CallSyncQueue.KEY_SOURCE) ?: "unknown",
                     )
                     file.delete()
                     Result.success()
@@ -152,6 +181,18 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                     Result.success()
                 }
 
+                CallSyncQueue.KIND_REPORT_OPEN -> {
+                    if (leadId == null) return Result.failure()
+                    WinstoneApi.openReport(
+                        leadId = leadId,
+                        recordingId = null,
+                        phoneNumber = inputData.getString(CallSyncQueue.KEY_PHONE),
+                        durationSeconds = inputData.getInt(CallSyncQueue.KEY_DURATION, 0),
+                        connected = inputData.getBoolean(CallSyncQueue.KEY_CONNECTED, false),
+                    )
+                    Result.success()
+                }
+
                 else -> Result.failure()
             }
         } catch (error: Exception) {
@@ -159,7 +200,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             val message = error.message.orEmpty()
             if (message.contains("Invalid payload") || message.contains("Unauthorized")) Result.failure()
             // A call recording is the audit trail of the call: never give up on it.
-            else if (kind == CallSyncQueue.KIND_RECORDING) Result.retry()
+            else if (kind == CallSyncQueue.KIND_RECORDING || kind == CallSyncQueue.KIND_REPORT_OPEN) Result.retry()
             else if (runAttemptCount < 12) Result.retry()
             else Result.failure()
         }

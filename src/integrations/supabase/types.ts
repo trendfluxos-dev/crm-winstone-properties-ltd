@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_devices: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          device_label: string | null
+          id: string
+          last_seen_at: string
+          platform: string
+          profile_id: string
+          revoked_at: string | null
+          token_hash: string
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          device_label?: string | null
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          profile_id: string
+          revoked_at?: string | null
+          token_hash: string
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          device_label?: string | null
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          profile_id?: string
+          revoked_at?: string | null
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_devices_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_config: {
         Row: {
           data: Json
@@ -32,20 +76,56 @@ export type Database = {
         }
         Relationships: []
       }
+      app_releases: {
+        Row: {
+          id: string
+          is_mandatory: boolean
+          release_notes: string | null
+          released_at: string
+          storage_path: string
+          version_code: number
+          version_name: string
+        }
+        Insert: {
+          id?: string
+          is_mandatory?: boolean
+          release_notes?: string | null
+          released_at?: string
+          storage_path?: string
+          version_code: number
+          version_name: string
+        }
+        Update: {
+          id?: string
+          is_mandatory?: boolean
+          release_notes?: string | null
+          released_at?: string
+          storage_path?: string
+          version_code?: number
+          version_name?: string
+        }
+        Relationships: []
+      }
       call_recordings: {
         Row: {
           agent_id: string | null
           ai_summary: string | null
+          analysis_attempts: number
+          analysis_error: string | null
+          analysis_status: string
           audio_url: string | null
           call_direction: Database["public"]["Enums"]["call_direction"]
+          client_upload_id: string | null
           created_at: string
           customer_objections: string[]
           deal_stage: string | null
+          device_id: string | null
           duration_seconds: number
           id: string
           is_two_sided: boolean
           lead_id: string | null
           phone_number: string
+          recorder_source: string | null
           sentiment: Database["public"]["Enums"]["call_sentiment"] | null
           sync_status: Database["public"]["Enums"]["sync_status"]
           transcription_text: string | null
@@ -53,16 +133,22 @@ export type Database = {
         Insert: {
           agent_id?: string | null
           ai_summary?: string | null
+          analysis_attempts?: number
+          analysis_error?: string | null
+          analysis_status?: string
           audio_url?: string | null
           call_direction?: Database["public"]["Enums"]["call_direction"]
+          client_upload_id?: string | null
           created_at?: string
           customer_objections?: string[]
           deal_stage?: string | null
+          device_id?: string | null
           duration_seconds?: number
           id?: string
           is_two_sided?: boolean
           lead_id?: string | null
           phone_number: string
+          recorder_source?: string | null
           sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
           transcription_text?: string | null
@@ -70,16 +156,22 @@ export type Database = {
         Update: {
           agent_id?: string | null
           ai_summary?: string | null
+          analysis_attempts?: number
+          analysis_error?: string | null
+          analysis_status?: string
           audio_url?: string | null
           call_direction?: Database["public"]["Enums"]["call_direction"]
+          client_upload_id?: string | null
           created_at?: string
           customer_objections?: string[]
           deal_stage?: string | null
+          device_id?: string | null
           duration_seconds?: number
           id?: string
           is_two_sided?: boolean
           lead_id?: string | null
           phone_number?: string
+          recorder_source?: string | null
           sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
           transcription_text?: string | null
@@ -93,10 +185,115 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "call_recordings_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "agent_devices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "call_recordings_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_reports: {
+        Row: {
+          agent_id: string | null
+          ai_decision: string | null
+          ai_suggestion: Json | null
+          call_ended_at: string
+          call_started_at: string | null
+          category: string | null
+          connected: boolean
+          created_at: string
+          device_id: string | null
+          duration_seconds: number
+          follow_up_at: string | null
+          id: string
+          lead_id: string
+          note: string | null
+          phone_number: string | null
+          reason: string | null
+          recording_id: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          ai_decision?: string | null
+          ai_suggestion?: Json | null
+          call_ended_at?: string
+          call_started_at?: string | null
+          category?: string | null
+          connected?: boolean
+          created_at?: string
+          device_id?: string | null
+          duration_seconds?: number
+          follow_up_at?: string | null
+          id?: string
+          lead_id: string
+          note?: string | null
+          phone_number?: string | null
+          reason?: string | null
+          recording_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          ai_decision?: string | null
+          ai_suggestion?: Json | null
+          call_ended_at?: string
+          call_started_at?: string | null
+          category?: string | null
+          connected?: boolean
+          created_at?: string
+          device_id?: string | null
+          duration_seconds?: number
+          follow_up_at?: string | null
+          id?: string
+          lead_id?: string
+          note?: string | null
+          phone_number?: string | null
+          reason?: string | null
+          recording_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_reports_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_reports_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "agent_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_reports_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_reports_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
             referencedColumns: ["id"]
           },
         ]
@@ -130,6 +327,213 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      doc_pages: {
+        Row: {
+          body_markdown: string
+          category: string
+          created_at: string
+          id: string
+          published_at: string | null
+          slug: string
+          sort_order: number
+          source: string
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body_markdown?: string
+          category?: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          slug: string
+          sort_order?: number
+          source?: string
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body_markdown?: string
+          category?: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          slug?: string
+          sort_order?: number
+          source?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_pages_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follow_up_events: {
+        Row: {
+          agent_id: string | null
+          category: string
+          completed_at: string | null
+          created_at: string
+          customer_name: string | null
+          id: string
+          lead_id: string
+          note: string | null
+          notified_at: string | null
+          phone_number: string | null
+          priority: string
+          recording_id: string | null
+          reminder_minutes: number
+          report_id: string | null
+          scheduled_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          category: string
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          lead_id: string
+          note?: string | null
+          notified_at?: string | null
+          phone_number?: string | null
+          priority?: string
+          recording_id?: string | null
+          reminder_minutes?: number
+          report_id?: string | null
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          lead_id?: string
+          note?: string | null
+          notified_at?: string | null
+          phone_number?: string | null
+          priority?: string
+          recording_id?: string | null
+          reminder_minutes?: number
+          report_id?: string | null
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_up_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_events_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_events_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "call_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_assignments: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_agent_id: string | null
+          id: string
+          lead_id: string
+          note: string | null
+          source: string
+          to_agent_id: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_agent_id?: string | null
+          id?: string
+          lead_id: string
+          note?: string | null
+          source?: string
+          to_agent_id?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_agent_id?: string | null
+          id?: string
+          lead_id?: string
+          note?: string | null
+          source?: string
+          to_agent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_assignments_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_assignments_from_agent_id_fkey"
+            columns: ["from_agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_assignments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_assignments_to_agent_id_fkey"
+            columns: ["to_agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lead_events: {
         Row: {
@@ -365,6 +769,50 @@ export type Database = {
         }
         Relationships: []
       }
+      system_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          action: string | null
+          code: string
+          created_at: string
+          detail: string | null
+          id: string
+          severity: string
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action?: string | null
+          code: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          severity?: string
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action?: string | null
+          code?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           key: string
@@ -461,6 +909,7 @@ export type Database = {
     }
     Functions: {
       has_active_license: { Args: { check_env?: string }; Returns: boolean }
+      has_pending_call_report: { Args: { _agent_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

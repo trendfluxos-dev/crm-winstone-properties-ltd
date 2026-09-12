@@ -27,15 +27,6 @@ const Body = z.object({
   connected: z.boolean().optional(),
 });
 
-function authorized(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret || provided.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
-  return diff === 0;
-}
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -47,7 +38,9 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
+        const { resolveApiCaller } = await import("@/lib/device-auth.server");
+        const caller = await resolveApiCaller(request);
+        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
 
         let raw: unknown;
         try {
@@ -65,10 +58,14 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
 
         const { data: lead } = await supabaseAdmin
           .from("leads")
-          .select("id, notes, call_attempts")
+          .select("id, notes, call_attempts, assigned_to")
           .eq("id", lead_id)
           .maybeSingle();
         if (!lead) return json({ error: "Unknown lead" }, 404);
+        // A phone may only close out a lead that belongs to its own agent.
+        if (caller.kind === "device" && lead.assigned_to && lead.assigned_to !== caller.profile.id) {
+          return json({ error: "এই লিড আপনার তালিকায় নেই" }, 403);
+        }
 
         const stamp = new Date();
         const trimmed = notes?.trim();
@@ -92,7 +89,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
         const { logLeadEvent } = await import("@/lib/lead-events.server");
         await logLeadEvent({
           leadId: lead_id,
-          agentId: parsed.data.agent_id ?? null,
+          agentId: caller.kind === "device" ? caller.profile.id : (parsed.data.agent_id ?? null),
           kind: "outcome_logged",
           detail: `কলের ফল: ${outcome.replace(/_/g, " ")}`,
         });

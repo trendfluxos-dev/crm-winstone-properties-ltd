@@ -17,16 +17,9 @@ import type { Database } from "@/integrations/supabase/types";
 const Body = z.object({
   email: z.string().trim().email().max(160),
   password: z.string().min(6).max(200),
+  device_label: z.string().trim().max(120).nullable().optional(),
+  app_version: z.string().trim().max(40).nullable().optional(),
 });
-
-function authorized(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret || provided.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
-  return diff === 0;
-}
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -43,8 +36,8 @@ export const Route = createFileRoute("/api/public/agent/login")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
-
+        // Bootstrap endpoint: the only credential is the agent's own CRM
+        // email + password. Nothing privileged is shipped inside the APK.
         const raw = await request.json().catch(() => null);
         const parsed = Body.safeParse(raw);
         if (!parsed.success) return json({ error: "ইমেইল ও পাসওয়ার্ড দিন" }, 400);
@@ -97,8 +90,19 @@ export const Route = createFileRoute("/api/public/agent/login")({
           await supabaseAdmin.from("profiles").update({ employee_id: employeeId }).eq("id", profile.id);
         }
 
+        // Every phone gets its own token, bound to this profile. The APK stores
+        // the token; the server only ever keeps its SHA-256 hash.
+        const { issueDeviceToken } = await import("@/lib/device-auth.server");
+        const device = await issueDeviceToken({
+          profileId: profile.id,
+          deviceLabel: parsed.data.device_label ?? null,
+          appVersion: parsed.data.app_version ?? null,
+        });
+
         return json({
           ok: true,
+          device_token: device.token,
+          device_id: device.deviceId,
           agent: {
             id: profile.id,
             name: profile.name,

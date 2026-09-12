@@ -151,7 +151,7 @@ async function readSseText(res: Response): Promise<string> {
 }
 
 /** Transcribes + analyses a stored recording and writes the intelligence back to the row. */
-export async function processRecording(recordingId: string): Promise<void> {
+export async function processRecording(recordingId: string): Promise<"done" | "empty"> {
   const { data: recording, error } = await supabaseAdmin
     .from("call_recordings")
     .select("*")
@@ -170,13 +170,7 @@ export async function processRecording(recordingId: string): Promise<void> {
 
   try {
     const transcript = await transcribeAudio(bytes, filename);
-    if (!transcript) {
-      await supabaseAdmin
-        .from("call_recordings")
-        .update({ sync_status: "failed" })
-        .eq("id", recordingId);
-      return;
-    }
+    if (!transcript) return "empty";
 
     const analysis = await analyzeTranscript(transcript, recording.duration_seconds);
 
@@ -191,6 +185,7 @@ export async function processRecording(recordingId: string): Promise<void> {
         sync_status: recording.is_two_sided ? "verified" : "uploaded",
       })
       .eq("id", recordingId);
+    return "done";
   } catch (err) {
     await supabaseAdmin
       .from("call_recordings")
@@ -209,6 +204,9 @@ export async function ingestRecording(input: {
   durationSeconds: number;
   direction: "outgoing" | "incoming_callback";
   isTwoSided: boolean;
+  clientUploadId?: string | null;
+  recorderSource?: string | null;
+  deviceId?: string | null;
 }): Promise<string> {
   const { data: lead, error: leadError } = await supabaseAdmin
     .from("leads")
@@ -236,6 +234,10 @@ export async function ingestRecording(input: {
       audio_url: path,
       is_two_sided: input.isTwoSided,
       sync_status: "uploaded",
+      client_upload_id: input.clientUploadId ?? null,
+      recorder_source: input.recorderSource ?? null,
+      device_id: input.deviceId ?? null,
+      analysis_status: "pending",
     })
     .select("id")
     .single();

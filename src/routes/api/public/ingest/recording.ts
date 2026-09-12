@@ -1,32 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+/**
+ * Call recording upload from the Winstone Connect Android app.
+ *
+ * Authentication: `x-device-token` (per-device, bound to one agent profile) or
+ * the server-side INGEST_SECRET for trusted back-office callers.
+ *
+ * Audio is stored first and answered immediately; transcription + AI analysis
+ * run afterwards through the durable queue (`analysis_status` on the row, swept
+ * by /api/public/ingest/analyze), so a long call never holds the request open.
+ *
+ * Idempotency: `client_upload_id` is unique, so a WorkManager retry can never
+ * create a second recording for the same file.
+ */
 const Payload = z.object({
   lead_id: z.string().uuid().optional(),
   phone_number: z.string().min(5).optional(),
   agent_id: z.string().uuid().nullable().optional(),
   employee_id: z.string().min(2).max(20).nullable().optional(),
   lead_name: z.string().trim().min(1).max(120).nullable().optional(),
+  client_upload_id: z.string().trim().min(6).max(120).nullable().optional(),
+  recorder_source: z.enum(["voice_call", "mic", "unknown"]).default("unknown"),
   audio_base64: z.string().min(1),
   file_extension: z.string().min(1).max(5).default("mp3"),
   duration_seconds: z.number().int().min(0),
+  call_started_at: z.string().datetime({ offset: true }).nullable().optional(),
   call_direction: z.enum(["outgoing", "incoming_callback"]).default("outgoing"),
-  is_two_sided: z.boolean().default(true),
+  is_two_sided: z.boolean().default(false),
 });
-
-function authorized(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret || provided.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
-  return diff === 0;
-}
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 }
 
@@ -40,10 +47,7 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-/**
- * The phone app may post the audio either as multipart/form-data (preferred:
- * the raw file streams straight through) or as JSON with base64 audio.
- */
+/** Multipart (preferred) or JSON+base64, so older builds keep working. */
 async function readPayload(request: Request) {
   const contentType = request.headers.get("Content-Type") ?? "";
   if (!contentType.toLowerCase().includes("multipart/form-data")) {
@@ -71,11 +75,14 @@ async function readPayload(request: Request) {
     agent_id: text("agent_id"),
     employee_id: text("employee_id"),
     lead_name: text("lead_name"),
+    client_upload_id: text("client_upload_id"),
+    recorder_source: text("recorder_source") ?? "unknown",
     audio_base64: toBase64(bytes),
     file_extension: ext.slice(0, 5),
     duration_seconds: Number(text("duration_seconds") ?? 0),
+    call_started_at: text("call_started_at"),
     call_direction: text("call_direction") ?? "outgoing",
-    is_two_sided: text("is_two_sided") !== "false",
+    is_two_sided: text("is_two_sided") === "true",
   });
 }
 
@@ -83,7 +90,9 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
+        const { resolveApiCaller } = await import("@/lib/device-auth.server");
+        const caller = await resolveApiCaller(request);
+        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
 
         const parsed = await readPayload(request);
         if (!parsed.success) {
@@ -92,13 +101,33 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
         }
         const body = parsed.data;
 
-        const { ingestRecording, processRecording } = await import("@/lib/call-intel.server");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        // Replay protection: same upload id -> same recording row.
+        if (body.client_upload_id) {
+          const { data: existing } = await supabaseAdmin
+            .from("call_recordings")
+            .select("id, analysis_status")
+            .eq("client_upload_id", body.client_upload_id)
+            .maybeSingle();
+          if (existing) {
+            return json(
+              { recording_id: existing.id, duplicate: true, analysis: existing.analysis_status },
+              200,
+            );
+          }
+        }
+
+        const { ingestRecording } = await import("@/lib/call-intel.server");
         const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
 
-        const agent = await resolveAgent({
-          agentId: body.agent_id ?? null,
-          employeeId: body.employee_id ?? null,
-        });
+        const agent =
+          caller.kind === "device"
+            ? { id: caller.profile.id }
+            : await resolveAgent({
+                agentId: body.agent_id ?? null,
+                employeeId: body.employee_id ?? null,
+              });
 
         const { leadId } = await resolveLeadId({
           leadId: body.lead_id ?? null,
@@ -120,6 +149,9 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             durationSeconds: body.duration_seconds,
             direction: body.call_direction,
             isTwoSided: body.is_two_sided,
+            clientUploadId: body.client_upload_id ?? null,
+            recorderSource: body.recorder_source,
+            deviceId: caller.kind === "device" ? caller.device.id : null,
           });
 
           if (body.duration_seconds > 10) {
@@ -136,35 +168,36 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             agentId: agent?.id ?? null,
             recordingId,
             kind: "recording_saved",
-            detail: body.is_two_sided ? "দুই পক্ষের অডিও" : "এক পক্ষের অডিও",
+            detail: body.is_two_sided
+              ? "দুই পক্ষের অডিও (ডিভাইস অনুমোদন করেছে)"
+              : "এক পক্ষের অডিও — এই ফোনে কল অডিও পাওয়া যায়নি",
           });
 
-          try {
-            await processRecording(recordingId);
-          } catch (aiError) {
-            console.error("[ingest] AI analysis failed", aiError);
-            await logLeadEvent({
+          // Every completed call gets a reportable lifecycle, recording or not.
+          if (agent?.id) {
+            const { openCallReport } = await import("@/lib/call-reports.server");
+            await openCallReport({
               leadId,
-              agentId: agent?.id ?? null,
+              agentId: agent.id,
               recordingId,
-              kind: "transcript_failed",
-              detail: "এআই বিশ্লেষণ ব্যর্থ — পরে আবার চেষ্টা হবে",
+              deviceId: caller.kind === "device" ? caller.device.id : null,
+              phoneNumber: body.phone_number ?? null,
+              callStartedAt: body.call_started_at ?? null,
+              durationSeconds: body.duration_seconds,
+              connected: body.duration_seconds > 5,
             });
-            return json({ recording_id: recordingId, analysis: "failed" }, 202);
           }
 
-          await logLeadEvent({
-            leadId,
-            agentId: agent?.id ?? null,
-            recordingId,
-            kind: "transcript_ready",
-            detail: "ট্রান্সক্রিপ্ট ও এআই বিশ্লেষণ তৈরি",
-          });
+          // Analysis runs out of band; the sweep endpoint owns retries.
+          const { analyzePending } = await import("@/lib/analysis-queue.server");
+          void analyzePending(1).catch((error) =>
+            console.error("[ingest] background analysis failed", error),
+          );
 
-          return json({ recording_id: recordingId, analysis: "complete" }, 201);
+          return json({ recording_id: recordingId, analysis: "pending" }, 202);
         } catch (error) {
           console.error("[ingest] recording failed", error);
-          return json({ error: error instanceof Error ? error.message : "Ingest failed" }, 500);
+          return json({ error: "Recording could not be stored" }, 500);
         }
       },
     },

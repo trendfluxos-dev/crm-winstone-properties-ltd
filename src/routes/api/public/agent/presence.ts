@@ -21,15 +21,6 @@ const Body = z.object({
   lead_id: z.string().uuid().optional(),
 });
 
-function authorized(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret || provided.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
-  return diff === 0;
-}
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -41,7 +32,9 @@ export const Route = createFileRoute("/api/public/agent/presence")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
+        const { resolveApiCaller } = await import("@/lib/device-auth.server");
+        const caller = await resolveApiCaller(request);
+        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
 
         let raw: unknown;
         try {
@@ -53,7 +46,9 @@ export const Route = createFileRoute("/api/public/agent/presence")({
         if (!parsed.success) {
           return json({ error: "Invalid payload", issues: parsed.error.issues }, 400);
         }
-        const { employee_id, agent_id, presence, call_started_at, lead_id } = parsed.data;
+        const { presence, call_started_at, lead_id } = parsed.data;
+        const agent_id = caller.kind === "device" ? caller.profile.id : parsed.data.agent_id;
+        const employee_id = caller.kind === "device" ? undefined : parsed.data.employee_id;
         if (!employee_id && !agent_id) {
           return json({ error: "employee_id or agent_id is required" }, 400);
         }

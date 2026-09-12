@@ -51,6 +51,7 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
             _state.value = _state.value.copy(loading = true, error = null)
             runCatching { WinstoneAgentApi.signIn(email, password) }
                 .onSuccess { me ->
+                    AgentSession.saveDevice(app, me.deviceToken, me.deviceId)
                     AgentSession.saveEmployeeId(app, me.employeeId)
                     AgentSession.cacheAgent(app, me.agentId, me.name)
                     _state.value = _state.value.copy(employeeId = me.employeeId, error = null)

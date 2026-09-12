@@ -36,6 +36,7 @@ class CallStateReceiver : BroadcastReceiver() {
             TelephonyManager.EXTRA_STATE_OFFHOOK -> {
                 if (lastState == TelephonyManager.EXTRA_STATE_OFFHOOK) return
                 lastState = state
+                CallRecordingService.start(app)
                 recorder(app).start(LiveCallLauncher.activeLeadId)
                 LiveCallLauncher.recording = true
                 LiveCallLauncher.setPhase(CallPhase.Connected)
@@ -50,7 +51,9 @@ class CallStateReceiver : BroadcastReceiver() {
                 val endedLeadId = LiveCallLauncher.activeLeadId
                 val rec = recorder(app)
                 val twoSided = rec.twoSided
+                val recorderSource = rec.recorderSource
                 val captured = rec.stopAndGetFile()
+                CallRecordingService.stop(app)
 
                 if (wasOnCall && captured != null) {
                     CallSyncQueue.queueRecording(
@@ -60,6 +63,20 @@ class CallStateReceiver : BroadcastReceiver() {
                         file = captured.first,
                         durationSeconds = captured.second,
                         twoSided = twoSided,
+                        recorderSource = recorderSource,
+                    )
+                }
+
+                // Every finished call becomes reportable, even when recording
+                // failed entirely — the report is opened server-side and queued
+                // so a dead network cannot swallow it.
+                if (wasOnCall && endedLeadId != null) {
+                    CallSyncQueue.queueReportOpen(
+                        context = app,
+                        leadId = endedLeadId,
+                        phoneNumber = LiveCallLauncher.activePhone.orEmpty(),
+                        durationSeconds = captured?.second ?: 0,
+                        connected = captured != null,
                     )
                 }
                 scope.launch {

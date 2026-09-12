@@ -2,15 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { parseConfig } from "@/lib/crm-config";
 
-function authorized(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret || provided.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i += 1) diff |= secret.charCodeAt(i) ^ provided.charCodeAt(i);
-  return diff === 0;
-}
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -23,7 +14,9 @@ export const Route = createFileRoute("/api/public/config/rules")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
+        const { resolveApiCaller } = await import("@/lib/device-auth.server");
+        const caller = await resolveApiCaller(request);
+        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin
           .from("app_config")

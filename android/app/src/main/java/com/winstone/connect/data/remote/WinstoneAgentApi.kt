@@ -1,6 +1,6 @@
 package com.winstone.connect.data.remote
 
-import com.winstone.connect.BuildConfig
+import com.winstone.connect.data.AgentSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -27,6 +27,8 @@ object WinstoneAgentApi {
         val agentId: String,
         val name: String,
         val phone: String?,
+        val deviceToken: String,
+        val deviceId: String,
     )
 
     /** CRM credentials sign-in: email + password, exactly like the web desk. */
@@ -34,21 +36,25 @@ object WinstoneAgentApi {
         val payload = JSONObject().apply {
             put("email", email.trim())
             put("password", password)
+            put("device_label", android.os.Build.MODEL)
         }
         val req = Request.Builder()
             .url(WinstoneApi.BASE_URL + "/api/public/agent/login")
-            .header("x-ingest-secret", BuildConfig.INGEST_SECRET)
             .post(payload.toString().toRequestBody(JSON))
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
             if (!res.isSuccessful) error(body.optString("error", "সাইন ইন করা যায়নি (HTTP ${res.code})"))
             val agent = body.optJSONObject("agent") ?: error("সাইন ইন করা যায়নি")
+            val token = body.optString("device_token")
+            if (token.isBlank()) error("ডিভাইস অনুমোদন পাওয়া যায়নি")
             AgentIdentity(
                 employeeId = agent.optString("employee_id"),
                 agentId = agent.optString("id"),
                 name = agent.optString("name"),
                 phone = agent.optString("phone").takeIf { it.isNotBlank() && it != "null" },
+                deviceToken = token,
+                deviceId = body.optString("device_id"),
             )
         }
     }
@@ -79,7 +85,7 @@ object WinstoneAgentApi {
         }
         val req = Request.Builder()
             .url(WinstoneApi.BASE_URL + "/api/public/ingest/lead")
-            .header("x-ingest-secret", BuildConfig.INGEST_SECRET)
+            .header("x-device-token", AgentSession.deviceToken.orEmpty())
             .post(payload.toString().toRequestBody(JSON))
             .build()
         client.newCall(req).execute().use { res ->
@@ -92,7 +98,7 @@ object WinstoneAgentApi {
     suspend fun fetchCoach(employeeId: String): Coach = withContext(Dispatchers.IO) {
         val req = Request.Builder()
             .url("${WinstoneApi.BASE_URL}/api/public/agent/coach?employee_id=$employeeId")
-            .header("x-ingest-secret", BuildConfig.INGEST_SECRET)
+            .header("x-device-token", AgentSession.deviceToken.orEmpty())
             .get()
             .build()
         client.newCall(req).execute().use { res ->
