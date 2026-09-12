@@ -32,6 +32,9 @@ export function NewLeadDialog() {
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [notes, setNotes] = useState("");
+  const [address, setAddress] = useState("");
+  const [serialNo, setSerialNo] = useState("");
+  const [referenceBy, setReferenceBy] = useState("");
 
   const phoneOk = BD_PHONE.test(phone.trim());
   const valid = name.trim().length > 0 && phoneOk;
@@ -45,6 +48,9 @@ export function NewLeadDialog() {
           phoneNumber: phone.trim(),
           company: company.trim() || null,
           notes: notes.trim() || null,
+          address: address.trim() || null,
+          serialNo: serialNo.trim() || null,
+          referenceBy: referenceBy.trim() || null,
         },
       }),
     onSuccess: () => {
@@ -53,6 +59,9 @@ export function NewLeadDialog() {
       setPhone("");
       setCompany("");
       setNotes("");
+      setAddress("");
+      setSerialNo("");
+      setReferenceBy("");
       setOpen(false);
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
     },
@@ -90,6 +99,24 @@ export function NewLeadDialog() {
             {phone.length > 0 && !phoneOk && (
               <p className="mt-1 text-xs text-destructive">বাংলাদেশি মোবাইল নম্বর দিন</p>
             )}
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">ঠিকানা (ইচ্ছা হলে)</Label>
+            <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="মিরপুর, ঢাকা" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">ক্রমিক নম্বর</Label>
+              <Input value={serialNo} onChange={(e) => setSerialNo(e.target.value)} placeholder="১২" />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">রেফারেন্স</Label>
+              <Input
+                value={referenceBy}
+                onChange={(e) => setReferenceBy(e.target.value)}
+                placeholder="নিজে / হেড অফিস"
+              />
+            </div>
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">প্রতিষ্ঠান (ইচ্ছা হলে)</Label>

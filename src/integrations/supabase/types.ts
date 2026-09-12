@@ -582,6 +582,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          address: string | null
           assigned_agent_id: string | null
           assigned_to: string | null
           assignment_source: string | null
@@ -596,11 +597,14 @@ export type Database = {
           notes: string | null
           outcome_category: string | null
           phone_number: string
+          reference_by: string | null
+          serial_no: string | null
           source: string
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
         }
         Insert: {
+          address?: string | null
           assigned_agent_id?: string | null
           assigned_to?: string | null
           assignment_source?: string | null
@@ -615,11 +619,14 @@ export type Database = {
           notes?: string | null
           outcome_category?: string | null
           phone_number: string
+          reference_by?: string | null
+          serial_no?: string | null
           source?: string
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
         }
         Update: {
+          address?: string | null
           assigned_agent_id?: string | null
           assigned_to?: string | null
           assignment_source?: string | null
@@ -634,6 +641,8 @@ export type Database = {
           notes?: string | null
           outcome_category?: string | null
           phone_number?: string
+          reference_by?: string | null
+          serial_no?: string | null
           source?: string
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string

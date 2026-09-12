@@ -25,6 +25,10 @@ export async function intakeLead(input: {
   phoneNumber: string;
   company?: string | null;
   notes?: string | null;
+  address?: string | null;
+  serialNo?: string | null;
+  /** Who handed this lead over — the agent themselves, or head office. */
+  referenceBy?: string | null;
   /** Profile id that should own the lead, or null for unassigned. */
   ownerId: string | null;
   /** Free-form label used only for round-robin webhook traffic. */
@@ -52,6 +56,9 @@ export async function intakeLead(input: {
       phone_number: phone,
       company: input.company?.trim() || null,
       notes: input.notes?.trim() || null,
+      address: input.address?.trim() || null,
+      serial_no: input.serialNo?.trim() || null,
+      reference_by: input.referenceBy?.trim() || (owner ? input.ownerName?.trim() || null : null),
       source: owner ? "agent_app" : (input.source ?? "webhook"),
       status: "pending",
       assigned_to: owner,
