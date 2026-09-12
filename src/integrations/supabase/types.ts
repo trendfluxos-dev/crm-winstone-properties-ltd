@@ -1152,6 +1152,101 @@ export type Database = {
         }
         Relationships: []
       }
+      recording_doc_backups: {
+        Row: {
+          created_at: string
+          date_key: string
+          doc_id: string | null
+          drive_file_id: string | null
+          drive_file_name: string | null
+          drive_file_url: string | null
+          drive_folder_id: string | null
+          error_message: string | null
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_key: string
+          doc_id?: string | null
+          drive_file_id?: string | null
+          drive_file_name?: string | null
+          drive_file_url?: string | null
+          drive_folder_id?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_key?: string
+          doc_id?: string | null
+          drive_file_id?: string | null
+          drive_file_name?: string | null
+          drive_file_url?: string | null
+          drive_folder_id?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recording_drive_backups: {
+        Row: {
+          bytes: number | null
+          call_recording_id: string | null
+          created_at: string
+          drive_file_id: string | null
+          drive_file_name: string | null
+          drive_file_url: string | null
+          drive_folder_id: string | null
+          error_message: string | null
+          id: string
+          mime_type: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bytes?: number | null
+          call_recording_id?: string | null
+          created_at?: string
+          drive_file_id?: string | null
+          drive_file_name?: string | null
+          drive_file_url?: string | null
+          drive_folder_id?: string | null
+          error_message?: string | null
+          id?: string
+          mime_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bytes?: number | null
+          call_recording_id?: string | null
+          created_at?: string
+          drive_file_id?: string | null
+          drive_file_name?: string | null
+          drive_file_url?: string | null
+          drive_folder_id?: string | null
+          error_message?: string | null
+          id?: string
+          mime_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recording_drive_backups_call_recording_id_fkey"
+            columns: ["call_recording_id"]
+            isOneToOne: true
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_summaries: {
         Row: {
           agents: Json
