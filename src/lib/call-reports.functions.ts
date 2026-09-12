@@ -83,6 +83,85 @@ export const openMyReport = createServerFn({ method: "POST" })
     return report;
   });
 
+/**
+ * Customer called the agent back. Logs the incoming call, claims the lead when
+ * it is still unassigned, and opens the mandatory post-call report — the same
+ * gate as an outgoing call, so callbacks get category/summary/note/follow-up
+ * and land in the spreadsheet like every other report.
+ */
+export const logIncomingCallback = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    Base.extend({
+      leadId: z.string().uuid(),
+      durationSeconds: z.number().int().min(0).max(86400).default(0),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const me = await agentOf(data.adminToken ?? null);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: lead } = await supabaseAdmin
+      .from("leads")
+      .select("id, name, phone_number, assigned_to")
+      .eq("id", data.leadId)
+      .maybeSingle();
+    if (!lead) throw new Error("লিড পাওয়া যায়নি");
+    if (lead.assigned_to && lead.assigned_to !== me.id) {
+      throw new Error("এই লিড আপনার তালিকায় নেই");
+    }
+    if (!lead.assigned_to) {
+      await supabaseAdmin
+        .from("leads")
+        .update({ assigned_to: me.id, assigned_agent_id: me.id, assignment_source: "callback_claim" })
+        .eq("id", lead.id);
+    }
+
+    const { data: rec, error } = await supabaseAdmin
+      .from("call_recordings")
+      .insert({
+        lead_id: lead.id,
+        agent_id: me.id,
+        phone_number: lead.phone_number,
+        call_direction: "incoming_callback",
+        duration_seconds: data.durationSeconds,
+        is_two_sided: false,
+        sync_status: "uploaded",
+        analysis_status: "not_available",
+        call_source: "web_callback",
+        call_status: "completed",
+        recording_status: "not_available",
+        upload_status: "pending",
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+
+    const { openCallReport } = await import("@/lib/call-reports.server");
+    const report = await openCallReport({
+      leadId: lead.id,
+      agentId: me.id,
+      recordingId: rec?.id ?? null,
+      phoneNumber: lead.phone_number,
+      durationSeconds: data.durationSeconds,
+      connected: true,
+    });
+
+    await supabaseAdmin
+      .from("leads")
+      .update({ last_call_at: new Date().toISOString() })
+      .eq("id", lead.id);
+
+    const { logLeadEvent } = await import("@/lib/lead-events.server");
+    await logLeadEvent({
+      leadId: lead.id,
+      agentId: me.id,
+      kind: "call_connected",
+      detail: "ক্রেতা ফিরতি কল করেছেন (কলব্যাক)",
+    });
+
+    return report;
+  });
+
 export const submitMyReport = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     Base.extend({

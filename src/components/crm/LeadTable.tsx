@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { CheckCircle2, PhoneOutgoing, Search } from "lucide-react";
 
+import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
@@ -170,6 +171,7 @@ export function LeadTable() {
                         <PhoneOutgoing className="size-4" /> কল
                       </a>
                     </Button>
+                    <CallbackLogButton leadId={lead.id} label="" />
                     <WhatsAppAction phone={lead.phone_number} leadId={lead.id} label="" />
                   </div>
                 </td>

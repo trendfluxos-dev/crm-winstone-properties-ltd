@@ -6,6 +6,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { Button } from "@/components/ui/button";
 import type { CallRecording, Lead, Profile } from "@/lib/crm-data";
 import { relativeTime, summaryBullets } from "@/lib/crm-format";
@@ -91,6 +92,7 @@ export function LeadCard({
           size="lg"
           className="h-11 flex-1 rounded-xl bg-whatsapp text-base font-semibold text-live-foreground shadow-sm transition-all duration-300 hover:bg-whatsapp/90 hover:shadow-md"
         />
+        <CallbackLogButton leadId={lead.id} className="h-11 rounded-xl" label="" />
         <Button
           size="lg"
           variant="outline"
