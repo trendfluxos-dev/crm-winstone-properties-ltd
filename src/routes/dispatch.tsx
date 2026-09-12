@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { QueueBoard } from "@/components/crm/QueueBoard";
+import { SelfClaimsFeed } from "@/components/crm/SelfClaimsFeed";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
@@ -169,6 +170,8 @@ function Dispatcher() {
           </Button>
         </div>
       </section>
+
+      <SelfClaimsFeed />
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Team load</h2>
