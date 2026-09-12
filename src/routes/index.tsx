@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Headphones, Lock, Server, Users } from "lucide-react";
+import { BarChart3, Headphones, Lock, Mic, Server, Users } from "lucide-react";
 import { useState } from "react";
 
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
