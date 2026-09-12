@@ -34,6 +34,10 @@ data class DeskUiState(
     val twilioCallingLeadId: String? = null,
     /** Honest recording capability of this phone, as reported to the CRM. */
     val recordingStatus: String? = null,
+    /** two_sided / mic_only / unavailable — drives the per-lead recording badge. */
+    val recordingMode: String? = null,
+    /** Technical reason behind the verdict, shown when recording is blocked. */
+    val recordingReason: String? = null,
 )
 
 class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
