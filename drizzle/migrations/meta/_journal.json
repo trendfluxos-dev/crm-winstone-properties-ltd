@@ -141,6 +141,13 @@
       "when": 1789249756324,
       "tag": "0019_realtime_call_recordings",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1789250398716,
+      "tag": "0020_agent_sim_binding",
+      "breakpoints": true
     }
   ]
 }
