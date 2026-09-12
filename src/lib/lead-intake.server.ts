@@ -79,5 +79,15 @@ export async function intakeLead(input: {
     });
   }
 
+  const { logAudit } = await import("@/lib/audit.server");
+  await logAudit({
+    action: "lead_created",
+    entityType: "lead",
+    entityId: created.id,
+    actorProfileId: owner,
+    actorLabel: input.ownerName?.trim() || null,
+    metadata: { phone, source: owner ? "agent_app" : (input.source ?? "webhook") },
+  });
+
   return { leadId: created.id, duplicate: false, assignedTo: owner };
 }

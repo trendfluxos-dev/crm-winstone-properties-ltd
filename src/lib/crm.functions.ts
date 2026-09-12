@@ -183,7 +183,8 @@ export const importLeads = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
-    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const importer = await resolveCaller(data.adminToken ?? null);
+    requireDispatch(importer);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const normalize = (p: string) => p.replace(/[^\d+]/g, "");
@@ -237,6 +238,14 @@ export const importLeads = createServerFn({ method: "POST" })
       const { error } = await supabaseAdmin.from("leads").insert(toInsert);
       if (error) throw new Error(error.message);
     }
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "lead_imported",
+      entityType: "lead",
+      actorProfileId: importer.profile?.id ?? null,
+      actorLabel: importer.profile?.name ?? "Authority PIN",
+      metadata: { imported: toInsert.length, skipped, autoAssign: data.autoAssign },
+    });
     return { imported: toInsert.length, skipped };
   });
 
@@ -301,6 +310,12 @@ export const reanalyzeRecording = createServerFn({ method: "POST" })
     requireAdminToken(data.adminToken);
     const { processRecording } = await import("@/lib/call-intel.server");
     await processRecording(data.recordingId);
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "recording_reprocessed",
+      entityType: "call_recording",
+      entityId: data.recordingId,
+    });
     return { ok: true };
   });
 
@@ -316,7 +331,8 @@ export const assignLeadsToAgent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AssignInput.parse(input))
   .handler(async ({ data }) => {
     const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
-    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const caller = await resolveCaller(data.adminToken ?? null);
+    requireDispatch(caller);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     let query = supabaseAdmin
@@ -349,5 +365,15 @@ export const assignLeadsToAgent = createServerFn({ method: "POST" })
         source: "coordinator",
       })),
     );
+
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "lead_assigned",
+      entityType: "lead",
+      entityId: null,
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.name ?? "Authority PIN",
+      metadata: { agentId: data.agentId, count: pool.length, source: "coordinator" },
+    });
     return { assigned: pool.length };
   });

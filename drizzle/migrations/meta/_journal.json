@@ -29,6 +29,13 @@
       "when": 1789221430849,
       "tag": "0003_lead_intake_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789222921038,
+      "tag": "0004_create_audit_logs",
+      "breakpoints": true
     }
   ]
 }

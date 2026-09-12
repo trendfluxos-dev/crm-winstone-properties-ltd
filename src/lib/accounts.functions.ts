@@ -174,5 +174,21 @@ export const decideAccount = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.profileId);
     if (error) throw new Error(error.message);
+
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: data.decision === "reject" ? "account_rejected" : "account_approved",
+      entityType: "profile",
+      entityId: data.profileId,
+      metadata: { decision: data.decision, role: "role" in patch ? patch.role : null },
+    });
+    if ("role" in patch) {
+      await logAudit({
+        action: "role_changed",
+        entityType: "profile",
+        entityId: data.profileId,
+        metadata: { role: patch.role },
+      });
+    }
     return { ok: true };
   });

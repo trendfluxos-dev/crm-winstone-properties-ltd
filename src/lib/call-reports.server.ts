@@ -237,6 +237,20 @@ export async function submitCallReport(input: {
     detail: `${CATEGORY_LABEL[category]}${input.followUpAt ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}` : ""}`,
   });
 
+  const { logAudit } = await import("@/lib/audit.server");
+  await logAudit({
+    action: "call_report_submitted",
+    entityType: "call_report",
+    entityId: report.id,
+    actorProfileId: input.agentId,
+    metadata: {
+      leadId: report.lead_id,
+      category,
+      aiDecision: input.aiDecision ?? null,
+      followUpAt: input.followUpAt ?? null,
+    },
+  });
+
   return { ok: true, followUpId };
 }
 
