@@ -170,6 +170,7 @@ export function LeadTable() {
                         <PhoneOutgoing className="size-4" /> কল
                       </a>
                     </Button>
+                    <CallbackLogButton leadId={lead.id} label="" />
                     <WhatsAppAction phone={lead.phone_number} leadId={lead.id} label="" />
                   </div>
                 </td>
