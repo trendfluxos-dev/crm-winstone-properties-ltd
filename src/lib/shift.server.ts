@@ -3,7 +3,7 @@
  * the shift summary is generated right after each window closes.
  */
 
-export type ShiftId = "morning" | "midday" | "evening";
+export type ShiftId = "morning" | "evening";
 
 export const SHIFTS: {
   id: ShiftId;
@@ -14,8 +14,6 @@ export const SHIFTS: {
 }[] = [
   // 09:00 – 12:45, summary at 12:50
   { id: "morning", label: "সকালের শিফট (৯:০০–১২:৪৫)", startMinutes: 9 * 60, endMinutes: 12 * 60 + 45, summaryMinutes: 12 * 60 + 50 },
-  // 12:45 – 13:45, summary at 13:50 (দুপুরের চেকপয়েন্ট)
-  { id: "midday", label: "দুপুরের চেকপয়েন্ট (১২:৪৫–১:৪৫)", startMinutes: 12 * 60 + 45, endMinutes: 13 * 60 + 45, summaryMinutes: 13 * 60 + 50 },
   // 14:00 – 17:20, summary at 17:30
   { id: "evening", label: "বিকেলের শিফট (২:০০–৫:২০)", startMinutes: 14 * 60, endMinutes: 17 * 60 + 20, summaryMinutes: 17 * 60 + 30 },
 ];
