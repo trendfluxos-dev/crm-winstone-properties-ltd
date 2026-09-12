@@ -856,35 +856,56 @@ export type Database = {
         Row: {
           agent_id: string | null
           created_at: string
+          delivered_at: string | null
           duration_seconds: number | null
+          error_detail: string | null
           id: string
           lead_id: string | null
           media_url: string | null
           message_content: string | null
           message_type: Database["public"]["Enums"]["message_type"]
+          provider: string
+          provider_message_id: string | null
+          read_at: string | null
           sender_type: Database["public"]["Enums"]["sender_type"]
+          status: string
+          status_updated_at: string | null
         }
         Insert: {
           agent_id?: string | null
           created_at?: string
+          delivered_at?: string | null
           duration_seconds?: number | null
+          error_detail?: string | null
           id?: string
           lead_id?: string | null
           media_url?: string | null
           message_content?: string | null
           message_type?: Database["public"]["Enums"]["message_type"]
+          provider?: string
+          provider_message_id?: string | null
+          read_at?: string | null
           sender_type: Database["public"]["Enums"]["sender_type"]
+          status?: string
+          status_updated_at?: string | null
         }
         Update: {
           agent_id?: string | null
           created_at?: string
+          delivered_at?: string | null
           duration_seconds?: number | null
+          error_detail?: string | null
           id?: string
           lead_id?: string | null
           media_url?: string | null
           message_content?: string | null
           message_type?: Database["public"]["Enums"]["message_type"]
+          provider?: string
+          provider_message_id?: string | null
+          read_at?: string | null
           sender_type?: Database["public"]["Enums"]["sender_type"]
+          status?: string
+          status_updated_at?: string | null
         }
         Relationships: [
           {
