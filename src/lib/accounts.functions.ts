@@ -5,6 +5,43 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const RequestedRole = z.enum(["agent", "coordinator"]);
 
+/** Digits only, compared on the last 10 so 01805049668 / +8801805049668 match. */
+function phoneKey(value: string): string | null {
+  const digits = value.replace(/\D+/g, "");
+  return digits.length >= 10 ? digits.slice(-10) : null;
+}
+
+/**
+ * Agents sign in with a phone number or Employee ID instead of an email.
+ * Resolves whatever they typed to the email of their desk account.
+ */
+export const resolveSignInEmail = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ identifier: z.string().trim().min(3).max(160) }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const raw = data.identifier.trim();
+    if (raw.includes("@")) return { email: raw };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from("profiles")
+      .select("email, phone, employee_id")
+      .not("email", "is", null)
+      .limit(500);
+
+    const wantId = raw.toUpperCase().replace(/\s+/g, "");
+    const wantPhone = phoneKey(raw);
+    const match = (rows ?? []).find(
+      (row) =>
+        (row.employee_id ?? "").toUpperCase().replace(/\s+/g, "") === wantId ||
+        (wantPhone !== null && row.phone !== null && phoneKey(row.phone) === wantPhone),
+    );
+    if (!match?.email) throw new Error("এই ফোন নম্বর বা Employee ID পাওয়া যায়নি");
+    return { email: match.email };
+  });
+
+
 /**
  * Called right after sign-up / first sign-in. Everybody — roster staff
  * included — lands in "pending" and waits for the IT Console to approve the
