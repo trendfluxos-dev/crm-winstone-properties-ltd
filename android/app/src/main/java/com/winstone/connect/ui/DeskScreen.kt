@@ -137,6 +137,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                             items(leads) { lead ->
                                 LeadCard(
                                     lead = lead,
+                                    twilioBusy = state.twilioCallingLeadId == lead.id,
                                     onCall = {
                                         // The server decides: an unfinished post-call
                                         // report blocks the next outbound call.
@@ -151,6 +152,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                             }
                                         }
                                     },
+                                    onTwilioCall = { vm.twilioCall(lead.id) },
                                 )
                             }
                         }
