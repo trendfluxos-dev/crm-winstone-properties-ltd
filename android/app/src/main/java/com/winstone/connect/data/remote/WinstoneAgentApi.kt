@@ -31,10 +31,10 @@ object WinstoneAgentApi {
         val deviceId: String,
     )
 
-    /** CRM credentials sign-in: email + password, exactly like the web desk. */
-    suspend fun signIn(email: String, password: String): AgentIdentity = withContext(Dispatchers.IO) {
+    /** CRM credentials sign-in: phone number + password, exactly like the web desk. */
+    suspend fun signIn(phone: String, password: String): AgentIdentity = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
-            put("email", email.trim())
+            put("email", phone.trim())
             put("password", password)
             put("device_label", android.os.Build.MODEL)
         }
