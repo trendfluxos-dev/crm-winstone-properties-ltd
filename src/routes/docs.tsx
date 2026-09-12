@@ -13,7 +13,8 @@ export const Route = createFileRoute("/docs")({
       { title: "Winstone CRM ডকুমেন্টেশন" },
       {
         name: "description",
-        content: "Winstone Connect CRM ব্যবহারের নির্দেশিকা — এজেন্ট ডেস্ক, কল রিপোর্ট, ফলো-আপ ও এইচকিউ।",
+        content:
+          "Winstone Connect CRM ব্যবহারের নির্দেশিকা — এজেন্ট ডেস্ক, কল রিপোর্ট, ফলো-আপ ও এইচকিউ।",
       },
       { property: "og:title", content: "Winstone CRM ডকুমেন্টেশন" },
       {

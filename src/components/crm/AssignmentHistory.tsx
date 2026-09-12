@@ -30,7 +30,9 @@ export function AssignmentHistory() {
         <h2 className="flex items-center gap-1.5 text-sm font-bold tracking-tight">
           <History className="size-4" /> অ্যাসাইনমেন্ট ইতিহাস
         </h2>
-        <p className="text-xs text-muted-foreground">কোন লিড কে কার কাছে পাঠিয়েছেন — সব লেখা থাকে।</p>
+        <p className="text-xs text-muted-foreground">
+          কোন লিড কে কার কাছে পাঠিয়েছেন — সব লেখা থাকে।
+        </p>
       </header>
 
       {rows.length === 0 ? (
@@ -40,7 +42,10 @@ export function AssignmentHistory() {
       ) : (
         <ul className="space-y-1.5 text-xs">
           {rows.map((row) => (
-            <li key={row.id} className="flex flex-wrap justify-between gap-2 rounded-lg border border-border px-3 py-2">
+            <li
+              key={row.id}
+              className="flex flex-wrap justify-between gap-2 rounded-lg border border-border px-3 py-2"
+            >
               <span>
                 <strong>{leadOf(row.lead_id)}</strong> — {nameOf(row.from_agent_id)} →{" "}
                 {nameOf(row.to_agent_id)}

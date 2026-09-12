@@ -121,9 +121,9 @@ export function PostCallReportGate() {
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
-          {detail.lead?.name ?? "লিড"} — {detail.lead?.phone_number ?? detail.report.phone_number ?? ""} ·{" "}
-          {detail.report.duration_seconds}s
-          {detail.report.connected ? "" : " · কথা হয়নি"}
+          {detail.lead?.name ?? "লিড"} —{" "}
+          {detail.lead?.phone_number ?? detail.report.phone_number ?? ""} ·{" "}
+          {detail.report.duration_seconds}s{detail.report.connected ? "" : " · কথা হয়নি"}
         </p>
 
         {detail.recording && detail.recording.analysis_status !== "completed" ? (
@@ -158,10 +158,20 @@ export function PostCallReportGate() {
               <Button size="sm" onClick={applySuggestion} className="gap-1">
                 <Check className="size-3.5" /> মেনে নিন
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => setAiDecision("edited")} className="gap-1">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setAiDecision("edited")}
+                className="gap-1"
+              >
                 <Pencil className="size-3.5" /> নিজে বদলাবো
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setAiDecision("rejected")} className="gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setAiDecision("rejected")}
+                className="gap-1"
+              >
                 <X className="size-3.5" /> মানছি না
               </Button>
             </div>

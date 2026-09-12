@@ -46,7 +46,7 @@ export const callOpsSummary = createServerFn({ method: "POST" })
       supabaseAdmin.from("leads").select("id, assigned_to, status"),
     ]);
 
-    const count = <T,>(rows: T[] | null, predicate: (row: T) => boolean) =>
+    const count = <T>(rows: T[] | null, predicate: (row: T) => boolean) =>
       (rows ?? []).filter(predicate).length;
 
     const now = Date.now();
@@ -70,7 +70,8 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         notAvailable: count(recordings.data, (r) => r.analysis_status === "not_available"),
         micOnly: count(recordings.data, (r) => r.is_two_sided === false),
         lastError:
-          (recordings.data ?? []).find((r) => r.analysis_status === "failed")?.analysis_error ?? null,
+          (recordings.data ?? []).find((r) => r.analysis_status === "failed")?.analysis_error ??
+          null,
       },
       followUps: {
         overdue: count(
@@ -106,7 +107,9 @@ export const callOpsSummary = createServerFn({ method: "POST" })
 
 /** Assign / reassign audit trail, newest first. */
 export const assignmentHistory = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => Input.extend({ limit: z.number().int().min(1).max(200).default(50) }).parse(input))
+  .inputValidator((input: unknown) =>
+    Input.extend({ limit: z.number().int().min(1).max(200).default(50) }).parse(input),
+  )
   .handler(async ({ data }) => {
     await requireSupervisor(data.adminToken ?? null);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

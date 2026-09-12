@@ -65,11 +65,21 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
           </p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => void summary.refetch()}>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="gap-1.5"
+            onClick={() => void summary.refetch()}
+          >
             <RefreshCw className="size-3.5" /> রিফ্রেশ
           </Button>
           {showControls ? (
-            <Button size="sm" className="gap-1.5" disabled={runSweep.isPending} onClick={() => runSweep.mutate()}>
+            <Button
+              size="sm"
+              className="gap-1.5"
+              disabled={runSweep.isPending}
+              onClick={() => runSweep.mutate()}
+            >
               {runSweep.isPending ? <Loader2 className="size-3.5 animate-spin" /> : null}
               AI বিশ্লেষণ চালান
             </Button>
@@ -82,7 +92,11 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
       ) : (
         <>
           <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Tile label="রিপোর্ট বাকি" value={data.reports.pending} hint="জমা না দিলে পরের কল বন্ধ" />
+            <Tile
+              label="রিপোর্ট বাকি"
+              value={data.reports.pending}
+              hint="জমা না দিলে পরের কল বন্ধ"
+            />
             <Tile label="রিপোর্ট জমা" value={data.reports.submitted} hint="শেষ ৭ দিনে" />
             <Tile
               label="AI বিশ্লেষণ বাকি"
@@ -95,7 +109,11 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
               hint={data.analysis.lastError ?? "সব ঠিক আছে"}
             />
             <Tile label="ফলো-আপ সময় পার" value={data.followUps.overdue} hint="এখনই দেখা দরকার" />
-            <Tile label="ফলো-আপ এখন" value={data.followUps.due} hint={`${data.followUps.upcoming}টি আসছে`} />
+            <Tile
+              label="ফলো-আপ এখন"
+              value={data.followUps.due}
+              hint={`${data.followUps.upcoming}টি আসছে`}
+            />
             <Tile label="খালি লিড" value={data.leads.unassigned} hint={`মোট ${data.leads.total}`} />
             <Tile
               label="শুধু এজেন্টের কণ্ঠ"

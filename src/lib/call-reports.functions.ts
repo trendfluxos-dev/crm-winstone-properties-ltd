@@ -49,7 +49,8 @@ export const startMyCall = createServerFn({ method: "POST" })
       .eq("id", data.leadId)
       .maybeSingle();
     if (!lead) throw new Error("লিড পাওয়া যায়নি");
-    if (lead.assigned_to && lead.assigned_to !== me.id) throw new Error("এই লিড আপনার তালিকায় নেই");
+    if (lead.assigned_to && lead.assigned_to !== me.id)
+      throw new Error("এই লিড আপনার তালিকায় নেই");
 
     const { logLeadEvent } = await import("@/lib/lead-events.server");
     await logLeadEvent({
@@ -141,14 +142,10 @@ export const myFollowUps = createServerFn({ method: "POST" })
       const at = new Date(event.scheduled_at).getTime();
       const due = at - (event.reminder_minutes ?? 15) * 60_000;
       const state =
-        event.status === "done"
-          ? "done"
-          : at < now
-            ? "overdue"
-            : due <= now
-              ? "due"
-              : "upcoming";
-      return { ...event, state } as typeof event & { state: "done" | "overdue" | "due" | "upcoming" };
+        event.status === "done" ? "done" : at < now ? "overdue" : due <= now ? "due" : "upcoming";
+      return { ...event, state } as typeof event & {
+        state: "done" | "overdue" | "due" | "upcoming";
+      };
     });
   });
 

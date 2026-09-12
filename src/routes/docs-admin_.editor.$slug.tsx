@@ -128,7 +128,12 @@ function Editor() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => setPreview((v) => !v)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="gap-1.5"
+            onClick={() => setPreview((v) => !v)}
+          >
             <Eye className="size-4" /> {preview ? "সম্পাদনা" : "প্রিভিউ"}
           </Button>
           <Button
@@ -138,10 +143,18 @@ function Editor() {
             disabled={persist.isPending}
             onClick={() => persist.mutate(status === "published" ? "published" : "draft")}
           >
-            {persist.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            {persist.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Save className="size-4" />
+            )}
             সংরক্ষণ
           </Button>
-          <Button size="sm" disabled={persist.isPending} onClick={() => persist.mutate("published")}>
+          <Button
+            size="sm"
+            disabled={persist.isPending}
+            onClick={() => persist.mutate("published")}
+          >
             প্রকাশ করুন
           </Button>
         </div>
@@ -152,7 +165,11 @@ function Editor() {
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </Field>
         <Field label="Slug (ইংরেজি ছোট হাতের, ড্যাশ)">
-          <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="agent-desk-guide" />
+          <Input
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder="agent-desk-guide"
+          />
         </Field>
         <Field label="ক্যাটাগরি">
           <Input value={category} onChange={(e) => setCategory(e.target.value)} />
