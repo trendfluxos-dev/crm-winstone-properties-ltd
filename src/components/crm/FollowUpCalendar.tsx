@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, Check, MessageCircle, PhoneCall } from "lucide-react";
+import { CalendarClock, Check, PhoneCall } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { completeFollowUp, myFollowUps } from "@/lib/call-reports.functions";
@@ -122,15 +123,12 @@ export function FollowUpCalendar() {
                         <PhoneCall className="size-3.5" /> কল
                       </a>
                     </Button>
-                    <Button asChild size="sm" variant="ghost" className="gap-1">
-                      <a
-                        href={`https://api.whatsapp.com/send?phone=${event.phone_number.replace(/[^\d]/g, "")}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <MessageCircle className="size-3.5" /> মেসেজ
-                      </a>
-                    </Button>
+                    <WhatsAppAction
+                      phone={event.phone_number}
+                      leadId={event.lead_id ?? null}
+                      label="মেসেজ"
+                      variant="ghost"
+                    />
                   </>
                 ) : null}
                 {event.status !== "done" ? (

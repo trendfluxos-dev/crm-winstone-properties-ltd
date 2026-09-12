@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 import { CallAudioPlayer } from "@/components/crm/CallAudioPlayer";
 import { Button } from "@/components/ui/button";
+import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { CallRecording, Lead, LeadEvent, Profile, TimelineEntry, WhatsappMessage } from "@/lib/crm-data";
 import { LEAD_EVENT_LABELS } from "@/lib/crm-data";
@@ -27,7 +28,6 @@ import { getAdminToken } from "@/lib/local-session";
 import {
   clockTime,
   dayLabel,
-  digitsOnly,
   formatDuration,
   parseTranscript,
   summaryBullets,
@@ -91,15 +91,12 @@ export function LeadDossier({
                     <PhoneOutgoing className="size-4" /> সরাসরি কল
                   </a>
                 </Button>
-                <Button asChild size="sm" variant="secondary" className="flex-1">
-                  <a
-                    href={`https://wa.me/${digitsOnly(lead.phone_number)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <MessageCircle className="size-4" /> হোয়াটসঅ্যাপ চ্যাট
-                  </a>
-                </Button>
+                <WhatsAppAction
+                  phone={lead.phone_number}
+                  leadId={lead.id}
+                  label="হোয়াটসঅ্যাপ চ্যাট"
+                  className="flex-1"
+                />
               </div>
             </SheetHeader>
 

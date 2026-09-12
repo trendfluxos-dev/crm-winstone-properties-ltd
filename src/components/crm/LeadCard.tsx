@@ -1,7 +1,6 @@
 import {
   BadgeCheck,
   FolderOpen,
-  MessageCircle,
   PhoneOutgoing,
   Repeat,
   Sparkles,
@@ -9,7 +8,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import type { CallRecording, Lead, Profile } from "@/lib/crm-data";
-import { digitsOnly, relativeTime, summaryBullets } from "@/lib/crm-format";
+import { relativeTime, summaryBullets } from "@/lib/crm-format";
+import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -84,19 +84,13 @@ export function LeadCard({
             <PhoneOutgoing className="size-5" /> Call
           </a>
         </Button>
-        <Button
-          asChild
+        <WhatsAppAction
+          phone={lead.phone_number}
+          leadId={lead.id}
+          label="WhatsApp"
           size="lg"
           className="h-11 flex-1 rounded-xl bg-whatsapp text-base font-semibold text-live-foreground shadow-sm transition-all duration-300 hover:bg-whatsapp/90 hover:shadow-md"
-        >
-          <a
-            href={`https://wa.me/${digitsOnly(lead.phone_number)}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <MessageCircle className="size-5" /> WhatsApp
-          </a>
-        </Button>
+        />
         <Button
           size="lg"
           variant="outline"

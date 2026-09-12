@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { logMyWhatsappMessage } from "@/lib/agent-desk.functions";
+import { getWhatsappIntegrationStatus } from "@/lib/whatsapp.functions";
 import type { Lead, WhatsappMessage } from "@/lib/crm-data";
 import { useSnapshot } from "@/lib/crm-data";
-import { clockTime, dayLabel, digitsOnly, relativeTime } from "@/lib/crm-format";
+import { clockTime, dayLabel, relativeTime } from "@/lib/crm-format";
+import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { useAdminToken } from "@/lib/local-session";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +29,12 @@ export function WhatsappInbox() {
   const adminToken = useAdminToken();
   const queryClient = useQueryClient();
   const send = useServerFn(logMyWhatsappMessage);
+  const { data: integration } = useQuery({
+    queryKey: ["whatsapp-integration-status"],
+    queryFn: () => getWhatsappIntegrationStatus(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const integrationStatus = integration?.status ?? "not_configured";
   const [search, setSearch] = useState("");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -94,6 +102,12 @@ export function WhatsappInbox() {
             {threads.length}টি কথা · ফোন থেকে আসা প্রতিটি মেসেজ নিজে নিজেই এখানে জমা হয়
             <MyPhoneLine />
           </p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {integrationStatus === "configured"
+              ? "WhatsApp Business API: সংযুক্ত"
+              : "WhatsApp Business API: সংযুক্ত নয় (INTEGRATION REQUIRED) — মেসেজ এজেন্টের নিজের হোয়াটসঅ্যাপ থেকে যাবে"}
+          </p>
+
         </div>
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -152,15 +166,11 @@ export function WhatsappInbox() {
                   <p className="truncate text-sm font-semibold">{active.lead.name}</p>
                   <p className="tabular text-xs text-muted-foreground">{active.lead.phone_number}</p>
                 </div>
-                <Button asChild size="sm" variant="secondary">
-                  <a
-                    href={`https://wa.me/${digitsOnly(active.lead.phone_number)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <MessageCircle className="size-4" /> হোয়াটসঅ্যাপে খুলুন
-                  </a>
-                </Button>
+                <WhatsAppAction
+                  phone={active.lead.phone_number}
+                  leadId={active.lead.id}
+                  label="হোয়াটসঅ্যাপে খুলুন"
+                />
               </header>
 
               <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
