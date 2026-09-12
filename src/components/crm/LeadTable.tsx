@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { CheckCircle2, PhoneOutgoing, Search } from "lucide-react";
 
+import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";

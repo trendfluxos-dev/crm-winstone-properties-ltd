@@ -6,6 +6,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { Button } from "@/components/ui/button";
 import type { CallRecording, Lead, Profile } from "@/lib/crm-data";
 import { relativeTime, summaryBullets } from "@/lib/crm-format";
