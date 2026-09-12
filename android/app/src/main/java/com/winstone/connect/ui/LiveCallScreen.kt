@@ -42,10 +42,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.winstone.connect.data.sync.CallSyncQueue
+import com.winstone.connect.data.remote.WinstoneApi
 import com.winstone.connect.telephony.CallPhase
 import com.winstone.connect.telephony.LiveCallLauncher
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * কলের সময়ের পর্দা — লাইভ টাইমার, রেকর্ডিং চিহ্ন, নোট, মিউট/স্পিকার,
@@ -155,26 +157,168 @@ fun LiveCallScreen(phase: CallPhase) {
     }
 
     if (phase == CallPhase.Ended) {
-        OutcomeSheet(
-            notes = notes,
-            onSubmit = { outcome, finalNotes, connected ->
-                LiveCallLauncher.activeLeadId?.let { lead ->
-                    CallSyncQueue.queueOutcome(
-                        context = context.applicationContext,
-                        leadId = lead,
-                        outcome = outcome,
-                        notes = finalNotes,
-                        connected = connected,
-                    )
-                }
-                LiveCallLauncher.clear()
-            },
-            onDismiss = { LiveCallLauncher.clear() },
-        )
+        ReportSheet(notes = notes)
     }
 }
 
+/**
+ * বাধ্যতামূলক পোস্ট-কল রিপোর্ট।
+ *
+ * কল শেষ হলে এই শিটটি বন্ধ করা যায় না: ক্যাটাগরি ও তার আবশ্যক ঘর পূরণ করে
+ * জমা না দিলে পরের কল শুরু করা যায় না — নিয়মটি সার্ভারেই বসানো, তাই অ্যাপ
+ * বন্ধ করে দিলেও রিপোর্টটি বাকি থেকে যায়।
+ */
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReportSheet(notes: String) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var reportId by remember { mutableStateOf<String?>(null) }
+    var category by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf(notes) }
+    var reason by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var aiSummary by remember { mutableStateOf<String?>(null) }
+    var aiCategory by remember { mutableStateOf<String?>(null) }
+
+    // Wait for the server-side report (opened by the sync worker when the call ended).
+    LaunchedEffect(Unit) {
+        while (reportId == null) {
+            runCatching { WinstoneApi.pendingReport() }.getOrNull()?.let { body ->
+                body.optJSONObject("pending")?.let { pending ->
+                    reportId = pending.optString("id").takeIf { it.isNotBlank() }
+                    pending.optJSONObject("recording")?.let { rec ->
+                        aiSummary = rec.optString("ai_summary").takeIf { it.isNotBlank() && it != "null" }
+                    }
+                    pending.optJSONObject("ai_suggestion")?.let { suggestion ->
+                        aiCategory = suggestion.optString("suggestedCategory").takeIf { it.isNotBlank() }
+                    }
+                }
+            }
+            if (reportId == null) delay(3_000)
+        }
+    }
+
+    val needsSchedule = category == "follow_up" || category == "callback"
+    val needsReason = category == "not_interested" || category == "wrong_number"
+    val needsNote = needsSchedule || category == "hot_lead"
+    val ready = category.isNotBlank() &&
+        (!needsSchedule || (date.length == 10 && time.length == 5)) &&
+        (!needsReason || reason.trim().length > 1) &&
+        (!needsNote || note.trim().length > 1)
+
+    ModalBottomSheet(onDismissRequest = { /* বাধ্যতামূলক — বন্ধ করা যাবে না */ }, sheetState = sheet) {
+        Column(Modifier.padding(20.dp)) {
+            Text("কল রিপোর্ট (বাধ্যতামূলক)", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                if (reportId == null) "রিপোর্ট তৈরি হচ্ছে…" else "ক্যাটাগরি বেছে নিয়ে জমা দিন",
+                fontSize = 12.sp,
+            )
+            aiSummary?.let {
+                Spacer(Modifier.height(8.dp))
+                Text("AI সারসংক্ষেপ: $it", fontSize = 12.sp)
+            }
+            aiCategory?.let {
+                Spacer(Modifier.height(4.dp))
+                Text("AI পরামর্শ: $it (চূড়ান্ত সিদ্ধান্ত আপনারই)", fontSize = 12.sp)
+            }
+
+            Spacer(Modifier.height(12.dp))
+            CATEGORIES.forEach { (value, label) ->
+                OutlinedButton(
+                    onClick = { category = value },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                ) { Text(if (category == value) "✓ $label" else label) }
+            }
+
+            if (needsSchedule) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = date,
+                    onValueChange = { date = it },
+                    label = { Text("ফলো-আপ তারিখ (2026-05-20)") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = time,
+                    onValueChange = { time = it },
+                    label = { Text("সময় (14:30)") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (needsReason) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = reason,
+                    onValueChange = { reason = it },
+                    label = { Text("কারণ (বাধ্যতামূলক)") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text(if (needsNote) "নোট (বাধ্যতামূলক)" else "নোট") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+            )
+
+            error?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(it, color = Color(0xFFB3261E), fontSize = 12.sp)
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Button(
+                enabled = ready && reportId != null && !busy,
+                onClick = {
+                    val id = reportId ?: return@Button
+                    busy = true; error = null
+                    scope.launch {
+                        val followUp = if (needsSchedule) "${'$'}{date}T${'$'}{time}:00+06:00" else null
+                        val result = runCatching {
+                            WinstoneApi.submitReport(
+                                reportId = id,
+                                category = category,
+                                note = note,
+                                reason = reason,
+                                followUpAtIso = followUp,
+                                aiDecision = if (aiCategory != null && aiCategory == category) "accepted" else "edited",
+                            )
+                        }
+                        busy = false
+                        result.onSuccess { LiveCallLauncher.clear() }
+                            .onFailure { error = it.message ?: "রিপোর্ট জমা হয়নি" }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(if (busy) "জমা হচ্ছে…" else "রিপোর্ট জমা দিন") }
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+private val CATEGORIES = listOf(
+    "hot_lead" to "HOT LEAD — খুব সম্ভাবনাময়",
+    "follow_up" to "FOLLOW UP — পরে যোগাযোগ",
+    "interested" to "INTERESTED — আগ্রহী",
+    "not_interested" to "NOT INTERESTED — আগ্রহী নয়",
+    "callback" to "CALLBACK — কলব্যাক চেয়েছেন",
+    "no_answer" to "NO ANSWER — ধরেনি",
+    "wrong_number" to "WRONG NUMBER — ভুল নম্বর",
+    "closed_converted" to "CLOSED / CONVERTED — বিক্রি হয়েছে",
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OutcomeSheetUnused(@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OutcomeSheet(
     notes: String,
