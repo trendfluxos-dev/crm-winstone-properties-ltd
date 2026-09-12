@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { logMyWhatsappMessage } from "@/lib/agent-desk.functions";
-import { getWhatsappIntegrationStatus } from "@/lib/whatsapp.functions";
+import { getWhatsappIntegrationStatus, sendWhatsappMessage } from "@/lib/whatsapp.functions";
 import type { Lead, WhatsappMessage } from "@/lib/crm-data";
 import { useSnapshot } from "@/lib/crm-data";
 import { clockTime, dayLabel, relativeTime } from "@/lib/crm-format";
@@ -80,12 +80,19 @@ export function WhatsappInbox() {
   }, [active?.messages.length, active?.lead.id]);
 
   const mutation = useMutation({
-    mutationFn: (text: string) =>
-      send({
+    mutationFn: async (text: string) => {
+      if (integrationStatus === "configured") {
+        const result = await sendApi({ data: { adminToken, leadId: active!.lead.id, body: text } });
+        if (!result.ok) throw new Error(result.error);
+        return result;
+      }
+      return send({
         data: { adminToken, leadId: active!.lead.id, senderType: "agent", messageContent: text },
-      }),
+      });
+    },
     onSuccess: () => {
       setDraft("");
+      if (integrationStatus === "configured") toast.success("WhatsApp মেসেজ পাঠানো হয়েছে");
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
     },
     onError: (error: Error) => toast.error(error.message),
