@@ -21,7 +21,16 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
           if (typeof value === "string") params[key] = value;
         }
 
+        const { claimWebhookEvent, markWebhookProcessed, markWebhookRejected } = await import(
+          "@/lib/webhook-log.server"
+        );
+
         if (!validateSignature(cfg, request.url, params, signature)) {
+          await markWebhookRejected({
+            provider: "twilio",
+            eventType: "voice",
+            reason: "invalid X-Twilio-Signature",
+          });
           return twiML(buildErrorTwiML("Invalid signature"), 401);
         }
 
@@ -29,6 +38,14 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
         const called = params["To"];
         const callSid = params["CallSid"];
         if (!caller || !callSid) return twiML(buildErrorTwiML("Missing caller"), 400);
+
+        const claim = await claimWebhookEvent({
+          provider: "twilio",
+          eventId: callSid,
+          eventType: "voice",
+          signatureValid: true,
+          payload: params,
+        });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const normalized = normalizePhone(caller);
@@ -107,6 +124,7 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
             "ধন্যবাদ, কিন্তু এখন কোনো এজেন্ট যুক্ত নেই। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
         };
         if (agentPhone) args.agentPhone = agentPhone;
+        await markWebhookProcessed(claim.id, agentPhone ? undefined : "no agent available");
         return twiML(buildInboundTwiML(args));
       },
     },

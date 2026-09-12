@@ -48,12 +48,16 @@ export const initiateTwilioCall = createServerFn({ method: "POST" })
     const from = cfg.phoneNumber ?? (await resolvePhoneNumber(cfg));
     if (!from) throw new Error("কোনো Twilio ফোন নম্বর কনফিগার করা নেই");
 
+    const { assertContactable, recordingAllowed } = await import("@/lib/comms-guard.server");
+    await assertContactable(customerPhone, "voice");
+    const record = await recordingAllowed(customerPhone, cfg.recordingEnabled);
+
     return await createOutboundCall({
       agentPhone,
       customerPhone,
       leadId: lead.id,
       agentId: profile.id,
-      record: true,
+      record,
     });
   });
 

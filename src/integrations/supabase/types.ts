@@ -506,6 +506,60 @@ export type Database = {
           },
         ]
       }
+      consent_records: {
+        Row: {
+          channel: string
+          consent_type: string
+          created_at: string
+          granted: boolean
+          id: string
+          lead_id: string | null
+          note: string | null
+          phone_number: string
+          recorded_by: string | null
+          source: string
+        }
+        Insert: {
+          channel?: string
+          consent_type?: string
+          created_at?: string
+          granted?: boolean
+          id?: string
+          lead_id?: string | null
+          note?: string | null
+          phone_number: string
+          recorded_by?: string | null
+          source?: string
+        }
+        Update: {
+          channel?: string
+          consent_type?: string
+          created_at?: string
+          granted?: boolean
+          id?: string
+          lead_id?: string | null
+          note?: string | null
+          phone_number?: string
+          recorded_by?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_records_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_records_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_reports: {
         Row: {
           assigned_to: string | null
@@ -535,6 +589,44 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      do_not_contact: {
+        Row: {
+          added_by: string | null
+          channel: string
+          created_at: string
+          id: string
+          phone_number: string
+          reason: string | null
+          source: string
+        }
+        Insert: {
+          added_by?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          phone_number: string
+          reason?: string | null
+          source?: string
+        }
+        Update: {
+          added_by?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          phone_number?: string
+          reason?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "do_not_contact_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       doc_pages: {
         Row: {
@@ -1168,6 +1260,48 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          attempts: number
+          created_at: string
+          error_message: string | null
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json
+          processed_at: string | null
+          provider: string
+          signature_valid: boolean
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider: string
+          signature_valid?: boolean
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+          signature_valid?: boolean
+          status?: string
         }
         Relationships: []
       }
