@@ -12,8 +12,8 @@ export function TwilioStatusCard() {
   const queryClient = useQueryClient();
   const fetchHealth = useServerFn(twilioHealth);
   const health = useQuery({
-    queryKey: ["twilio-health"],
-    queryFn: () => fetchHealth({ data: {} }),
+    queryKey: ["twilio-health", getAdminToken()],
+    queryFn: () => fetchHealth({ data: { adminToken: getAdminToken() } }),
     refetchInterval: 60_000,
   });
 
