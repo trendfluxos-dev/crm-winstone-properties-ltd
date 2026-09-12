@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { CallAudioPlayer } from "@/components/crm/CallAudioPlayer";
+import { PreCallBriefCard } from "@/components/crm/PreCallBriefCard";
 import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { Button } from "@/components/ui/button";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
@@ -107,6 +108,8 @@ export function LeadDossier({
             </SheetHeader>
 
             <div className="space-y-4 px-5 py-5">
+              <PreCallBriefCard leadId={lead.id} />
+
               <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 সব মাধ্যমের টাইমলাইন
               </h3>
