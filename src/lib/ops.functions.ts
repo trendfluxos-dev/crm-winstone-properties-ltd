@@ -148,3 +148,34 @@ export const acknowledgeAlert = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** Immutable audit history for the IT Console (newest first, paginated). */
+export const auditTrail = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    Input.extend({
+      search: z.string().trim().max(120).optional(),
+      action: z.string().trim().max(60).optional(),
+      page: z.number().int().min(0).max(500).default(0),
+      pageSize: z.number().int().min(5).max(100).default(25),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    await requireSupervisor(data.adminToken ?? null);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const from = data.page * data.pageSize;
+    let query = supabaseAdmin
+      .from("audit_logs")
+      .select("id, action, entity_type, entity_id, actor_label, actor_profile_id, metadata, created_at", {
+        count: "exact",
+      })
+      .order("created_at", { ascending: false })
+      .range(from, from + data.pageSize - 1);
+
+    if (data.action) query = query.eq("action", data.action);
+    if (data.search) query = query.ilike("actor_label", `%${data.search}%`);
+
+    const { data: rows, count, error } = await query;
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [], total: count ?? 0, page: data.page, pageSize: data.pageSize };
+  });
