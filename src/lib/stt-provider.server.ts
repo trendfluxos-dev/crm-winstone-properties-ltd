@@ -184,7 +184,7 @@ export async function transcribeWithAdapter(
       const out =
         provider === "sarvam"
           ? await transcribeWithSarvam(bytes, filename, contentType)
-          : { ...(await transcribeWithGemini(bytes, filename, contentType)), language: null };
+          : { ...(await transcribeWithGateway(provider, bytes, filename, contentType)), language: null };
 
       return {
         transcript: out.transcript,
