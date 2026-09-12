@@ -233,7 +233,9 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
       .from("call_recordings")
       .update({
         ...provider,
+        stt_status: "completed",
         transcribed_at: new Date().toISOString(),
+
         transcription_text: analysis.timestamped_transcript || transcript,
         ai_summary: analysis.summary_bullets.map((b) => `• ${b}`).join("\n"),
         sentiment: analysis.sentiment,
