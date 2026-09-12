@@ -76,6 +76,9 @@ export function MyProfileCard() {
         <Button variant="secondary" size="sm" onClick={() => setOpen((v) => !v)}>
           <Palette className="size-4" /> Edit profile
         </Button>
+        <Button variant="secondary" size="sm" onClick={() => setPwOpen((v) => !v)}>
+          <KeyRound className="size-4" /> পাসওয়ার্ড বদল
+        </Button>
         <Button variant="ghost" size="sm" onClick={() => void signOut()}>
           <LogOut className="size-4" /> Sign out
         </Button>
@@ -117,6 +120,48 @@ export function MyProfileCard() {
               {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
               Save profile
             </Button>
+          </div>
+        </div>
+      )}
+
+      {pwOpen && (
+        <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="my-pw1">নতুন পাসওয়ার্ড</Label>
+            <Input
+              id="my-pw1"
+              type="password"
+              autoComplete="new-password"
+              value={pw1}
+              onChange={(e) => setPw1(e.target.value)}
+              placeholder="কমপক্ষে ৬ অক্ষর"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="my-pw2">আবার লিখুন</Label>
+            <Input
+              id="my-pw2"
+              type="password"
+              autoComplete="new-password"
+              value={pw2}
+              onChange={(e) => setPw2(e.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Button
+              disabled={pw1.length < 6 || pw1 !== pw2 || changePassword.isPending}
+              onClick={() => changePassword.mutate()}
+            >
+              {changePassword.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <KeyRound className="size-4" />
+              )}
+              পাসওয়ার্ড সংরক্ষণ
+            </Button>
+            {pw1.length > 0 && pw1 !== pw2 && (
+              <p className="mt-2 text-xs text-destructive">দুইটি পাসওয়ার্ড মিলছে না</p>
+            )}
           </div>
         </div>
       )}
