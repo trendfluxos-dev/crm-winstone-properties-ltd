@@ -13,7 +13,15 @@ export const Route = createFileRoute("/api/public/twilio/recording")({
         const cfg = twilioConfig();
         const signature = request.headers.get("X-Twilio-Signature");
         const params = await twilioFormData(request);
+        const { claimWebhookEvent, markWebhookProcessed, markWebhookFailed, markWebhookRejected } =
+          await import("@/lib/webhook-log.server");
+
         if (!validateSignature(cfg, request.url, params, signature)) {
+          await markWebhookRejected({
+            provider: "twilio",
+            eventType: "recording",
+            reason: "invalid X-Twilio-Signature",
+          });
           return new Response("Invalid signature", { status: 401 });
         }
 
@@ -24,6 +32,16 @@ export const Route = createFileRoute("/api/public/twilio/recording")({
         const duration = Number(params["RecordingDuration"] ?? "0");
         const channels = Number(params["RecordingChannels"] ?? "1");
         if (!recordingSid || !callSid) return ok();
+
+        const claim = await claimWebhookEvent({
+          provider: "twilio",
+          eventId: `${recordingSid}:${status}`,
+          eventType: "recording",
+          signatureValid: true,
+          payload: params,
+        });
+        if (!claim.fresh) return ok();
+
         if (status !== "completed" || !recordingUrl) {
           // Failed or in-progress recordings are noted but not downloaded.
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -31,6 +49,8 @@ export const Route = createFileRoute("/api/public/twilio/recording")({
             .from("call_recordings")
             .update({ recording_status: status === "failed" ? "failed" : "pending" })
             .eq("external_call_id", callSid);
+          if (status === "failed") await markWebhookFailed(claim.id, "Twilio reported recording failed");
+          else await markWebhookProcessed(claim.id, `recording status ${status}`);
           return ok();
         }
 
@@ -42,7 +62,10 @@ export const Route = createFileRoute("/api/public/twilio/recording")({
           .eq("external_call_id", callSid)
           .maybeSingle();
 
-        if (!existing) return ok();
+        if (!existing) {
+          await markWebhookProcessed(claim.id, "no matching call row");
+          return ok();
+        }
 
         // Download the recording from Twilio using AccountSid/AuthToken basic auth.
         let bytes: Uint8Array | null = null;
@@ -69,6 +92,7 @@ export const Route = createFileRoute("/api/public/twilio/recording")({
               stt_error_message: String(error),
             })
             .eq("id", existing.id);
+          await markWebhookFailed(claim.id, error);
           return ok();
         }
 
@@ -83,6 +107,7 @@ export const Route = createFileRoute("/api/public/twilio/recording")({
             .from("call_recordings")
             .update({ recording_status: "failed", stt_error_message: uploadError.message })
             .eq("id", existing.id);
+          await markWebhookFailed(claim.id, uploadError.message);
           return ok();
         }
 
@@ -112,6 +137,7 @@ export const Route = createFileRoute("/api/public/twilio/recording")({
         const { analyzePending } = await import("@/lib/analysis-queue.server");
         void analyzePending(2).catch((err) => console.error("[twilio] analysis sweep failed", err));
 
+        await markWebhookProcessed(claim.id);
         return ok();
       },
     },

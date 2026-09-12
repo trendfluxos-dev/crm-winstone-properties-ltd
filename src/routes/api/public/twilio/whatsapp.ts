@@ -13,7 +13,16 @@ export const Route = createFileRoute("/api/public/twilio/whatsapp")({
         const cfg = twilioConfig();
         const signature = request.headers.get("X-Twilio-Signature");
         const params = await twilioFormData(request);
+        const { claimWebhookEvent, markWebhookProcessed, markWebhookRejected } = await import(
+          "@/lib/webhook-log.server"
+        );
+
         if (!validateSignature(cfg, request.url, params, signature)) {
+          await markWebhookRejected({
+            provider: "twilio",
+            eventType: "whatsapp",
+            reason: "invalid X-Twilio-Signature",
+          });
           return new Response("Invalid signature", { status: 401 });
         }
 
@@ -44,6 +53,36 @@ export const Route = createFileRoute("/api/public/twilio/whatsapp")({
             .maybeSingle();
           leadId = lead?.id ?? null;
           agentId = lead?.assigned_to ?? null;
+        }
+
+        const claim = await claimWebhookEvent({
+          provider: "twilio",
+          eventId: messageSid ? `${messageSid}:${status || "inbound"}` : `${from}:${now}`,
+          eventType: "whatsapp",
+          signatureValid: true,
+          payload: params,
+        });
+        if (!claim.fresh) return ok();
+
+        // Honour opt-out keywords immediately (Bengali + English).
+        const optOut = /^\s*(stop|unsubscribe|বন্ধ|বন্ধ করুন|আর পাঠাবেন না)\s*$/i.test(body);
+        if (optOut && normalized) {
+          const { addDoNotContact, saveConsent } = await import("@/lib/comms-guard.server");
+          await addDoNotContact({
+            phoneNumber: normalized,
+            channel: "whatsapp",
+            reason: "গ্রাহক নিজে বন্ধ করতে বলেছেন",
+            source: "opt_out_keyword",
+          });
+          await saveConsent({
+            leadId,
+            phoneNumber: normalized,
+            channel: "whatsapp",
+            consentType: "marketing",
+            granted: false,
+            source: "opt_out_keyword",
+            note: body.slice(0, 200),
+          });
         }
 
         if (messageSid && status) {
@@ -78,10 +117,14 @@ export const Route = createFileRoute("/api/public/twilio/whatsapp")({
                 .eq("id", existing.id);
             }
           }
+          await markWebhookProcessed(claim.id, `status ${mapped}`);
           return ok();
         }
 
-        if (!from) return ok();
+        if (!from) {
+          await markWebhookProcessed(claim.id, "missing sender");
+          return ok();
+        }
 
         // Inbound message.
         const direction = from.startsWith("whatsapp:") ? "in" : "out";
@@ -109,6 +152,7 @@ export const Route = createFileRoute("/api/public/twilio/whatsapp")({
           });
         }
 
+        await markWebhookProcessed(claim.id, optOut ? "opt-out recorded" : undefined);
         return ok();
       },
     },

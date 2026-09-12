@@ -14,6 +14,12 @@ export const Route = createFileRoute("/api/public/twilio/call-status")({
         const signature = request.headers.get("X-Twilio-Signature");
         const params = await twilioFormData(request);
         if (!validateSignature(cfg, request.url, params, signature)) {
+          const { markWebhookRejected } = await import("@/lib/webhook-log.server");
+          await markWebhookRejected({
+            provider: "twilio",
+            eventType: "call-status",
+            reason: "invalid X-Twilio-Signature",
+          });
           return new Response("Invalid signature", { status: 401 });
         }
 
@@ -21,6 +27,18 @@ export const Route = createFileRoute("/api/public/twilio/call-status")({
         const status = params["CallStatus"] ?? "";
         const duration = Number(params["CallDuration"] ?? "0");
         if (!callSid) return ok();
+
+        const { claimWebhookEvent, markWebhookProcessed, markWebhookFailed } = await import(
+          "@/lib/webhook-log.server"
+        );
+        const claim = await claimWebhookEvent({
+          provider: "twilio",
+          eventId: `${callSid}:${status}`,
+          eventType: "call-status",
+          signatureValid: true,
+          payload: params,
+        });
+        if (!claim.fresh) return ok();
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -54,12 +72,22 @@ export const Route = createFileRoute("/api/public/twilio/call-status")({
         }
         if (duration > 0) patch.duration_seconds = duration;
 
-        if (existing) {
-          // Calls that finish without a recording callback should not block reports.
-          if (status === "completed" && existing.recording_status === "pending") {
-            patch.recording_status = "not_available";
+        try {
+          if (existing) {
+            // Calls that finish without a recording callback should not block reports.
+            if (status === "completed" && existing.recording_status === "pending") {
+              patch.recording_status = "not_available";
+            }
+            const { error } = await supabaseAdmin
+              .from("call_recordings")
+              .update(patch)
+              .eq("id", existing.id);
+            if (error) throw new Error(error.message);
           }
-          await supabaseAdmin.from("call_recordings").update(patch).eq("id", existing.id);
+          await markWebhookProcessed(claim.id, existing ? undefined : "no matching call row");
+        } catch (error) {
+          console.error("[twilio] call-status update failed", error);
+          await markWebhookFailed(claim.id, error);
         }
 
         return ok();

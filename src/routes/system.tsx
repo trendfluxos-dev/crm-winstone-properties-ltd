@@ -9,6 +9,7 @@ import { DocSummaryPanel } from "@/components/crm/DocSummaryPanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
 import { StaffAccountsTable } from "@/components/crm/StaffAccountsTable";
+import { TwilioOpsPanel } from "@/components/crm/TwilioOpsPanel";
 import { TwilioStatusCard } from "@/components/crm/TwilioStatusCard";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
@@ -115,6 +116,7 @@ function SystemBoard() {
       <ReportSheetPanel />
 
       <TwilioStatusCard />
+      <TwilioOpsPanel />
 
       <StaffAccountsTable />
 
