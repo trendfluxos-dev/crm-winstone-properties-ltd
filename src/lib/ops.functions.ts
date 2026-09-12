@@ -127,6 +127,43 @@ export const callOpsSummary = createServerFn({ method: "POST" })
     };
   });
 
+/**
+ * Revokes one bound phone. The device token stops working on the very next
+ * request because `resolveApiCaller` requires `revoked_at IS NULL`. Idempotent:
+ * revoking an already revoked device keeps the first timestamp.
+ */
+export const revokeAgentDevice = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Input.extend({ deviceId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const caller = await requireSupervisor(data.adminToken ?? null);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: device } = await supabaseAdmin
+      .from("agent_devices")
+      .select("id, profile_id, device_label, revoked_at")
+      .eq("id", data.deviceId)
+      .maybeSingle();
+    if (!device) throw new Error("ফোনটি পাওয়া যায়নি");
+    if (device.revoked_at) return { ok: true, alreadyRevoked: true };
+
+    const { error } = await supabaseAdmin
+      .from("agent_devices")
+      .update({ revoked_at: new Date().toISOString(), status: "revoked" })
+      .eq("id", device.id);
+    if (error) throw new Error(error.message);
+
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "device_revoked",
+      entityType: "agent_device",
+      entityId: device.id,
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.name ?? "Authority PIN",
+      metadata: { profile_id: device.profile_id, device_label: device.device_label },
+    });
+    return { ok: true, alreadyRevoked: false };
+  });
+
 /** Assign / reassign audit trail, newest first. */
 export const assignmentHistory = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
