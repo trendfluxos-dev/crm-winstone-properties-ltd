@@ -32,6 +32,7 @@ class CallStateReceiver : BroadcastReceiver() {
         // Cold start (incoming call wakes the process): read the synchronous mirror.
         val employeeId = AgentSession.employeeIdNow(app) ?: return
 
+        val outgoing = LiveCallLauncher.activeCallUid != null
         when (state) {
             TelephonyManager.EXTRA_STATE_OFFHOOK -> {
                 if (lastState == TelephonyManager.EXTRA_STATE_OFFHOOK) return
@@ -51,6 +52,9 @@ class CallStateReceiver : BroadcastReceiver() {
                     CallRecordingService.stop(app)
                 }
                 LiveCallLauncher.setPhase(CallPhase.Connected)
+                // Answered is the first moment Android actually tells us the call
+                // is up — we never infer it from the agent pressing CALL.
+                reportState(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
                 scope.launch {
                     runCatching { WinstoneApi.postPresence(employeeId, "on_call", leadId = LiveCallLauncher.activeLeadId) }
                 }
@@ -63,10 +67,15 @@ class CallStateReceiver : BroadcastReceiver() {
                 val rec = recorder(app)
                 val twoSided = rec.twoSided
                 val recorderSource = rec.recorderSource
+                val support = RecordingCapabilityCheck.cachedOrNull()?.support ?: RecordingSupport.UNAVAILABLE
                 val captured = rec.stopAndGetFile()
                 CallRecordingService.stop(app)
 
-                if (wasOnCall && captured != null) {
+                // Policy: only a real two-sided carrier recording is uploaded. A
+                // microphone-only file is not a call recording, so it is deleted
+                // and the call is reported as recording-unavailable instead.
+                val uploadable = CallLifecycle.uploadable(support, captured != null)
+                if (wasOnCall && captured != null && uploadable) {
                     CallSyncQueue.queueRecording(
                         context = app,
                         leadId = LiveCallLauncher.activeLeadId,
@@ -76,7 +85,15 @@ class CallStateReceiver : BroadcastReceiver() {
                         twoSided = twoSided,
                         recorderSource = recorderSource,
                     )
+                } else if (captured != null) {
+                    captured.first.delete()
                 }
+
+                val duration = captured?.second ?: 0
+                val ended =
+                    if (outgoing) CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
+                    else CallLifecycle.incomingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
+                reportState(app, ended, duration, uploadable)
 
                 // Every finished call becomes reportable, even when recording
                 // failed entirely — the report is opened server-side and queued
@@ -86,8 +103,10 @@ class CallStateReceiver : BroadcastReceiver() {
                         context = app,
                         leadId = endedLeadId,
                         phoneNumber = LiveCallLauncher.activePhone.orEmpty(),
-                        durationSeconds = captured?.second ?: 0,
-                        connected = captured != null,
+                        durationSeconds = duration,
+                        // Connected means Android saw the call go off-hook, not
+                        // that we managed to record it.
+                        connected = wasOnCall,
                     )
                 }
                 scope.launch {
@@ -98,8 +117,34 @@ class CallStateReceiver : BroadcastReceiver() {
                 if (wasOnCall) LiveCallLauncher.setPhase(CallPhase.Ended) else LiveCallLauncher.clear()
             }
 
+
             else -> lastState = state
         }
+    }
+
+    /**
+     * Queues one observed call state. States we cannot observe are dropped, and
+     * a call that was never started from the app has no id to report against.
+     */
+    private fun reportState(
+        app: Context,
+        callState: CallState,
+        durationSeconds: Int = 0,
+        recordingCaptured: Boolean? = null,
+    ) {
+        val wire = callState.wire ?: return
+        val callUid = LiveCallLauncher.activeCallUid ?: return
+        val leadId = LiveCallLauncher.activeLeadId ?: return
+        CallSyncQueue.queueCallState(
+            context = app,
+            callUid = callUid,
+            leadId = leadId,
+            state = wire,
+            durationSeconds = durationSeconds,
+            phoneNumber = LiveCallLauncher.activePhone,
+            recordingSupported = recordingCaptured,
+            recordingNote = RecordingCapabilityCheck.cachedOrNull()?.reason,
+        )
     }
 
     companion object {

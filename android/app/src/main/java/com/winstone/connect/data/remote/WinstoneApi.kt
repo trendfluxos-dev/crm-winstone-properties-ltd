@@ -255,6 +255,32 @@ object WinstoneApi {
         post("/api/public/agent/report", payload)
     }
 
+    /**
+     * Reports an observed call state to the CRM's Phase-1 call-state contract.
+     * `callUid` is stable per call attempt, so a retry updates the same call row
+     * instead of creating a new one.
+     */
+    suspend fun postCallState(
+        callUid: String,
+        leadId: String,
+        state: String,                         // initiated | ringing | answered | completed | failed | no_answer
+        durationSeconds: Int? = null,
+        agentPhone: String? = null,
+        recordingSupported: Boolean? = null,
+        recordingNote: String? = null,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val payload = JSONObject().apply {
+            put("call_uid", callUid)
+            put("lead_id", leadId)
+            put("state", state)
+            durationSeconds?.let { put("duration_seconds", it) }
+            agentPhone?.let { if (it.isNotBlank()) put("agent_phone", it) }
+            recordingSupported?.let { put("recording_supported", it) }
+            recordingNote?.let { if (it.isNotBlank()) put("recording_note", it.take(300)) }
+        }
+        post("/api/public/agent/call-state", payload)
+    }
+
     private fun post(path: String, payload: JSONObject): JSONObject {
         val req = Request.Builder()
             .url(BASE_URL + path)

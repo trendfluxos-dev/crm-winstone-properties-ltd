@@ -10,6 +10,7 @@ import com.winstone.connect.data.parseLeads
 import com.winstone.connect.data.parseMessages
 import com.winstone.connect.data.remote.WinstoneAgentApi
 import com.winstone.connect.data.remote.WinstoneApi
+import com.winstone.connect.data.sync.SyncStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,10 @@ data class DeskUiState(
     val coachLoading: Boolean = false,
     /** Local time of the last successful CRM sync, for the status screen. */
     val lastSyncedAt: String? = null,
+    /** Items still waiting on this phone / given up on, plus the last error. */
+    val sync: SyncStatus.Snapshot = SyncStatus.Snapshot(),
+    /** Set when the CRM refused this phone (device access removed by IT). */
+    val deviceRevoked: Boolean = false,
 )
 
 class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -35,12 +40,17 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch {
             AgentSession.load(app)
+            SyncStatus.load(app)
             _state.value = _state.value.copy(employeeId = AgentSession.employeeId)
             if (AgentSession.isSignedIn()) refresh()
             while (true) {
                 delay(20_000)
                 if (AgentSession.isSignedIn()) refresh(silent = true)
             }
+        }
+        // Live pending / failed / last-error counters for the status screen.
+        viewModelScope.launch {
+            SyncStatus.state.collect { snap -> _state.value = _state.value.copy(sync = snap) }
         }
     }
 
@@ -97,10 +107,23 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
                     )
                 }
                 .onFailure { e ->
-                    _state.value = _state.value.copy(
-                        loading = false,
-                        error = e.message ?: "সার্ভারে সংযোগ করা যাচ্ছে না",
-                    )
+                    val message = e.message.orEmpty()
+                    // IT removed this phone's access: stop using the stored token
+                    // and send the agent back to sign-in with a clear reason.
+                    val revoked = message.contains("Unauthorized", ignoreCase = true) ||
+                        message.contains("device", ignoreCase = true) && message.contains("revoke", ignoreCase = true)
+                    if (revoked) {
+                        AgentSession.clear(app)
+                        _state.value = DeskUiState(
+                            deviceRevoked = true,
+                            error = "এই ফোনের অনুমতি বাতিল করা হয়েছে — আবার সাইন ইন করুন",
+                        )
+                    } else {
+                        _state.value = _state.value.copy(
+                            loading = false,
+                            error = message.ifBlank { "সার্ভারে সংযোগ করা যাচ্ছে না" },
+                        )
+                    }
                 }
         }
     }

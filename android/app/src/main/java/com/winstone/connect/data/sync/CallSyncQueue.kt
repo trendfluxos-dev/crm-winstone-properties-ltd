@@ -88,15 +88,52 @@ object CallSyncQueue {
         )
     }
 
+    /**
+     * Reports one observed call state. The unique work name is
+     * callUid + state, so the same transition can never be sent twice even if
+     * the phone reboots mid-queue.
+     */
+    fun queueCallState(
+        context: Context,
+        callUid: String,
+        leadId: String,
+        state: String,
+        durationSeconds: Int = 0,
+        phoneNumber: String? = null,
+        recordingSupported: Boolean? = null,
+        recordingNote: String? = null,
+    ) {
+        enqueue(
+            context,
+            unique = "state_${callUid}_$state",
+            data = Data.Builder()
+                .putString(KEY_KIND, KIND_CALL_STATE)
+                .putString(KEY_CALL_UID, callUid)
+                .putString(KEY_LEAD, leadId)
+                .putString(KEY_STATE, state)
+                .putInt(KEY_DURATION, durationSeconds)
+                .putString(KEY_PHONE, phoneNumber)
+                .putString(KEY_REC_NOTE, recordingNote)
+                .apply { recordingSupported?.let { putBoolean(KEY_REC_SUPPORTED, it) } }
+                .build(),
+        )
+    }
+
     private fun enqueue(context: Context, unique: String, data: Data) {
         val request = OneTimeWorkRequestBuilder<CrmSyncWorker>()
             .setInputData(data)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
             .build()
+        SyncStatus.queued(context)
         WorkManager.getInstance(context).enqueueUniqueWork(unique, ExistingWorkPolicy.KEEP, request)
     }
 
+    const val KEY_CALL_UID = "call_uid"
+    const val KEY_STATE = "state"
+    const val KEY_REC_SUPPORTED = "recording_supported"
+    const val KEY_REC_NOTE = "recording_note"
+    const val KIND_CALL_STATE = "call_state"
     const val KEY_KIND = "kind"
     const val KEY_LEAD = "lead_id"
     const val KEY_PHONE = "phone"
@@ -168,16 +205,45 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                     Result.success()
                 }
 
+                CallSyncQueue.KIND_CALL_STATE -> {
+                    val callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID)
+                    if (leadId == null || callUid == null) return Result.failure()
+                    WinstoneApi.postCallState(
+                        callUid = callUid,
+                        leadId = leadId,
+                        state = inputData.getString(CallSyncQueue.KEY_STATE).orEmpty(),
+                        durationSeconds = inputData.getInt(CallSyncQueue.KEY_DURATION, 0),
+                        agentPhone = inputData.getString(CallSyncQueue.KEY_PHONE),
+                        recordingSupported =
+                            if (inputData.hasKeyWithValueOfType<Boolean>(CallSyncQueue.KEY_REC_SUPPORTED))
+                                inputData.getBoolean(CallSyncQueue.KEY_REC_SUPPORTED, false)
+                            else null,
+                        recordingNote = inputData.getString(CallSyncQueue.KEY_REC_NOTE),
+                    )
+                    Result.success()
+                }
+
                 else -> Result.failure()
-            }
+            }.also { if (it is Result.Success) SyncStatus.succeeded(applicationContext) }
         } catch (error: Exception) {
             // 4xx = bad payload, retrying will not help; anything else is transient.
             val message = error.message.orEmpty()
-            if (message.contains("Invalid payload") || message.contains("Unauthorized")) Result.failure()
-            // A call recording is the audit trail of the call: never give up on it.
-            else if (kind == CallSyncQueue.KIND_RECORDING || kind == CallSyncQueue.KIND_REPORT_OPEN) Result.retry()
-            else if (runAttemptCount < 12) Result.retry()
-            else Result.failure()
+            val giveUp = message.contains("Invalid payload") || message.contains("Unauthorized")
+            // A call recording and its report are the audit trail of the call:
+            // never give up on them while the failure could still be the network.
+            val keepTrying = !giveUp && (
+                kind == CallSyncQueue.KIND_RECORDING ||
+                    kind == CallSyncQueue.KIND_REPORT_OPEN ||
+                    kind == CallSyncQueue.KIND_CALL_STATE ||
+                    runAttemptCount < 12
+                )
+            if (keepTrying) {
+                SyncStatus.retrying(applicationContext, message)
+                Result.retry()
+            } else {
+                SyncStatus.failed(applicationContext, message)
+                Result.failure()
+            }
         }
     }
 }
