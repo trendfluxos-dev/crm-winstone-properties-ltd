@@ -259,7 +259,11 @@ class MetaWhatsApp implements WhatsAppProvider {
       for (const change of entry.changes ?? []) {
         const value = (change.value ?? {}) as {
           messages?: Array<{ from?: string; type?: string; text?: { body?: string }; id?: string }>;
-          statuses?: Array<{ id?: string; status?: string }>;
+          statuses?: Array<{
+            id?: string;
+            status?: string;
+            errors?: Array<{ title?: string; message?: string }>;
+          }>;
         };
         for (const message of value.messages ?? []) {
           const msisdn = normalizeWhatsAppNumber(message.from ?? null);
@@ -271,18 +275,75 @@ class MetaWhatsApp implements WhatsAppProvider {
             .ilike("phone_number", `%${tail}`)
             .limit(1)
             .maybeSingle();
-          await supabaseAdmin.from("whatsapp_interactions").insert({
-            lead_id: lead?.id ?? null,
-            agent_id: lead?.assigned_to ?? null,
-            sender_type: "customer",
-            message_type: message.type === "text" ? "text" : "text",
-            message_content: message.text?.body ?? `[${message.type ?? "media"}]`,
-          });
+          const now = new Date().toISOString();
+          // Meta can retry a delivery; provider_message_id is unique so the
+          // same inbound message never lands twice in the thread.
+          await supabaseAdmin.from("whatsapp_interactions").upsert(
+            {
+              lead_id: lead?.id ?? null,
+              agent_id: lead?.assigned_to ?? null,
+              sender_type: "customer",
+              message_type: message.type === "text" ? "text" : "text",
+              message_content: message.text?.body ?? `[${message.type ?? "media"}]`,
+              provider: "meta-cloud-api",
+              provider_message_id: message.id ?? null,
+              status: "delivered",
+              status_updated_at: now,
+              delivered_at: now,
+            },
+            { onConflict: "provider_message_id", ignoreDuplicates: true },
+          );
           handled += 1;
+        }
+        for (const status of value.statuses ?? []) {
+          if (!status.id) continue;
+          const applied = await applyStatusCallback({
+            providerMessageId: status.id,
+            status: status.status ?? "unknown",
+            errorDetail: status.errors?.[0]?.message ?? status.errors?.[0]?.title ?? null,
+          });
+          if (applied) handled += 1;
+          if (status.status === "failed") {
+            await logWhatsAppFailure({
+              code: "whatsapp_delivery_failed",
+              title: "WhatsApp মেসেজ পৌঁছায়নি",
+              detail: status.errors?.[0]?.message ?? "Meta delivery failure",
+            });
+          }
         }
       }
     }
-    return handled > 0 ? { handled: true } : { handled: false, reason: "no inbound message in payload" };
+    return handled > 0 ? { handled: true } : { handled: false, reason: "no message or status in payload" };
+  }
+
+  async processWebhook(input: { rawBody: string; signature: string | null }) {
+    const appSecret = process.env["WHATSAPP_APP_SECRET"] ?? whatsAppCredentials().webhookSecret;
+    if (appSecret) {
+      if (!input.signature) return { ok: false, reason: "missing signature" };
+      const { createHmac, timingSafeEqual } = await import("crypto");
+      const expected = `sha256=${createHmac("sha256", appSecret).update(input.rawBody).digest("hex")}`;
+      const got = Buffer.from(input.signature);
+      const exp = Buffer.from(expected);
+      if (got.length !== exp.length || !timingSafeEqual(got, exp)) {
+        return { ok: false, reason: "invalid signature" };
+      }
+    }
+    let payload: unknown;
+    try {
+      payload = JSON.parse(input.rawBody);
+    } catch {
+      return { ok: false, reason: "invalid json" };
+    }
+    const result = await this.receiveMessage(payload);
+    return result.reason ? { ok: true, reason: result.reason } : { ok: true };
+  }
+
+  async getConversation(leadId: string) {
+    return readStoredConversation(leadId);
+  }
+
+  async getMessageStatus(providerMessageId: string) {
+    return readStoredStatus(providerMessageId);
   }
 
   async processWebhook(input: { rawBody: string; signature: string | null }) {
