@@ -8,6 +8,9 @@ import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.winstone.connect.data.sync.CallSyncQueue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Real "Call" and "WhatsApp" buttons.
@@ -18,8 +21,10 @@ import com.winstone.connect.data.sync.CallSyncQueue
  * whatsApp() opens WhatsApp *and* queues the message into the lead timeline,
  *            so the web CRM shows the touch even if the network drops.
  *
- * Manifest: <uses-permission android:name="android.permission.CALL_PHONE" />
+ * The phase flow drives the in-call overlay (LiveCallScreen).
  */
+enum class CallPhase { Idle, Dialing, Connected, Ended }
+
 object LiveCallLauncher {
     const val REQ_CALL = 4411
 
@@ -27,10 +32,32 @@ object LiveCallLauncher {
     @Volatile var activeLeadId: String? = null
     @Volatile var activePhone: String? = null
     @Volatile var activeAgentId: String? = null
+    @Volatile var activeLeadName: String? = null
 
-    fun call(activity: Activity, leadId: String, phone: String, agentId: String?) {
+    /** When the call went off-hook (millis), for the live timer. */
+    @Volatile var connectedAt: Long = 0L
+    @Volatile var recording: Boolean = false
+
+    private val _phase = MutableStateFlow(CallPhase.Idle)
+    val phase: StateFlow<CallPhase> = _phase.asStateFlow()
+
+    fun setPhase(next: CallPhase) {
+        if (next == CallPhase.Connected && _phase.value != CallPhase.Connected) {
+            connectedAt = System.currentTimeMillis()
+        }
+        _phase.value = next
+    }
+
+    fun call(
+        activity: Activity,
+        leadId: String,
+        phone: String,
+        agentId: String?,
+        leadName: String? = null,
+    ) {
         val clean = phone.replace(Regex("[^\\d+]"), "")
         activeLeadId = leadId; activePhone = clean; activeAgentId = agentId
+        activeLeadName = leadName
 
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE)
             != PackageManager.PERMISSION_GRANTED
@@ -38,6 +65,8 @@ object LiveCallLauncher {
             ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CALL_PHONE), REQ_CALL)
             return
         }
+        connectedAt = 0L
+        setPhase(CallPhase.Dialing)
         activity.startActivity(Intent(Intent.ACTION_CALL, Uri.parse("tel:$clean")))
     }
 
@@ -50,7 +79,10 @@ object LiveCallLauncher {
         )
     }
 
+    /** Called after the outcome sheet is submitted or dismissed. */
     fun clear() {
-        activeLeadId = null; activePhone = null; activeAgentId = null
+        activeLeadId = null; activePhone = null; activeAgentId = null; activeLeadName = null
+        connectedAt = 0L; recording = false
+        _phase.value = CallPhase.Idle
     }
 }
