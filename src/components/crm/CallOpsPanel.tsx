@@ -135,6 +135,21 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
               value={data.analysis.micOnly}
               hint="ফোন দুই পক্ষের অডিও দেয়নি"
             />
+            <Tile
+              label="প্রসেসিং সারিতে"
+              value={data.pipeline.queued + data.pipeline.processing}
+              hint={`${data.pipeline.completed}টি শেষ · ${data.pipeline.retried}টি পুনরায় চেষ্টা`}
+            />
+            <Tile
+              label="প্রসেসিং ব্যর্থ"
+              value={data.pipeline.failed}
+              hint={data.pipeline.lastError ?? "সব ঠিক আছে"}
+            />
+            <Tile
+              label="ফোন থেকে আসা ইভেন্ট"
+              value={data.sync.total}
+              hint={`${data.sync.queued}টি অপেক্ষায় · ${data.sync.failed}টি ব্যর্থ`}
+            />
           </dl>
 
           {Object.keys(data.reports.categories).length ? (
