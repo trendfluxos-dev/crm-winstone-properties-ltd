@@ -39,7 +39,12 @@ export const Route = createFileRoute("/import")({
 function ImportPage() {
   return (
     <AppShell>
-      <RoleGate allow={["authority", "coordinator"]}>
+      <RoleGate
+        allow={["authority", "coordinator"]}
+        icon={<FileUp className="size-7" />}
+        title="লিড ইমপোর্ট"
+        description="CSV ফাইল থেকে লিড যোগ করা। কোঅর্ডিনেটর একাউন্ট বা মাস্টার পিন দরকার।"
+      >
         <ImportScreen />
       </RoleGate>
     </AppShell>
