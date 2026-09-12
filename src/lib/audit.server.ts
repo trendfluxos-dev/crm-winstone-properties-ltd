@@ -27,7 +27,8 @@ export type AuditAction =
   | "agent_account_created"
   | "agent_account_updated"
   | "shift_summary_generated"
-  | "shift_summary_hq_cleared";
+  | "shift_summary_hq_cleared"
+  | "document_summarized";
 
 export async function logAudit(input: {
   action: AuditAction;
