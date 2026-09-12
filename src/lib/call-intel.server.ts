@@ -15,37 +15,17 @@ export const AUDIO_BUCKET = "call-audio";
  * configured; otherwise the built-in transcription model is used so calls never
  * stall waiting on an external account.
  */
-export async function transcribeAudio(bytes: Uint8Array, filename: string): Promise<string> {
+export async function transcribeCall(bytes: Uint8Array, filename: string) {
   const ext = filename.split(".").pop() ?? "mp3";
-  const { sarvamConfigured, sarvamTranscribe } = await import("@/lib/sarvam-stt.server");
+  const { transcribeWithAdapter } = await import("@/lib/stt-provider.server");
+  return transcribeWithAdapter(bytes, filename, mimeFor(ext));
+}
 
-  if (sarvamConfigured()) {
-    try {
-      const text = await sarvamTranscribe(bytes, filename, mimeFor(ext));
-      if (text) return text;
-    } catch (error) {
-      // Never block the call pipeline on the external STT account: log a safe
-      // reason (no key material) and continue with the built-in model.
-      console.warn("Sarvam STT unavailable, using built-in transcription:", (error as Error).message);
-    }
-  }
-
-  const form = new FormData();
-  form.append("model", "google/gemini-3.5-transcribe");
-  form.append("file", new Blob([bytes as BlobPart]), filename);
-
-  const res = await fetch(`${GATEWAY}/audio/transcriptions`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey()}` },
-    body: form,
-  });
-
-  if (!res.ok) {
-    throw new Error(`Transcription failed (${res.status}): ${await res.text().catch(() => "")}`);
-  }
-
-  const json = (await res.json()) as { text?: string };
-  return json.text?.trim() ?? "";
+/** Transcript-only helper kept for existing callers. */
+export async function transcribeAudio(bytes: Uint8Array, filename: string): Promise<string> {
+  const result = await transcribeCall(bytes, filename);
+  if (result.status === "failed") throw new Error(result.errorMessage ?? "Transcription failed");
+  return result.transcript;
 }
 
 export type CallAnalysis = {
@@ -188,14 +168,33 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
   const filename = recording.audio_url.split("/").pop() ?? "recording.mp3";
 
   try {
-    const transcript = await transcribeAudio(bytes, filename);
-    if (!transcript) return "empty";
+    const stt = await transcribeCall(bytes, filename);
+    const provider = {
+      stt_provider: stt.provider,
+      stt_model: stt.model,
+      stt_language: stt.language,
+      stt_fallback_used: stt.fallbackUsed,
+      stt_error_code: stt.errorCode,
+      stt_error_message: stt.errorMessage,
+    };
 
+    if (stt.status === "failed" || !stt.transcript) {
+      await supabaseAdmin
+        .from("call_recordings")
+        .update({ ...provider, sync_status: stt.status === "failed" ? "failed" : recording.sync_status })
+        .eq("id", recordingId);
+      if (stt.status === "failed") throw new Error(stt.errorMessage ?? "Transcription failed");
+      return "empty";
+    }
+
+    const transcript = stt.transcript;
     const analysis = await analyzeTranscript(transcript, recording.duration_seconds);
 
     await supabaseAdmin
       .from("call_recordings")
       .update({
+        ...provider,
+        transcribed_at: new Date().toISOString(),
         transcription_text: analysis.timestamped_transcript || transcript,
         ai_summary: analysis.summary_bullets.map((b) => `• ${b}`).join("\n"),
         sentiment: analysis.sentiment,

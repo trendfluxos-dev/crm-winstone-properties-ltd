@@ -168,7 +168,14 @@ export type Database = {
           phone_number: string
           recorder_source: string | null
           sentiment: Database["public"]["Enums"]["call_sentiment"] | null
+          stt_error_code: string | null
+          stt_error_message: string | null
+          stt_fallback_used: boolean
+          stt_language: string | null
+          stt_model: string | null
+          stt_provider: string | null
           sync_status: Database["public"]["Enums"]["sync_status"]
+          transcribed_at: string | null
           transcription_text: string | null
         }
         Insert: {
@@ -191,7 +198,14 @@ export type Database = {
           phone_number: string
           recorder_source?: string | null
           sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          stt_error_code?: string | null
+          stt_error_message?: string | null
+          stt_fallback_used?: boolean
+          stt_language?: string | null
+          stt_model?: string | null
+          stt_provider?: string | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
+          transcribed_at?: string | null
           transcription_text?: string | null
         }
         Update: {
@@ -214,7 +228,14 @@ export type Database = {
           phone_number?: string
           recorder_source?: string | null
           sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          stt_error_code?: string | null
+          stt_error_message?: string | null
+          stt_fallback_used?: boolean
+          stt_language?: string | null
+          stt_model?: string | null
+          stt_provider?: string | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
+          transcribed_at?: string | null
           transcription_text?: string | null
         }
         Relationships: [
