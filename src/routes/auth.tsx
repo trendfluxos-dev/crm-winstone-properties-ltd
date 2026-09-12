@@ -105,7 +105,10 @@ function AuthPage() {
   const isSignup = mode === "signup";
   const busy = signIn.isPending || signUp.isPending;
   const canSubmit =
-    email.includes("@") && password.length >= 6 && (!isSignup || name.trim().length >= 2);
+    (isSignup ? email.includes("@") : email.trim().length >= 4) &&
+    password.length >= 6 &&
+    (!isSignup || name.trim().length >= 2);
+
 
   return (
     <div className="grid-noise flex min-h-screen items-center justify-center px-4 py-10">
