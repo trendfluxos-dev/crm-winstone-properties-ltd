@@ -345,36 +345,6 @@ class MetaWhatsApp implements WhatsAppProvider {
   async getMessageStatus(providerMessageId: string) {
     return readStoredStatus(providerMessageId);
   }
-
-  async processWebhook(input: { rawBody: string; signature: string | null }) {
-    const appSecret = process.env["WHATSAPP_APP_SECRET"] ?? whatsAppCredentials().webhookSecret;
-    if (appSecret) {
-      if (!input.signature) return { ok: false, reason: "missing signature" };
-      const { createHmac, timingSafeEqual } = await import("crypto");
-      const expected = `sha256=${createHmac("sha256", appSecret).update(input.rawBody).digest("hex")}`;
-      const got = Buffer.from(input.signature);
-      const exp = Buffer.from(expected);
-      if (got.length !== exp.length || !timingSafeEqual(got, exp)) {
-        return { ok: false, reason: "invalid signature" };
-      }
-    }
-    let payload: unknown;
-    try {
-      payload = JSON.parse(input.rawBody);
-    } catch {
-      return { ok: false, reason: "invalid json" };
-    }
-    const result = await this.receiveMessage(payload);
-    return result.reason ? { ok: true, reason: result.reason } : { ok: true };
-  }
-
-  async getConversation(leadId: string) {
-    return new NotConfiguredWhatsApp().getConversation(leadId);
-  }
-
-  async getMessageStatus() {
-    return "unknown" as WhatsAppMessageStatus;
-  }
 }
 
 export function getWhatsAppProvider(): WhatsAppProvider {
