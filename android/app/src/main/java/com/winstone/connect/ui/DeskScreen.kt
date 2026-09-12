@@ -275,6 +275,12 @@ private fun LeadCard(
             onClick = onCall,
             modifier = Modifier.fillMaxWidth(),
         ) { Text("কল করুন") }
+        Spacer(Modifier.height(6.dp))
+        OutlinedButton(
+            onClick = onTwilioCall,
+            enabled = !twilioBusy,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text(if (twilioBusy) "Twilio কল শুরু হচ্ছে…" else "Twilio কল (রেকর্ড হবে)") }
     }
 }
 
