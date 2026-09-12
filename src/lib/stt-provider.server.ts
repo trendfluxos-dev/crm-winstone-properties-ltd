@@ -52,16 +52,20 @@ class SttProviderError extends Error {
 }
 
 export function sttPrimaryProvider(): SttProviderName {
-  return process.env["STT_PRIMARY_PROVIDER"] === "sarvam" && sarvamEnabled() ? "sarvam" : "gemini";
+  const wanted = process.env["STT_PRIMARY_PROVIDER"];
+  if (wanted === "sarvam" && sarvamEnabled()) return "sarvam";
+  if (wanted === "openai") return "openai";
+  return "gemini";
 }
 
 export function sarvamEnabled(): boolean {
   return process.env["STT_SARVAM_ENABLED"] === "true" && Boolean(process.env["SARVAM_API_KEY"]);
 }
 
-/* ------------------------------- Gemini ---------------------------------- */
+/* --------------------- Gateway providers (Gemini / OpenAI) ---------------- */
 
-async function transcribeWithGemini(
+async function transcribeWithGateway(
+  provider: "gemini" | "openai",
   bytes: Uint8Array,
   filename: string,
   contentType: string,
@@ -75,8 +79,9 @@ async function transcribeWithGemini(
     });
   }
 
+  const model = GATEWAY_MODELS[provider];
   const form = new FormData();
-  form.append("model", GEMINI_STT_MODEL);
+  form.append("model", model);
   form.append("file", new Blob([bytes as BlobPart], { type: contentType }), filename);
 
   const res = await fetch(`${GATEWAY}/audio/transcriptions`, {
@@ -88,7 +93,7 @@ async function transcribeWithGemini(
   if (!res.ok) {
     const retryable = res.status === 429 || res.status >= 500;
     throw new SttProviderError({
-      code: `GEMINI_${res.status}`,
+      code: `${provider.toUpperCase()}_${res.status}`,
       message: retryable ? "ট্রান্সক্রিপশন সেবা ব্যস্ত, পরে আবার চেষ্টা হবে" : "অডিও ট্রান্সক্রাইব করা যায়নি",
       retryable,
     });
@@ -97,7 +102,7 @@ async function transcribeWithGemini(
   const json = (await res.json()) as { text?: string; request_id?: string };
   return {
     transcript: (json.text ?? "").trim(),
-    model: GEMINI_STT_MODEL,
+    model,
     requestId: json.request_id ?? null,
   };
 }
