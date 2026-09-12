@@ -95,6 +95,12 @@ export function WhatsappInbox() {
             {threads.length}টি কথা · ফোন থেকে আসা প্রতিটি মেসেজ নিজে নিজেই এখানে জমা হয়
             <MyPhoneLine />
           </p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {integrationStatus === "configured"
+              ? "WhatsApp Business API: সংযুক্ত"
+              : "WhatsApp Business API: সংযুক্ত নয় (INTEGRATION REQUIRED) — মেসেজ এজেন্টের নিজের হোয়াটসঅ্যাপ থেকে যাবে"}
+          </p>
+
         </div>
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
