@@ -26,3 +26,30 @@ export const generateShiftSummaryNow = createServerFn({ method: "POST" })
     const { generateShiftSummary } = await import("@/lib/shift-summary.server");
     return generateShiftSummary();
   });
+
+/**
+ * Live sheet for the shift that is running right now, recomputed on each call so
+ * an update an agent just submitted appears immediately in the IT Console.
+ */
+export const liveShiftSheetNow = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const { liveShiftSheet } = await import("@/lib/shift-summary.server");
+    return liveShiftSheet();
+  });
+
+/** Rebuilds summaries for windows that already closed on the last two weeks. */
+export const backfillShiftSummariesNow = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
+    requireAuthority(await resolveCaller(data.adminToken ?? null));
+    const { backfillShiftSummaries } = await import("@/lib/shift-summary.server");
+    return backfillShiftSummaries();
+  });
