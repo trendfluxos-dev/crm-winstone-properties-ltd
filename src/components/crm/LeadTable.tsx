@@ -7,7 +7,7 @@ import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { buildTimeline, latestVerifiedCall, useSnapshot } from "@/lib/crm-data";
+import { buildTimeline, useSnapshot } from "@/lib/crm-data";
 import { relativeTime } from "@/lib/crm-format";
 import { cn } from "@/lib/utils";
 
