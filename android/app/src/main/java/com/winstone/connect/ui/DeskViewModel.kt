@@ -54,14 +54,15 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun signIn(email: String, password: String) {
-        if (!email.contains("@") || password.length < 6) {
-            _state.value = _state.value.copy(error = "সঠিক ইমেইল ও পাসওয়ার্ড দিন")
+    fun signIn(phone: String, password: String) {
+        val digits = phone.filter { it.isDigit() }
+        if (digits.length < 6 || password.length < 6) {
+            _state.value = _state.value.copy(error = "সঠিক ফোন নম্বর ও পাসওয়ার্ড দিন")
             return
         }
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
-            runCatching { WinstoneAgentApi.signIn(email, password) }
+            runCatching { WinstoneAgentApi.signIn(phone.trim(), password) }
                 .onSuccess { me ->
                     AgentSession.saveDevice(app, me.deviceToken, me.deviceId)
                     AgentSession.saveEmployeeId(app, me.employeeId)

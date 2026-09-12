@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.winstone.connect.ui.theme.WinInkMuted
 
 /**
- * Same credentials as the web CRM: email + password. No employee id typing.
+ * Phone number + password only. No email field, no employee id typing.
  */
 @Composable
 fun SignInScreen(
@@ -33,8 +33,9 @@ fun SignInScreen(
     loading: Boolean = false,
     onSignIn: (String, String) -> Unit,
 ) {
-    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val digits = phone.filter { it.isDigit() }
     Column(
         Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -42,17 +43,17 @@ fun SignInScreen(
     ) {
         Text("Winstone Connect", fontWeight = FontWeight.Bold, fontSize = 24.sp)
         Text(
-            "CRM এর ইমেইল ও পাসওয়ার্ড দিয়েই সাইন ইন করুন — এরপর আপনার লিড ও কল সব এখানেই দেখাবে।",
+            "আপনার ফোন নম্বর ও পাসওয়ার্ড দিয়ে প্রবেশ করুন — এরপর আপনার লিড ও কল সব এখানেই দেখাবে।",
             color = WinInkMuted,
             fontSize = 13.sp,
             modifier = Modifier.padding(vertical = 12.dp),
         )
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("ইমেইল") },
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("ফোন নম্বর") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
@@ -73,8 +74,8 @@ fun SignInScreen(
             )
         }
         Button(
-            onClick = { onSignIn(email, password) },
-            enabled = !loading && email.contains("@") && password.length >= 6,
+            onClick = { onSignIn(phone, password) },
+            enabled = !loading && digits.length >= 6 && password.length >= 6,
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
         ) {
             if (loading) CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
