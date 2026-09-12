@@ -49,6 +49,14 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinTarget, setPinTarget] = useState<"/hq" | "/system">("/hq");
+
+  const openPin = (target: "/hq" | "/system") => {
+    setPinTarget(target);
+    setPinOpen(true);
+  };
+
 
   const signIn = useMutation({
     mutationFn: async () => {
