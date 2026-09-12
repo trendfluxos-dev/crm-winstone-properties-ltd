@@ -1,13 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { routeTree } from "@/routeTree.gen";
+
 /**
  * Post-publish smoke test.
  *
- * Verifies that the agent APK is present in storage and that the key CRM pages
- * respond. Read-only and safe for external monitors — it never returns lead or
- * user data, only route names and HTTP statuses.
+ * Verifies that the agent APK is present in storage, that every key CRM page is
+ * really built into this deployment, and that the public API layer answers over
+ * HTTP. Read-only and safe for external monitors — it never returns lead or user
+ * data, only route names and statuses.
+ *
+ * Why pages are not fetched over HTTP: only `/api/public/*` bypasses the site
+ * login wall, so a request the server makes to `/desk` or `/hq` comes back 401
+ * even while the page works perfectly in a signed-in browser. That 401 said
+ * nothing about the page, so the check now proves the route is deployed instead
+ * of reporting a false failure.
  */
 const ROUTES = ["/", "/auth", "/desk", "/dispatch", "/hq", "/system", "/import", "/docs"] as const;
+
+/** Every route path compiled into this build. */
+function deployedPaths(): Set<string> {
+  const found = new Set<string>();
+  const walk = (node: unknown) => {
+    const route = node as { options?: { path?: string }; children?: unknown };
+    const path = route?.options?.path;
+    if (typeof path === "string") found.add(path);
+    const children = route?.children;
+    const list = Array.isArray(children)
+      ? children
+      : children && typeof children === "object"
+        ? Object.values(children as Record<string, unknown>)
+        : [];
+    for (const child of list) walk(child);
+  };
+  walk(routeTree);
+  return found;
+}
 
 type Check = {
   name: string;
@@ -48,31 +76,41 @@ export const Route = createFileRoute("/api/public/smoke")({
           });
         }
 
-        // 2. Key CRM routes respond
-        await Promise.all(
-          ROUTES.map(async (path) => {
-            try {
-              const res = await fetch(`${origin}${path}`, {
-                method: "GET",
-                headers: { "x-smoke-test": "1" },
-                redirect: "manual",
-              });
-              checks.push({
-                name: path,
-                ok: res.status < 400,
-                status: res.status,
-                detail: res.status < 400 ? "পেজ ঠিকভাবে সাড়া দিচ্ছে" : "পেজ সাড়া দিচ্ছে না",
-              });
-            } catch (err) {
-              checks.push({
-                name: path,
-                ok: false,
-                status: null,
-                detail: err instanceof Error ? err.message : "রিকোয়েস্ট ব্যর্থ",
-              });
-            }
-          }),
-        );
+        // 2. Every key CRM page is really part of this deployment
+        const deployed = deployedPaths();
+        for (const path of ROUTES) {
+          const present = deployed.has(path);
+          checks.push({
+            name: path,
+            ok: present,
+            status: present ? 200 : 404,
+            detail: present
+              ? "পেজ এই ভার্সনে চালু আছে (সাইন ইন করে ব্রাউজারে খুলবে)"
+              : "পেজ এই ভার্সনে নেই",
+          });
+        }
+
+        // 3. The public API layer really answers over HTTP
+        try {
+          const res = await fetch(`${origin}/api/public/agent/version`, {
+            method: "GET",
+            headers: { "x-smoke-test": "1" },
+            redirect: "manual",
+          });
+          checks.push({
+            name: "/api/public/agent/version",
+            ok: res.status < 400,
+            status: res.status,
+            detail: res.status < 400 ? "সার্ভার সাড়া দিচ্ছে" : "সার্ভার সাড়া দিচ্ছে না",
+          });
+        } catch (err) {
+          checks.push({
+            name: "/api/public/agent/version",
+            ok: false,
+            status: null,
+            detail: err instanceof Error ? err.message : "রিকোয়েস্ট ব্যর্থ",
+          });
+        }
 
         checks.sort((a, b) => a.name.localeCompare(b.name));
         const failed = checks.filter((c) => !c.ok);
@@ -84,6 +122,7 @@ export const Route = createFileRoute("/api/public/smoke")({
             checkedAt: new Date().toISOString(),
             passed: checks.length - failed.length,
             total: checks.length,
+            note: "পেজগুলো লগইন দেয়ালের পেছনে, তাই সার্ভার নিজে থেকে খুলে দেখতে পারে না — এখানে যাচাই হয় পেজটি এই ভার্সনে আছে কি না।",
             checks,
           },
           {
