@@ -5,7 +5,12 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { acknowledgeAlert, callOpsSummary, runAnalysisSweep } from "@/lib/ops.functions";
+import {
+  acknowledgeAlert,
+  callOpsSummary,
+  revokeAgentDevice,
+  runAnalysisSweep,
+} from "@/lib/ops.functions";
 import { useAdminToken } from "@/lib/local-session";
 
 const CATEGORY_LABEL: Record<string, string> = {
