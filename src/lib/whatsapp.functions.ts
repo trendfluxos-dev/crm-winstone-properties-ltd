@@ -83,6 +83,11 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
       sender_type: "agent",
       message_type: "text",
       message_content: data.body,
+      provider: "meta-cloud-api",
+      provider_message_id: result.providerMessageId || null,
+      // Meta's webhook moves this to delivered / read / failed.
+      status: "sent",
+      status_updated_at: new Date().toISOString(),
     });
     const { logLeadEvent } = await import("@/lib/lead-events.server");
     await logLeadEvent({
