@@ -48,4 +48,4 @@
 - [ ] Official Meta WhatsApp Business API: needs a business account + credentials before delivery can be claimed
 - [x] Desk tab "আমার রিপোর্ট": own call reports + upcoming/overdue follow-up work (web + phone data)
 - [x] Official Meta WhatsApp Cloud API send + webhook receive implemented (activates when credentials are saved)
-- [ ] Re-verify recording → stored audio → transcription → AI summary with retry/error states (in progress)
+- [x] Recording → stored audio → transcription → AI summary verified again with real speech; duplicate upload de-duplicated, retry endpoint returns complete, durable pending/processing/completed/failed/not_available states
