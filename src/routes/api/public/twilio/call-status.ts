@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/public/twilio/call-status")({
         }
 
         const callSid = params["CallSid"];
-        const status = params["CallStatus"];
+        const status = params["CallStatus"] ?? "";
         const duration = Number(params["CallDuration"] ?? "0");
         if (!callSid) return ok();
 
@@ -26,37 +26,40 @@ export const Route = createFileRoute("/api/public/twilio/call-status")({
 
         const { data: existing } = await supabaseAdmin
           .from("call_recordings")
-          .select("id, call_status, recording_status")
+          .select("id, recording_status")
           .eq("external_call_id", callSid)
           .maybeSingle();
 
         const now = new Date().toISOString();
-        const patch: Record<string, unknown> = {};
 
-        // Map Twilio statuses onto our simpler CRM lifecycle.
-        if (["initiated", "ringing"].includes(status)) patch["call_status"] = "ringing";
-        else if (status === "answered" || status === "in-progress") patch["call_status"] = "answered";
-        else if (status === "completed") patch["call_status"] = "completed";
-        else if (["failed", "busy", "no-answer", "canceled"].includes(status)) {
-          patch["call_status"] = status === "no-answer" ? "no_answer" : "failed";
-        }
+        let callStatus: string;
+        if (["initiated", "ringing"].includes(status)) callStatus = "ringing";
+        else if (status === "answered" || status === "in-progress") callStatus = "answered";
+        else if (status === "completed") callStatus = "completed";
+        else if (["failed", "busy", "canceled"].includes(status)) callStatus = "failed";
+        else if (status === "no-answer") callStatus = "no_answer";
+        else callStatus = status;
 
-        if (status === "answered" || status === "in-progress") patch["answered_at"] = now;
+        const patch: {
+          call_status: string;
+          answered_at?: string;
+          finished_at?: string;
+          duration_seconds?: number;
+          recording_status?: string;
+        } = { call_status: callStatus };
+
+        if (status === "answered" || status === "in-progress") patch.answered_at = now;
         if (["completed", "failed", "busy", "no-answer", "canceled"].includes(status)) {
-          patch["finished_at"] = now;
+          patch.finished_at = now;
         }
-        if (duration > 0) patch["duration_seconds"] = duration;
+        if (duration > 0) patch.duration_seconds = duration;
 
         if (existing) {
+          // Calls that finish without a recording callback should not block reports.
+          if (status === "completed" && existing.recording_status === "pending") {
+            patch.recording_status = "not_available";
+          }
           await supabaseAdmin.from("call_recordings").update(patch).eq("id", existing.id);
-        }
-
-        // If the call ended without a recording callback, make sure the report flow can proceed.
-        if (status === "completed" && existing?.recording_status === "pending") {
-          await supabaseAdmin
-            .from("call_recordings")
-            .update({ recording_status: "not_available" })
-            .eq("id", existing.id);
         }
 
         return ok();
