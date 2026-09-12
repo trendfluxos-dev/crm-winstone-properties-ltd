@@ -24,7 +24,6 @@ const CATEGORIES = [
   { value: "closed_converted", label: "CLOSED / CONVERTED — বিক্রি হয়েছে" },
 ] as const;
 
-const NEEDS_SCHEDULE = new Set(["follow_up", "callback"]);
 const NEEDS_REASON = new Set(["not_interested", "wrong_number"]);
 
 /**
