@@ -59,8 +59,8 @@ function ControlBoardPage() {
       <RoleGate
         allow={["authority"]}
         icon={<ShieldCheck className="size-7" />}
-        title="Executive HQ"
-        description="Live radar, leaderboard, call audits and ask-anything reports. Master PIN required."
+        title="এক্সিকিউটিভ এইচকিউ"
+        description="লাইভ রাডার, লিডারবোর্ড, কল অডিট আর যা জানতে চান তার রিপোর্ট। মাস্টার পিন লাগবে।"
       >
         <ControlBoard />
       </RoleGate>
@@ -101,13 +101,13 @@ function ControlBoard() {
       <div className="space-y-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Control Board</h1>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">কন্ট্রোল বোর্ড</h1>
             <p className="text-xs text-muted-foreground sm:text-sm">
-              Every dial, recording and WhatsApp touch across the floor, updating live.
+              পুরো ফ্লোরের প্রতিটি কল, রেকর্ডিং আর হোয়াটসঅ্যাপ কথা — সরাসরি লাইভ।
             </p>
           </div>
           <p className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-            Read-only view · lead assignment lives in the Coordinator Deck
+            শুধু দেখার ভিউ · লিড অ্যাসাইন হয় কোঅর্ডিনেটর ডেস্ক থেকে
           </p>
         </div>
 
@@ -121,30 +121,30 @@ function ControlBoard() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile
             icon={<PhoneCall className="size-4" />}
-            label="Total dials"
+            label="মোট কল"
             value={String(calls.length)}
-            hint={`${connected} connected over ${CONNECTED_THRESHOLD_SECONDS}s`}
+            hint={`${connected}টি কল ${CONNECTED_THRESHOLD_SECONDS} সেকেন্ডের বেশি কথা হয়েছে`}
           />
           <StatTile
             icon={<Timer className="size-4" />}
-            label="Floor talk time"
+            label="ফ্লোরের কথার সময়"
             value={formatTalkTime(talkSeconds)}
-            hint="Across all synced recordings"
+            hint="সব সিঙ্ক হওয়া রেকর্ডিং মিলিয়ে"
           />
           <StatTile
             icon={<Users className="size-4" />}
-            label="Active leads"
+            label="চালু লিড"
             value={String(leads.filter((l) => l.status !== "closed").length)}
-            hint={`${unassigned} waiting for an owner`}
+            hint={`${unassigned}টি লিড এখনো কারো নামে দেওয়া হয়নি`}
           />
           <StatTile
             icon={<TrendingUp className="size-4" />}
-            label="Deals won"
+            label="ডিল জেতা"
             value={String(
               leads.filter((l) => l.status === "closed" && l.outcome_category === "deal_won")
                 .length,
             )}
-            hint={`${messages.length} WhatsApp messages logged`}
+            hint={`${messages.length}টি হোয়াটসঅ্যাপ মেসেজ জমা আছে`}
           />
         </div>
 
@@ -153,15 +153,15 @@ function ControlBoard() {
         <section className="space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
-              <h2 className="text-lg font-semibold">Connected calls vs talk minutes</h2>
-              <p className="text-sm text-muted-foreground">Per agent, all recorded activity</p>
+              <h2 className="text-lg font-semibold">কথা হওয়া কল ও কথার মিনিট</h2>
+              <p className="text-sm text-muted-foreground">প্রতি এজেন্টের সব রেকর্ড করা কাজ</p>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-sm bg-primary" /> Connected calls
+                <span className="size-2.5 rounded-sm bg-primary" /> কথা হওয়া কল
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="size-2.5 rounded-sm bg-live" /> Talk minutes
+                <span className="size-2.5 rounded-sm bg-live" /> কথার মিনিট
               </span>
             </div>
           </div>
@@ -191,7 +191,7 @@ function ControlBoard() {
         <Leaderboard stats={stats} onSelectAgent={setOpenAgentId} />
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Latest verified conversations</h2>
+          <h2 className="text-lg font-semibold">সর্বশেষ যাচাই হওয়া কথাবার্তা</h2>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {calls
               .filter((c) => c.ai_summary)
@@ -205,9 +205,9 @@ function ControlBoard() {
                     onClick={() => lead && setOpenLeadId(lead.id)}
                     className="card-elevated p-4 text-left transition-colors hover:border-primary/40"
                   >
-                    <p className="font-medium">{lead?.name ?? "Unknown lead"}</p>
+                    <p className="font-medium">{lead?.name ?? "অজানা লিড"}</p>
                     <p className="text-xs text-muted-foreground">
-                      {agent?.name} · {call.sentiment ?? "unrated"}
+                      {agent?.name} · {call.sentiment ?? "রেটিং নেই"}
                     </p>
                     <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
                       {call.ai_summary}
