@@ -203,13 +203,16 @@ export async function submitCallReport(input: {
     .update({
       status: LEAD_STATUS_FOR[category],
       outcome_category: category,
-      notes: input.note?.trim() || input.reason?.trim() || null,
+      notes:
+        [input.summary?.trim(), input.note?.trim(), input.reason?.trim()]
+          .filter(Boolean)
+          .join(" — ") || null,
       last_call_at: new Date().toISOString(),
     })
     .eq("id", report.lead_id);
 
   let followUpId: string | null = null;
-  if ((category === "follow_up" || category === "callback") && input.followUpAt) {
+  if (input.followUpAt) {
     const { data: event } = await supabaseAdmin
       .from("follow_up_events")
       .insert({
