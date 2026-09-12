@@ -70,12 +70,18 @@ function ControlBoardPage() {
 }
 
 function ControlBoard() {
-  const { profiles, leads, calls, messages } = useSnapshot();
+  const { profiles, leads, calls, messages, events } = useSnapshot();
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [openAgentId, setOpenAgentId] = useState<string | null>(null);
 
   const agents = useMemo(
-    () => profiles.filter((p) => p.role === "agent" || p.role === "team_leader"),
+    () =>
+      profiles.filter(
+        (p) =>
+          (p.role === "agent" || p.role === "team_leader") &&
+          p.is_active &&
+          p.approval_status === "approved",
+      ),
     [profiles],
   );
   const stats = useMemo(
@@ -225,7 +231,7 @@ function ControlBoard() {
       <LeadDossier
         lead={openLead}
         agents={profiles}
-        timeline={openLead ? buildTimeline(calls, messages, openLead.id) : []}
+        timeline={openLead ? buildTimeline(calls, messages, openLead.id, events) : []}
         open={openLeadId !== null}
         onOpenChange={(next) => !next && setOpenLeadId(null)}
       />

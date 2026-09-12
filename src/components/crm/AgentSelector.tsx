@@ -17,7 +17,10 @@ export function AgentSelector() {
   const data = useSnapshot();
   const operatorId = useOperatorId();
   const agents = data.profiles.filter(
-    (p) => p.is_active && (p.role === "agent" || p.role === "team_leader"),
+    (p) =>
+      p.is_active &&
+      p.approval_status === "approved" &&
+      (p.role === "agent" || p.role === "team_leader"),
   );
   const current = agents.find((a) => a.id === operatorId);
 

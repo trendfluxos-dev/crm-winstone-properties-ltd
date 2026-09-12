@@ -89,6 +89,14 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
           .eq("id", lead_id);
         if (error) return json({ error: error.message }, 500);
 
+        const { logLeadEvent } = await import("@/lib/lead-events.server");
+        await logLeadEvent({
+          leadId: lead_id,
+          agentId: parsed.data.agent_id ?? null,
+          kind: "outcome_logged",
+          detail: `কলের ফল: ${outcome.replace(/_/g, " ")}`,
+        });
+
         return json({
           ok: true,
           lead_id,

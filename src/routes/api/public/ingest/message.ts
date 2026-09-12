@@ -68,6 +68,15 @@ export const Route = createFileRoute("/api/public/ingest/message")({
         });
         if (error) return json({ error: error.message }, 500);
 
+        const { logLeadEvent } = await import("@/lib/lead-events.server");
+        await logLeadEvent({
+          leadId,
+          agentId: agent?.id ?? null,
+          kind: "whatsapp_message",
+          detail:
+            body.sender_type === "agent" ? "এজেন্ট হোয়াটসঅ্যাপে লিখেছেন" : "ক্রেতা হোয়াটসঅ্যাপে উত্তর দিয়েছেন",
+        });
+
         return json({ ok: true, lead_id: leadId, lead_created: created, agent_id: agent?.id ?? null }, 201);
       },
     },

@@ -18,6 +18,7 @@ const Body = z.object({
   agent_id: z.string().uuid().optional(),
   presence: z.enum(["on_call", "idle", "offline"]),
   call_started_at: z.string().datetime({ offset: true }).optional(),
+  lead_id: z.string().uuid().optional(),
 });
 
 function authorized(request: Request): boolean {
@@ -52,7 +53,7 @@ export const Route = createFileRoute("/api/public/agent/presence")({
         if (!parsed.success) {
           return json({ error: "Invalid payload", issues: parsed.error.issues }, 400);
         }
-        const { employee_id, agent_id, presence, call_started_at } = parsed.data;
+        const { employee_id, agent_id, presence, call_started_at, lead_id } = parsed.data;
         if (!employee_id && !agent_id) {
           return json({ error: "employee_id or agent_id is required" }, 400);
         }
@@ -76,6 +77,25 @@ export const Route = createFileRoute("/api/public/agent/presence")({
           })
           .eq("id", agent.id);
         if (error) return json({ error: error.message }, 500);
+
+        if (lead_id) {
+          const { logLeadEvent } = await import("@/lib/lead-events.server");
+          if (presence === "on_call") {
+            await logLeadEvent({
+              leadId: lead_id,
+              agentId: agent.id,
+              kind: "call_started",
+              detail: `${agent.name} ফোন থেকে ডায়াল করেছেন`,
+            });
+          } else {
+            await logLeadEvent({
+              leadId: lead_id,
+              agentId: agent.id,
+              kind: "call_ended",
+              detail: "কল শেষ — রেকর্ডিং আপলোডের অপেক্ষায়",
+            });
+          }
+        }
 
         return json({ ok: true, agent, presence, server_time: now });
       },

@@ -1,5 +1,7 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCrmSnapshot } from "@/lib/crm.functions";
 import { useAdminToken } from "@/lib/local-session";
@@ -8,6 +10,7 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
 export type CallRecording = Database["public"]["Tables"]["call_recordings"]["Row"];
 export type WhatsappMessage = Database["public"]["Tables"]["whatsapp_interactions"]["Row"];
+export type LeadEvent = Database["public"]["Tables"]["lead_events"]["Row"];
 export type LeadStatus = Database["public"]["Enums"]["lead_status"];
 
 export const LEAD_STATUSES: { key: LeadStatus; label: string }[] = [
@@ -28,8 +31,8 @@ export const snapshotQueryFor = (scope: { token: string | null }) =>
   queryOptions({
     queryKey: ["crm-snapshot", scope.token ? "authority" : "session"],
     queryFn: () => getCrmSnapshot({ data: { token: scope.token } }),
-    refetchInterval: 15_000,
-    staleTime: 5_000,
+    refetchInterval: 10_000,
+    staleTime: 2_000,
   });
 
 const EMPTY_SNAPSHOT = {
@@ -37,12 +40,42 @@ const EMPTY_SNAPSHOT = {
   leads: [] as Lead[],
   calls: [] as CallRecording[],
   messages: [] as WhatsappMessage[],
+  events: [] as LeadEvent[],
 };
+
+/**
+ * Live push refresh: whenever the phone app writes a call lifecycle event, a
+ * recording or a WhatsApp message, the board reloads itself — no manual refresh.
+ * The 10s poll above stays as a safety net for PIN-only (not signed-in) boards.
+ */
+function useLiveCrmRefresh() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const invalidate = () => {
+      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
+    };
+    const channel = supabase
+      .channel("crm-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "lead_events" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "call_recordings" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, invalidate)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "whatsapp_interactions" },
+        invalidate,
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+}
 
 /** Snapshot for the current device; customer data requires an authority token. */
 export function useSnapshot() {
   const token = useAdminToken();
   const query = useQuery(snapshotQueryFor({ token }));
+  useLiveCrmRefresh();
   return { ...(query.data ?? EMPTY_SNAPSHOT), isPending: query.isPending };
 }
 
@@ -112,12 +145,27 @@ export function buildAgentStats(
 
 export type TimelineEntry =
   | { kind: "call"; at: string; call: CallRecording }
-  | { kind: "message"; at: string; message: WhatsappMessage };
+  | { kind: "message"; at: string; message: WhatsappMessage }
+  | { kind: "event"; at: string; event: LeadEvent };
+
+/** Bengali labels for the automatic call lifecycle trail. */
+export const LEAD_EVENT_LABELS: Record<string, string> = {
+  call_started: "কল শুরু হয়েছে",
+  call_connected: "কল সংযুক্ত হয়েছে",
+  call_ended: "কল শেষ হয়েছে",
+  recording_saved: "রেকর্ডিং সার্ভারে জমা হয়েছে",
+  transcript_ready: "ট্রান্সক্রিপ্ট প্রস্তুত",
+  transcript_failed: "ট্রান্সক্রিপ্ট তৈরি হয়নি",
+  outcome_logged: "কলের ফল জমা হয়েছে",
+  whatsapp_message: "হোয়াটসঅ্যাপ কথা হয়েছে",
+  self_claimed: "এজেন্ট নিজে লিড নিয়েছেন",
+};
 
 export function buildTimeline(
   calls: CallRecording[],
   messages: WhatsappMessage[],
   leadId: string,
+  events: LeadEvent[] = [],
 ): TimelineEntry[] {
   const entries: TimelineEntry[] = [
     ...calls
@@ -126,6 +174,9 @@ export function buildTimeline(
     ...messages
       .filter((m) => m.lead_id === leadId)
       .map((message) => ({ kind: "message" as const, at: message.created_at, message })),
+    ...events
+      .filter((e) => e.lead_id === leadId)
+      .map((event) => ({ kind: "event" as const, at: event.created_at, event })),
   ];
   return entries.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
 }
