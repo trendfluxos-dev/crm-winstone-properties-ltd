@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/public/agent/presence")({
         if (!parsed.success) {
           return json({ error: "Invalid payload", issues: parsed.error.issues }, 400);
         }
-        const { employee_id, agent_id, presence, call_started_at } = parsed.data;
+        const { employee_id, agent_id, presence, call_started_at, lead_id } = parsed.data;
         if (!employee_id && !agent_id) {
           return json({ error: "employee_id or agent_id is required" }, 400);
         }
