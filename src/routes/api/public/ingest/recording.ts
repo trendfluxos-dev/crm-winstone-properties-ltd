@@ -123,14 +123,34 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
 
         const { ingestRecording } = await import("@/lib/call-intel.server");
         const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
+        const { bindAgentSim, resolveAgentBySim, simMatchesAgent } = await import(
+          "@/lib/agent-sim.server"
+        );
 
-        const agent =
-          caller.kind === "device"
-            ? { id: caller.profile.id }
-            : await resolveAgent({
-                agentId: body.agent_id ?? null,
-                employeeId: body.employee_id ?? null,
-              });
+        let agent: { id: string } | null = null;
+        if (caller.kind === "device") {
+          // The SIM the call came from must belong to this desk.
+          const simCheck = await simMatchesAgent({
+            profileId: caller.profile.id,
+            sim: body.sim_number ?? null,
+          });
+          if (!simCheck.ok) return json({ error: simCheck.reason }, 409);
+          // First sync from an unbound SIM binds it to this desk.
+          if (body.sim_number) {
+            await bindAgentSim({
+              profileId: caller.profile.id,
+              sim: body.sim_number,
+              deviceId: caller.device.id,
+            });
+          }
+          agent = { id: caller.profile.id };
+        } else {
+          agent =
+            (await resolveAgent({
+              agentId: body.agent_id ?? null,
+              employeeId: body.employee_id ?? null,
+            })) ?? (await resolveAgentBySim(body.sim_number ?? null));
+        }
 
         const { leadId } = await resolveLeadId({
           leadId: body.lead_id ?? null,
@@ -140,6 +160,29 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
           fallbackName: body.lead_name ?? null,
         });
         if (!leadId) return json({ error: "Unknown lead" }, 404);
+
+        // Ownership is never moved by a sync: a lead already held by another
+        // agent stays with them, and an unheld lead goes to the caller's desk.
+        if (agent?.id) {
+          const { data: leadOwner } = await supabaseAdmin
+            .from("leads")
+            .select("id, assigned_to, assigned_agent_id")
+            .eq("id", leadId)
+            .maybeSingle();
+          const ownerId = leadOwner?.assigned_to ?? leadOwner?.assigned_agent_id ?? null;
+          if (ownerId && ownerId !== agent.id) {
+            return json(
+              { error: "এই লিড অন্য এজেন্টের কাছে আছে — কল সিংক করা যাবে না", lead_id: leadId },
+              409,
+            );
+          }
+          if (!ownerId) {
+            await supabaseAdmin
+              .from("leads")
+              .update({ assigned_to: agent.id, assigned_agent_id: agent.id })
+              .eq("id", leadId);
+          }
+        }
 
         const { logLeadEvent } = await import("@/lib/lead-events.server");
 
