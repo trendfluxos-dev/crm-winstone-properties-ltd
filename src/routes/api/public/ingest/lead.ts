@@ -46,11 +46,12 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
         // An agent adding their own lead keeps it — no approval, no round-robin.
         let assignedTo: string | null = null;
         let selfAdded = false;
-        if (body.agent_id) {
+        const requestedAgentId = caller.kind === "device" ? caller.profile.id : body.agent_id;
+        if (requestedAgentId) {
           const { data: agent } = await supabaseAdmin
             .from("profiles")
             .select("id, name")
-            .eq("id", body.agent_id)
+            .eq("id", requestedAgentId)
             .eq("is_active", true)
             .in("role", ["agent", "team_leader"])
             .maybeSingle();

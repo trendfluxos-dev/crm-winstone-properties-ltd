@@ -36,10 +36,14 @@ export const Route = createFileRoute("/api/public/ingest/message")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
 
-        const agent = await resolveAgent({
-          agentId: body.agent_id ?? null,
-          employeeId: body.employee_id ?? null,
-        });
+        // A phone always logs as its own agent — the body cannot spoof another.
+        const agent =
+          caller.kind === "device"
+            ? { id: caller.profile.id }
+            : await resolveAgent({
+                agentId: body.agent_id ?? null,
+                employeeId: body.employee_id ?? null,
+              });
 
         const { leadId, created } = await resolveLeadId({
           leadId: body.lead_id ?? null,
