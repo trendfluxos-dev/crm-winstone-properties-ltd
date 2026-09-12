@@ -37,7 +37,9 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         .select("id, agent_id, status, scheduled_at, reminder_minutes"),
       supabaseAdmin
         .from("agent_devices")
-        .select("id, profile_id, device_label, app_version, last_seen_at, revoked_at"),
+        .select(
+          "id, profile_id, device_label, app_version, last_seen_at, revoked_at, model, manufacturer, android_version, recording_mode, recording_capable, recording_tested, recording_note, recording_checked_at",
+        ),
       supabaseAdmin
         .from("system_alerts")
         .select("*")
@@ -100,11 +102,28 @@ export const callOpsSummary = createServerFn({ method: "POST" })
       devices: (devices.data ?? []).map((d) => ({
         id: d.id,
         profileId: d.profile_id,
-        label: d.device_label,
+        label: d.device_label ?? d.model,
+        model: d.model,
+        manufacturer: d.manufacturer,
+        androidVersion: d.android_version,
         appVersion: d.app_version,
         lastSeenAt: d.last_seen_at,
         revoked: Boolean(d.revoked_at),
+        recordingMode: d.recording_mode,
+        recordingCapable: d.recording_capable,
+        recordingTested: d.recording_tested,
+        recordingNote: d.recording_note,
+        recordingCheckedAt: d.recording_checked_at,
       })),
+      recording: {
+        twoSided: count(
+          devices.data,
+          (d) => !d.revoked_at && d.recording_mode === "two_sided",
+        ),
+        micOnly: count(devices.data, (d) => !d.revoked_at && d.recording_mode === "mic_only"),
+        blocked: count(devices.data, (d) => !d.revoked_at && d.recording_mode === "unavailable"),
+        untested: count(devices.data, (d) => !d.revoked_at && !d.recording_mode),
+      },
       alerts: alerts.data ?? [],
       leads: {
         total: leads.data?.length ?? 0,

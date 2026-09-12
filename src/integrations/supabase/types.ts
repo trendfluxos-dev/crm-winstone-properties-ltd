@@ -29,6 +29,8 @@ export type Database = {
           platform: string
           profile_id: string
           recording_capable: boolean | null
+          recording_checked_at: string | null
+          recording_mode: string | null
           recording_note: string | null
           recording_tested: boolean
           revoked_at: string | null
@@ -49,6 +51,8 @@ export type Database = {
           platform?: string
           profile_id: string
           recording_capable?: boolean | null
+          recording_checked_at?: string | null
+          recording_mode?: string | null
           recording_note?: string | null
           recording_tested?: boolean
           revoked_at?: string | null
@@ -69,6 +73,8 @@ export type Database = {
           platform?: string
           profile_id?: string
           recording_capable?: boolean | null
+          recording_checked_at?: string | null
+          recording_mode?: string | null
           recording_note?: string | null
           recording_tested?: boolean
           revoked_at?: string | null

@@ -120,6 +120,13 @@
       "when": 1789246632197,
       "tag": "0016_ai_voice_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789248786034,
+      "tag": "0017_device_recording_capability_status",
+      "breakpoints": true
     }
   ]
 }

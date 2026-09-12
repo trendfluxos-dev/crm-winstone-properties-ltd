@@ -139,6 +139,32 @@ object WinstoneAgentApi {
         }
     }
 
+    /**
+     * Reports this phone's real recording capability to the CRM, so IT sees the
+     * honest state (call audio / microphone only / blocked) in real time.
+     */
+    suspend fun reportRecordingCapability(
+        mode: String,
+        note: String?,
+    ): Unit = withContext(Dispatchers.IO) {
+        val payload = JSONObject().apply {
+            put("recording_mode", mode)
+            if (!note.isNullOrBlank()) put("recording_note", note.take(300))
+            put("app_version", com.winstone.connect.BuildConfig.VERSION_NAME)
+            put("android_version", android.os.Build.VERSION.SDK_INT.toString())
+            put("manufacturer", android.os.Build.MANUFACTURER)
+            put("model", android.os.Build.MODEL)
+        }
+        val req = Request.Builder()
+            .url(WinstoneApi.BASE_URL + "/api/public/agent/device-capability")
+            .header("x-device-token", AgentSession.deviceToken.orEmpty())
+            .post(payload.toString().toRequestBody(JSON))
+            .build()
+        client.newCall(req).execute().use { res ->
+            if (!res.isSuccessful) error("রেকর্ডিং স্ট্যাটাস পাঠানো যায়নি (HTTP ${res.code})")
+        }
+    }
+
     private fun JSONObject.stringList(vararg keys: String): List<String> {
         for (key in keys) {
             val arr = optJSONArray(key) ?: continue
