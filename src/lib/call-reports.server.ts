@@ -153,6 +153,7 @@ export async function submitCallReport(input: {
   reportId: string;
   agentId: string;
   category: string;
+  summary?: string | null;
   note?: string | null;
   reason?: string | null;
   followUpAt?: string | null;
@@ -180,6 +181,7 @@ export async function submitCallReport(input: {
     .update({
       status: "submitted",
       category,
+      summary: input.summary?.trim() || null,
       note: input.note?.trim() || null,
       reason: input.reason?.trim() || null,
       follow_up_at: input.followUpAt ?? null,
