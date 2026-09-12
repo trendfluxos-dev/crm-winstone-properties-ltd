@@ -111,6 +111,19 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         unassigned: count(leads.data, (l) => l.assigned_to === null),
         pending: count(leads.data, (l) => l.status === "pending"),
       },
+      pipeline: {
+        queued: count(jobs.data, (j) => j.status === "queued"),
+        processing: count(jobs.data, (j) => j.status === "processing"),
+        completed: count(jobs.data, (j) => j.status === "completed"),
+        failed: count(jobs.data, (j) => j.status === "failed"),
+        retried: count(jobs.data, (j) => (j.attempts ?? 0) > 1),
+        lastError: (jobs.data ?? []).find((j) => j.status === "failed")?.error_message ?? null,
+      },
+      sync: {
+        total: syncEvents.data?.length ?? 0,
+        queued: count(syncEvents.data, (s) => s.status === "queued"),
+        failed: count(syncEvents.data, (s) => s.status === "failed"),
+      },
     };
   });
 
