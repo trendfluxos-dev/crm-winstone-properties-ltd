@@ -50,3 +50,6 @@
 - [x] Official Meta WhatsApp Cloud API send + webhook receive implemented (activates when credentials are saved)
 - [x] Recording → stored audio → transcription → AI summary verified again with real speech; duplicate upload de-duplicated, retry endpoint returns complete, durable pending/processing/completed/failed/not_available states
 - [x] Per-lead WhatsApp conversation panel with delivery/read status (sent/delivered/read/failed, stored per message, Meta status webhook applies updates; verified against the live database)
+- [x] Lead dashboard table (serial/name/address/phone/reference + Call beside each row, কল বাকি / আবার যোগাযোগ / কথা হয়েছে filters)
+- [x] AI lead import from CSV/TXT/Word/Excel/PDF/photo with reviewable rows, saved into the agent's own list (verified with xlsx + csv)
+- [x] leads.address / serial_no / reference_by columns (migration 0003)
