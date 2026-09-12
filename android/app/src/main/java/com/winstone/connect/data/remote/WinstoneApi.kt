@@ -1,6 +1,6 @@
 package com.winstone.connect.data.remote
 
-import com.winstone.connect.BuildConfig
+import com.winstone.connect.data.AgentSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -25,7 +25,11 @@ import java.util.concurrent.TimeUnit
  */
 object WinstoneApi {
     const val BASE_URL = "https://webcrm.winstonebd.com"
-    private val INGEST_SECRET = BuildConfig.INGEST_SECRET // see README step 2
+    /**
+     * The phone authenticates with its own device token (issued at sign-in and
+     * bound to this agent profile). No shared privileged secret ships in the APK.
+     */
+    private fun authToken(): String = AgentSession.deviceToken.orEmpty()
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
@@ -47,7 +51,7 @@ object WinstoneApi {
     suspend fun fetchWorkspace(employeeId: String): Workspace = withContext(Dispatchers.IO) {
         val req = Request.Builder()
             .url("$BASE_URL/api/public/agent/workspace?employee_id=$employeeId")
-            .header("x-ingest-secret", INGEST_SECRET)
+            .header("x-device-token", authToken())
             .get()
             .build()
         client.newCall(req).execute().use { res ->
@@ -76,6 +80,8 @@ object WinstoneApi {
         twoSided: Boolean = true,
         incoming: Boolean = false,
         leadName: String? = null,
+        clientUploadId: String? = null,
+        recorderSource: String = "unknown",
     ): JSONObject = withContext(Dispatchers.IO) {
         // Multipart: the audio streams straight up, no base64 bloat in memory.
         val ext = file.extension.ifBlank { "m4a" }
@@ -91,6 +97,10 @@ object WinstoneApi {
                 addFormDataPart("duration_seconds", durationSeconds.toString())
                 addFormDataPart("call_direction", if (incoming) "incoming_callback" else "outgoing")
                 addFormDataPart("is_two_sided", twoSided.toString())
+                // Idempotency: a WorkManager retry can never create a second row.
+                addFormDataPart("client_upload_id", clientUploadId ?: file.name)
+                addFormDataPart("recorder_source", recorderSource)
+                AgentSession.deviceId?.let { addFormDataPart("device_id", it) }
                 addFormDataPart(
                     "file",
                     file.name,
@@ -101,7 +111,7 @@ object WinstoneApi {
 
         val req = Request.Builder()
             .url("$BASE_URL/api/public/ingest/recording")
-            .header("x-ingest-secret", INGEST_SECRET)
+            .header("x-device-token", authToken())
             .post(body)
             .build()
 
@@ -177,10 +187,76 @@ object WinstoneApi {
         post("/api/public/ingest/outcome", payload)
     }
 
+    /** Asks the CRM whether this agent may start a call (409 = report pending). */
+    suspend fun startCall(leadId: String): JSONObject = withContext(Dispatchers.IO) {
+        val req = Request.Builder()
+            .url("$BASE_URL/api/public/agent/call-start")
+            .header("x-device-token", authToken())
+            .header("Content-Type", "application/json")
+            .post(JSONObject().put("lead_id", leadId).toString().toRequestBody(JSON))
+            .build()
+        client.newCall(req).execute().use { res ->
+            val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
+            body.put("http_status", res.code)
+        }
+    }
+
+    /** Opens the mandatory post-call report the moment a call ends. */
+    suspend fun openReport(
+        leadId: String,
+        recordingId: String?,
+        phoneNumber: String?,
+        durationSeconds: Int,
+        connected: Boolean,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val payload = JSONObject().apply {
+            put("action", "open")
+            put("lead_id", leadId)
+            recordingId?.let { put("recording_id", it) }
+            phoneNumber?.let { if (it.isNotBlank()) put("phone_number", it) }
+            put("duration_seconds", durationSeconds)
+            put("connected", connected)
+        }
+        post("/api/public/agent/report", payload)
+    }
+
+    /** The agent's own open report, so the app can never skip it. */
+    suspend fun pendingReport(): JSONObject = withContext(Dispatchers.IO) {
+        val req = Request.Builder()
+            .url("$BASE_URL/api/public/agent/report")
+            .header("x-device-token", authToken())
+            .get()
+            .build()
+        client.newCall(req).execute().use { res ->
+            runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
+        }
+    }
+
+    /** Submits the report: category + its required fields. */
+    suspend fun submitReport(
+        reportId: String,
+        category: String,
+        note: String?,
+        reason: String?,
+        followUpAtIso: String?,
+        aiDecision: String?,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val payload = JSONObject().apply {
+            put("action", "submit")
+            put("report_id", reportId)
+            put("category", category)
+            note?.let { if (it.isNotBlank()) put("note", it) }
+            reason?.let { if (it.isNotBlank()) put("reason", it) }
+            followUpAtIso?.let { put("follow_up_at", it) }
+            aiDecision?.let { put("ai_decision", it) }
+        }
+        post("/api/public/agent/report", payload)
+    }
+
     private fun post(path: String, payload: JSONObject): JSONObject {
         val req = Request.Builder()
             .url(BASE_URL + path)
-            .header("x-ingest-secret", INGEST_SECRET)
+            .header("x-device-token", authToken())
             .header("Content-Type", "application/json")
             .post(payload.toString().toRequestBody(JSON))
             .build()

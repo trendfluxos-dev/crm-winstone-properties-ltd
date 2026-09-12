@@ -10,7 +10,6 @@ val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
-val ingestSecret = (localProps["INGEST_SECRET"] as String?) ?: System.getenv("INGEST_SECRET") ?: ""
 
 android {
     namespace = "com.winstone.connect"
@@ -20,9 +19,8 @@ android {
         applicationId = "com.winstone.connect"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.3"
-        buildConfigField("String", "INGEST_SECRET", "\"$ingestSecret\"")
+        versionCode = 5
+        versionName = "1.4"
     }
 
     buildFeatures {
