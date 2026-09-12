@@ -78,6 +78,25 @@ export const Route = createFileRoute("/api/public/agent/presence")({
           .eq("id", agent.id);
         if (error) return json({ error: error.message }, 500);
 
+        if (lead_id) {
+          const { logLeadEvent } = await import("@/lib/lead-events.server");
+          if (presence === "on_call") {
+            await logLeadEvent({
+              leadId: lead_id,
+              agentId: agent.id,
+              kind: "call_started",
+              detail: `${agent.name} ফোন থেকে ডায়াল করেছেন`,
+            });
+          } else {
+            await logLeadEvent({
+              leadId: lead_id,
+              agentId: agent.id,
+              kind: "call_ended",
+              detail: "কল শেষ — রেকর্ডিং আপলোডের অপেক্ষায়",
+            });
+          }
+        }
+
         return json({ ok: true, agent, presence, server_time: now });
       },
     },
