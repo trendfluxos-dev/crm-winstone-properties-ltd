@@ -16,6 +16,9 @@ const NewLeadInput = z.object({
     .regex(/^(?:\+?880|0)1[3-9]\d{8}$/, "Use a Bangladeshi mobile number"),
   company: z.string().trim().max(120).nullable().optional(),
   notes: z.string().trim().max(2000).nullable().optional(),
+  address: z.string().trim().max(300).nullable().optional(),
+  serialNo: z.string().trim().max(40).nullable().optional(),
+  referenceBy: z.string().trim().max(120).nullable().optional(),
 });
 
 /** Agents (and supervisors) add a lead; agents keep it in their own queue. */
@@ -34,6 +37,9 @@ export const submitMyLead = createServerFn({ method: "POST" })
       phoneNumber: data.phoneNumber,
       company: data.company ?? null,
       notes: data.notes ?? null,
+      address: data.address ?? null,
+      serialNo: data.serialNo ?? null,
+      referenceBy: data.referenceBy ?? null,
       ownerId: caller.profile?.id ?? null,
       ownerName: caller.profile?.name ?? null,
     });
