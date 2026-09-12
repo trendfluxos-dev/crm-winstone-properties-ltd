@@ -43,6 +43,13 @@
       "when": 1789224936775,
       "tag": "0005_stt_provider_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789225932636,
+      "tag": "0006_call_ai_intent_category",
+      "breakpoints": true
     }
   ]
 }
