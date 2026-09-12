@@ -88,15 +88,52 @@ object CallSyncQueue {
         )
     }
 
+    /**
+     * Reports one observed call state. The unique work name is
+     * callUid + state, so the same transition can never be sent twice even if
+     * the phone reboots mid-queue.
+     */
+    fun queueCallState(
+        context: Context,
+        callUid: String,
+        leadId: String,
+        state: String,
+        durationSeconds: Int = 0,
+        phoneNumber: String? = null,
+        recordingSupported: Boolean? = null,
+        recordingNote: String? = null,
+    ) {
+        enqueue(
+            context,
+            unique = "state_${callUid}_$state",
+            data = Data.Builder()
+                .putString(KEY_KIND, KIND_CALL_STATE)
+                .putString(KEY_CALL_UID, callUid)
+                .putString(KEY_LEAD, leadId)
+                .putString(KEY_STATE, state)
+                .putInt(KEY_DURATION, durationSeconds)
+                .putString(KEY_PHONE, phoneNumber)
+                .putString(KEY_REC_NOTE, recordingNote)
+                .apply { recordingSupported?.let { putBoolean(KEY_REC_SUPPORTED, it) } }
+                .build(),
+        )
+    }
+
     private fun enqueue(context: Context, unique: String, data: Data) {
         val request = OneTimeWorkRequestBuilder<CrmSyncWorker>()
             .setInputData(data)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
             .build()
+        SyncStatus.queued(context)
         WorkManager.getInstance(context).enqueueUniqueWork(unique, ExistingWorkPolicy.KEEP, request)
     }
 
+    const val KEY_CALL_UID = "call_uid"
+    const val KEY_STATE = "state"
+    const val KEY_REC_SUPPORTED = "recording_supported"
+    const val KEY_REC_NOTE = "recording_note"
+    const val KIND_CALL_STATE = "call_state"
     const val KEY_KIND = "kind"
     const val KEY_LEAD = "lead_id"
     const val KEY_PHONE = "phone"
