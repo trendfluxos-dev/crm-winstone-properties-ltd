@@ -138,6 +138,8 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                 LeadCard(
                                     lead = lead,
                                     twilioBusy = state.twilioCallingLeadId == lead.id,
+                                    recordingMode = state.recordingMode,
+                                    recordingReason = state.recordingReason,
                                     onCall = {
                                         // The server decides: an unfinished post-call
                                         // report blocks the next outbound call.
