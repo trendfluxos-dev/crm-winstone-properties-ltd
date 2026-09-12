@@ -281,7 +281,8 @@ function suggestionFrom(recording: {
     : "unknown";
 
   let suggested: CallCategory | null = null;
-  if (recording.duration_seconds < 6) suggested = "no_answer";
+  if (objections.some((o) => /কলব্যাক|callback|পরে ফোন/i.test(o))) suggested = "callback";
+  else if (recording.duration_seconds < 6) suggested = "no_answer";
   else if (stage.includes("won") || stage.includes("closed")) suggested = "closed_converted";
   else if (recording.sentiment === "positive") suggested = "hot_lead";
   else if (recording.sentiment === "critical") suggested = "not_interested";
