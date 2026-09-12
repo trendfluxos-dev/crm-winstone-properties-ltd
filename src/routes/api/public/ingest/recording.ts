@@ -19,6 +19,8 @@ const Payload = z.object({
   phone_number: z.string().min(5).optional(),
   agent_id: z.string().uuid().nullable().optional(),
   employee_id: z.string().min(2).max(20).nullable().optional(),
+  /** The SIM the call was actually made from. */
+  sim_number: z.string().trim().max(25).nullable().optional(),
   lead_name: z.string().trim().min(1).max(120).nullable().optional(),
   client_upload_id: z.string().trim().min(6).max(120).nullable().optional(),
   recorder_source: z.enum(["voice_call", "mic", "unknown"]).default("unknown"),
