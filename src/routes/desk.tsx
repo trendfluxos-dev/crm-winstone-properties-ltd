@@ -130,29 +130,29 @@ function DeskPage() {
             <>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {account.approval === "rejected" ? "Access declined" : "Waiting for approval"}
+                  {account.approval === "rejected" ? "প্রবেশ বাতিল" : "অনুমোদনের অপেক্ষায়"}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {account.approval === "rejected"
-                    ? "A supervisor declined this account. Talk to your team lead if this looks wrong."
-                    : "Your account is created. A supervisor in the IT Console or Executive HQ will open your desk shortly."}
+                    ? "একজন সুপারভাইজার এই অ্যাকাউন্ট বাতিল করেছেন। ভুল মনে হলে টিম লিডের সঙ্গে কথা বলুন।"
+                    : "আপনার অ্যাকাউন্ট তৈরি হয়েছে। আইটি কনসোল বা এক্সিকিউটিভ এইচকিউ থেকে শীঘ্রই ডেস্ক খুলে দেওয়া হবে।"}
                 </p>
               </div>
               <Button variant="secondary" onClick={() => void signOut()}>
-                Sign out
+                সাইন আউট
               </Button>
             </>
           ) : (
             <>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">Sign in to your desk</h1>
+                <h1 className="text-2xl font-bold tracking-tight">নিজের ডেস্কে সাইন ইন করুন</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Agents and coordinators use their own email and password.
+                  এজেন্ট ও কোঅর্ডিনেটর নিজের ইমেইল ও পাসওয়ার্ড ব্যবহার করবেন।
                 </p>
               </div>
               <Button asChild size="lg">
                 <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
-                  <LogIn className="size-4" /> Sign in
+                  <LogIn className="size-4" /> সাইন ইন
                 </Link>
               </Button>
             </>
@@ -166,11 +166,38 @@ function DeskPage() {
     <AppShell>
       <div className="space-y-6">
         <MyProfileCard />
-        <QueueBoard
-          title={scope === "agent" ? "My Leads" : "Floor Queue"}
-          canSeeAllAgents={scope !== "agent"}
-          showManualLog={scope !== "agent"}
-        />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">আমার ডেস্ক</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">
+              নিজের লিড, কল, হোয়াটসঅ্যাপ কথা আর নতুন লিড — সব এক জায়গায়।
+            </p>
+          </div>
+          <NewLeadDialog />
+        </div>
+
+        <DeskStats />
+
+        <Tabs defaultValue="leads" className="space-y-4">
+          <TabsList className="flex w-full flex-wrap">
+            <TabsTrigger value="leads">লিড তালিকা</TabsTrigger>
+            <TabsTrigger value="calls">কল রেকর্ড</TabsTrigger>
+            <TabsTrigger value="whatsapp">হোয়াটসঅ্যাপ</TabsTrigger>
+          </TabsList>
+          <TabsContent value="leads">
+            <QueueBoard
+              title={scope === "agent" ? "আমার লিড" : "ফ্লোর কিউ"}
+              canSeeAllAgents={scope !== "agent"}
+              showManualLog={scope !== "agent"}
+            />
+          </TabsContent>
+          <TabsContent value="calls">
+            <MyCallLog />
+          </TabsContent>
+          <TabsContent value="whatsapp">
+            <WhatsappInbox />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppShell>
   );
