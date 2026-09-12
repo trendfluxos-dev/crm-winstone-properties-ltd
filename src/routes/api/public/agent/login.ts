@@ -85,13 +85,19 @@ export const Route = createFileRoute("/api/public/agent/login")({
           },
         });
 
+        const loginEmail = await resolveLoginEmail(parsed.data.email);
+        if (!loginEmail) {
+          return json({ error: "এই ফোন নম্বর বা Employee ID পাওয়া যায়নি" }, 401);
+        }
+
         const { data: session, error } = await auth.auth.signInWithPassword({
-          email: parsed.data.email,
+          email: loginEmail,
           password: parsed.data.password,
         });
         if (error || !session.user) {
-          return json({ error: "ইমেইল বা পাসওয়ার্ড মিলছে না" }, 401);
+          return json({ error: "লগইন তথ্য মিলছে না" }, 401);
         }
+
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: profile } = await supabaseAdmin
