@@ -73,12 +73,90 @@ export const twilioHealth = createServerFn({ method: "POST" })
       throw new Error("শুধুমাত্র HQ/Coordinator দেখতে পারবেন");
     }
 
-    const { twilioConfig, isConfigured } = await import("@/lib/twilio.server");
+    const { twilioConfig, isConfigured, listIncomingNumbers } = await import("@/lib/twilio.server");
     const cfg = twilioConfig();
     const configured = isConfigured();
     const webhookBase = cfg.webhookBase || getPublicBaseUrl();
 
+    // Never call this "connected" from env vars alone: ask Twilio itself.
+    type Status = "not_connected" | "config_error" | "webhook_error" | "connected" | "not_verified";
+    let status: Status = "not_verified";
+    let statusDetail: string | null = null;
+    let numbers: Array<{
+      sid: string;
+      phoneNumber: string;
+      voice: boolean;
+      sms: boolean;
+      voiceWired: boolean;
+      statusWired: boolean;
+      smsWired: boolean;
+    }> = [];
+    let verifiedAt: string | null = null;
+
+    if (!cfg.apiKey || !cfg.accountSid) {
+      status = "not_connected";
+      statusDetail = "Twilio ক্রিডেনশিয়াল সেট করা নেই";
+    } else {
+      try {
+        const live = await listIncomingNumbers();
+        verifiedAt = new Date().toISOString();
+        numbers = live.map((n) => ({
+          sid: n.sid,
+          phoneNumber: n.phoneNumber,
+          voice: !!n.capabilities.voice,
+          sms: !!n.capabilities.sms,
+          voiceWired: (n.voiceUrl ?? "").includes("/api/public/twilio/voice"),
+          statusWired: (n.statusCallback ?? "").includes("/api/public/twilio/call-status"),
+          smsWired: (n.smsUrl ?? "").includes("/api/public/twilio/whatsapp"),
+        }));
+        if (numbers.length === 0) {
+          status = "not_connected";
+          statusDetail = "এই অ্যাকাউন্টে এখনো কোনো Twilio নম্বর নেই।";
+        } else if (!numbers.some((n) => n.voiceWired && n.statusWired)) {
+          status = "webhook_error";
+          statusDetail = "নম্বরের ওয়েবহুক এখনো এই CRM-এ সেট করা হয়নি।";
+        } else if (!cfg.webhookBase) {
+          status = "config_error";
+          statusDetail = "পাবলিক ওয়েবহুক ঠিকানা সেট করা নেই।";
+        } else {
+          status = "connected";
+        }
+      } catch (error) {
+        status = "config_error";
+        statusDetail = error instanceof Error ? error.message : "Twilio যাচাই করা যায়নি";
+      }
+    }
+
+    // Webhook health comes only from real recorded deliveries.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: deliveries } = await supabaseAdmin
+      .from("webhook_deliveries")
+      .select("event_type, status, created_at")
+      .eq("provider", "twilio")
+      .order("created_at", { ascending: false })
+      .limit(500);
+
+    const rows = deliveries ?? [];
+    const webhooks = {
+      total: rows.length,
+      processed: rows.filter((r) => r.status === "processed").length,
+      failed: rows.filter((r) => r.status === "failed").length,
+      rejected: rows.filter((r) => r.status === "rejected").length,
+      lastEventAt: rows[0]?.created_at ?? null,
+      verified: rows.some((r) => r.status === "processed"),
+      byType: ["voice", "call-status", "recording", "whatsapp"].map((type) => ({
+        type,
+        processed: rows.filter((r) => r.event_type === type && r.status === "processed").length,
+        failed: rows.filter((r) => r.event_type === type && r.status !== "processed").length,
+      })),
+    };
+
     return {
+      status,
+      statusDetail,
+      numbers,
+      verifiedAt,
+      webhooks,
       configured,
       hasApiKey: !!cfg.apiKey,
       hasAccountSid: !!cfg.accountSid,
