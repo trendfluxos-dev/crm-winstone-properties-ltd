@@ -68,12 +68,16 @@ export const Route = createFileRoute("/api/public/twilio/whatsapp")({
         const optOut = /^\s*(stop|unsubscribe|বন্ধ|বন্ধ করুন|আর পাঠাবেন না)\s*$/i.test(body);
         if (optOut && normalized) {
           const { addDoNotContact, saveConsent } = await import("@/lib/comms-guard.server");
-          await addDoNotContact({
-            phoneNumber: normalized,
-            channel: "whatsapp",
-            reason: "গ্রাহক নিজে বন্ধ করতে বলেছেন",
-            source: "opt_out_keyword",
-          });
+          // Suppress every channel, not just WhatsApp: an opt-out must also
+          // block outbound calls and SMS server-side.
+          for (const channel of ["all", "whatsapp", "voice", "sms"] as const) {
+            await addDoNotContact({
+              phoneNumber: normalized,
+              channel,
+              reason: "গ্রাহক নিজে বন্ধ করতে বলেছেন",
+              source: "opt_out_keyword",
+            });
+          }
           await saveConsent({
             leadId,
             phoneNumber: normalized,

@@ -176,6 +176,9 @@ export async function sendSms(input: {
   const cfg = twilioConfig();
   const from = cfg.phoneNumber ?? (await resolvePhoneNumber(cfg));
   if (!from) throw new Error("No Twilio phone number is configured");
+  // Opt-out suppression is enforced here so no caller can skip it.
+  const { assertContactable } = await import("@/lib/comms-guard.server");
+  await assertContactable(input.to, "sms");
   const params = new URLSearchParams({ To: input.to, From: from, Body: input.body });
   if (input.statusCallback) params.set("StatusCallback", input.statusCallback);
   const res = await twilioFetch("/Messages.json", { method: "POST", body: params.toString() });
