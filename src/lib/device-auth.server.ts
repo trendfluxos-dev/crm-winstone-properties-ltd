@@ -83,6 +83,19 @@ export async function issueDeviceToken(input: {
     .single();
   if (error || !data) throw new Error(error?.message ?? "Could not register device");
 
+  const { logAudit } = await import("@/lib/audit.server");
+  await logAudit({
+    action: "device_registered",
+    entityType: "agent_device",
+    entityId: data.id,
+    actorProfileId: input.profileId,
+    metadata: {
+      platform: input.platform ?? "android",
+      appVersion: input.appVersion ?? null,
+      deviceLabel: input.deviceLabel ?? null,
+    },
+  });
+
   return { token, deviceId: data.id };
 }
 
