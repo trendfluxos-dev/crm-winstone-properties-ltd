@@ -164,8 +164,12 @@ export async function transcribeWithAdapter(
   contentType: string,
 ): Promise<SttResult> {
   const primary = sttPrimaryProvider();
-  const order: SttProviderName[] =
-    primary === "sarvam" ? ["sarvam", "gemini"] : sarvamEnabled() ? ["gemini", "sarvam"] : ["gemini"];
+  // Chain: preferred provider first, then the other Bangladesh-reachable
+  // gateway provider, and Sarvam only when it is explicitly enabled.
+  const chain: SttProviderName[] = [primary, "gemini", "openai", ...(sarvamEnabled() ? ["sarvam" as const] : [])];
+  const order: SttProviderName[] = chain.filter(
+    (p, i) => chain.indexOf(p) === i && (p !== "sarvam" || sarvamEnabled()),
+  );
 
   const startedAt = Date.now();
   let lastFailure: SttFailure = {
