@@ -30,6 +30,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as ApiPublicSmokeRouteImport } from './routes/api/public/smoke'
 import { Route as DocsAdminEditorSlugRouteImport } from './routes/docs-admin_.editor.$slug'
 import { Route as ApiPublicAgentCallStartRouteImport } from './routes/api/public/agent/call-start'
+import { Route as ApiPublicAgentCallStateRouteImport } from './routes/api/public/agent/call-state'
 import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
@@ -154,6 +155,11 @@ const ApiPublicAgentCallStartRoute = ApiPublicAgentCallStartRouteImport.update({
   path: '/api/public/agent/call-start',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentCallStateRoute = ApiPublicAgentCallStateRouteImport.update({
+  id: '/api/public/agent/call-state',
+  path: '/api/public/agent/call-state',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentCoachRoute = ApiPublicAgentCoachRouteImport.update({
   id: '/api/public/agent/coach',
   path: '/api/public/agent/coach',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
+  '/api/public/agent/call-state': typeof ApiPublicAgentCallStateRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
+  '/api/public/agent/call-state': typeof ApiPublicAgentCallStateRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin_/editor/$slug': typeof DocsAdminEditorSlugRoute
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
+  '/api/public/agent/call-state': typeof ApiPublicAgentCallStateRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/api/public/smoke'
     | '/docs-admin/editor/$slug'
     | '/api/public/agent/call-start'
+    | '/api/public/agent/call-state'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/api/public/smoke'
     | '/docs-admin/editor/$slug'
     | '/api/public/agent/call-start'
+    | '/api/public/agent/call-state'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/api/public/smoke'
     | '/docs-admin_/editor/$slug'
     | '/api/public/agent/call-start'
+    | '/api/public/agent/call-state'
     | '/api/public/agent/coach'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
@@ -509,6 +521,7 @@ export interface RootRouteChildren {
   ApiPublicSmokeRoute: typeof ApiPublicSmokeRoute
   DocsAdminEditorSlugRoute: typeof DocsAdminEditorSlugRoute
   ApiPublicAgentCallStartRoute: typeof ApiPublicAgentCallStartRoute
+  ApiPublicAgentCallStateRoute: typeof ApiPublicAgentCallStateRoute
   ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
@@ -677,6 +690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentCallStartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/call-state': {
+      id: '/api/public/agent/call-state'
+      path: '/api/public/agent/call-state'
+      fullPath: '/api/public/agent/call-state'
+      preLoaderRoute: typeof ApiPublicAgentCallStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/coach': {
       id: '/api/public/agent/coach'
       path: '/api/public/agent/coach'
@@ -822,6 +842,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSmokeRoute: ApiPublicSmokeRoute,
   DocsAdminEditorSlugRoute: DocsAdminEditorSlugRoute,
   ApiPublicAgentCallStartRoute: ApiPublicAgentCallStartRoute,
+  ApiPublicAgentCallStateRoute: ApiPublicAgentCallStateRoute,
   ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,

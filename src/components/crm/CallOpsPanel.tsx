@@ -1,11 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, BellRing, Check, Loader2, RefreshCw, Smartphone } from "lucide-react";
+import {
+  Activity,
+  BellRing,
+  Check,
+  Loader2,
+  RefreshCw,
+  ShieldOff,
+  Smartphone,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { acknowledgeAlert, callOpsSummary, runAnalysisSweep } from "@/lib/ops.functions";
+import {
+  acknowledgeAlert,
+  callOpsSummary,
+  revokeAgentDevice,
+  runAnalysisSweep,
+} from "@/lib/ops.functions";
 import { useAdminToken } from "@/lib/local-session";
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -29,6 +42,7 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
   const fetchSummary = useServerFn(callOpsSummary);
   const sweep = useServerFn(runAnalysisSweep);
   const ack = useServerFn(acknowledgeAlert);
+  const revoke = useServerFn(revokeAgentDevice);
 
   const summary = useQuery({
     queryKey: ["call-ops", adminToken ? "pin" : "session"],
@@ -48,6 +62,15 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
   const clearAlert = useMutation({
     mutationFn: (alertId: string) => ack({ data: { adminToken, alertId } }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["call-ops"] }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const revokeDevice = useMutation({
+    mutationFn: (deviceId: string) => revoke({ data: { adminToken, deviceId } }),
+    onSuccess: () => {
+      toast.success("ফোনটির প্রবেশ বাতিল করা হলো");
+      void queryClient.invalidateQueries({ queryKey: ["call-ops"] });
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -120,6 +143,21 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
               value={data.analysis.micOnly}
               hint="ফোন দুই পক্ষের অডিও দেয়নি"
             />
+            <Tile
+              label="প্রসেসিং সারিতে"
+              value={data.pipeline.queued + data.pipeline.processing}
+              hint={`${data.pipeline.completed}টি শেষ · ${data.pipeline.retried}টি পুনরায় চেষ্টা`}
+            />
+            <Tile
+              label="প্রসেসিং ব্যর্থ"
+              value={data.pipeline.failed}
+              hint={data.pipeline.lastError ?? "সব ঠিক আছে"}
+            />
+            <Tile
+              label="ফোন থেকে আসা ইভেন্ট"
+              value={data.sync.total}
+              hint={`${data.sync.queued}টি অপেক্ষায় · ${data.sync.failed}টি ব্যর্থ`}
+            />
           </dl>
 
           {Object.keys(data.reports.categories).length ? (
@@ -141,16 +179,27 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
             ) : (
               <ul className="space-y-1 text-xs">
                 {data.devices.slice(0, 8).map((device) => (
-                  <li key={device.id} className="flex flex-wrap justify-between gap-2">
+                  <li key={device.id} className="flex flex-wrap items-center justify-between gap-2">
                     <span>
                       {device.label ?? "ফোন"} {device.appVersion ? `· v${device.appVersion}` : ""}
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="flex items-center gap-2 text-muted-foreground">
                       {device.revoked
                         ? "বাতিল"
                         : device.lastSeenAt
                           ? new Date(device.lastSeenAt).toLocaleString("bn-BD")
                           : "—"}
+                      {showControls && !device.revoked ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 gap-1 px-2 text-[11px]"
+                          disabled={revokeDevice.isPending}
+                          onClick={() => revokeDevice.mutate(device.id)}
+                        >
+                          <ShieldOff className="size-3" /> বাতিল করুন
+                        </Button>
+                      ) : null}
                     </span>
                   </li>
                 ))}

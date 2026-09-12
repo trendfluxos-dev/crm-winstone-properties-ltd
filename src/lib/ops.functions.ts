@@ -22,7 +22,8 @@ export const callOpsSummary = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const since = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
-    const [reports, recordings, followUps, devices, alerts, leads] = await Promise.all([
+    const [reports, recordings, followUps, devices, alerts, leads, jobs, syncEvents] =
+      await Promise.all([
       supabaseAdmin
         .from("call_reports")
         .select("id, agent_id, status, category, created_at, submitted_at")
@@ -44,6 +45,14 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false })
         .limit(20),
       supabaseAdmin.from("leads").select("id, assigned_to, status"),
+      supabaseAdmin
+        .from("call_processing_jobs")
+        .select("id, job_type, status, attempts, error_message")
+        .gte("created_at", since),
+      supabaseAdmin
+        .from("sync_events")
+        .select("id, event_type, status, created_at")
+        .gte("created_at", since),
     ]);
 
     const count = <T>(rows: T[] | null, predicate: (row: T) => boolean) =>
@@ -102,7 +111,57 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         unassigned: count(leads.data, (l) => l.assigned_to === null),
         pending: count(leads.data, (l) => l.status === "pending"),
       },
+      pipeline: {
+        queued: count(jobs.data, (j) => j.status === "queued"),
+        processing: count(jobs.data, (j) => j.status === "processing"),
+        completed: count(jobs.data, (j) => j.status === "completed"),
+        failed: count(jobs.data, (j) => j.status === "failed"),
+        retried: count(jobs.data, (j) => (j.attempts ?? 0) > 1),
+        lastError: (jobs.data ?? []).find((j) => j.status === "failed")?.error_message ?? null,
+      },
+      sync: {
+        total: syncEvents.data?.length ?? 0,
+        queued: count(syncEvents.data, (s) => s.status === "queued"),
+        failed: count(syncEvents.data, (s) => s.status === "failed"),
+      },
     };
+  });
+
+/**
+ * Revokes one bound phone. The device token stops working on the very next
+ * request because `resolveApiCaller` requires `revoked_at IS NULL`. Idempotent:
+ * revoking an already revoked device keeps the first timestamp.
+ */
+export const revokeAgentDevice = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Input.extend({ deviceId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const caller = await requireSupervisor(data.adminToken ?? null);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: device } = await supabaseAdmin
+      .from("agent_devices")
+      .select("id, profile_id, device_label, revoked_at")
+      .eq("id", data.deviceId)
+      .maybeSingle();
+    if (!device) throw new Error("ফোনটি পাওয়া যায়নি");
+    if (device.revoked_at) return { ok: true, alreadyRevoked: true };
+
+    const { error } = await supabaseAdmin
+      .from("agent_devices")
+      .update({ revoked_at: new Date().toISOString(), status: "revoked" })
+      .eq("id", device.id);
+    if (error) throw new Error(error.message);
+
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "device_revoked",
+      entityType: "agent_device",
+      entityId: device.id,
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.name ?? "Authority PIN",
+      metadata: { profile_id: device.profile_id, device_label: device.device_label },
+    });
+    return { ok: true, alreadyRevoked: false };
   });
 
 /** Assign / reassign audit trail, newest first. */

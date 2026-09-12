@@ -20,6 +20,7 @@ export type AuditAction =
   | "lead_self_claimed"
   | "call_report_submitted"
   | "device_registered"
+  | "device_revoked"
   | "recording_reprocessed"
   | "alert_acknowledged"
   | "report_sheet_sync";
