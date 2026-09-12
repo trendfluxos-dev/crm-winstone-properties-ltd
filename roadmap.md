@@ -28,3 +28,8 @@
       place at public/downloads/winstone-connect.apk
 - [ ] Install APK on a real phone, place a live call, confirm recording + WhatsApp log land in the
       agent workspace (needs the physical handset — cannot be done from this environment)
+---ADD---
+
+## Open tasks
+- [ ] Verify Android app wiring end to end (call, WhatsApp, lead, AI Copilot)
+- [ ] Bengali UI for Executive HQ + IT Console (in progress)
