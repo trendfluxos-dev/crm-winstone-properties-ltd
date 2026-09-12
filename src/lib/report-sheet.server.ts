@@ -155,8 +155,11 @@ async function ensureTab() {
 }
 
 /**
- * Appends every submitted report that has not been pushed yet. Keeps the last
- * synced report timestamp in public.app_config so repeat runs stay idempotent.
+ * Full sync: rewrites the whole "Call Reports" tab so the spreadsheet always
+ * mirrors the latest report fields — new submissions are appended and any
+ * later edits to category/summary/note/follow-up overwrite their old row.
+ * Remembers the previous row count so removed rows are cleared, and keeps the
+ * last synced timestamp in public.app_config so repeat runs stay idempotent.
  */
 export async function syncReportsToSheet() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -165,28 +168,41 @@ export async function syncReportsToSheet() {
     .select("data")
     .eq("id", CONFIG_ID)
     .maybeSingle();
-  const state = (config?.data ?? {}) as { syncedIds?: string[]; lastSyncedAt?: string };
-  const synced = new Set(state.syncedIds ?? []);
+  const state = (config?.data ?? {}) as {
+    syncedIds?: string[];
+    lastSyncedAt?: string;
+    rowCount?: number;
+  };
 
   const rows = await fetchReportSheetRows(500);
-  const fresh = rows.filter((r) => !synced.has(r.id)).reverse();
-  if (fresh.length === 0) {
-    return { appended: 0, sheetUrl: reportSheetUrl(), lastSyncedAt: state.lastSyncedAt ?? null };
-  }
+  // Oldest first in the sheet so it reads chronologically top to bottom.
+  const ordered = [...rows].reverse();
 
   await ensureTab();
+  const values = [[...REPORT_SHEET_HEADER], ...ordered.map(toSheetLine)];
+  const endRow = values.length;
   await gatewayFetch(
-    `/spreadsheets/${SHEET_ID}/values/${TAB}!A1:J1:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-    { method: "POST", body: JSON.stringify({ values: fresh.map(toSheetLine) }) },
+    `/spreadsheets/${SHEET_ID}/values/${TAB}!A1:J${endRow}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values }) },
   );
 
-  const lastSyncedAt = new Date().toISOString();
-  const keptIds = [...synced, ...fresh.map((r) => r.id)].slice(-2000);
-  await supabaseAdmin
-    .from("app_config")
-    .upsert({ id: CONFIG_ID, data: { syncedIds: keptIds, lastSyncedAt }, updated_at: lastSyncedAt });
+  // Clear stale rows below if the sheet previously had more data.
+  const previousRows = (state.rowCount ?? 0) + 1;
+  if (previousRows > endRow) {
+    await gatewayFetch(`/spreadsheets/${SHEET_ID}/values/${TAB}!A${endRow + 1}:J${previousRows}:clear`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    });
+  }
 
-  return { appended: fresh.length, sheetUrl: reportSheetUrl(), lastSyncedAt };
+  const lastSyncedAt = new Date().toISOString();
+  await supabaseAdmin.from("app_config").upsert({
+    id: CONFIG_ID,
+    data: { syncedIds: ordered.map((r) => r.id), rowCount: ordered.length, lastSyncedAt },
+    updated_at: lastSyncedAt,
+  });
+
+  return { appended: ordered.length, sheetUrl: reportSheetUrl(), lastSyncedAt };
 }
 
 export function reportSheetUrl() {
