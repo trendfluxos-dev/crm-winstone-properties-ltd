@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { CallAudioPlayer } from "@/components/crm/CallAudioPlayer";
+import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { Button } from "@/components/ui/button";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
