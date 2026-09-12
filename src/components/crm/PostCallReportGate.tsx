@@ -47,6 +47,7 @@ export function PostCallReportGate() {
   });
 
   const [category, setCategory] = useState<string>("");
+  const [summary, setSummary] = useState("");
   const [note, setNote] = useState("");
   const [reason, setReason] = useState("");
   const [when, setWhen] = useState("");
@@ -58,6 +59,7 @@ export function PostCallReportGate() {
   useEffect(() => {
     if (!detail) {
       setCategory("");
+      setSummary("");
       setNote("");
       setReason("");
       setWhen("");
@@ -72,6 +74,7 @@ export function PostCallReportGate() {
           adminToken,
           reportId: detail!.report.id,
           category,
+          summary: summary.trim() || null,
           note: note.trim() || null,
           reason: reason.trim() || null,
           followUpAt: when ? new Date(when).toISOString() : null,
@@ -90,14 +93,14 @@ export function PostCallReportGate() {
 
   if (!detail) return null;
 
-  const scheduleRequired = NEEDS_SCHEDULE.has(category);
   const reasonRequired = NEEDS_REASON.has(category);
-  const noteRequired = category === "hot_lead" || scheduleRequired;
+  // Every call: category + summary + note + follow-up date are all mandatory.
   const ready =
     Boolean(category) &&
-    (!scheduleRequired || Boolean(when)) &&
-    (!reasonRequired || reason.trim().length > 1) &&
-    (!noteRequired || note.trim().length > 1);
+    summary.trim().length > 1 &&
+    note.trim().length > 1 &&
+    Boolean(when) &&
+    (!reasonRequired || reason.trim().length > 1);
 
   const applySuggestion = () => {
     if (!suggestion) return;
@@ -105,7 +108,10 @@ export function PostCallReportGate() {
     if (suggestion.suggestedFollowUpAt) {
       setWhen(new Date(suggestion.suggestedFollowUpAt).toISOString().slice(0, 16));
     }
-    if (!note.trim() && suggestion.summary.length) setNote(suggestion.summary.join(" • "));
+    if (!summary.trim() && suggestion.summary.length) {
+      setSummary(suggestion.summary.join(" • "));
+    }
+    if (!note.trim() && suggestion.nextAction) setNote(suggestion.nextAction);
     setAiDecision("accepted");
   };
 
