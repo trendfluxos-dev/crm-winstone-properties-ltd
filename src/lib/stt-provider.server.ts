@@ -13,7 +13,7 @@
  */
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
-const GEMINI_STT_MODEL = "google/gemini-3.5-transcribe";
+
 
 export type SttProviderName = "gemini" | "openai" | "sarvam";
 
