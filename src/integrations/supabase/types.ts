@@ -131,6 +131,51 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_events: {
+        Row: {
+          agent_id: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          kind: string
+          lead_id: string | null
+          recording_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          kind: string
+          lead_id?: string | null
+          recording_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          kind?: string
+          lead_id?: string | null
+          recording_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_agent_id: string | null
