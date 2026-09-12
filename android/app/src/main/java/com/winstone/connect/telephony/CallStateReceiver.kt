@@ -54,7 +54,12 @@ class CallStateReceiver : BroadcastReceiver() {
                 LiveCallLauncher.setPhase(CallPhase.Connected)
                 // Answered is the first moment Android actually tells us the call
                 // is up — we never infer it from the agent pressing CALL.
-                reportState(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                if (outgoing) {
+                    reportState(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                } else {
+                    IncomingCallTracker.ensure(intent.incomingNumber())
+                    reportIncoming(app, CallLifecycle.incomingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                }
                 scope.launch {
                     runCatching { WinstoneApi.postPresence(employeeId, "on_call", leadId = LiveCallLauncher.activeLeadId) }
                 }
@@ -93,7 +98,14 @@ class CallStateReceiver : BroadcastReceiver() {
                 val ended =
                     if (outgoing) CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
                     else CallLifecycle.incomingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
-                reportState(app, ended, duration, uploadable)
+                if (outgoing) {
+                    reportState(app, ended, duration, uploadable)
+                } else {
+                    // Callback finished: the CRM resolves or creates the lead from
+                    // the caller's number and opens the same mandatory report.
+                    reportIncoming(app, ended, duration, uploadable)
+                    IncomingCallTracker.clear()
+                }
 
                 // Every finished call becomes reportable, even when recording
                 // failed entirely — the report is opened server-side and queued
