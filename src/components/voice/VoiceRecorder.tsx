@@ -162,7 +162,8 @@ export function VoiceRecorder() {
     const slice = canvas.width / buffer.length;
     let x = 0;
     for (let i = 0; i < buffer.length; i++) {
-      const v = buffer[i] / 128.0;
+      const value = buffer[i] ?? 128;
+      const v = value / 128.0;
       const y = (v * canvas.height) / 2;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
