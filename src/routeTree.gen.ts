@@ -28,6 +28,7 @@ import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/age
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
+import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/ingest/outcome'
@@ -131,6 +132,11 @@ const ApiPublicConfigRulesRoute = ApiPublicConfigRulesRouteImport.update({
   path: '/api/public/config/rules',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDownloadApkRoute = ApiPublicDownloadApkRouteImport.update({
+  id: '/api/public/download/apk',
+  path: '/api/public/download/apk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicIngestLeadRoute = ApiPublicIngestLeadRouteImport.update({
   id: '/api/public/ingest/lead',
   path: '/api/public/ingest/lead',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
+  '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
+  '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
+  '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
+    | '/api/public/download/apk'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
+    | '/api/public/download/apk'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/presence'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
+    | '/api/public/download/apk'
     | '/api/public/ingest/lead'
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
@@ -349,6 +361,7 @@ export interface RootRouteChildren {
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
+  ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestOutcomeRoute: typeof ApiPublicIngestOutcomeRoute
@@ -492,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicConfigRulesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/download/apk': {
+      id: '/api/public/download/apk'
+      path: '/api/public/download/apk'
+      fullPath: '/api/public/download/apk'
+      preLoaderRoute: typeof ApiPublicDownloadApkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ingest/lead': {
       id: '/api/public/ingest/lead'
       path: '/api/public/ingest/lead'
@@ -558,6 +578,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
+  ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestOutcomeRoute: ApiPublicIngestOutcomeRoute,
