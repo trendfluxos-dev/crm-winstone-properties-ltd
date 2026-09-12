@@ -1,11 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Loader2, LogIn, UserPlus } from "lucide-react";
+import { Loader2, Lock, LogIn, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
+import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +49,14 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinTarget, setPinTarget] = useState<"/hq" | "/system">("/hq");
+
+  const openPin = (target: "/hq" | "/system") => {
+    setPinTarget(target);
+    setPinOpen(true);
+  };
+
 
   const signIn = useMutation({
     mutationFn: async () => {
@@ -183,6 +192,20 @@ function AuthPage() {
               {isSignup ? "Sign in" : "Create account"}
             </Link>
           </p>
+          <div className="mt-2 border-t border-border pt-4">
+            <p className="text-center text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Or unlock with the master PIN
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => openPin("/hq")}>
+                <Lock className="size-4" /> Executive HQ
+              </Button>
+              <Button variant="secondary" onClick={() => openPin("/system")}>
+                <Lock className="size-4" /> IT Console
+              </Button>
+            </div>
+          </div>
+
           <p className="text-center text-xs text-muted-foreground">
             <Link to="/" className="hover:underline">
               Back to the entry hall
@@ -190,6 +213,12 @@ function AuthPage() {
           </p>
         </div>
       </div>
+
+      <AdminPinDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onUnlocked={() => void navigate({ to: pinTarget })}
+      />
     </div>
   );
 }
