@@ -93,17 +93,18 @@ export function LeadDossier({
                   </span>
                 )}
               </div>
-              <div className="mt-3 flex gap-2">
-                <Button asChild size="sm" className="flex-1">
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button asChild size="sm" className="flex-1 min-w-[100px]">
                   <a href={`tel:${lead.phone_number}`}>
                     <PhoneOutgoing className="size-4" /> সরাসরি কল
                   </a>
                 </Button>
+                <TwilioCallButton leadId={lead.id} className="flex-1 min-w-[100px]" variant="secondary" />
                 <WhatsAppAction
                   phone={lead.phone_number}
                   leadId={lead.id}
                   label="হোয়াটসঅ্যাপ চ্যাট"
-                  className="flex-1"
+                  className="flex-1 min-w-[100px]"
                 />
               </div>
             </SheetHeader>
