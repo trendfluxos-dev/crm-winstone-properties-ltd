@@ -21,6 +21,12 @@ import {
 } from "@/lib/ops.functions";
 import { useAdminToken } from "@/lib/local-session";
 
+const RECORDING_LABEL: Record<string, string> = {
+  two_sided: "রেকর্ডিং: দুই পাশের কথা",
+  mic_only: "রেকর্ডিং: শুধু এজেন্টের পাশ",
+  unavailable: "এই ফোনে রেকর্ডিং সম্ভব নয়",
+};
+
 const CATEGORY_LABEL: Record<string, string> = {
   hot_lead: "HOT LEAD",
   follow_up: "FOLLOW UP",
@@ -47,7 +53,7 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
   const summary = useQuery({
     queryKey: ["call-ops", adminToken ? "pin" : "session"],
     queryFn: () => fetchSummary({ data: { adminToken } }),
-    refetchInterval: 30_000,
+    refetchInterval: 15_000,
   });
 
   const runSweep = useMutation({
@@ -172,16 +178,41 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
 
           <div className="space-y-2">
             <p className="flex items-center gap-1.5 text-xs font-bold">
-              <Smartphone className="size-3.5" /> অনুমোদিত ফোন
+              <Smartphone className="size-3.5" /> অনুমোদিত ফোন ও রেকর্ডিং ক্ষমতা
             </p>
+            <div className="flex flex-wrap gap-1.5">
+              <Badge variant="secondary">দুই পাশ: {data.recording.twoSided}</Badge>
+              <Badge variant="secondary">শুধু এজেন্ট: {data.recording.micOnly}</Badge>
+              <Badge variant="destructive">রেকর্ডিং সম্ভব নয়: {data.recording.blocked}</Badge>
+              <Badge variant="outline">যাচাই বাকি: {data.recording.untested}</Badge>
+            </div>
             {data.devices.length === 0 ? (
               <p className="text-xs text-muted-foreground">কোনো ফোন এখনো সাইন ইন করেনি।</p>
             ) : (
               <ul className="space-y-1 text-xs">
                 {data.devices.slice(0, 8).map((device) => (
                   <li key={device.id} className="flex flex-wrap items-center justify-between gap-2">
-                    <span>
-                      {device.label ?? "ফোন"} {device.appVersion ? `· v${device.appVersion}` : ""}
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <span>
+                        {device.label ?? "ফোন"} {device.appVersion ? `· v${device.appVersion}` : ""}
+                      </span>
+                      <Badge
+                        variant={
+                          device.recordingMode === "two_sided"
+                            ? "secondary"
+                            : device.recordingMode === "unavailable"
+                              ? "destructive"
+                              : "outline"
+                        }
+                        title={device.recordingNote ?? undefined}
+                      >
+                        {RECORDING_LABEL[device.recordingMode ?? ""] ?? "রেকর্ডিং যাচাই হয়নি"}
+                      </Badge>
+                      {device.recordingCheckedAt ? (
+                        <span className="text-[10px] text-muted-foreground">
+                          যাচাই: {new Date(device.recordingCheckedAt).toLocaleString("bn-BD")}
+                        </span>
+                      ) : null}
                     </span>
                     <span className="flex items-center gap-2 text-muted-foreground">
                       {device.revoked
