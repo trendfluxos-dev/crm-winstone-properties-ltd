@@ -179,6 +179,7 @@ object CallSyncQueue {
     const val KIND_RECORDING = "recording"
     const val KIND_OUTCOME = "outcome"
     const val KIND_REPORT_OPEN = "report_open"
+    const val KIND_INCOMING_CALL = "incoming_call"
 }
 
 class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
