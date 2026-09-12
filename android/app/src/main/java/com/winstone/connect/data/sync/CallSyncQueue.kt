@@ -119,6 +119,35 @@ object CallSyncQueue {
         )
     }
 
+    /**
+     * Reports one observed state of an *incoming* call. There is no lead id: the
+     * CRM matches the caller's number to a lead, and creates one when the number
+     * is new, so a customer's callback becomes a real lead.
+     */
+    fun queueIncomingCall(
+        context: Context,
+        callUid: String,
+        phoneNumber: String,
+        state: String,
+        durationSeconds: Int = 0,
+        recordingSupported: Boolean? = null,
+        recordingNote: String? = null,
+    ) {
+        enqueue(
+            context,
+            unique = "incoming_${callUid}_$state",
+            data = Data.Builder()
+                .putString(KEY_KIND, KIND_INCOMING_CALL)
+                .putString(KEY_CALL_UID, callUid)
+                .putString(KEY_PHONE, phoneNumber)
+                .putString(KEY_STATE, state)
+                .putInt(KEY_DURATION, durationSeconds)
+                .putString(KEY_REC_NOTE, recordingNote)
+                .apply { recordingSupported?.let { putBoolean(KEY_REC_SUPPORTED, it) } }
+                .build(),
+        )
+    }
+
     private fun enqueue(context: Context, unique: String, data: Data) {
         val request = OneTimeWorkRequestBuilder<CrmSyncWorker>()
             .setInputData(data)
