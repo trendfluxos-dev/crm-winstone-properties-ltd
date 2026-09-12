@@ -99,6 +99,13 @@
       "when": 1789236857471,
       "tag": "0013_enable_cron_net",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789237343960,
+      "tag": "0014_restrict_pin_hash_column",
+      "breakpoints": true
     }
   ]
 }
