@@ -114,6 +114,8 @@ function SystemBoard() {
 
       <ReportSheetPanel />
 
+      <TwilioStatusCard />
+
       <StaffAccountsTable />
 
       <ShiftSummaryPanel scope="it" />
