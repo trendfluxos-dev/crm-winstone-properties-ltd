@@ -1,26 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Clock, LogIn } from "lucide-react";
+import { Clock, LogIn, MessageCircle, PhoneCall, Timer, Users } from "lucide-react";
+import { useMemo } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
+import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
+import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
 import { QueueBoard } from "@/components/crm/QueueBoard";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
+import { WhatsappInbox } from "@/components/crm/WhatsappInbox";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CONNECTED_THRESHOLD_SECONDS, useSnapshot } from "@/lib/crm-data";
+import { formatTalkTime } from "@/lib/crm-format";
 import { useMyAccount, useSignOut } from "@/lib/session";
 
 export const Route = createFileRoute("/desk")({
   head: () => ({
     meta: [
-      { title: "My Desk — Winstone Connect" },
+      { title: "আমার ডেস্ক — Winstone Connect" },
       {
         name: "description",
         content:
-          "Your own lead queue, call history and profile settings inside the Winstone Connect tele-sales floor.",
+          "নিজের লিড তালিকা, কল রেকর্ড, হোয়াটসঅ্যাপ ইনবক্স আর নতুন লিড জমা দেওয়ার জায়গা — সব এক ডেস্কে।",
       },
-      { property: "og:title", content: "My Desk — Winstone Connect" },
+      { property: "og:title", content: "আমার ডেস্ক — Winstone Connect" },
       {
         property: "og:description",
-        content: "Work your assigned leads with one-tap dialling and WhatsApp deep links.",
+        content: "এক চাপে কল, হোয়াটসঅ্যাপ কথা আর নিজের লিড — Winstone Connect এজেন্ট ডেস্ক।",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -28,6 +35,77 @@ export const Route = createFileRoute("/desk")({
   }),
   component: DeskPage,
 });
+
+/** Live counters for the agent's own day. */
+function DeskStats() {
+  const { leads, calls, messages } = useSnapshot();
+
+  const stats = useMemo(() => {
+    const today = new Date().toDateString();
+    const todayCalls = calls.filter((c) => new Date(c.created_at).toDateString() === today);
+    const talk = todayCalls.reduce((sum, c) => sum + c.duration_seconds, 0);
+    return {
+      leads: leads.length,
+      pending: leads.filter((l) => l.status === "pending").length,
+      calls: todayCalls.length,
+      connected: todayCalls.filter((c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS).length,
+      talk,
+      whatsapp: messages.filter((m) => new Date(m.created_at).toDateString() === today).length,
+    };
+  }, [leads, calls, messages]);
+
+  return (
+    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <Tile
+        icon={<Users className="size-4" />}
+        label="আমার লিড"
+        value={String(stats.leads)}
+        hint={`${stats.pending}টি এখনো বাকি`}
+      />
+      <Tile
+        icon={<PhoneCall className="size-4" />}
+        label="আজকের কল"
+        value={String(stats.calls)}
+        hint={`${stats.connected}টিতে কথা হয়েছে`}
+      />
+      <Tile
+        icon={<Timer className="size-4" />}
+        label="আজকের কথার সময়"
+        value={formatTalkTime(stats.talk)}
+        hint="সব কল মিলিয়ে"
+      />
+      <Tile
+        icon={<MessageCircle className="size-4" />}
+        label="আজকের হোয়াটসঅ্যাপ"
+        value={String(stats.whatsapp)}
+        hint="মেসেজ আদান-প্রদান"
+      />
+    </dl>
+  );
+}
+
+function Tile({
+  icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  hint: string;
+}) {
+  return (
+    <div className="card-elevated p-3">
+      <dt className="flex items-center gap-2 text-xs text-muted-foreground">
+        {icon}
+        {label}
+      </dt>
+      <dd className="tabular mt-1 text-xl font-bold">{value}</dd>
+      <p className="text-[11px] text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
 
 function DeskPage() {
   const { account, scope, isPending } = useMyAccount();
