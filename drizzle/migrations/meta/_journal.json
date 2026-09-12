@@ -57,6 +57,13 @@
       "when": 1789226227747,
       "tag": "0007_stt_status_request_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789227251644,
+      "tag": "0008_profiles_insert_no_self_approval",
+      "breakpoints": true
     }
   ]
 }
