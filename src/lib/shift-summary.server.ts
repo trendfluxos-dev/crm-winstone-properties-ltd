@@ -183,6 +183,48 @@ export async function generateShiftSummary(at: Date = new Date()) {
 }
 
 /**
+ * Fills in summaries for windows that closed on earlier days, so the archive is
+ * not empty for days the schedule had not been running yet. A window with no
+ * agent updates at all is skipped — an empty summary would be misleading.
+ */
+export async function backfillShiftSummaries(days = 14, at: Date = new Date()) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const written: string[] = [];
+
+  for (let back = 0; back <= days; back += 1) {
+    const dayAt = new Date(at.getTime() - back * 24 * 60 * 60 * 1000);
+    const { dateKey, minutes } = dhakaParts(dayAt);
+    for (const shift of SHIFTS) {
+      const closedToday = back > 0 || minutes >= shift.summaryMinutes;
+      if (!closedToday) continue;
+      const windowStart = dhakaInstant(dateKey, shift.startMinutes);
+      const windowEnd = dhakaInstant(dateKey, shift.endMinutes);
+      const { lines, totals } = await buildShiftLines(
+        windowStart.toISOString(),
+        windowEnd.toISOString(),
+      );
+      if (totals.called === 0 && totals.reports === 0 && totals.followUps === 0) continue;
+      const { error } = await supabaseAdmin.from("shift_summaries").upsert(
+        {
+          shift_key: `${dateKey}:${shift.id}`,
+          shift_label: shift.label,
+          window_start: windowStart.toISOString(),
+          window_end: windowEnd.toISOString(),
+          generated_at: new Date().toISOString(),
+          hq_visible: true,
+          totals,
+          agents: lines,
+        },
+        { onConflict: "shift_key" },
+      );
+      if (error) throw new Error(error.message);
+      written.push(`${dateKey}:${shift.id}`);
+    }
+  }
+  return { written };
+}
+
+/**
  * On the 5th of each month, HQ's rolling month is cleared: the rows stay in the
  * IT Console for ever, they just stop showing in Executive HQ.
  */
