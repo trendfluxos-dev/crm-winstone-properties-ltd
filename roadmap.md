@@ -1,9 +1,10 @@
 # Winstone CRM Roadmap
 
-## In progress
-- [ ] Executive HQ shift summary export at 12:50 & 1:50 PM Dhaka + IT Console doc upload smart summary.
-- [ ] Reconnect Google Sheets in the new workspace (required for report sheet sync and doc summary integration).
+## Completed
+- [x] Executive HQ shift summary export at 12:50 & 13:50 PM Dhaka + IT Console doc upload smart summary.
+- [x] Reconnect Google Sheets in the new workspace.
+- [x] Build a voice transcription app route (`/voice-transcription`) with Web Audio recording + Bengali STT via server function + auto-scroll UI.
 
 ## Pending
-- [ ] Build a voice transcription app route with Web Audio recording + Bengali STT via server route (not Edge Function) + auto-scroll UI.
-- [ ] Re-run smoke tests after Google Sheets reconnect.
+- [ ] Verify voice transcription end-to-end with real microphone input on the published site.
+- [ ] Re-run smoke tests after publication.
