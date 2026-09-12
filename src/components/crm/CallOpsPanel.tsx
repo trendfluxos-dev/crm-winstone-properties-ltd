@@ -34,6 +34,7 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
   const fetchSummary = useServerFn(callOpsSummary);
   const sweep = useServerFn(runAnalysisSweep);
   const ack = useServerFn(acknowledgeAlert);
+  const revoke = useServerFn(revokeAgentDevice);
 
   const summary = useQuery({
     queryKey: ["call-ops", adminToken ? "pin" : "session"],
@@ -53,6 +54,15 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
   const clearAlert = useMutation({
     mutationFn: (alertId: string) => ack({ data: { adminToken, alertId } }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["call-ops"] }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const revokeDevice = useMutation({
+    mutationFn: (deviceId: string) => revoke({ data: { adminToken, deviceId } }),
+    onSuccess: () => {
+      toast.success("ফোনটির প্রবেশ বাতিল করা হলো");
+      void queryClient.invalidateQueries({ queryKey: ["call-ops"] });
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
