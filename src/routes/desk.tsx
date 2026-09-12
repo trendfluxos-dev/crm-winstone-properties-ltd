@@ -11,6 +11,7 @@ import { MyReports } from "@/components/crm/MyReports";
 import { PostCallReportGate } from "@/components/crm/PostCallReportGate";
 import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
 import { LeadImportDialog } from "@/components/crm/LeadImportDialog";
+import { LeadDeadlineBanner } from "@/components/crm/LeadDeadlineBanner";
 import { LeadTable } from "@/components/crm/LeadTable";
 import { OpenLeadsCard } from "@/components/crm/OpenLeadsCard";
 import { QueueBoard } from "@/components/crm/QueueBoard";
@@ -173,6 +174,7 @@ function DeskPage() {
     <AppShell>
       <div className="space-y-6">
         <PostCallReportGate />
+        <LeadDeadlineBanner />
         <MyProfileCard />
         <MyPhoneSetup />
         <div className="flex flex-wrap items-center justify-between gap-3">
