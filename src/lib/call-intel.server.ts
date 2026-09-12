@@ -111,7 +111,7 @@ export async function analyzeTranscript(
           content: [
             {
               type: "input_text",
-              text: "You analyse tele-sales phone calls for a Bangladeshi B2B sales team. Calls are in Bangla. Write summary_bullets, objections and deal_stage in Bangla, and keep the transcript in its original Bangla wording. Be concise and factual, never invent facts that are not in the transcript.",
+              text: "You analyse tele-sales phone calls for a Bangladeshi B2B sales team. Calls are in Bangla. Write summary_bullets, objections, deal_stage, intent and next_action in Bangla, and keep the transcript in its original Bangla wording. lead_category must be the single best-fitting category id for the call outcome. Be concise and factual, never invent facts that are not in the transcript.",
             },
           ],
         },
