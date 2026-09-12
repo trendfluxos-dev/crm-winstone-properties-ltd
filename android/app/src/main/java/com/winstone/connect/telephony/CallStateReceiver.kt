@@ -37,13 +37,14 @@ class CallStateReceiver : BroadcastReceiver() {
                 lastState = state
                 recorder(app).start(LiveCallLauncher.activeLeadId)
                 scope.launch {
-                    runCatching { WinstoneApi.postPresence(employeeId, "on_call") }
+                    runCatching { WinstoneApi.postPresence(employeeId, "on_call", leadId = LiveCallLauncher.activeLeadId) }
                 }
             }
 
             TelephonyManager.EXTRA_STATE_IDLE -> {
                 val wasOnCall = lastState == TelephonyManager.EXTRA_STATE_OFFHOOK
                 lastState = state
+                val endedLeadId = LiveCallLauncher.activeLeadId
                 val rec = recorder(app)
                 val twoSided = rec.twoSided
                 val captured = rec.stopAndGetFile()
@@ -59,7 +60,7 @@ class CallStateReceiver : BroadcastReceiver() {
                     )
                 }
                 scope.launch {
-                    runCatching { WinstoneApi.postPresence(employeeId, "idle") }
+                    runCatching { WinstoneApi.postPresence(employeeId, "idle", leadId = endedLeadId) }
                 }
                 LiveCallLauncher.clear()
             }
