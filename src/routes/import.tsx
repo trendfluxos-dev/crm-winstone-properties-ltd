@@ -68,6 +68,26 @@ function ImportScreen() {
   const [rows, setRows] = useState<CsvLeadRow[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
   const [autoAssign, setAutoAssign] = useState(true);
+  const [sheetUrl, setSheetUrl] = useState("");
+  const [sheetTabs, setSheetTabs] = useState<string[]>([]);
+  const [sheetTab, setSheetTab] = useState<string | null>(null);
+  const loadSheet = useServerFn(previewSheetLeads);
+
+  const sheetMutation = useMutation({
+    mutationFn: (tab: string | null) =>
+      loadSheet({ data: { adminToken: getAdminToken() ?? "", sheetUrl, tab } }),
+    onSuccess: (result) => {
+      setSheetTabs(result.tabs);
+      setSheetTab(result.tab);
+      setRows(result.rows);
+      setFileName(`Google Sheet · ${result.tab}`);
+      if (result.rows.length === 0)
+        toast.error("এই ট্যাবে নাম ও ফোন নম্বরসহ কোনো সারি পাওয়া যায়নি");
+      else toast.success(`${result.rows.length}টি লিড প্রিভিউতে এলো`);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
 
   const load = (text: string, label: string) => {
     const parsed = toLeadRows(parseCsv(text));
