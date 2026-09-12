@@ -211,7 +211,10 @@ export async function transcribeWithAdapter(
   return {
     transcript: "",
     provider: order[0]!,
-    model: order[0] === "sarvam" ? (process.env["SARVAM_STT_MODEL"] ?? "saaras:v4") : GEMINI_STT_MODEL,
+    model:
+      order[0] === "sarvam"
+        ? (process.env["SARVAM_STT_MODEL"] ?? "saaras:v4")
+        : GATEWAY_MODELS[order[0] as "gemini" | "openai"],
     language: null,
     status: "failed",
     requestId: null,
