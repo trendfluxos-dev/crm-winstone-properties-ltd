@@ -270,6 +270,8 @@ export async function ingestRecording(input: {
   clientUploadId?: string | null;
   recorderSource?: string | null;
   deviceId?: string | null;
+  callSource?: string | null;
+  callStartedAt?: string | null;
 }): Promise<string> {
   const { data: lead, error: leadError } = await supabaseAdmin
     .from("leads")
@@ -279,7 +281,11 @@ export async function ingestRecording(input: {
   if (leadError || !lead) throw new Error(leadError?.message ?? "Lead not found");
 
   const bytes = Uint8Array.from(atob(input.audioBase64), (c) => c.charCodeAt(0));
-  const path = `uploads/${input.leadId}/${Date.now()}.${input.fileExtension}`;
+  const agentId = input.agentId ?? lead.assigned_to;
+  const fileName = `${Date.now()}.${input.fileExtension}`;
+  // agent/lead/file keeps every object inside an ownership-shaped prefix.
+  const path = `uploads/${agentId ?? "unassigned"}/${input.leadId}/${fileName}`;
+  const checksum = await sha256Hex(bytes);
 
   const { error: uploadError } = await supabaseAdmin.storage
     .from(AUDIO_BUCKET)
@@ -290,7 +296,7 @@ export async function ingestRecording(input: {
     .from("call_recordings")
     .insert({
       lead_id: input.leadId,
-      agent_id: input.agentId ?? lead.assigned_to,
+      agent_id: agentId,
       phone_number: lead.phone_number,
       call_direction: input.direction,
       duration_seconds: input.durationSeconds,
@@ -301,6 +307,19 @@ export async function ingestRecording(input: {
       recorder_source: input.recorderSource ?? null,
       device_id: input.deviceId ?? null,
       analysis_status: "pending",
+      call_source: input.callSource ?? "android_sim",
+      call_status: "completed",
+      external_call_id: input.clientUploadId ?? null,
+      started_at: input.callStartedAt ?? null,
+      finished_at: new Date().toISOString(),
+      recording_status: "available",
+      upload_status: "uploaded",
+      storage_bucket: AUDIO_BUCKET,
+      storage_path: path,
+      file_name: fileName,
+      mime_type: mimeFor(input.fileExtension),
+      file_size_bytes: bytes.byteLength,
+      checksum,
     })
     .select("id")
     .single();
@@ -316,7 +335,19 @@ export async function ingestRecording(input: {
     })
     .eq("id", input.leadId);
 
+  // Retry-safe job rows: upload done, transcription + AI queued.
+  const { queueCallJobs } = await import("@/lib/call-jobs.server");
+  await queueCallJobs(inserted.id, true);
+
   return inserted.id;
+}
+
+/** Stable checksum so a re-uploaded file is recognisable as the same audio. */
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes as unknown as ArrayBuffer);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function mimeFor(ext: string): string {
