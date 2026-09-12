@@ -59,6 +59,31 @@ object WinstoneAgentApi {
         }
     }
 
+    /**
+     * Cloud call through Twilio: Twilio rings this agent's own phone and then
+     * bridges the customer, so the CRM records the call and (when allowed) the
+     * recording by itself. The server enforces the report lock and opt-outs.
+     */
+    suspend fun twilioCall(leadId: String): JSONObject = withContext(Dispatchers.IO) {
+        val payload = JSONObject().apply { put("lead_id", leadId) }
+        val req = Request.Builder()
+            .url(WinstoneApi.BASE_URL + "/api/public/agent/twilio-call")
+            .header("x-device-token", AgentSession.deviceToken.orEmpty())
+            .post(payload.toString().toRequestBody(JSON))
+            .build()
+        client.newCall(req).execute().use { res ->
+            val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
+            if (!res.isSuccessful) {
+                error(
+                    body.optString("reason").ifBlank {
+                        body.optString("error", "Twilio কল শুরু করা যায়নি (HTTP ${res.code})")
+                    },
+                )
+            }
+            body
+        }
+    }
+
     data class Coach(
         val summary: String,
         val strengths: List<String>,
