@@ -215,7 +215,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         durationSeconds = inputData.getInt(CallSyncQueue.KEY_DURATION, 0),
                         agentPhone = inputData.getString(CallSyncQueue.KEY_PHONE),
                         recordingSupported =
-                            if (inputData.hasKeyWithValueOfType<Boolean>(CallSyncQueue.KEY_REC_SUPPORTED))
+                            if (inputData.keyValueMap.containsKey(CallSyncQueue.KEY_REC_SUPPORTED))
                                 inputData.getBoolean(CallSyncQueue.KEY_REC_SUPPORTED, false)
                             else null,
                         recordingNote = inputData.getString(CallSyncQueue.KEY_REC_NOTE),
