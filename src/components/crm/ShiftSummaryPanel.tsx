@@ -1,14 +1,80 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, Loader2, RefreshCw } from "lucide-react";
+import { CalendarClock, Download, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import type { ShiftSummaryRow } from "@/lib/shift-summary.server";
 import { generateShiftSummaryNow, shiftSummaries } from "@/lib/shift-summary.functions";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
 function dhaka(iso: string) {
   return new Date(iso).toLocaleString("bn-BD", { timeZone: "Asia/Dhaka" });
+}
+
+const EXPORT_HEADER = [
+  "শিফট",
+  "উইন্ডো শেষ",
+  "এজেন্ট",
+  "আইডি",
+  "অ্যাসাইন লিড",
+  "কল",
+  "ধরেছে",
+  "আপডেট",
+  "বাকি",
+  "ফলো-আপ",
+  "ক্যাটাগরি",
+];
+
+function csvCell(value: string | number) {
+  const text = String(value ?? "");
+  // Keep spreadsheet formulas inert.
+  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+/** One CSV of the given summaries, one line per agent per shift. */
+function buildCsv(rows: ShiftSummaryRow[]) {
+  const lines = [EXPORT_HEADER.map(csvCell).join(",")];
+  for (const row of rows) {
+    for (const agent of row.agents) {
+      lines.push(
+        [
+          row.shift_label,
+          dhaka(row.window_end),
+          agent.name,
+          agent.employeeId ?? "",
+          agent.assigned,
+          agent.called,
+          agent.connected,
+          agent.reports,
+          agent.pending,
+          agent.followUps,
+          Object.entries(agent.categories)
+            .map(([label, count]) => `${label} ${count}`)
+            .join(" | "),
+        ]
+          .map(csvCell)
+          .join(","),
+      );
+    }
+  }
+  return `\ufeff${lines.join("\r\n")}`;
+}
+
+function downloadCsv(rows: ShiftSummaryRow[], fileName: string) {
+  if (rows.length === 0) {
+    toast.error("এক্সপোর্ট করার মতো কিছু নেই");
+    return;
+  }
+  const blob = new Blob([buildCsv(rows)], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+  toast.success("সামারি ফাইল নামানো হয়েছে");
 }
 
 /**
