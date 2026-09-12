@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.winstone.connect.data.sync.CallSyncQueue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +28,9 @@ object LiveCallLauncher {
 
     /** Remember which lead we are dialling so the post-call upload can attach it. */
     @Volatile var activeLeadId: String? = null
+
+    /** Stable id for the current call attempt; every state update carries it. */
+    @Volatile var activeCallUid: String? = null
     @Volatile var activePhone: String? = null
     @Volatile var activeAgentId: String? = null
     @Volatile var activeLeadName: String? = null
@@ -107,6 +111,7 @@ object LiveCallLauncher {
     /** Called after the outcome sheet is submitted or dismissed. */
     fun clear() {
         activeLeadId = null; activePhone = null; activeAgentId = null; activeLeadName = null
+        activeCallUid = null
         connectedAt = 0L; recording = false; recordingIssue = null
         _phase.value = CallPhase.Idle
     }
