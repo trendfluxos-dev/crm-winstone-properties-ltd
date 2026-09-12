@@ -34,6 +34,7 @@ export type Database = {
           recording_note: string | null
           recording_tested: boolean
           revoked_at: string | null
+          sim_verified_at: string | null
           status: string
           token_hash: string
         }
@@ -56,6 +57,7 @@ export type Database = {
           recording_note?: string | null
           recording_tested?: boolean
           revoked_at?: string | null
+          sim_verified_at?: string | null
           status?: string
           token_hash: string
         }
@@ -78,6 +80,7 @@ export type Database = {
           recording_note?: string | null
           recording_tested?: boolean
           revoked_at?: string | null
+          sim_verified_at?: string | null
           status?: string
           token_hash?: string
         }
@@ -1100,6 +1103,8 @@ export type Database = {
           presence: Database["public"]["Enums"]["agent_presence"]
           requested_role: Database["public"]["Enums"]["app_role"]
           role: Database["public"]["Enums"]["app_role"]
+          sim_bound_at: string | null
+          sim_number: string | null
           status: string | null
           user_id: string | null
         }
@@ -1119,6 +1124,8 @@ export type Database = {
           presence?: Database["public"]["Enums"]["agent_presence"]
           requested_role?: Database["public"]["Enums"]["app_role"]
           role?: Database["public"]["Enums"]["app_role"]
+          sim_bound_at?: string | null
+          sim_number?: string | null
           status?: string | null
           user_id?: string | null
         }
@@ -1138,6 +1145,8 @@ export type Database = {
           presence?: Database["public"]["Enums"]["agent_presence"]
           requested_role?: Database["public"]["Enums"]["app_role"]
           role?: Database["public"]["Enums"]["app_role"]
+          sim_bound_at?: string | null
+          sim_number?: string | null
           status?: string | null
           user_id?: string | null
         }

@@ -208,6 +208,14 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
                       >
                         {RECORDING_LABEL[device.recordingMode ?? ""] ?? "রেকর্ডিং যাচাই হয়নি"}
                       </Badge>
+                      {device.agentSim ? (
+                        <Badge variant={device.simMatched ? "secondary" : "outline"}>
+                          সিম {device.agentSim}
+                          {device.agentName ? ` · ${device.agentName}` : ""}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">সিম যুক্ত হয়নি</Badge>
+                      )}
                       {device.recordingCheckedAt ? (
                         <span className="text-[10px] text-muted-foreground">
                           যাচাই: {new Date(device.recordingCheckedAt).toLocaleString("bn-BD")}

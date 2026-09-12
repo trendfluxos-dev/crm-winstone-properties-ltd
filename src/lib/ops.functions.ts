@@ -22,7 +22,7 @@ export const callOpsSummary = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const since = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
-    const [reports, recordings, followUps, devices, alerts, leads, jobs, syncEvents] =
+    const [reports, recordings, followUps, devices, alerts, leads, jobs, syncEvents, agentRows] =
       await Promise.all([
       supabaseAdmin
         .from("call_reports")
@@ -38,7 +38,7 @@ export const callOpsSummary = createServerFn({ method: "POST" })
       supabaseAdmin
         .from("agent_devices")
         .select(
-          "id, profile_id, device_label, app_version, last_seen_at, revoked_at, model, manufacturer, android_version, recording_mode, recording_capable, recording_tested, recording_note, recording_checked_at",
+          "id, profile_id, device_label, app_version, phone_number, last_seen_at, revoked_at, model, manufacturer, android_version, recording_mode, recording_capable, recording_tested, recording_note, recording_checked_at",
         ),
       supabaseAdmin
         .from("system_alerts")
@@ -55,7 +55,14 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         .from("sync_events")
         .select("id, event_type, status, created_at")
         .gte("created_at", since),
+      supabaseAdmin.from("profiles").select("id, name, sim_number, sim_bound_at"),
     ]);
+
+    const simKeyOf = (value: string | null) => {
+      const digits = (value ?? "").replace(/\D+/g, "");
+      return digits.length >= 10 ? digits.slice(-10) : null;
+    };
+    const agentById = new Map((agentRows.data ?? []).map((a) => [a.id, a]));
 
     const count = <T>(rows: T[] | null, predicate: (row: T) => boolean) =>
       (rows ?? []).filter(predicate).length;
@@ -114,6 +121,12 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         recordingTested: d.recording_tested,
         recordingNote: d.recording_note,
         recordingCheckedAt: d.recording_checked_at,
+        agentName: agentById.get(d.profile_id)?.name ?? null,
+        agentSim: agentById.get(d.profile_id)?.sim_number ?? null,
+        deviceSim: d.phone_number,
+        simMatched:
+          simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) !== null &&
+          simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) === simKeyOf(d.phone_number),
       })),
       recording: {
         twoSided: count(
