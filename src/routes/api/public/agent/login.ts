@@ -104,7 +104,7 @@ export const Route = createFileRoute("/api/public/agent/login")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: profile } = await supabaseAdmin
           .from("profiles")
-          .select("id, name, employee_id, phone, role, is_active, approval_status")
+          .select("id, name, employee_id, phone, sim_number, role, is_active, approval_status")
           .eq("user_id", session.user.id)
           .maybeSingle();
 
