@@ -1,12 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, FileAudio, Loader2 } from "lucide-react";
+import { Download, FileAudio, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { dayCallExport, type DayCallRow } from "@/lib/day-export.functions";
 import { getAdminToken } from "@/lib/local-session";
+import { recordingDocSync } from "@/lib/recording-doc.functions";
 
 const HEADER = [
   "সময় (ঢাকা)",
@@ -76,6 +77,18 @@ export function DayCallExportPanel() {
   const run = useServerFn(dayCallExport);
   const [dateKey, setDateKey] = useState(todayDhaka());
   const [result, setResult] = useState<Result | null>(null);
+  const syncDoc = useServerFn(recordingDocSync);
+  const [docLink, setDocLink] = useState<string | null>(null);
+
+  const toDoc = useMutation({
+    mutationFn: () => syncDoc({ data: { adminToken: getAdminToken(), dateKey } }),
+    onSuccess: (data) => {
+      setDocLink(data.docUrl);
+      toast.success(`${data.calls}টি কল · ${data.recordings}টি রেকর্ডিং Google Doc-এ লেখা হয়েছে`);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
 
   const build = useMutation({
     mutationFn: () => run({ data: { adminToken: getAdminToken(), dateKey } }),
@@ -113,12 +126,33 @@ export function DayCallExportPanel() {
           {build.isPending ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
           সামারি ও রেকর্ডিং
         </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={toDoc.isPending}
+          onClick={() => toDoc.mutate()}
+        >
+          {toDoc.isPending ? <Loader2 className="size-4 animate-spin" /> : <FileText className="size-4" />}
+          Google Doc
+        </Button>
       </header>
 
       <p className="mt-1 text-xs text-muted-foreground">
         ওই দিনের প্রতিটি কল, সঠিক সংখ্যা ও কথার সময়, আর প্রতিটি রেকর্ডিংয়ের ৬ ঘণ্টার জন্য সাইন করা শোনার লিংক
-        একটি ফাইলে নামে। যে কলের অডিও জমা নেই, সেখানে লিংকের বদলে আসল অবস্থাই লেখা থাকে।
+        একটি ফাইলে নামে। যে কলের অডিও জমা নেই, সেখানে লিংকের বদলে আসল অবস্থাই লেখা থাকে। Google Doc-এ প্রতিদিনের
+        তালিকা যায় — ফাইলের নাম: তারিখ_এজেন্ট_লিড_নম্বর_কল-নম্বর।
       </p>
+
+      {docLink && (
+        <a
+          href={docLink}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-block text-xs font-semibold text-primary underline"
+        >
+          {dateKey} তারিখের Google Doc খুলুন
+        </a>
+      )}
 
       {result && (
         <div className="mt-3 grid gap-2 sm:grid-cols-3">

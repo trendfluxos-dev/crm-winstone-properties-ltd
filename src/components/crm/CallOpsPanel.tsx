@@ -181,10 +181,10 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
               <Smartphone className="size-3.5" /> অনুমোদিত ফোন ও রেকর্ডিং ক্ষমতা
             </p>
             <div className="flex flex-wrap gap-1.5">
-              <Badge variant="secondary">দুই পাশ: {data.recording.twoSided}</Badge>
-              <Badge variant="secondary">শুধু এজেন্ট: {data.recording.micOnly}</Badge>
-              <Badge variant="destructive">রেকর্ডিং সম্ভব নয়: {data.recording.blocked}</Badge>
-              <Badge variant="outline">যাচাই বাকি: {data.recording.untested}</Badge>
+              <Badge variant="secondary">দুই পাশ: {data.recording?.twoSided ?? 0}</Badge>
+              <Badge variant="secondary">শুধু এজেন্ট: {data.recording?.micOnly ?? 0}</Badge>
+              <Badge variant="destructive">রেকর্ডিং সম্ভব নয়: {data.recording?.blocked ?? 0}</Badge>
+              <Badge variant="outline">যাচাই বাকি: {data.recording?.untested ?? 0}</Badge>
             </div>
             {data.devices.length === 0 ? (
               <p className="text-xs text-muted-foreground">কোনো ফোন এখনো সাইন ইন করেনি।</p>
