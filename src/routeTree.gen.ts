@@ -53,6 +53,8 @@ import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public
 import { Route as ApiPublicTwilioBridgeRouteImport } from './routes/api/public/twilio/bridge'
 import { Route as ApiPublicTwilioCallStatusRouteImport } from './routes/api/public/twilio/call-status'
 import { Route as ApiPublicTwilioRecordingRouteImport } from './routes/api/public/twilio/recording'
+import { Route as ApiPublicTwilioRelayRouteImport } from './routes/api/public/twilio/relay'
+import { Route as ApiPublicTwilioRelayActionRouteImport } from './routes/api/public/twilio/relay-action'
 import { Route as ApiPublicTwilioVoiceRouteImport } from './routes/api/public/twilio/voice'
 import { Route as ApiPublicTwilioWhatsappRouteImport } from './routes/api/public/twilio/whatsapp'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp/webhook'
@@ -284,6 +286,17 @@ const ApiPublicTwilioRecordingRoute =
     path: '/api/public/twilio/recording',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicTwilioRelayRoute = ApiPublicTwilioRelayRouteImport.update({
+  id: '/api/public/twilio/relay',
+  path: '/api/public/twilio/relay',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicTwilioRelayActionRoute =
+  ApiPublicTwilioRelayActionRouteImport.update({
+    id: '/api/public/twilio/relay-action',
+    path: '/api/public/twilio/relay-action',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicTwilioVoiceRoute = ApiPublicTwilioVoiceRouteImport.update({
   id: '/api/public/twilio/voice',
   path: '/api/public/twilio/voice',
@@ -346,6 +359,8 @@ export interface FileRoutesByFullPath {
   '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
   '/api/public/twilio/call-status': typeof ApiPublicTwilioCallStatusRoute
   '/api/public/twilio/recording': typeof ApiPublicTwilioRecordingRoute
+  '/api/public/twilio/relay': typeof ApiPublicTwilioRelayRoute
+  '/api/public/twilio/relay-action': typeof ApiPublicTwilioRelayActionRoute
   '/api/public/twilio/voice': typeof ApiPublicTwilioVoiceRoute
   '/api/public/twilio/whatsapp': typeof ApiPublicTwilioWhatsappRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -395,6 +410,8 @@ export interface FileRoutesByTo {
   '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
   '/api/public/twilio/call-status': typeof ApiPublicTwilioCallStatusRoute
   '/api/public/twilio/recording': typeof ApiPublicTwilioRecordingRoute
+  '/api/public/twilio/relay': typeof ApiPublicTwilioRelayRoute
+  '/api/public/twilio/relay-action': typeof ApiPublicTwilioRelayActionRoute
   '/api/public/twilio/voice': typeof ApiPublicTwilioVoiceRoute
   '/api/public/twilio/whatsapp': typeof ApiPublicTwilioWhatsappRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -445,6 +462,8 @@ export interface FileRoutesById {
   '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
   '/api/public/twilio/call-status': typeof ApiPublicTwilioCallStatusRoute
   '/api/public/twilio/recording': typeof ApiPublicTwilioRecordingRoute
+  '/api/public/twilio/relay': typeof ApiPublicTwilioRelayRoute
+  '/api/public/twilio/relay-action': typeof ApiPublicTwilioRelayActionRoute
   '/api/public/twilio/voice': typeof ApiPublicTwilioVoiceRoute
   '/api/public/twilio/whatsapp': typeof ApiPublicTwilioWhatsappRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
@@ -496,6 +515,8 @@ export interface FileRouteTypes {
     | '/api/public/twilio/bridge'
     | '/api/public/twilio/call-status'
     | '/api/public/twilio/recording'
+    | '/api/public/twilio/relay'
+    | '/api/public/twilio/relay-action'
     | '/api/public/twilio/voice'
     | '/api/public/twilio/whatsapp'
     | '/api/public/whatsapp/webhook'
@@ -545,6 +566,8 @@ export interface FileRouteTypes {
     | '/api/public/twilio/bridge'
     | '/api/public/twilio/call-status'
     | '/api/public/twilio/recording'
+    | '/api/public/twilio/relay'
+    | '/api/public/twilio/relay-action'
     | '/api/public/twilio/voice'
     | '/api/public/twilio/whatsapp'
     | '/api/public/whatsapp/webhook'
@@ -594,6 +617,8 @@ export interface FileRouteTypes {
     | '/api/public/twilio/bridge'
     | '/api/public/twilio/call-status'
     | '/api/public/twilio/recording'
+    | '/api/public/twilio/relay'
+    | '/api/public/twilio/relay-action'
     | '/api/public/twilio/voice'
     | '/api/public/twilio/whatsapp'
     | '/api/public/whatsapp/webhook'
@@ -644,6 +669,8 @@ export interface RootRouteChildren {
   ApiPublicTwilioBridgeRoute: typeof ApiPublicTwilioBridgeRoute
   ApiPublicTwilioCallStatusRoute: typeof ApiPublicTwilioCallStatusRoute
   ApiPublicTwilioRecordingRoute: typeof ApiPublicTwilioRecordingRoute
+  ApiPublicTwilioRelayRoute: typeof ApiPublicTwilioRelayRoute
+  ApiPublicTwilioRelayActionRoute: typeof ApiPublicTwilioRelayActionRoute
   ApiPublicTwilioVoiceRoute: typeof ApiPublicTwilioVoiceRoute
   ApiPublicTwilioWhatsappRoute: typeof ApiPublicTwilioWhatsappRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
@@ -959,6 +986,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTwilioRecordingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/twilio/relay': {
+      id: '/api/public/twilio/relay'
+      path: '/api/public/twilio/relay'
+      fullPath: '/api/public/twilio/relay'
+      preLoaderRoute: typeof ApiPublicTwilioRelayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/twilio/relay-action': {
+      id: '/api/public/twilio/relay-action'
+      path: '/api/public/twilio/relay-action'
+      fullPath: '/api/public/twilio/relay-action'
+      preLoaderRoute: typeof ApiPublicTwilioRelayActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/twilio/voice': {
       id: '/api/public/twilio/voice'
       path: '/api/public/twilio/voice'
@@ -1029,6 +1070,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicTwilioBridgeRoute: ApiPublicTwilioBridgeRoute,
   ApiPublicTwilioCallStatusRoute: ApiPublicTwilioCallStatusRoute,
   ApiPublicTwilioRecordingRoute: ApiPublicTwilioRecordingRoute,
+  ApiPublicTwilioRelayRoute: ApiPublicTwilioRelayRoute,
+  ApiPublicTwilioRelayActionRoute: ApiPublicTwilioRelayActionRoute,
   ApiPublicTwilioVoiceRoute: ApiPublicTwilioVoiceRoute,
   ApiPublicTwilioWhatsappRoute: ApiPublicTwilioWhatsappRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
