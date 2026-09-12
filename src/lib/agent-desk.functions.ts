@@ -48,6 +48,59 @@ export const submitMyLead = createServerFn({ method: "POST" })
     return { leadId: created.id };
   });
 
+const OpenLeadsInput = z.object({
+  adminToken: z.string().nullable().optional(),
+  limit: z.number().int().min(1).max(100).default(50),
+});
+
+/** Leads nobody has taken yet — an agent may pull these into their own queue. */
+export const listOpenLeads = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => OpenLeadsInput.parse(input))
+  .handler(async ({ data }) => {
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    if (caller.scope === "none") throw new Error("অনুমোদিত অ্যাকাউন্ট দিয়ে সাইন ইন করুন");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: leads, error } = await supabaseAdmin
+      .from("leads")
+      .select("id, name, phone_number, company, status, source, created_at")
+      .is("assigned_to", null)
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return leads ?? [];
+  });
+
+const ClaimInput = z.object({
+  adminToken: z.string().nullable().optional(),
+  leadId: z.string().uuid(),
+});
+
+/** The agent takes an untaken lead into their own account. No app needed. */
+export const claimLead = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => ClaimInput.parse(input))
+  .handler(async ({ data }) => {
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    if (caller.scope === "none" || !caller.profile) {
+      throw new Error("অনুমোদিত অ্যাকাউন্ট দিয়ে সাইন ইন করুন");
+    }
+    const me = caller.profile.id;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: updated, error } = await supabaseAdmin
+      .from("leads")
+      .update({ assigned_to: me, assigned_agent_id: me })
+      .eq("id", data.leadId)
+      .is("assigned_to", null)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!updated) throw new Error("এই লিড আগেই অন্য কেউ নিয়ে নিয়েছে");
+    return { leadId: updated.id };
+  });
+
 const MyMessageInput = z.object({
   adminToken: z.string().nullable().optional(),
   leadId: z.string().uuid(),

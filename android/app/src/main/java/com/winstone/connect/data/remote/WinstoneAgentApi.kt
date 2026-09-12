@@ -22,6 +22,37 @@ object WinstoneAgentApi {
         .build()
     private val JSON = "application/json; charset=utf-8".toMediaType()
 
+    data class AgentIdentity(
+        val employeeId: String,
+        val agentId: String,
+        val name: String,
+        val phone: String?,
+    )
+
+    /** CRM credentials sign-in: email + password, exactly like the web desk. */
+    suspend fun signIn(email: String, password: String): AgentIdentity = withContext(Dispatchers.IO) {
+        val payload = JSONObject().apply {
+            put("email", email.trim())
+            put("password", password)
+        }
+        val req = Request.Builder()
+            .url(WinstoneApi.BASE_URL + "/api/public/agent/login")
+            .header("x-ingest-secret", BuildConfig.INGEST_SECRET)
+            .post(payload.toString().toRequestBody(JSON))
+            .build()
+        client.newCall(req).execute().use { res ->
+            val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
+            if (!res.isSuccessful) error(body.optString("error", "সাইন ইন করা যায়নি (HTTP ${res.code})"))
+            val agent = body.optJSONObject("agent") ?: error("সাইন ইন করা যায়নি")
+            AgentIdentity(
+                employeeId = agent.optString("employee_id"),
+                agentId = agent.optString("id"),
+                name = agent.optString("name"),
+                phone = agent.optString("phone").takeIf { it.isNotBlank() && it != "null" },
+            )
+        }
+    }
+
     data class Coach(
         val summary: String,
         val strengths: List<String>,
