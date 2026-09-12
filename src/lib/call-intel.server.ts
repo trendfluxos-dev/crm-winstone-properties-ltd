@@ -20,8 +20,14 @@ export async function transcribeAudio(bytes: Uint8Array, filename: string): Prom
   const { sarvamConfigured, sarvamTranscribe } = await import("@/lib/sarvam-stt.server");
 
   if (sarvamConfigured()) {
-    const text = await sarvamTranscribe(bytes, filename, mimeFor(ext));
-    if (text) return text;
+    try {
+      const text = await sarvamTranscribe(bytes, filename, mimeFor(ext));
+      if (text) return text;
+    } catch (error) {
+      // Never block the call pipeline on the external STT account: log a safe
+      // reason (no key material) and continue with the built-in model.
+      console.warn("Sarvam STT unavailable, using built-in transcription:", (error as Error).message);
+    }
   }
 
   const form = new FormData();
