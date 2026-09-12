@@ -176,6 +176,7 @@ private fun ReportSheet(notes: String) {
 
     var reportId by remember { mutableStateOf<String?>(null) }
     var category by remember { mutableStateOf("") }
+    var summary by remember { mutableStateOf("") }
     var note by remember { mutableStateOf(notes) }
     var reason by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
@@ -203,13 +204,13 @@ private fun ReportSheet(notes: String) {
         }
     }
 
-    val needsSchedule = category == "follow_up" || category == "callback"
+    // প্রতিটি কলে: ক্যাটাগরি + সারাংশ + নোট + ফলো-আপ তারিখ — সবই বাধ্যতামূলক
     val needsReason = category == "not_interested" || category == "wrong_number"
-    val needsNote = needsSchedule || category == "hot_lead"
     val ready = category.isNotBlank() &&
-        (!needsSchedule || (date.length == 10 && time.length == 5)) &&
-        (!needsReason || reason.trim().length > 1) &&
-        (!needsNote || note.trim().length > 1)
+        date.length == 10 && time.length == 5 &&
+        summary.trim().length > 1 &&
+        note.trim().length > 1 &&
+        (!needsReason || reason.trim().length > 1)
 
     ModalBottomSheet(onDismissRequest = { /* বাধ্যতামূলক — বন্ধ করা যাবে না */ }, sheetState = sheet) {
         Column(Modifier.padding(20.dp)) {
