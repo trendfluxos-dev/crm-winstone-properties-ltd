@@ -168,14 +168,33 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
   const filename = recording.audio_url.split("/").pop() ?? "recording.mp3";
 
   try {
-    const transcript = await transcribeAudio(bytes, filename);
-    if (!transcript) return "empty";
+    const stt = await transcribeCall(bytes, filename);
+    const provider = {
+      stt_provider: stt.provider,
+      stt_model: stt.model,
+      stt_language: stt.language,
+      stt_fallback_used: stt.fallbackUsed,
+      stt_error_code: stt.errorCode,
+      stt_error_message: stt.errorMessage,
+    };
 
+    if (stt.status === "failed" || !stt.transcript) {
+      await supabaseAdmin
+        .from("call_recordings")
+        .update({ ...provider, sync_status: stt.status === "failed" ? "failed" : recording.sync_status })
+        .eq("id", recordingId);
+      if (stt.status === "failed") throw new Error(stt.errorMessage ?? "Transcription failed");
+      return "empty";
+    }
+
+    const transcript = stt.transcript;
     const analysis = await analyzeTranscript(transcript, recording.duration_seconds);
 
     await supabaseAdmin
       .from("call_recordings")
       .update({
+        ...provider,
+        transcribed_at: new Date().toISOString(),
         transcription_text: analysis.timestamped_transcript || transcript,
         ai_summary: analysis.summary_bullets.map((b) => `• ${b}`).join("\n"),
         sentiment: analysis.sentiment,
