@@ -232,6 +232,9 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
         sentiment: analysis.sentiment,
         customer_objections: analysis.objections,
         deal_stage: analysis.deal_stage,
+        ai_intent: analysis.intent,
+        ai_lead_category: analysis.lead_category,
+        ai_next_action: analysis.next_action,
         sync_status: recording.is_two_sided ? "verified" : "uploaded",
       })
       .eq("id", recordingId);
