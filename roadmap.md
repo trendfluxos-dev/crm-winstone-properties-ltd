@@ -24,8 +24,9 @@
 - [x] IT Console approves / rejects new accounts and keeps system configuration
 
 ## Queued
-- [ ] Android: build APK with WinstoneApi.kt + LiveCallLauncher.kt + WinstoneRules.kt wired in;
-      place at public/downloads/winstone-connect.apk
+- [x] Android agent app: real Gradle project at android/ (Compose desk mirroring /desk: stats,
+      lead queue, call log, WhatsApp inbox, AI coach, new-lead form), SIM call + call recording,
+      WorkManager upload queue; APK built and served from the web CRM download button
 - [ ] Install APK on a real phone, place a live call, confirm recording + WhatsApp log land in the
       agent workspace (needs the physical handset — cannot be done from this environment)
 ---ADD---
