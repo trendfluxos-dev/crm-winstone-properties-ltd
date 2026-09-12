@@ -286,17 +286,30 @@ private fun LeadCard(
             fontSize = 12.sp,
         )
         lead.notes?.let { Text(it, fontSize = 12.sp, color = WinInkMuted) }
+        Spacer(Modifier.height(6.dp))
+        Text(recordingLine, fontSize = 12.sp, color = recordingColor)
+        if (blocked) {
+            recordingReason?.let { Text(it, fontSize = 10.sp, color = WinInkMuted) }
+        }
         Spacer(Modifier.height(10.dp))
         androidx.compose.material3.Button(
             onClick = onCall,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("কল করুন") }
+        ) { Text(if (blocked) "কল করুন (রেকর্ডিং ছাড়া)" else "কল করুন") }
         Spacer(Modifier.height(6.dp))
         OutlinedButton(
             onClick = onTwilioCall,
-            enabled = !twilioBusy,
+            enabled = !twilioBusy && !blocked,
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(if (twilioBusy) "Twilio কল শুরু হচ্ছে…" else "Twilio কল (রেকর্ড হবে)") }
+        ) {
+            Text(
+                when {
+                    blocked -> "রেকর্ড কল বন্ধ"
+                    twilioBusy -> "Twilio কল শুরু হচ্ছে…"
+                    else -> "Twilio কল (রেকর্ড হবে)"
+                },
+            )
+        }
     }
 }
 
