@@ -76,6 +76,7 @@ async function readPayload(request: Request) {
     phone_number: text("phone_number"),
     agent_id: text("agent_id"),
     employee_id: text("employee_id"),
+    sim_number: text("sim_number"),
     lead_name: text("lead_name"),
     client_upload_id: text("client_upload_id"),
     recorder_source: text("recorder_source") ?? "unknown",
