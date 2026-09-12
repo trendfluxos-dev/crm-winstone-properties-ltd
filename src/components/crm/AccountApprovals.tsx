@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { decideAccount, listAccountRequests } from "@/lib/accounts.functions";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "অপেক্ষমাণ",
+  approved: "অনুমোদিত",
+  rejected: "বাতিল",
+};
+
 /** IT Console / HQ approval list for new agent and coordinator accounts. */
 export function AccountApprovals() {
   const adminToken = useAdminToken();
@@ -24,7 +30,7 @@ export function AccountApprovals() {
     mutationFn: (input: { profileId: string; decision: "approve_agent" | "approve_coordinator" | "reject" }) =>
       decide({ data: { adminToken: getAdminToken() ?? "", ...input } }),
     onSuccess: () => {
-      toast.success("Account updated");
+      toast.success("অ্যাকাউন্ট হালনাগাদ হয়েছে");
       void queryClient.invalidateQueries({ queryKey: ["account-requests"] });
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
     },
@@ -38,15 +44,15 @@ export function AccountApprovals() {
     <section className="card-elevated p-4">
       <header className="flex items-center gap-2">
         <ShieldCheck className="size-4 text-primary" />
-        <h2 className="text-sm font-semibold">Account approvals</h2>
-        <span className="ml-auto text-xs text-muted-foreground">{pending.length} waiting</span>
+        <h2 className="text-sm font-semibold">অ্যাকাউন্ট অনুমোদন</h2>
+        <span className="ml-auto text-xs text-muted-foreground">{pending.length}টি অপেক্ষমাণ</span>
       </header>
 
-      {list.isPending && <p className="mt-3 text-sm text-muted-foreground">Loading accounts…</p>}
+      {list.isPending && <p className="mt-3 text-sm text-muted-foreground">অ্যাকাউন্ট আনা হচ্ছে…</p>}
 
       {!list.isPending && accounts.length === 0 && (
         <p className="mt-3 text-sm text-muted-foreground">
-          No account requests yet. Agents and coordinators appear here after they sign up.
+          এখনো কোনো অনুরোধ নেই। এজেন্ট আর কোঅর্ডিনেটর সাইন আপ করলে এখানে দেখা যাবে।
         </p>
       )}
 
@@ -56,14 +62,14 @@ export function AccountApprovals() {
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{account.name}</p>
               <p className="truncate text-xs text-muted-foreground">
-                {account.email ?? "no email"} · asked for{" "}
-                {account.requested_role === "team_leader" ? "Coordinator" : "Agent"} ·{" "}
-                {account.approval_status}
+                {account.email ?? "ইমেইল নেই"} · চেয়েছেন{" "}
+                {account.requested_role === "team_leader" ? "কোঅর্ডিনেটর" : "এজেন্ট"} ·{" "}
+                {STATUS_LABELS[account.approval_status] ?? account.approval_status}
               </p>
             </div>
             {account.approval_status === "approved" ? (
               <span className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
-                {account.role === "team_leader" ? "Coordinator" : "Agent"}
+                {account.role === "team_leader" ? "কোঅর্ডিনেটর" : "এজেন্ট"}
               </span>
             ) : (
               <div className="flex gap-1.5">
@@ -73,7 +79,7 @@ export function AccountApprovals() {
                   onClick={() => act.mutate({ profileId: account.id, decision: "approve_agent" })}
                 >
                   {act.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
-                  Agent
+                  এজেন্ট
                 </Button>
                 <Button
                   size="sm"
@@ -83,7 +89,7 @@ export function AccountApprovals() {
                     act.mutate({ profileId: account.id, decision: "approve_coordinator" })
                   }
                 >
-                  Coordinator
+                  কোঅর্ডিনেটর
                 </Button>
                 <Button
                   size="sm"
@@ -91,7 +97,7 @@ export function AccountApprovals() {
                   disabled={act.isPending}
                   onClick={() => act.mutate({ profileId: account.id, decision: "reject" })}
                 >
-                  <X className="size-3.5" /> Decline
+                  <X className="size-3.5" /> বাদ দিন
                 </Button>
               </div>
             )}
