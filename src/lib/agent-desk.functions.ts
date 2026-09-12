@@ -40,10 +40,20 @@ export const submitMyLead = createServerFn({ method: "POST" })
         status: "pending",
         assigned_to: owner,
         assigned_agent_id: owner,
+        assignment_source: "self",
       })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
+
+    // Show it immediately in Coordinator Deck / HQ self-claims — no approval step.
+    const { logLeadEvent } = await import("@/lib/lead-events.server");
+    await logLeadEvent({
+      leadId: created.id,
+      agentId: owner,
+      kind: "self_claimed",
+      detail: `${caller.profile?.name ?? "এজেন্ট"} নতুন লিড যোগ করেছেন — ${data.name}`,
+    });
 
     return { leadId: created.id };
   });

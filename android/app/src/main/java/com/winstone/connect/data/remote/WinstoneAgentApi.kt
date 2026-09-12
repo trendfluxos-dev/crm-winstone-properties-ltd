@@ -65,6 +65,7 @@ object WinstoneAgentApi {
         phone: String,
         company: String?,
         notes: String?,
+        agentId: String?,
     ): JSONObject = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("name", name)
@@ -73,6 +74,8 @@ object WinstoneAgentApi {
             if (!notes.isNullOrBlank()) put("notes", notes)
             put("source", "agent_app")
             put("assign", true)
+            // Keep the lead with the agent who added it — no approval needed.
+            if (!agentId.isNullOrBlank()) put("agent_id", agentId)
         }
         val req = Request.Builder()
             .url(WinstoneApi.BASE_URL + "/api/public/ingest/lead")

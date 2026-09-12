@@ -117,7 +117,9 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun submitLead(name: String, phone: String, company: String, notes: String) {
         viewModelScope.launch {
-            runCatching { WinstoneAgentApi.submitLead(name, phone, company, notes) }
+            runCatching {
+                WinstoneAgentApi.submitLead(name, phone, company, notes, AgentSession.agentId)
+            }
                 .onSuccess {
                     _state.value = _state.value.copy(toast = "লিড জমা হয়েছে")
                     refresh(silent = true)
