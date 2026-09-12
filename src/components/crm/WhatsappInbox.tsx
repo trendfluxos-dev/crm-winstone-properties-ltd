@@ -15,6 +15,11 @@ import { useSnapshot } from "@/lib/crm-data";
 import { clockTime, dayLabel, relativeTime } from "@/lib/crm-format";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { useAdminToken } from "@/lib/local-session";
+import {
+  whatsappStatusLabel,
+  whatsappStatusTicks,
+  whatsappStatusTone,
+} from "@/lib/whatsapp-status";
 import { cn } from "@/lib/utils";
 
 type Thread = { lead: Lead; messages: WhatsappMessage[]; last: WhatsappMessage | null };
