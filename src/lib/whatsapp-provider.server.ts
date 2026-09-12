@@ -240,7 +240,7 @@ class MetaWhatsApp implements WhatsAppProvider {
       return { ok: false, reason: "invalid json" };
     }
     const result = await this.receiveMessage(payload);
-    return { ok: true, reason: result.reason };
+    return result.reason ? { ok: true, reason: result.reason } : { ok: true };
   }
 
   async getConversation(leadId: string) {
