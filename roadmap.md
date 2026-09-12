@@ -1,17 +1,8 @@
-# Winstone CRM roadmap
+# Winstone CRM Roadmap
 
-## In progress (এই ধাপ)
-- [ ] IT Console: এজেন্ট অ্যাকাউন্ট টেবিল (নাম / Agent ID / ফোন / পাসওয়ার্ড — তৈরি ও এডিট)
-- [ ] Coordinator Deck: এজেন্ট নামের পাশে অ্যাসাইন করা লিড সংখ্যা + অ্যাসাইন + লিড ইমপোর্ট
-- [ ] রিপোর্ট জমা হলেই সাথে সাথে স্প্রেডশিট আপডেট
-- [ ] শিফট উইন্ডো ৯:০০–১২:৪৫ ও ১৪:০০–১৭:২০ (ঢাকা)
-- [ ] ১২:৫০ ও ১৭:৩০-এ শিফট সামারি → IT Console + Executive HQ
-- [ ] HQ-তে এক মাসের সামারি, প্রতি মাসের ৫ তারিখে HQ থেকে সরে যাবে; IT Console-এ সব সেভ
+## In progress
+- [ ] Executive HQ shift summary export at 12:50 & 1:50 PM Dhaka + IT Console doc upload smart summary.
+- [ ] Reconnect Google Sheets in the new workspace (required for report sheet sync and doc summary integration).
 
-## Done
-- Phase 1/2: কল লাইফসাইকল, বাধ্যতামূলক রিপোর্ট লক, ডিভাইস অথ, রেকর্ডিং/AI পাইপলাইন
-- Phase 3 step 1: প্রতি লিডে AI প্রি-কল ব্রিফিং
-
-## Blocked
-- আসল ফোনে SIM কল + রেকর্ডিং পরীক্ষা (হ্যান্ডসেট দরকার)
-- Meta WhatsApp Business অনুমোদন
+## Pending
+- [ ] Re-run smoke tests after Google Sheets reconnect.
