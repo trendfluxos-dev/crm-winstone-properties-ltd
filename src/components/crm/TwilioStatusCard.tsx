@@ -117,18 +117,6 @@ export function TwilioStatusCard() {
   );
 }
 
-function StatusRow({ label, ok, value }: { label: string; ok: boolean; value?: string | undefined }) {
-  return (
-    <div className="flex items-center justify-between gap-2 rounded-md border border-border px-2.5 py-1.5">
-      <span className="text-muted-foreground">{label}</span>
-      <div className="flex items-center gap-1.5">
-        {value && <span className="max-w-[140px] truncate font-mono text-xs">{value}</span>}
-        {ok ? <CheckCircle2 className="size-4 text-live" /> : <ShieldAlert className="size-4 text-idle" />}
-      </div>
-    </div>
-  );
-}
-
 function WebhookRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (

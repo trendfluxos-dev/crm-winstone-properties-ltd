@@ -152,7 +152,7 @@ export const twilioHealth = createServerFn({ method: "POST" })
     };
 
     return {
-      status,
+      status: status as Status,
       statusDetail,
       numbers,
       verifiedAt,
