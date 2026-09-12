@@ -190,6 +190,17 @@ export function SystemCustomizer() {
                 }
               />
             ))}
+            <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-surface-2 p-3">
+              <div>
+                <p className="text-sm font-medium">Use the AI Coach</p>
+                <p className="text-xs text-muted-foreground">
+                  Always on for every agent — cannot be switched off.
+                </p>
+              </div>
+              <span className="rounded-full bg-live/15 px-2 py-0.5 text-xs font-medium text-live">
+                Always on
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -46,7 +46,14 @@ export const PermissionsSchema = z.object({
   agentCanExportData: z.boolean().default(false),
   agentCanLogManualCall: z.boolean().default(true),
   agentCanReassignLead: z.boolean().default(false),
-  agentCanUseAiCoach: z.boolean().default(true),
+  /**
+   * AI Coach stays on for every agent. Kept in the schema for compatibility,
+   * but any stored value is coerced back to true — it is not a toggle.
+   */
+  agentCanUseAiCoach: z
+    .unknown()
+    .transform(() => true as const)
+    .default(true),
 });
 export type Permissions = z.infer<typeof PermissionsSchema>;
 
@@ -105,10 +112,5 @@ export const PERMISSION_LABELS: { key: keyof Permissions; label: string; hint: s
     key: "agentCanExportData",
     label: "Export / download data",
     hint: "Off blocks CSV downloads on agent devices.",
-  },
-  {
-    key: "agentCanUseAiCoach",
-    label: "Use the AI Coach",
-    hint: "Personal performance summary and next steps.",
   },
 ];
