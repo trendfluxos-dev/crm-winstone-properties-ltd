@@ -30,14 +30,66 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+const MAX_AUDIO_BYTES = 24 * 1024 * 1024;
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 8192) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+  }
+  return btoa(binary);
+}
+
+/**
+ * The phone app may post the audio either as multipart/form-data (preferred:
+ * the raw file streams straight through) or as JSON with base64 audio.
+ */
+async function readPayload(request: Request) {
+  const contentType = request.headers.get("Content-Type") ?? "";
+  if (!contentType.toLowerCase().includes("multipart/form-data")) {
+    return Payload.safeParse(await request.json().catch(() => null));
+  }
+
+  const form = await request.formData().catch(() => null);
+  if (!form) return Payload.safeParse(null);
+
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) return Payload.safeParse(null);
+  if (file.size > MAX_AUDIO_BYTES) return { success: false as const, error: null, oversize: true };
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const text = (key: string) => {
+    const value = form.get(key);
+    return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
+  };
+  const nameParts = (file.name || "recording.m4a").split(".");
+  const ext = text("file_extension") ?? (nameParts.length > 1 ? nameParts.pop()! : "m4a");
+
+  return Payload.safeParse({
+    lead_id: text("lead_id"),
+    phone_number: text("phone_number"),
+    agent_id: text("agent_id"),
+    employee_id: text("employee_id"),
+    lead_name: text("lead_name"),
+    audio_base64: toBase64(bytes),
+    file_extension: ext.slice(0, 5),
+    duration_seconds: Number(text("duration_seconds") ?? 0),
+    call_direction: text("call_direction") ?? "outgoing",
+    is_two_sided: text("is_two_sided") !== "false",
+  });
+}
+
 export const Route = createFileRoute("/api/public/ingest/recording")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         if (!authorized(request)) return json({ error: "Unauthorized" }, 401);
 
-        const parsed = Payload.safeParse(await request.json().catch(() => null));
-        if (!parsed.success) return json({ error: "Invalid payload" }, 400);
+        const parsed = await readPayload(request);
+        if (!parsed.success) {
+          if ("oversize" in parsed) return json({ error: "Audio file too large" }, 413);
+          return json({ error: "Invalid payload" }, 400);
+        }
         const body = parsed.data;
 
         const { ingestRecording, processRecording } = await import("@/lib/call-intel.server");

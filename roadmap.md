@@ -37,3 +37,4 @@
 - [x] Agent dashboard (/desk): own stats, lead queue, call log, WhatsApp inbox, submit new lead
 - [x] Android app signs in with CRM email + password (/api/public/agent/login) — no employee id typing
 - [x] Agents self-assign: open (unassigned) leads list on /desk with one-tap claim, web only
+- [x] Real call-recording backend: multipart audio upload, storage + transcription + AI audit, retry endpoint (/api/public/ingest/reprocess) — verified end to end with real speech

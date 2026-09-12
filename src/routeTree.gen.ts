@@ -33,6 +33,7 @@ import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ing
 import { Route as ApiPublicIngestMessageRouteImport } from './routes/api/public/ingest/message'
 import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/ingest/outcome'
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
+import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
 import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
 
@@ -158,6 +159,12 @@ const ApiPublicIngestRecordingRoute =
     path: '/api/public/ingest/recording',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicIngestReprocessRoute =
+  ApiPublicIngestReprocessRouteImport.update({
+    id: '/api/public/ingest/reprocess',
+    path: '/api/public/ingest/reprocess',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaddleWebhookRoute = ApiPublicPaddleWebhookRouteImport.update({
   id: '/api/public/paddle/webhook',
   path: '/api/public/paddle/webhook',
@@ -194,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
+  '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
@@ -222,6 +230,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
+  '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
@@ -251,6 +260,7 @@ export interface FileRoutesById {
   '/api/public/ingest/message': typeof ApiPublicIngestMessageRoute
   '/api/public/ingest/outcome': typeof ApiPublicIngestOutcomeRoute
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
+  '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
 }
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
     | '/api/public/ingest/recording'
+    | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
   fileRoutesByTo: FileRoutesByTo
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
     | '/api/public/ingest/recording'
+    | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
   id:
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/message'
     | '/api/public/ingest/outcome'
     | '/api/public/ingest/recording'
+    | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
   fileRoutesById: FileRoutesById
@@ -366,6 +379,7 @@ export interface RootRouteChildren {
   ApiPublicIngestMessageRoute: typeof ApiPublicIngestMessageRoute
   ApiPublicIngestOutcomeRoute: typeof ApiPublicIngestOutcomeRoute
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
+  ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
   ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
 }
@@ -540,6 +554,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIngestRecordingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ingest/reprocess': {
+      id: '/api/public/ingest/reprocess'
+      path: '/api/public/ingest/reprocess'
+      fullPath: '/api/public/ingest/reprocess'
+      preLoaderRoute: typeof ApiPublicIngestReprocessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/paddle/webhook': {
       id: '/api/public/paddle/webhook'
       path: '/api/public/paddle/webhook'
@@ -583,6 +604,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestMessageRoute: ApiPublicIngestMessageRoute,
   ApiPublicIngestOutcomeRoute: ApiPublicIngestOutcomeRoute,
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
+  ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
   ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,
 }
