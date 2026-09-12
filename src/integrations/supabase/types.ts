@@ -301,6 +301,7 @@ export type Database = {
           recording_id: string | null
           status: string
           submitted_at: string | null
+          summary: string | null
           updated_at: string
         }
         Insert: {
@@ -323,6 +324,7 @@ export type Database = {
           recording_id?: string | null
           status?: string
           submitted_at?: string | null
+          summary?: string | null
           updated_at?: string
         }
         Update: {
@@ -345,6 +347,7 @@ export type Database = {
           recording_id?: string | null
           status?: string
           submitted_at?: string | null
+          summary?: string | null
           updated_at?: string
         }
         Relationships: [

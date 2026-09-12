@@ -64,6 +64,13 @@
       "when": 1789227251644,
       "tag": "0008_profiles_insert_no_self_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789228066911,
+      "tag": "0009_call_report_summary_required",
+      "breakpoints": true
     }
   ]
 }
