@@ -22,7 +22,8 @@ export const callOpsSummary = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const since = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
-    const [reports, recordings, followUps, devices, alerts, leads] = await Promise.all([
+    const [reports, recordings, followUps, devices, alerts, leads, jobs, syncEvents] =
+      await Promise.all([
       supabaseAdmin
         .from("call_reports")
         .select("id, agent_id, status, category, created_at, submitted_at")
