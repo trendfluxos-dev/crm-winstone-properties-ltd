@@ -146,6 +146,14 @@ export const acknowledgeAlert = createServerFn({ method: "POST" })
       })
       .eq("id", data.alertId);
     if (error) throw new Error(error.message);
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "alert_acknowledged",
+      entityType: "system_alert",
+      entityId: data.alertId,
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.name ?? "Authority PIN",
+    });
     return { ok: true };
   });
 
