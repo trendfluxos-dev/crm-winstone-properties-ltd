@@ -73,10 +73,38 @@ object LiveCallLauncher {
     /** Opens WhatsApp with the text and logs the same text against the lead. */
     fun whatsApp(activity: Activity, leadId: String?, phone: String, text: String) {
         CallSyncQueue.queueWhatsApp(activity.applicationContext, leadId, phone, text)
-        val clean = phone.replace(Regex("[^\\d]"), "").let { if (it.startsWith("0")) "88$it" else it }
-        activity.startActivity(
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=$clean&text=${Uri.encode(text)}"))
-        )
+        val msisdn = normalizeBdMsisdn(phone) ?: return
+        // wa.me is the supported external deep link: Android hands it to the
+        // installed WhatsApp app, and falls back to the browser otherwise.
+        val uri = Uri.parse("https://wa.me/$msisdn?text=" + Uri.encode(text))
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            setPackage("com.whatsapp")
+        }
+        try {
+            activity.startActivity(intent)
+        } catch (_: Exception) {
+            activity.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        }
+    }
+
+    /**
+     * Bangladesh-first msisdn normalisation: 01XXXXXXXXX / +8801XXXXXXXXX /
+     * 008801XXXXXXXXX / 8801XXXXXXXXX all become 8801XXXXXXXXX. Returns null
+     * for malformed input and never duplicates the country code.
+     */
+    fun normalizeBdMsisdn(raw: String?): String? {
+        var value = (raw ?: "").replace(Regex("[^\\d]"), "")
+        if (value.isEmpty()) return null
+        while (value.startsWith("00")) value = value.substring(2)
+        value = when {
+            value.startsWith("880") -> "880" + value.substring(3).trimStart('0')
+            value.startsWith("0") -> "880" + value.substring(1)
+            Regex("^1[3-9]\\d{8}$").matches(value) -> "880$value"
+            else -> value
+        }
+        if (Regex("^8801[3-9]\\d{8}$").matches(value)) return value
+        if (Regex("^[1-9]\\d{7,14}$").matches(value) && !value.startsWith("880")) return value
+        return null
     }
 
     /** Called after the outcome sheet is submitted or dismissed. */
