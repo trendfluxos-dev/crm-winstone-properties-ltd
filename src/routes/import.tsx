@@ -156,6 +156,57 @@ function ImportScreen() {
         </label>
       </section>
 
+      <section className="card-elevated space-y-3 p-4">
+        <header className="space-y-1">
+          <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
+            <Sheet className="size-4 text-primary" /> Google Sheet থেকে লিড আনুন
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            শিটের লিংক দিন। শিটটি সংযুক্ত Google অ্যাকাউন্টের সাথে শেয়ার করা থাকতে হবে।
+          </p>
+        </header>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={sheetUrl}
+            onChange={(event) => setSheetUrl(event.target.value)}
+            placeholder="https://docs.google.com/spreadsheets/d/..."
+            className="sm:flex-1"
+          />
+          <Button
+            size="sm"
+            variant="secondary"
+            className="gap-1.5"
+            disabled={sheetUrl.trim().length < 20 || sheetMutation.isPending}
+            onClick={() => sheetMutation.mutate(sheetTab)}
+          >
+            {sheetMutation.isPending ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Sheet className="size-3.5" />
+            )}
+            শিট পড়ুন
+          </Button>
+        </div>
+
+        {sheetTabs.length > 1 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {sheetTabs.map((tab) => (
+              <Button
+                key={tab}
+                size="sm"
+                variant={tab === sheetTab ? "default" : "outline"}
+                disabled={sheetMutation.isPending}
+                onClick={() => sheetMutation.mutate(tab)}
+              >
+                {tab}
+              </Button>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+
       {fileName ? (
         <section className="card-elevated space-y-3 p-4">
           <header className="flex flex-wrap items-center justify-between gap-2">
