@@ -20,7 +20,8 @@ import { toast } from "sonner";
 import { CallAudioPlayer } from "@/components/crm/CallAudioPlayer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import type { CallRecording, Lead, Profile, TimelineEntry, WhatsappMessage } from "@/lib/crm-data";
+import type { CallRecording, Lead, LeadEvent, Profile, TimelineEntry, WhatsappMessage } from "@/lib/crm-data";
+import { LEAD_EVENT_LABELS } from "@/lib/crm-data";
 import { reanalyzeRecording } from "@/lib/crm.functions";
 import { getAdminToken } from "@/lib/local-session";
 import {
