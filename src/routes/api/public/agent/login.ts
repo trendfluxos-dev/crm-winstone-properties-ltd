@@ -123,6 +123,18 @@ export const Route = createFileRoute("/api/public/agent/login")({
           await supabaseAdmin.from("profiles").update({ employee_id: employeeId }).eq("id", profile.id);
         }
 
+        // A SIM already bound to another desk is refused before any token is
+        // issued, so SIM calls can never sync under the wrong agent.
+        const { bindAgentSim } = await import("@/lib/agent-sim.server");
+        const simCandidate = parsed.data.sim_number ?? profile.sim_number ?? profile.phone;
+        const preCheck = await bindAgentSim({ profileId: profile.id, sim: simCandidate });
+        if (preCheck.status === "conflict") {
+          return json(
+            { error: `এই সিম নম্বরটি ${preCheck.ownerName}-এর অ্যাকাউন্টে যুক্ত আছে` },
+            409,
+          );
+        }
+
         // Every phone gets its own token, bound to this profile. The APK stores
         // the token; the server only ever keeps its SHA-256 hash.
         const { issueDeviceToken } = await import("@/lib/device-auth.server");
@@ -130,7 +142,11 @@ export const Route = createFileRoute("/api/public/agent/login")({
           profileId: profile.id,
           deviceLabel: parsed.data.device_label ?? null,
           appVersion: parsed.data.app_version ?? null,
+          phoneNumber: "sim" in preCheck ? preCheck.sim : null,
         });
+        if ("sim" in preCheck && preCheck.sim) {
+          await bindAgentSim({ profileId: profile.id, sim: preCheck.sim, deviceId: device.deviceId });
+        }
 
         return json({
           ok: true,
@@ -141,6 +157,7 @@ export const Route = createFileRoute("/api/public/agent/login")({
             name: profile.name,
             employee_id: employeeId,
             phone: profile.phone,
+            sim_number: "sim" in preCheck ? preCheck.sim : profile.sim_number,
             role: profile.role,
           },
         });
