@@ -54,7 +54,12 @@ class CallStateReceiver : BroadcastReceiver() {
                 LiveCallLauncher.setPhase(CallPhase.Connected)
                 // Answered is the first moment Android actually tells us the call
                 // is up — we never infer it from the agent pressing CALL.
-                reportState(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                if (outgoing) {
+                    reportState(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                } else {
+                    IncomingCallTracker.ensure(intent.incomingNumber())
+                    reportIncoming(app, CallLifecycle.incomingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                }
                 scope.launch {
                     runCatching { WinstoneApi.postPresence(employeeId, "on_call", leadId = LiveCallLauncher.activeLeadId) }
                 }
@@ -78,11 +83,14 @@ class CallStateReceiver : BroadcastReceiver() {
                 if (wasOnCall && captured != null && uploadable) {
                     CallSyncQueue.queueRecording(
                         context = app,
-                        leadId = LiveCallLauncher.activeLeadId,
-                        phoneNumber = LiveCallLauncher.activePhone.orEmpty(),
+                        leadId = if (outgoing) LiveCallLauncher.activeLeadId else null,
+                        phoneNumber =
+                            if (outgoing) LiveCallLauncher.activePhone.orEmpty()
+                            else IncomingCallTracker.number.orEmpty(),
                         file = captured.first,
                         durationSeconds = captured.second,
                         twoSided = twoSided,
+                        incoming = !outgoing,
                         recorderSource = recorderSource,
                     )
                 } else if (captured != null) {
@@ -93,7 +101,14 @@ class CallStateReceiver : BroadcastReceiver() {
                 val ended =
                     if (outgoing) CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
                     else CallLifecycle.incomingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
-                reportState(app, ended, duration, uploadable)
+                if (outgoing) {
+                    reportState(app, ended, duration, uploadable)
+                } else {
+                    // Callback finished: the CRM resolves or creates the lead from
+                    // the caller's number and opens the same mandatory report.
+                    reportIncoming(app, ended, duration, uploadable)
+                    IncomingCallTracker.clear()
+                }
 
                 // Every finished call becomes reportable, even when recording
                 // failed entirely — the report is opened server-side and queued
@@ -118,8 +133,46 @@ class CallStateReceiver : BroadcastReceiver() {
             }
 
 
+            TelephonyManager.EXTRA_STATE_RINGING -> {
+                lastState = state
+                // Only a call the app did not dial is an incoming call.
+                if (!outgoing) {
+                    IncomingCallTracker.begin(intent.incomingNumber())
+                    reportIncoming(app, CallLifecycle.incomingState(CallLifecycle.ANDROID_RINGING, false))
+                }
+            }
+
             else -> lastState = state
         }
+    }
+
+    /** The caller's number, when Android is willing to tell us (needs READ_CALL_LOG). */
+    private fun Intent.incomingNumber(): String? =
+        getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)?.trim()?.takeIf { it.isNotBlank() }
+
+    /**
+     * Queues one observed state of an incoming call. There is no lead id yet —
+     * the CRM resolves the lead from the caller's number, and creates it when the
+     * number is new, so a callback is never lost.
+     */
+    private fun reportIncoming(
+        app: Context,
+        callState: CallState,
+        durationSeconds: Int = 0,
+        recordingCaptured: Boolean? = null,
+    ) {
+        val wire = callState.wire ?: return
+        val callUid = IncomingCallTracker.callUid ?: return
+        val number = IncomingCallTracker.number ?: return
+        CallSyncQueue.queueIncomingCall(
+            context = app,
+            callUid = callUid,
+            phoneNumber = number,
+            state = wire,
+            durationSeconds = durationSeconds,
+            recordingSupported = recordingCaptured,
+            recordingNote = RecordingCapabilityCheck.cachedOrNull()?.reason,
+        )
     }
 
     /**

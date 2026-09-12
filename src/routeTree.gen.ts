@@ -32,6 +32,7 @@ import { Route as DocsAdminEditorSlugRouteImport } from './routes/docs-admin_.ed
 import { Route as ApiPublicAgentCallStartRouteImport } from './routes/api/public/agent/call-start'
 import { Route as ApiPublicAgentCallStateRouteImport } from './routes/api/public/agent/call-state'
 import { Route as ApiPublicAgentCoachRouteImport } from './routes/api/public/agent/coach'
+import { Route as ApiPublicAgentIncomingCallRouteImport } from './routes/api/public/agent/incoming-call'
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
 import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
@@ -166,6 +167,12 @@ const ApiPublicAgentCoachRoute = ApiPublicAgentCoachRouteImport.update({
   path: '/api/public/agent/coach',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentIncomingCallRoute =
+  ApiPublicAgentIncomingCallRouteImport.update({
+    id: '/api/public/agent/incoming-call',
+    path: '/api/public/agent/incoming-call',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAgentLoginRoute = ApiPublicAgentLoginRouteImport.update({
   id: '/api/public/agent/login',
   path: '/api/public/agent/login',
@@ -280,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/call-state': typeof ApiPublicAgentCallStateRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
+  '/api/public/agent/incoming-call': typeof ApiPublicAgentIncomingCallRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
@@ -322,6 +330,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/call-state': typeof ApiPublicAgentCallStateRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
+  '/api/public/agent/incoming-call': typeof ApiPublicAgentIncomingCallRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
@@ -365,6 +374,7 @@ export interface FileRoutesById {
   '/api/public/agent/call-start': typeof ApiPublicAgentCallStartRoute
   '/api/public/agent/call-state': typeof ApiPublicAgentCallStateRoute
   '/api/public/agent/coach': typeof ApiPublicAgentCoachRoute
+  '/api/public/agent/incoming-call': typeof ApiPublicAgentIncomingCallRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/call-start'
     | '/api/public/agent/call-state'
     | '/api/public/agent/coach'
+    | '/api/public/agent/incoming-call'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
@@ -451,6 +462,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/call-start'
     | '/api/public/agent/call-state'
     | '/api/public/agent/coach'
+    | '/api/public/agent/incoming-call'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
@@ -493,6 +505,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/call-start'
     | '/api/public/agent/call-state'
     | '/api/public/agent/coach'
+    | '/api/public/agent/incoming-call'
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
@@ -536,6 +549,7 @@ export interface RootRouteChildren {
   ApiPublicAgentCallStartRoute: typeof ApiPublicAgentCallStartRoute
   ApiPublicAgentCallStateRoute: typeof ApiPublicAgentCallStateRoute
   ApiPublicAgentCoachRoute: typeof ApiPublicAgentCoachRoute
+  ApiPublicAgentIncomingCallRoute: typeof ApiPublicAgentIncomingCallRoute
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
   ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
@@ -718,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentCoachRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/incoming-call': {
+      id: '/api/public/agent/incoming-call'
+      path: '/api/public/agent/incoming-call'
+      fullPath: '/api/public/agent/incoming-call'
+      preLoaderRoute: typeof ApiPublicAgentIncomingCallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/login': {
       id: '/api/public/agent/login'
       path: '/api/public/agent/login'
@@ -865,6 +886,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentCallStartRoute: ApiPublicAgentCallStartRoute,
   ApiPublicAgentCallStateRoute: ApiPublicAgentCallStateRoute,
   ApiPublicAgentCoachRoute: ApiPublicAgentCoachRoute,
+  ApiPublicAgentIncomingCallRoute: ApiPublicAgentIncomingCallRoute,
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
   ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
