@@ -251,7 +251,12 @@ private fun WinCard(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun LeadCard(lead: Lead, onCall: () -> Unit) {
+private fun LeadCard(
+    lead: Lead,
+    twilioBusy: Boolean,
+    onCall: () -> Unit,
+    onTwilioCall: () -> Unit,
+) {
     WinCard {
         Text(lead.name, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         Text(
