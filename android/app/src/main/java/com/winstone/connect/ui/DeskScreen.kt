@@ -137,6 +137,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                             items(leads) { lead ->
                                 LeadCard(
                                     lead = lead,
+                                    twilioBusy = state.twilioCallingLeadId == lead.id,
                                     onCall = {
                                         // The server decides: an unfinished post-call
                                         // report blocks the next outbound call.
@@ -151,6 +152,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                             }
                                         }
                                     },
+                                    onTwilioCall = { vm.twilioCall(lead.id) },
                                 )
                             }
                         }
@@ -249,7 +251,12 @@ private fun WinCard(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun LeadCard(lead: Lead, onCall: () -> Unit) {
+private fun LeadCard(
+    lead: Lead,
+    twilioBusy: Boolean,
+    onCall: () -> Unit,
+    onTwilioCall: () -> Unit,
+) {
     WinCard {
         Text(lead.name, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         Text(
@@ -268,6 +275,12 @@ private fun LeadCard(lead: Lead, onCall: () -> Unit) {
             onClick = onCall,
             modifier = Modifier.fillMaxWidth(),
         ) { Text("কল করুন") }
+        Spacer(Modifier.height(6.dp))
+        OutlinedButton(
+            onClick = onTwilioCall,
+            enabled = !twilioBusy,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text(if (twilioBusy) "Twilio কল শুরু হচ্ছে…" else "Twilio কল (রেকর্ড হবে)") }
     }
 }
 

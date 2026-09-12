@@ -15,6 +15,7 @@ import { AgentDossier } from "@/components/crm/AgentDossier";
 import { AgentRadar } from "@/components/crm/AgentRadar";
 import { AskHqPanel } from "@/components/crm/AskHqPanel";
 import { CallOpsPanel } from "@/components/crm/CallOpsPanel";
+import { DayCallExportPanel } from "@/components/crm/DayCallExportPanel";
 import { SelfClaimsFeed } from "@/components/crm/SelfClaimsFeed";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
 import { Leaderboard } from "@/components/crm/Leaderboard";
@@ -123,6 +124,8 @@ function ControlBoard() {
         <SystemNoticeBar surface="hq" />
 
         <CallOpsPanel />
+
+        <DayCallExportPanel />
 
         <ShiftSummaryPanel scope="hq" />
 
