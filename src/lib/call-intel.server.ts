@@ -208,16 +208,23 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
       stt_fallback_used: stt.fallbackUsed,
       stt_error_code: stt.errorCode,
       stt_error_message: stt.errorMessage,
+      stt_request_id: stt.requestId,
+      stt_duration_ms: stt.durationMs,
     };
 
     if (stt.status === "failed" || !stt.transcript) {
       await supabaseAdmin
         .from("call_recordings")
-        .update({ ...provider, sync_status: stt.status === "failed" ? "failed" : recording.sync_status })
+        .update({
+          ...provider,
+          stt_status: "failed",
+          sync_status: stt.status === "failed" ? "failed" : recording.sync_status,
+        })
         .eq("id", recordingId);
       if (stt.status === "failed") throw new Error(stt.errorMessage ?? "Transcription failed");
       return "empty";
     }
+
 
     const transcript = stt.transcript;
     const analysis = await analyzeTranscript(transcript, recording.duration_seconds);
@@ -226,7 +233,9 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
       .from("call_recordings")
       .update({
         ...provider,
+        stt_status: "completed",
         transcribed_at: new Date().toISOString(),
+
         transcription_text: analysis.timestamped_transcript || transcript,
         ai_summary: analysis.summary_bullets.map((b) => `• ${b}`).join("\n"),
         sentiment: analysis.sentiment,
@@ -242,7 +251,8 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
   } catch (err) {
     await supabaseAdmin
       .from("call_recordings")
-      .update({ sync_status: "failed" })
+      .update({ stt_status: "failed", sync_status: "failed" })
+
       .eq("id", recordingId);
     throw err;
   }
