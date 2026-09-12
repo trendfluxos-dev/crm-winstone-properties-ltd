@@ -47,7 +47,20 @@ export const Route = createFileRoute("/api/public/hooks/shift-summary")({
           // Catches up any earlier window the schedule missed.
           await backfillShiftSummaries(3);
           const purge = await purgeHqSummaries();
-          return Response.json({ ok: true, summary, purge });
+
+          // Daily recording index in Google Docs for the current Dhaka day.
+          let recordingDoc: unknown = null;
+          try {
+            const { syncRecordingDoc } = await import("@/lib/recording-doc.server");
+            const dateKey = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 10);
+            const doc = await syncRecordingDoc(dateKey);
+            recordingDoc = { dateKey, docUrl: doc.docUrl, calls: doc.calls };
+          } catch (error) {
+            console.error("recording doc sync failed", error);
+            recordingDoc = { error: error instanceof Error ? error.message : "failed" };
+          }
+
+          return Response.json({ ok: true, summary, purge, recordingDoc });
         } catch (error) {
           console.error("shift summary job failed", error);
           return new Response(
