@@ -88,6 +88,7 @@ export const submitMyReport = createServerFn({ method: "POST" })
     Base.extend({
       reportId: z.string().uuid(),
       category: z.string().min(2).max(40),
+      summary: z.string().trim().max(4000).nullable().optional(),
       note: z.string().trim().max(4000).nullable().optional(),
       reason: z.string().trim().max(2000).nullable().optional(),
       followUpAt: z.string().nullable().optional(),
@@ -102,6 +103,7 @@ export const submitMyReport = createServerFn({ method: "POST" })
       reportId: data.reportId,
       agentId: me.id,
       category: data.category,
+      summary: data.summary ?? null,
       note: data.note ?? null,
       reason: data.reason ?? null,
       followUpAt: data.followUpAt ? new Date(data.followUpAt).toISOString() : null,
