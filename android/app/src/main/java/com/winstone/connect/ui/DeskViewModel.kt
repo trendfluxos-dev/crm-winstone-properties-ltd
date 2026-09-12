@@ -32,6 +32,8 @@ data class DeskUiState(
     val deviceRevoked: Boolean = false,
     /** Lead whose Twilio cloud call is being set up right now. */
     val twilioCallingLeadId: String? = null,
+    /** Honest recording capability of this phone, as reported to the CRM. */
+    val recordingStatus: String? = null,
 )
 
 class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -84,6 +86,42 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
                         error = e.message ?: "সাইন ইন করা যায়নি",
                     )
                 }
+        }
+    }
+
+    /**
+     * Probes this phone's recorder and posts the honest verdict to the CRM.
+     * Re-probes at most every 10 minutes, and only reports when the verdict
+     * changed or the last report is older than 10 minutes — so IT always sees a
+     * live state without hammering the server.
+     */
+    private var lastCapability: String? = null
+    private var lastCapabilityAt = 0L
+
+    private suspend fun reportRecordingCapability() {
+        val staleMs = 10 * 60_000L
+        val stale = System.currentTimeMillis() - lastCapabilityAt > staleMs
+        val capability = com.winstone.connect.telephony.RecordingCapabilityCheck
+            .check(app, force = stale)
+        val mode = when (capability.support) {
+            com.winstone.connect.telephony.RecordingSupport.TWO_SIDED -> "two_sided"
+            com.winstone.connect.telephony.RecordingSupport.AGENT_SIDE_ONLY -> "mic_only"
+            com.winstone.connect.telephony.RecordingSupport.UNAVAILABLE -> "unavailable"
+        }
+        if (mode == lastCapability && !stale) return
+        runCatching { WinstoneAgentApi.reportRecordingCapability(mode, capability.reason) }
+            .onSuccess {
+                lastCapability = mode
+                lastCapabilityAt = System.currentTimeMillis()
+                _state.value = _state.value.copy(recordingStatus = capability.label)
+            }
+    }
+
+    /** Lets the agent re-check recording support by hand from the status screen. */
+    fun recheckRecording() {
+        viewModelScope.launch {
+            lastCapabilityAt = 0L
+            reportRecordingCapability()
         }
     }
 
