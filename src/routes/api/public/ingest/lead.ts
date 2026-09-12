@@ -36,16 +36,9 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const { data: existing } = await supabaseAdmin
-          .from("leads")
-          .select("id")
-          .eq("phone_number", body.phone_number.trim())
-          .maybeSingle();
-        if (existing) return json({ ok: true, duplicate: true, lead_id: existing.id }, 200);
-
         // An agent adding their own lead keeps it — no approval, no round-robin.
         let assignedTo: string | null = null;
-        let selfAdded = false;
+        let ownerName: string | null = null;
         const requestedAgentId = caller.kind === "device" ? caller.profile.id : body.agent_id;
         if (requestedAgentId) {
           const { data: agent } = await supabaseAdmin
@@ -57,7 +50,7 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
             .maybeSingle();
           if (agent) {
             assignedTo = agent.id;
-            selfAdded = true;
+            ownerName = agent.name;
           }
         }
 
@@ -83,33 +76,25 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
           }
         }
 
-        const { data: inserted, error } = await supabaseAdmin
-          .from("leads")
-          .insert({
+        // Shared intake with the web desk: identical result either way.
+        const { intakeLead } = await import("@/lib/lead-intake.server");
+        try {
+          const result = await intakeLead({
             name: body.name,
-            phone_number: normalize(body.phone_number) || body.phone_number.trim(),
-            company: body.company || null,
-            notes: body.notes || null,
+            phoneNumber: body.phone_number,
+            company: body.company ?? null,
+            notes: body.notes ?? null,
+            ownerId: assignedTo,
+            ownerName,
             source: body.source,
-            assigned_to: assignedTo,
-            assigned_agent_id: assignedTo,
-            assignment_source: selfAdded ? "self" : assignedTo ? "coordinator" : null,
-          })
-          .select("id")
-          .single();
-        if (error) return json({ error: error.message }, 500);
-
-        if (selfAdded) {
-          const { logLeadEvent } = await import("@/lib/lead-events.server");
-          await logLeadEvent({
-            leadId: inserted.id,
-            agentId: assignedTo,
-            kind: "self_claimed",
-            detail: `এজেন্ট ফোন অ্যাপ থেকে নতুন লিড যোগ করেছেন — ${body.name}`,
           });
+          if (result.duplicate) {
+            return json({ ok: true, duplicate: true, lead_id: result.leadId }, 200);
+          }
+          return json({ ok: true, lead_id: result.leadId, assigned_to: result.assignedTo }, 201);
+        } catch (err) {
+          return json({ error: err instanceof Error ? err.message : "Insert failed" }, 500);
         }
-
-        return json({ ok: true, lead_id: inserted.id, assigned_to: assignedTo }, 201);
       },
     },
   },
