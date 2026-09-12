@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { AccountApprovals } from "@/components/crm/AccountApprovals";
 import { ApkInstallCard } from "@/components/crm/ApkInstallCard";
 import { AuditTrail } from "@/components/crm/AuditTrail";
+import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
@@ -104,6 +105,8 @@ function SystemBoard() {
       <SystemNoticeBar surface="it" />
 
       <CallOpsPanel showControls />
+
+      <ReportSheetPanel />
 
       <AccountApprovals />
 
