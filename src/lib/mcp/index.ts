@@ -2,6 +2,7 @@ import { auth, defineMcp } from "@lovable.dev/mcp-js";
 
 import createLead from "./tools/create-lead";
 import floorSummary from "./tools/floor-summary";
+import getCallIntel from "./tools/get-call-intel";
 import leadHistory from "./tools/lead-history";
 import listAgents from "./tools/list-agents";
 import listLeads from "./tools/list-leads";
