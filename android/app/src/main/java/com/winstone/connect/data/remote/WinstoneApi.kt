@@ -281,6 +281,30 @@ object WinstoneApi {
         post("/api/public/agent/call-state", payload)
     }
 
+    /**
+     * Incoming call on the agent's phone. Carries the caller's number instead of a
+     * lead id: the CRM matches it to a lead, or creates one owned by this agent,
+     * and opens the same mandatory post-call report as an outgoing call.
+     */
+    suspend fun postIncomingCall(
+        callUid: String,
+        phoneNumber: String,
+        state: String,                         // ringing | answered | completed | no_answer | failed
+        durationSeconds: Int? = null,
+        recordingSupported: Boolean? = null,
+        recordingNote: String? = null,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val payload = JSONObject().apply {
+            put("call_uid", callUid)
+            put("phone_number", phoneNumber)
+            put("state", state)
+            durationSeconds?.let { put("duration_seconds", it) }
+            recordingSupported?.let { put("recording_supported", it) }
+            recordingNote?.let { if (it.isNotBlank()) put("recording_note", it.take(300)) }
+        }
+        post("/api/public/agent/incoming-call", payload)
+    }
+
     private fun post(path: String, payload: JSONObject): JSONObject {
         val req = Request.Builder()
             .url(BASE_URL + path)

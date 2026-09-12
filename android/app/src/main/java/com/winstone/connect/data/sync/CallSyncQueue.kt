@@ -211,6 +211,24 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                     Result.success()
                 }
 
+                CallSyncQueue.KIND_INCOMING_CALL -> {
+                    val callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID)
+                    val phone = inputData.getString(CallSyncQueue.KEY_PHONE)
+                    if (callUid == null || phone.isNullOrBlank()) return Result.failure()
+                    WinstoneApi.postIncomingCall(
+                        callUid = callUid,
+                        phoneNumber = phone,
+                        state = inputData.getString(CallSyncQueue.KEY_STATE).orEmpty(),
+                        durationSeconds = inputData.getInt(CallSyncQueue.KEY_DURATION, 0),
+                        recordingSupported =
+                            if (inputData.keyValueMap.containsKey(CallSyncQueue.KEY_REC_SUPPORTED))
+                                inputData.getBoolean(CallSyncQueue.KEY_REC_SUPPORTED, false)
+                            else null,
+                        recordingNote = inputData.getString(CallSyncQueue.KEY_REC_NOTE),
+                    )
+                    Result.success()
+                }
+
                 CallSyncQueue.KIND_OUTCOME -> {
                     if (leadId == null) return Result.failure()
                     WinstoneApi.postCallOutcome(
