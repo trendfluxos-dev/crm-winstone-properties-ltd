@@ -45,8 +45,8 @@ function SystemPage() {
       <RoleGate
         allow={["authority"]}
         icon={<Database className="size-7" />}
-        title="IT Console"
-        description="System configuration, account approvals, data health and billing. Master PIN required."
+        title="আইটি কনসোল"
+        description="সিস্টেম সেটিং, অ্যাকাউন্ট অনুমোদন, ডেটার অবস্থা আর বিল। মাস্টার পিন লাগবে।"
       >
         <SystemBoard />
       </RoleGate>
@@ -55,9 +55,9 @@ function SystemPage() {
 }
 
 const ENDPOINTS = [
-  { path: "/api/public/ingest/recording", what: "Call audio + AI transcript & sentiment" },
-  { path: "/api/public/ingest/message", what: "WhatsApp conversation logs" },
-  { path: "/api/public/ingest/lead", what: "Website / ad form leads (auto round-robin)" },
+  { path: "/api/public/ingest/recording", what: "কলের অডিও + এআই ট্রান্সক্রিপ্ট ও মনোভাব" },
+  { path: "/api/public/ingest/message", what: "হোয়াটসঅ্যাপ কথার রেকর্ড" },
+  { path: "/api/public/ingest/lead", what: "ওয়েবসাইট / বিজ্ঞাপনের লিড (নিজে থেকে ভাগ হয়)" },
 ];
 
 function SystemBoard() {
@@ -81,9 +81,9 @@ function SystemBoard() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">System &amp; Billing</h1>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">সিস্টেম ও বিল</h1>
           <p className="text-xs text-muted-foreground sm:text-sm">
-            Core engine status, ingestion endpoints and monthly telephony cost.
+            মূল ইঞ্জিনের অবস্থা, ডেটা আসার ঠিকানা আর মাসিক টেলিফোন খরচ।
           </p>
         </div>
         <CopilotDrawer />
@@ -101,10 +101,10 @@ function SystemBoard() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Receipt className="size-4 text-primary" /> {billing.monthLabel} billing
+            <Receipt className="size-4 text-primary" /> {billing.monthLabel} মাসের বিল
           </h2>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            Rate ৳/min
+            রেট ৳/মিনিট
             <Input
               value={rate}
               onChange={(e) => setRate(e.target.value.replace(/[^\d.]/g, ""))}
@@ -114,21 +114,21 @@ function SystemBoard() {
           </label>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Tile label="Outgoing dials" value={String(billing.dials)} hint={`${billing.newLeads} new leads`} />
+          <Tile label="করা কল" value={String(billing.dials)} hint={`${billing.newLeads}টি নতুন লিড`} />
           <Tile
-            label="Connected"
+            label="কথা হয়েছে"
             value={`${billing.connectedPct.toFixed(0)}%`}
-            hint={`${billing.connected} of ${billing.dials} calls`}
+            hint={`${billing.dials}টির মধ্যে ${billing.connected}টি কলে`}
           />
           <Tile
-            label="Billable minutes"
+            label="বিলযোগ্য মিনিট"
             value={String(billing.billableMinutes)}
-            hint="Rounded up per call"
+            hint="প্রতি কলে উপরের দিকে গোনা"
           />
           <Tile
-            label="Estimated carrier cost"
+            label="আনুমানিক অপারেটর খরচ"
             value={`৳${billing.carrierCost.toFixed(2)}`}
-            hint={`${billing.aiAnalysed} calls AI-analysed`}
+            hint={`${billing.aiAnalysed}টি কল এআই দেখেছে`}
           />
         </div>
       </section>
@@ -136,33 +136,33 @@ function SystemBoard() {
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="card-elevated p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <Database className="size-4 text-primary" /> Data health
+            <Database className="size-4 text-primary" /> ডেটার অবস্থা
           </h2>
           <dl className="mt-3 space-y-1.5 text-sm">
-            <Row label="Agent profiles" value={`${profiles.filter((p) => p.is_active).length} active / ${profiles.length}`} />
-            <Row label="Leads" value={String(leads.length)} />
-            <Row label="Call recordings" value={String(calls.length)} />
-            <Row label="Verified audio" value={String(calls.filter((c) => c.sync_status === "verified").length)} />
-            <Row label="WhatsApp messages" value={String(messages.length)} />
-            <Row label="Deals won (all time)" value={String(leads.filter((l) => l.outcome_category === "deal_won").length)} />
+            <Row label="এজেন্ট প্রোফাইল" value={`${profiles.filter((p) => p.is_active).length} জন চালু / ${profiles.length}`} />
+            <Row label="লিড" value={String(leads.length)} />
+            <Row label="কল রেকর্ডিং" value={String(calls.length)} />
+            <Row label="যাচাই হওয়া অডিও" value={String(calls.filter((c) => c.sync_status === "verified").length)} />
+            <Row label="হোয়াটসঅ্যাপ মেসেজ" value={String(messages.length)} />
+            <Row label="ডিল জেতা (সব সময়ের)" value={String(leads.filter((l) => l.outcome_category === "deal_won").length)} />
           </dl>
           <h3 className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Lead sources
+            লিড কোথা থেকে এসেছে
           </h3>
           <dl className="mt-2 space-y-1.5 text-sm">
-            {sources.length === 0 && <p className="text-sm text-muted-foreground">No leads yet.</p>}
+            {sources.length === 0 && <p className="text-sm text-muted-foreground">এখনো কোনো লিড নেই।</p>}
             {sources.map(([source, total]) => (
-              <Row key={source} label={source} value={String(total)} />
+              <Row key={source} label={SOURCE_LABELS[source] ?? source} value={String(total)} />
             ))}
           </dl>
         </div>
 
         <div className="card-elevated p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <Radio className="size-4 text-primary" /> Ingestion endpoints
+            <Radio className="size-4 text-primary" /> ডেটা আসার ঠিকানা
           </h2>
           <p className="mt-2 text-xs text-muted-foreground">
-            Android client posts JSON with header <code>x-ingest-secret</code>.
+            অ্যান্ড্রয়েড অ্যাপ <code>x-ingest-secret</code> হেডার দিয়ে তথ্য পাঠায়।
           </p>
           <ul className="mt-3 space-y-2 text-sm">
             {ENDPOINTS.map((e) => (
@@ -176,12 +176,12 @@ function SystemBoard() {
             ))}
           </ul>
           <h3 className="mt-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <KeyRound className="size-3.5" /> Server keys in use
+            <KeyRound className="size-3.5" /> যেসব চাবি ব্যবহার হচ্ছে
           </h3>
           <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-            <li>Ingest secret — stored server-side, never shown</li>
-            <li>Master PIN — stored server-side, verified per unlock</li>
-            <li>AI transcription & summary key — managed by the platform</li>
+            <li>ইনজেস্ট সিক্রেট — সার্ভারে রাখা, কখনো দেখানো হয় না</li>
+            <li>মাস্টার পিন — সার্ভারে রাখা, প্রতিবার খোলার সময় মিলিয়ে দেখা হয়</li>
+            <li>এআই ট্রান্সক্রিপ্ট ও সারসংক্ষেপের চাবি — প্ল্যাটফর্ম নিজেই দেখে</li>
           </ul>
         </div>
       </section>
