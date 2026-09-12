@@ -42,7 +42,7 @@ fun SignInScreen(
     ) {
         Text("Winstone Connect", fontWeight = FontWeight.Bold, fontSize = 24.sp)
         Text(
-            "CRM এর ইমেইল ও পাসওয়ার্ড দিয়েই সাইন ইন করুন — এরপর আপনার লিড, কল আর WhatsApp সব এখানেই দেখাবে।",
+            "CRM এর ইমেইল ও পাসওয়ার্ড দিয়েই সাইন ইন করুন — এরপর আপনার লিড ও কল সব এখানেই দেখাবে।",
             color = WinInkMuted,
             fontSize = 13.sp,
             modifier = Modifier.padding(vertical = 12.dp),

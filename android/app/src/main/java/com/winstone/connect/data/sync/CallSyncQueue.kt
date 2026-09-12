@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit
 /**
  * Never lose a call log to a dead network.
  *
- * Everything the phone must push to the CRM (recording upload, WhatsApp log,
- * post-call outcome) is queued through WorkManager, so it survives a lost
+ * Everything the phone must push to the CRM (recording upload, post-call
+ * report and outcome) is queued through WorkManager, so it survives a lost
  * signal, an app kill and a reboot, and retries with backoff until the CRM
  * confirms it. This is what makes calls and messages *actually* land in the
  * database rather than only when the agent happens to have 4G.
@@ -74,19 +74,6 @@ object CallSyncQueue {
         )
     }
 
-    fun queueWhatsApp(context: Context, leadId: String?, phoneNumber: String, text: String) {
-        enqueue(
-            context,
-            unique = "wa_${System.currentTimeMillis()}_${phoneNumber.takeLast(4)}",
-            data = Data.Builder()
-                .putString(KEY_KIND, KIND_WHATSAPP)
-                .putString(KEY_LEAD, leadId)
-                .putString(KEY_PHONE, phoneNumber)
-                .putString(KEY_TEXT, text)
-                .build(),
-        )
-    }
-
     fun queueOutcome(context: Context, leadId: String, outcome: String, notes: String, connected: Boolean) {
         enqueue(
             context,
@@ -124,7 +111,6 @@ object CallSyncQueue {
     const val KEY_UPLOAD_ID = "client_upload_id"
 
     const val KIND_RECORDING = "recording"
-    const val KIND_WHATSAPP = "whatsapp"
     const val KIND_OUTCOME = "outcome"
     const val KIND_REPORT_OPEN = "report_open"
 }
@@ -155,17 +141,6 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         recorderSource = inputData.getString(CallSyncQueue.KEY_SOURCE) ?: "unknown",
                     )
                     file.delete()
-                    Result.success()
-                }
-
-                CallSyncQueue.KIND_WHATSAPP -> {
-                    WinstoneApi.logWhatsApp(
-                        leadId = leadId,
-                        phoneNumber = inputData.getString(CallSyncQueue.KEY_PHONE).orEmpty(),
-                        employeeId = employeeId,
-                        agentId = AgentSession.agentIdNow(applicationContext),
-                        text = inputData.getString(CallSyncQueue.KEY_TEXT).orEmpty(),
-                    )
                     Result.success()
                 }
 

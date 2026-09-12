@@ -23,6 +23,8 @@ data class DeskUiState(
     val toast: String? = null,
     val coach: WinstoneAgentApi.Coach? = null,
     val coachLoading: Boolean = false,
+    /** Local time of the last successful CRM sync, for the status screen. */
+    val lastSyncedAt: String? = null,
 )
 
 class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -83,6 +85,8 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
                     _state.value = _state.value.copy(
                         loading = false,
                         error = null,
+                        lastSyncedAt = java.text.SimpleDateFormat("dd MMM, hh:mm a", java.util.Locale.getDefault())
+                            .format(java.util.Date()),
                         data = DeskData(
                             agentId = ws.agentId,
                             agentName = ws.agentName,

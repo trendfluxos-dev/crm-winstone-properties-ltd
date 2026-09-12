@@ -24,10 +24,21 @@ class CallRecorder(private val context: Context) {
     /** voice_call = call audio source accepted, mic = OEM refused and we fell back. */
     var recorderSource: String = "unknown"; private set
 
+    /** Why recording could not start on this device (null when it did start). */
+    var unavailableReason: String? = null; private set
+
     val isRecording: Boolean get() = recorder != null
 
     fun start(leadId: String?): Boolean {
         stopQuietly()
+        unavailableReason = null
+        val capability = RecordingCapabilityCheck.check(context)
+        if (!capability.available) {
+            // Never fabricate a recording: report the technical reason instead.
+            unavailableReason = capability.reason
+            recorderSource = "unavailable"
+            return false
+        }
         val dir = File(context.cacheDir, "calls").apply { mkdirs() }
         val file = File(dir, "call_${leadId ?: "unknown"}_${System.currentTimeMillis()}.m4a")
 
@@ -65,6 +76,8 @@ class CallRecorder(private val context: Context) {
                 startedAt = System.currentTimeMillis()
                 true
             } catch (second: Exception) {
+                unavailableReason = second.message ?: second.javaClass.simpleName
+                recorderSource = "unavailable"
                 runCatching { rec.release() }
                 recorder = null
                 output = null
