@@ -1,5 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PhoneCall, ShieldCheck, Timer, TrendingUp, Users } from "lucide-react";
+import {
+  Flame,
+  ListChecks,
+  PhoneCall,
+  ShieldCheck,
+  Snowflake,
+  Timer,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   Bar,
