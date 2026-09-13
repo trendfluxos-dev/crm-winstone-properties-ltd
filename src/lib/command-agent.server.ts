@@ -246,11 +246,113 @@ Hard rules:
 
 ${ACTION_CATALOGUE}
 
-Reply with strict JSON, no markdown fences:
-{"answer": "2-6 sentences in Bengali",
- "facts": ["short Bengali fact with the number it came from", "..."],
- "actions": [{"type": "...", "label": "Bengali button text", "params": { ... }}]}
-Keep facts under 5 items and actions under 4.`;
+Think before answering: check the numbers, look for the real blocker, then answer.
+Keep facts under 5 items and actions under 4. Unused params are null.`;
+
+/**
+ * Strict output shape. Every property is required and optional values are
+ * nullable — that is what the Responses API needs for schema-enforced JSON.
+ */
+const ANSWER_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["answer", "facts", "actions"],
+  properties: {
+    answer: { type: "string" },
+    facts: { type: "array", items: { type: "string" } },
+    actions: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["type", "label", "params"],
+        properties: {
+          type: {
+            type: "string",
+            enum: [
+              "assign_leads",
+              "distribute_unassigned",
+              "classify_lead",
+              "retry_recording",
+              "verify_drive",
+              "generate_shift_summary",
+              "acknowledge_alert",
+              "retry_failed_recordings",
+            ],
+          },
+          label: { type: "string" },
+          params: {
+            type: "object",
+            additionalProperties: false,
+            required: [
+              "agent_id",
+              "count",
+              "lead_id",
+              "temperature",
+              "grade",
+              "note",
+              "recording_id",
+              "step",
+              "limit",
+              "alert_id",
+            ],
+            properties: {
+              agent_id: { type: ["string", "null"] },
+              count: { type: ["number", "null"] },
+              lead_id: { type: ["string", "null"] },
+              temperature: { type: ["string", "null"] },
+              grade: { type: ["string", "null"] },
+              note: { type: ["string", "null"] },
+              recording_id: { type: ["string", "null"] },
+              step: { type: ["string", "null"] },
+              limit: { type: ["number", "null"] },
+              alert_id: { type: ["string", "null"] },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+/** Reads the streamed Responses SSE body and returns the joined answer text. */
+async function readResponsesStream(body: ReadableStream<Uint8Array>): Promise<string> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+
+  while (true) {
+    const chunk = await reader.read();
+    if (chunk.done) break;
+    buffer += decoder.decode(chunk.value, { stream: true });
+
+    let cut = buffer.indexOf("\n");
+    while (cut !== -1) {
+      const line = buffer.slice(0, cut).trim();
+      buffer = buffer.slice(cut + 1);
+      cut = buffer.indexOf("\n");
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      try {
+        const event = JSON.parse(payload) as {
+          type?: string;
+          delta?: string;
+          response?: { output_text?: string };
+        };
+        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+          text += event.delta;
+        } else if (event.type === "response.completed" && event.response?.output_text) {
+          if (!text) text = event.response.output_text;
+        }
+      } catch {
+        // A partial SSE frame is normal mid-stream; the next chunk completes it.
+      }
+    }
+  }
+  return text;
+}
 
 export async function runCommandAgent(
   caller: Caller,
@@ -264,31 +366,62 @@ export async function runCommandAgent(
   const facts = await buildCommandFacts(caller, surface);
   const allowed = allowedActions(caller);
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  // Reasoning model on the Responses API: it must stream, or a long thinking run
+  // is cut off by the request timeout and billed for nothing.
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    headers: {
+      "Content-Type": "application/json",
+      "Lovable-API-Key": key,
+      "X-Lovable-AIG-SDK": "fetch",
+    },
     body: JSON.stringify({
-      model: "google/gemini-3-flash",
-      messages: [
-        { role: "system", content: SYSTEM },
-        ...history.slice(-6),
+      model: "openai/gpt-6-astra",
+      stream: true,
+      store: false,
+      reasoning: { effort: "medium", summary: "auto" },
+      text: {
+        format: {
+          type: "json_schema",
+          name: "winstone_answer",
+          strict: true,
+          schema: ANSWER_SCHEMA,
+        },
+      },
+      input: [
+        { role: "system", content: [{ type: "input_text", text: SYSTEM }] },
+        ...history.slice(-6).map((turn) => ({
+          role: turn.role,
+          content: [
+            turn.role === "assistant"
+              ? { type: "output_text", text: turn.content }
+              : { type: "input_text", text: turn.content },
+          ],
+        })),
         {
           role: "user",
-          content: `allowed_actions: ${JSON.stringify(allowed)}\nlive_data: ${JSON.stringify(
-            facts,
-          )}\n\nপ্রশ্ন/নির্দেশ: ${question}`,
+          content: [
+            {
+              type: "input_text",
+              text: `allowed_actions: ${JSON.stringify(allowed)}\nlive_data: ${JSON.stringify(
+                facts,
+              )}\n\nপ্রশ্ন/নির্দেশ: ${question}`,
+            },
+          ],
         },
       ],
-      response_format: { type: "json_object" },
     }),
   });
 
   if (response.status === 429) throw new Error("এআই এখন ব্যস্ত — একটু পরে আবার চেষ্টা করুন");
   if (response.status === 402) throw new Error("এআই ক্রেডিট শেষ হয়ে গেছে");
-  if (!response.ok) throw new Error(`এআই সাড়া দেয়নি (${response.status})`);
+  if (!response.ok || !response.body) {
+    const detail = response.ok ? "" : await response.text().catch(() => "");
+    console.error("[command-agent] gateway error", response.status, detail.slice(0, 300));
+    throw new Error(`এআই সাড়া দেয়নি (${response.status})`);
+  }
 
-  const payload = (await response.json()) as { choices?: { message?: { content?: string } }[] };
-  const raw = payload.choices?.[0]?.message?.content ?? "";
+  const raw = await readResponsesStream(response.body);
 
   let parsed: Partial<CommandAnswer> = {};
   try {
@@ -296,6 +429,7 @@ export async function runCommandAgent(
   } catch {
     return { answer: raw || "উত্তর তৈরি হয়নি — আবার চেষ্টা করুন", facts: [], actions: [] };
   }
+
 
   // Never surface an action this caller may not run, whatever the model returned.
   const actions = (parsed.actions ?? [])
