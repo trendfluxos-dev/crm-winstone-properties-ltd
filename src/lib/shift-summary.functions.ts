@@ -14,7 +14,9 @@ export const shiftSummaries = createServerFn({ method: "POST" })
     requireDispatch(await resolveCaller(data.adminToken ?? null));
     const { listShiftSummaries } = await import("@/lib/shift-summary.server");
     const rows = await listShiftSummaries(data.scope, data.scope === "it" ? 200 : 60);
-    return { rows, scope: data.scope };
+    const { shiftDriveLinks } = await import("@/lib/shift-drive.server");
+    const driveLinks = await shiftDriveLinks(rows.map((row) => row.shift_key));
+    return { rows, scope: data.scope, driveLinks };
   });
 
 /** Manual "generate now" for the window that already closed today. */
@@ -52,4 +54,22 @@ export const backfillShiftSummariesNow = createServerFn({ method: "POST" })
     requireAuthority(await resolveCaller(data.adminToken ?? null));
     const { backfillShiftSummaries } = await import("@/lib/shift-summary.server");
     return backfillShiftSummaries();
+  });
+
+
+/** Uploads one stored summary to the company Drive shift folder on demand. */
+export const exportShiftSummaryToDrive = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({ adminToken: z.string().nullable().optional(), shiftKey: z.string().min(3) })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const { getDriveBackupSettings } = await import("@/lib/recording-drive.server");
+    const settings = await getDriveBackupSettings();
+    if (!settings.enabled) throw new Error("Google Drive ব্যাকআপ বন্ধ আছে");
+    const { backupShiftSummaryToDrive } = await import("@/lib/shift-drive.server");
+    return backupShiftSummaryToDrive(data.shiftKey);
   });
