@@ -66,3 +66,26 @@ export const backupSingleRecordingToDriveFn = createServerFn({ method: "POST" })
     requireAuthority(caller);
     return backupRecordingToDrive(data.recordingId);
   });
+
+/** Realign every active agent's Drive folder (create / rename / move). */
+export const syncAgentDriveFoldersFn = createServerFn({ method: "POST" })
+  .handler(async () => {
+    const { resolveCaller, requireAuthority } = await import("./access.server");
+    const caller = await resolveCaller();
+    requireAuthority(caller);
+    const settings = await getDriveBackupSettings();
+    if (!settings.enabled) throw new Error("Google Drive ব্যাকআপ বন্ধ আছে");
+    if (!settings.folderId) throw new Error("Google Drive ফোল্ডার আইডি দেওয়া হয়নি");
+    const { syncAgentDriveFolders } = await import("./drive-agent-folders.server");
+    return syncAgentDriveFolders(settings.folderId);
+  });
+
+/** Current agent → Drive folder mapping for the IT Console list. */
+export const listAgentDriveFoldersFn = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { resolveCaller, requireAuthority } = await import("./access.server");
+    const caller = await resolveCaller();
+    requireAuthority(caller);
+    const { listAgentDriveFolders } = await import("./drive-agent-folders.server");
+    return listAgentDriveFolders();
+  });
