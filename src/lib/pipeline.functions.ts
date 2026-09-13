@@ -329,8 +329,8 @@ export const retryPipelineItem = createServerFn({ method: "POST" })
         await audit(result.status, result.driveFileId ?? null);
         return { ok: true as const, outcome: result.status, detail: result.driveFileId ?? null };
       }
-      const { analyzeRecording } = await import("@/lib/analysis-queue.server");
-      const outcome = await analyzeRecording(data.recordingId);
+      const { analyzeOne } = await import("@/lib/analysis-queue.server");
+      const outcome = await analyzeOne(data.recordingId);
       await audit(String(outcome), null);
       return { ok: true as const, outcome: String(outcome), detail: null };
     } catch (error) {
