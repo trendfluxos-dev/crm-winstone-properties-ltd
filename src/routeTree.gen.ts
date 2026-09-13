@@ -29,6 +29,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VoiceTranscriptionRouteImport } from './routes/voice-transcription'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DocsSlugRouteImport } from './routes/docs_.$slug'
+import { Route as HelpSlugRouteImport } from './routes/help_.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicSmokeRouteImport } from './routes/api/public/smoke'
 import { Route as DocsAdminEditorSlugRouteImport } from './routes/docs-admin_.editor.$slug'
@@ -156,6 +157,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
 const DocsSlugRoute = DocsSlugRouteImport.update({
   id: '/docs_/$slug',
   path: '/docs/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpSlugRoute = HelpSlugRouteImport.update({
+  id: '/help_/$slug',
+  path: '/help/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
@@ -322,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
+  '/help/$slug': typeof HelpSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
@@ -371,6 +378,7 @@ export interface FileRoutesByTo {
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
+  '/help/$slug': typeof HelpSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin/editor/$slug': typeof DocsAdminEditorSlugRoute
@@ -421,6 +429,7 @@ export interface FileRoutesById {
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs_/$slug': typeof DocsSlugRoute
+  '/help_/$slug': typeof HelpSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/smoke': typeof ApiPublicSmokeRoute
   '/docs-admin_/editor/$slug': typeof DocsAdminEditorSlugRoute
@@ -472,6 +481,7 @@ export interface FileRouteTypes {
     | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
+    | '/help/$slug'
     | '/.lovable/oauth/consent'
     | '/api/public/smoke'
     | '/docs-admin/editor/$slug'
@@ -521,6 +531,7 @@ export interface FileRouteTypes {
     | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
+    | '/help/$slug'
     | '/.lovable/oauth/consent'
     | '/api/public/smoke'
     | '/docs-admin/editor/$slug'
@@ -570,6 +581,7 @@ export interface FileRouteTypes {
     | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs_/$slug'
+    | '/help_/$slug'
     | '/.lovable/oauth/consent'
     | '/api/public/smoke'
     | '/docs-admin_/editor/$slug'
@@ -620,6 +632,7 @@ export interface RootRouteChildren {
   VoiceTranscriptionRoute: typeof VoiceTranscriptionRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DocsSlugRoute: typeof DocsSlugRoute
+  HelpSlugRoute: typeof HelpSlugRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicSmokeRoute: typeof ApiPublicSmokeRoute
   DocsAdminEditorSlugRoute: typeof DocsAdminEditorSlugRoute
@@ -789,6 +802,13 @@ declare module '@tanstack/react-router' {
       path: '/docs/$slug'
       fullPath: '/docs/$slug'
       preLoaderRoute: typeof DocsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help_/$slug': {
+      id: '/help_/$slug'
+      path: '/help/$slug'
+      fullPath: '/help/$slug'
+      preLoaderRoute: typeof HelpSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.lovable/oauth/consent': {
@@ -1005,6 +1025,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DocsSlugRoute: DocsSlugRoute,
+  HelpSlugRoute: HelpSlugRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicSmokeRoute: ApiPublicSmokeRoute,
   DocsAdminEditorSlugRoute: DocsAdminEditorSlugRoute,
