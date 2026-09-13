@@ -218,6 +218,49 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /**
+     * Opens WhatsApp on the agent's own phone with the typed message, then syncs
+     * that message to the CRM so it appears on the lead timeline. The message is
+     * only recorded as sent from this phone — nothing is marked delivered, since
+     * WhatsApp never reports delivery back to us.
+     */
+    fun sendWhatsApp(leadId: String, phone: String, text: String) {
+        val body = text.trim()
+        if (body.isBlank()) return
+        val digits = phone.filter { it.isDigit() }
+        val waNumber = when {
+            digits.startsWith("880") -> digits
+            digits.startsWith("0") -> "880" + digits.drop(1)
+            else -> digits
+        }
+        val opened = runCatching {
+            val intent = android.content.Intent(
+                android.content.Intent.ACTION_VIEW,
+                android.net.Uri.parse(
+                    "https://wa.me/$waNumber?text=" + java.net.URLEncoder.encode(body, "UTF-8"),
+                ),
+            ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            app.startActivity(intent)
+        }.isSuccess
+        if (!opened) {
+            _state.value = _state.value.copy(toast = "এই ফোনে হোয়াটসঅ্যাপ খোলা যায়নি")
+            return
+        }
+        viewModelScope.launch {
+            val clientMessageId = "wa-" + java.util.UUID.randomUUID().toString()
+            runCatching { WinstoneAgentApi.syncWhatsApp(leadId, clientMessageId, body) }
+                .onSuccess {
+                    _state.value = _state.value.copy(toast = "হোয়াটসঅ্যাপ মেসেজ CRM-এ জমা হয়েছে")
+                    refresh(silent = true)
+                }
+                .onFailure {
+                    _state.value = _state.value.copy(
+                        toast = it.message ?: "মেসেজ CRM-এ জমা হয়নি — আবার চেষ্টা করুন",
+                    )
+                }
+        }
+    }
+
     fun clearToast() {
         _state.value = _state.value.copy(toast = null)
     }
