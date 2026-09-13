@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, Loader2, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSnapshot, type Lead } from "@/lib/crm-data";
 import { useAdminToken } from "@/lib/local-session";
-import { setLeadWorkDate } from "@/lib/workday.functions";
+import { myDayPerformance, setLeadWorkDate } from "@/lib/workday.functions";
 
 /**
  * Day-by-day lead work.
@@ -79,6 +79,17 @@ export function LeadDayBoard() {
 
   const done = dayLeads.filter((l) => l.work_state === "completed").length;
 
+  // The day's calling performance, from the agent's own submitted reports.
+  // Every dialled call counts, including calls shorter than three seconds.
+  const performance = useServerFn(myDayPerformance);
+  const perf = useQuery({
+    queryKey: ["my-day-performance", day, adminToken],
+    queryFn: () => performance({ data: { adminToken, day } }),
+    refetchInterval: 60_000,
+  });
+  const stats = perf.data;
+  const minutes = Math.round((stats?.talkSeconds ?? 0) / 60);
+
   return (
     <section className="card-elevated space-y-3 p-4">
       <header className="flex flex-wrap items-center gap-2">
@@ -96,6 +107,25 @@ export function LeadDayBoard() {
           {dayLeads.length}টি লিড · {done}টি শেষ · {dayLeads.length - done}টি বাকি
         </span>
       </header>
+
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {[
+          { label: "মোট কল", value: stats ? String(stats.calls) : "—" },
+          { label: "কথা হয়েছে", value: stats ? String(stats.connected) : "—" },
+          { label: "কথার সময়", value: stats ? `${minutes} মিনিট` : "—" },
+          { label: "৩ সেকেন্ডের কম", value: stats ? String(stats.veryShort) : "—" },
+        ].map((item) => (
+          <div key={item.label} className="rounded-lg border border-border bg-muted/40 p-2">
+            <dt className="text-[11px] text-muted-foreground">{item.label}</dt>
+            <dd className="text-base font-bold tabular-nums">{item.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {stats && stats.pending > 0 ? (
+        <p className="text-xs font-semibold text-destructive">
+          {stats.pending}টি রিপোর্ট জমা বাকি আছে।
+        </p>
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         পুরোনো যেকোনো লিড খুঁজে এই দিনের কাজে আনতে পারেন — লিড আপনার তালিকা থেকে কখনো সরে না, শুধু

@@ -57,7 +57,10 @@ export async function intakeLead(input: {
       company: input.company?.trim() || null,
       notes: input.notes?.trim() || null,
       address: input.address?.trim() || null,
-      serial_no: input.serialNo?.trim() || null,
+      serial_no: input.serialNo?.trim() || (await nextSerialNo()),
+      // A newly assigned or self-added lead belongs to the day it arrived, and
+      // sits last in the serial order — exactly how the floor hands work out.
+      work_date: dhakaToday(),
       reference_by: input.referenceBy?.trim() || (owner ? input.ownerName?.trim() || null : null),
       source: owner ? "agent_app" : (input.source ?? "webhook"),
       status: "pending",
@@ -90,4 +93,28 @@ export async function intakeLead(input: {
   });
 
   return { leadId: created.id, duplicate: false, assignedTo: owner };
+}
+
+/** Today in Dhaka, as the working day a new lead belongs to. */
+function dhakaToday(): string {
+  return new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+/**
+ * The next serial in line. A lead added or assigned today lands at the end of
+ * the list, so the floor order is never reshuffled by a late arrival.
+ */
+async function nextSerialNo(): Promise<string> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("leads")
+    .select("serial_no")
+    .not("serial_no", "is", null)
+    .limit(5000);
+  let max = 0;
+  for (const row of data ?? []) {
+    const digits = Number(String(row.serial_no ?? "").replace(/\D/g, ""));
+    if (Number.isFinite(digits) && digits > max) max = digits;
+  }
+  return String(max + 1);
 }
