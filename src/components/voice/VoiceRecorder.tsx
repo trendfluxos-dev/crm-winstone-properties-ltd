@@ -181,7 +181,9 @@ export function VoiceRecorder() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">বাংলা ভয়েস ট্রান্সক্রিপশন</h2>
-              <p className="text-sm text-muted-foreground">মাইক বোতাম চাপুন, বলুন — লেখা স্বয়ংক্রিয়ভাবে আসবে</p>
+              <p className="text-sm text-muted-foreground">
+                মাইক বোতাম চাপুন, বলুন — লেখা স্বয়ংক্রিয়ভাবে আসবে
+              </p>
             </div>
             <select
               value={language}
@@ -210,7 +212,12 @@ export function VoiceRecorder() {
                 রেকর্ড শুরু করুন
               </Button>
             ) : (
-              <Button size="lg" variant="destructive" onClick={() => stopRecording()} disabled={busy}>
+              <Button
+                size="lg"
+                variant="destructive"
+                onClick={() => stopRecording()}
+                disabled={busy}
+              >
                 <Square className="mr-2 size-5" />
                 থামুন
               </Button>

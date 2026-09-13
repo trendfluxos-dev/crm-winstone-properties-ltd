@@ -1,14 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  Activity,
-  BellRing,
-  Check,
-  Loader2,
-  RefreshCw,
-  ShieldOff,
-  Smartphone,
-} from "lucide-react";
+import { Activity, BellRing, Check, Loader2, RefreshCw, ShieldOff, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -183,7 +175,9 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="secondary">দুই পাশ: {data.recording?.twoSided ?? 0}</Badge>
               <Badge variant="secondary">শুধু এজেন্ট: {data.recording?.micOnly ?? 0}</Badge>
-              <Badge variant="destructive">রেকর্ডিং সম্ভব নয়: {data.recording?.blocked ?? 0}</Badge>
+              <Badge variant="destructive">
+                রেকর্ডিং সম্ভব নয়: {data.recording?.blocked ?? 0}
+              </Badge>
               <Badge variant="outline">যাচাই বাকি: {data.recording?.untested ?? 0}</Badge>
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -215,7 +209,8 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
                       </Badge>
                       {device.agentSim ? (
                         <Badge variant={device.simMatched ? "secondary" : "destructive"}>
-                          সিম {device.agentSim}{device.simMatched ? " · যাচাই হয়েছে" : " · মিলছে না"}
+                          সিম {device.agentSim}
+                          {device.simMatched ? " · যাচাই হয়েছে" : " · মিলছে না"}
                           {device.agentName ? ` · ${device.agentName}` : ""}
                         </Badge>
                       ) : (

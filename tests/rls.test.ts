@@ -37,7 +37,9 @@ describe.runIf(url && key)("RLS: an unauthenticated client cannot read productio
   });
 
   it("cannot list call recordings", async () => {
-    expect(blocked(await anon.from("call_recordings").select("id, storage_path").limit(1))).toBe(true);
+    expect(blocked(await anon.from("call_recordings").select("id, storage_path").limit(1))).toBe(
+      true,
+    );
   });
 
   it("cannot list call reports", async () => {
@@ -61,7 +63,9 @@ describe.runIf(url && key)("RLS: an unauthenticated client cannot read productio
   });
 
   it("cannot read the AI usage ledger", async () => {
-    expect(blocked(await anon.from("ai_usage_events").select("id, est_credits").limit(1))).toBe(true);
+    expect(blocked(await anon.from("ai_usage_events").select("id, est_credits").limit(1))).toBe(
+      true,
+    );
   });
 });
 
@@ -83,7 +87,10 @@ describe.runIf(url && key)("RLS: an unauthenticated client cannot write producti
   });
 
   it("cannot approve a profile", async () => {
-    const result = await anon.from("profiles").update({ approval_status: "approved" }).neq("id", "");
+    const result = await anon
+      .from("profiles")
+      .update({ approval_status: "approved" })
+      .neq("id", "");
     expect(result.error).toBeTruthy();
   });
 

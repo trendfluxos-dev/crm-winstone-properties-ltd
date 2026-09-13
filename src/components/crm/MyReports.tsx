@@ -37,7 +37,8 @@ export function MyReports() {
             <CalendarClock className="size-5 text-primary" /> আপকমিং কাজ
           </h2>
           <p className="text-xs text-muted-foreground sm:text-sm">
-            {upcoming.length}টি কাজ বাকি{data?.overdueCount ? ` · ${data.overdueCount}টির সময় পার হয়েছে` : ""}
+            {upcoming.length}টি কাজ বাকি
+            {data?.overdueCount ? ` · ${data.overdueCount}টির সময় পার হয়েছে` : ""}
           </p>
         </div>
         {upcoming.length === 0 ? (

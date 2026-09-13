@@ -36,9 +36,7 @@ async function gatewayFetch(path: string) {
   if (!response.ok) {
     console.error(`Sheets gateway failed [${response.status}]: ${body}`);
     if (response.status === 403 || response.status === 404) {
-      throw new Error(
-        "শিটটি পড়া যায়নি — সংযুক্ত Google অ্যাকাউন্টকে এই শিটের অ্যাক্সেস দিন",
-      );
+      throw new Error("শিটটি পড়া যায়নি — সংযুক্ত Google অ্যাকাউন্টকে এই শিটের অ্যাক্সেস দিন");
     }
     throw new Error(`Google Sheets ত্রুটি [${response.status}]: ${body.slice(0, 300)}`);
   }
@@ -47,9 +45,9 @@ async function gatewayFetch(path: string) {
 
 /** Tab names in the spreadsheet, in sheet order. */
 export async function listSheetTabs(sheetId: string): Promise<string[]> {
-  const meta = (await gatewayFetch(
-    `/spreadsheets/${sheetId}?fields=sheets.properties.title`,
-  )) as { sheets?: { properties?: { title?: string } }[] } | null;
+  const meta = (await gatewayFetch(`/spreadsheets/${sheetId}?fields=sheets.properties.title`)) as {
+    sheets?: { properties?: { title?: string } }[];
+  } | null;
   return (meta?.sheets ?? []).map((s) => s.properties?.title ?? "").filter(Boolean);
 }
 

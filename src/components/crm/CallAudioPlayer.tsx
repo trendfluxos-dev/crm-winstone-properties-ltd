@@ -228,7 +228,11 @@ export function CallAudioPlayer({
             }
           }}
         >
-          {downloading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}{" "}
+          {downloading ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Download className="size-3.5" />
+          )}{" "}
           ডাউনলোড
         </Button>
         <div className="ml-auto flex items-center gap-1 rounded-full bg-ink-foreground/10 p-1">
@@ -256,7 +260,9 @@ export function CallAudioPlayer({
       )}
 
       {downloadError && (
-        <p className="mt-2 text-xs text-destructive">রেকর্ডিং ডাউনলোড করা যায়নি — আবার চেষ্টা করুন।</p>
+        <p className="mt-2 text-xs text-destructive">
+          রেকর্ডিং ডাউনলোড করা যায়নি — আবার চেষ্টা করুন।
+        </p>
       )}
     </div>
   );

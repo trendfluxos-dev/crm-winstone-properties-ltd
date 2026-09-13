@@ -53,7 +53,9 @@ export function DriveBackupPanel() {
   const save = useMutation({
     mutationFn: async () => {
       const folderId = folderIdDraft.trim() || (settings?.folderId ?? null);
-      return saveSettings({ data: { adminToken, enabled: enabledDraft ?? settings?.enabled ?? false, folderId } });
+      return saveSettings({
+        data: { adminToken, enabled: enabledDraft ?? settings?.enabled ?? false, folderId },
+      });
     },
     onSuccess: () => {
       toast.success("Google Drive ব্যাকআপ সেটিংস সংরক্ষিত হয়েছে");
@@ -77,9 +79,7 @@ export function DriveBackupPanel() {
   const recordingsSync = useMutation({
     mutationFn: () => syncRecordings({ data: { adminToken, dateKey } }),
     onSuccess: (data) => {
-      toast.success(
-        `${data.attempted}টি চেষ্টা · ${data.done}টি জমা · ${data.failed}টি ব্যর্থ`,
-      );
+      toast.success(`${data.attempted}টি চেষ্টা · ${data.done}টি জমা · ${data.failed}টি ব্যর্থ`);
       if (data.errors.length > 0) console.error("Drive sync errors", data.errors);
     },
     onError: (error: Error) => toast.error(error.message),
@@ -88,7 +88,9 @@ export function DriveBackupPanel() {
   const docSync = useMutation({
     mutationFn: () => syncDoc({ data: { adminToken, dateKey } }),
     onSuccess: (data) => {
-      toast.success(`${data.calls}টি কল · ${data.recordings}টি রেকর্ডিংয়ের ডক Google Drive-ে জমা হয়েছে`);
+      toast.success(
+        `${data.calls}টি কল · ${data.recordings}টি রেকর্ডিংয়ের ডক Google Drive-ে জমা হয়েছে`,
+      );
       window.open(data.docUrl, "_blank", "noopener,noreferrer");
     },
     onError: (error: Error) => toast.error(error.message),
@@ -120,8 +122,7 @@ export function DriveBackupPanel() {
   });
 
   const enabledValue = enabledDraft ?? settings?.enabled ?? false;
-  const folderIdValue =
-    folderIdDraft || settings?.folderId || "";
+  const folderIdValue = folderIdDraft || settings?.folderId || "";
 
   return (
     <section className="card-elevated p-4">
@@ -131,8 +132,8 @@ export function DriveBackupPanel() {
       </header>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        রেকর্ডিং ফাইল ও দৈনিক সারসংক্ষেপ ডক সরাসরি কোম্পানির নির্ধারিত Google Drive ফোল্ডারে জমা হয়।
-        এখানে ফোল্ডার আইডি দিন, বা "নতুন ফোল্ডার তৈরি করুন" চাপুন।
+        রেকর্ডিং ফাইল ও দৈনিক সারসংক্ষেপ ডক সরাসরি কোম্পানির নির্ধারিত Google Drive ফোল্ডারে জমা
+        হয়। এখানে ফোল্ডার আইডি দিন, বা "নতুন ফোল্ডার তৈরি করুন" চাপুন।
       </p>
 
       {isLoading ? (
@@ -173,7 +174,11 @@ export function DriveBackupPanel() {
                   onClick={() => init.mutate()}
                   title="Winstone Recordings নামে ফোল্ডার তৈরি/বের করুন"
                 >
-                  {init.isPending ? <Loader2 className="size-4 animate-spin" /> : <FolderSync className="size-4" />}
+                  {init.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <FolderSync className="size-4" />
+                  )}
                 </Button>
               </div>
               {settings?.folderUrl && (
@@ -194,7 +199,11 @@ export function DriveBackupPanel() {
               disabled={save.isPending}
               onClick={() => save.mutate()}
             >
-              {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="mr-1 size-4" />}
+              {save.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Save className="mr-1 size-4" />
+              )}
               সেটিংস সংরক্ষণ করুন
             </Button>
           </div>
@@ -219,7 +228,11 @@ export function DriveBackupPanel() {
                 disabled={recordingsSync.isPending}
                 onClick={() => recordingsSync.mutate()}
               >
-                {recordingsSync.isPending ? <Loader2 className="size-4 animate-spin" /> : "রেকর্ডিং জমা"}
+                {recordingsSync.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  "রেকর্ডিং জমা"
+                )}
               </Button>
               <Button
                 size="sm"
@@ -271,8 +284,8 @@ export function DriveBackupPanel() {
 
             <p className="text-xs text-muted-foreground">
               প্রত্যেক এজেন্টের রেকর্ডিং তার নিজের ফোল্ডারে জমা হয়। নতুন এজেন্ট যোগ হলে ফোল্ডার
-              স্বয়ংক্রিয়ভাবে তৈরি হয়, নাম বা Agent ID বদলালে একই ফোল্ডারের নাম বদলে যায়, আর কোম্পানির
-              মূল ফোল্ডার বদলালে সব ফোল্ডার নতুন জায়গায় সরে যায়।
+              স্বয়ংক্রিয়ভাবে তৈরি হয়, নাম বা Agent ID বদলালে একই ফোল্ডারের নাম বদলে যায়, আর
+              কোম্পানির মূল ফোল্ডার বদলালে সব ফোল্ডার নতুন জায়গায় সরে যায়।
             </p>
 
             {agentFolders && agentFolders.length > 0 ? (
@@ -295,9 +308,7 @@ export function DriveBackupPanel() {
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-muted-foreground">
-                এখনো কোনো এজেন্ট ফোল্ডার তৈরি হয়নি।
-              </p>
+              <p className="text-xs text-muted-foreground">এখনো কোনো এজেন্ট ফোল্ডার তৈরি হয়নি।</p>
             )}
           </div>
         </div>

@@ -59,7 +59,9 @@ export function PreCallBriefCard({ leadId }: { leadId: string }) {
 
           {data.objections.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">সম্ভাব্য আপত্তি</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                সম্ভাব্য আপত্তি
+              </p>
               {data.objections.map((item) => (
                 <div key={item.objection} className="rounded-lg border border-border bg-card p-3">
                   <p className="font-medium">{item.objection}</p>

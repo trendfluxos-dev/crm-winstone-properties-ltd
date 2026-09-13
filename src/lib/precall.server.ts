@@ -54,7 +54,10 @@ async function loadLead(leadId: string) {
   };
 }
 
-function fallback(lead: Lead, hasHistory: boolean): Omit<PreCallBrief, "leadId" | "leadName" | "generatedAt" | "aiAvailable"> {
+function fallback(
+  lead: Lead,
+  hasHistory: boolean,
+): Omit<PreCallBrief, "leadId" | "leadName" | "generatedAt" | "aiAvailable"> {
   return {
     headline: hasHistory ? "আগের কথাবার্তা পড়ে কল করুন" : "প্রথম যোগাযোগ",
     opener: hasHistory
@@ -111,7 +114,10 @@ export async function buildPreCallBrief(leadId: string): Promise<PreCallBrief> {
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: "system", content: `${SYSTEM}\nToday is ${new Date().toISOString().slice(0, 10)}.` },
+          {
+            role: "system",
+            content: `${SYSTEM}\nToday is ${new Date().toISOString().slice(0, 10)}.`,
+          },
           { role: "user", content: JSON.stringify(evidence) },
         ],
         response_format: { type: "json_object" },

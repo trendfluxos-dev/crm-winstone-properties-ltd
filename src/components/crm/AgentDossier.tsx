@@ -30,7 +30,9 @@ export function AgentDossier({
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
     [calls, agent?.id],
   );
-  const touches = messages.filter((m) => m.agent_id === agent?.id && m.sender_type === "agent").length;
+  const touches = messages.filter(
+    (m) => m.agent_id === agent?.id && m.sender_type === "agent",
+  ).length;
   const connected = agentCalls.filter((c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS);
   const talk = agentCalls.reduce((s, c) => s + c.duration_seconds, 0);
   const verified = agentCalls.filter((c) => c.is_two_sided || c.sync_status === "verified").length;
@@ -51,10 +53,26 @@ export function AgentDossier({
                 {relativeTime(agent.last_active_at)}
               </p>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-                <Stat icon={<PhoneCall className="size-3" />} label="কল / কথা হয়েছে" value={`${agentCalls.length} / ${connected.length}`} />
-                <Stat icon={<Timer className="size-3" />} label="কথা · গড়" value={`${formatTalkTime(talk)} · ${connected.length ? formatDuration(talk / connected.length) : "--:--"}`} />
-                <Stat icon={<MessageCircle className="size-3" />} label="হোয়াটসঅ্যাপ" value={String(touches)} />
-                <Stat icon={<BadgeCheck className="size-3 text-verified" />} label="যাচাই হওয়া অডিও" value={String(verified)} />
+                <Stat
+                  icon={<PhoneCall className="size-3" />}
+                  label="কল / কথা হয়েছে"
+                  value={`${agentCalls.length} / ${connected.length}`}
+                />
+                <Stat
+                  icon={<Timer className="size-3" />}
+                  label="কথা · গড়"
+                  value={`${formatTalkTime(talk)} · ${connected.length ? formatDuration(talk / connected.length) : "--:--"}`}
+                />
+                <Stat
+                  icon={<MessageCircle className="size-3" />}
+                  label="হোয়াটসঅ্যাপ"
+                  value={String(touches)}
+                />
+                <Stat
+                  icon={<BadgeCheck className="size-3 text-verified" />}
+                  label="যাচাই হওয়া অডিও"
+                  value={String(verified)}
+                />
               </dl>
             </SheetHeader>
 

@@ -8,12 +8,14 @@ type OauthNamespace = {
   getAuthorizationDetails: (
     id: string,
   ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
-  approveAuthorization: (
-    id: string,
-  ) => Promise<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
-  denyAuthorization: (
-    id: string,
-  ) => Promise<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
+  approveAuthorization: (id: string) => Promise<{
+    data: { redirect_url?: string; redirect_to?: string } | null;
+    error: { message: string } | null;
+  }>;
+  denyAuthorization: (id: string) => Promise<{
+    data: { redirect_url?: string; redirect_to?: string } | null;
+    error: { message: string } | null;
+  }>;
 };
 
 type AuthorizationDetails = {
@@ -30,7 +32,8 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   // Browser-only: the session lives in localStorage, absent during SSR.
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
-    authorization_id: typeof s["authorization_id"] === "string" ? (s["authorization_id"] as string) : "",
+    authorization_id:
+      typeof s["authorization_id"] === "string" ? (s["authorization_id"] as string) : "",
   }),
   loader: async ({ location }) => {
     const authorizationId = new URLSearchParams(location.search).get("authorization_id");
@@ -55,7 +58,10 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   head: () => ({
     meta: [
       { title: "Approve access · Winstone Connect" },
-      { name: "description", content: "Approve or deny an AI assistant's access to the Winstone Connect CRM." },
+      {
+        name: "description",
+        content: "Approve or deny an AI assistant's access to the Winstone Connect CRM.",
+      },
       { property: "og:title", content: "Approve access · Winstone Connect" },
       {
         property: "og:description",
@@ -136,8 +142,8 @@ function Consent() {
     <Shell>
       <h1 className="text-lg font-semibold">Connect {clientName} to Winstone Connect</h1>
       <p className="text-sm text-muted-foreground">
-        {clientName} will be able to read leads, call and WhatsApp history and floor activity, and add new leads —
-        acting as you. Only approved email addresses can actually use these tools.
+        {clientName} will be able to read leads, call and WhatsApp history and floor activity, and
+        add new leads — acting as you. Only approved email addresses can actually use these tools.
       </p>
       {error && (
         <p role="alert" className="text-sm text-destructive">

@@ -57,7 +57,10 @@ async function writeMap(map: Record<string, string>) {
   const supabaseAdmin = await admin();
   await supabaseAdmin
     .from("system_settings")
-    .upsert({ key: MAP_KEY, value: map, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    .upsert(
+      { key: MAP_KEY, value: map, updated_at: new Date().toISOString() },
+      { onConflict: "key" },
+    );
 }
 
 /** The root company folder; created on first use if it is not there yet. */
@@ -74,7 +77,10 @@ export async function driveRootFolderId(): Promise<string> {
   const folderId = await getOrCreateDriveFolder(ROOT_NAME);
   await supabaseAdmin
     .from("system_settings")
-    .upsert({ key: ROOT_KEY, value: folderId, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    .upsert(
+      { key: ROOT_KEY, value: folderId, updated_at: new Date().toISOString() },
+      { onConflict: "key" },
+    );
   return folderId;
 }
 
@@ -83,7 +89,10 @@ export async function driveRootFolderId(): Promise<string> {
  * cached id when Drive still has it, otherwise resolves by name under the
  * parent and caches the result.
  */
-export async function driveBranchFolder(branch: DriveBranch, year?: number | string | null): Promise<string> {
+export async function driveBranchFolder(
+  branch: DriveBranch,
+  year?: number | string | null,
+): Promise<string> {
   const map = await readMap();
   const branchKey = branch;
   let branchId = map[branchKey] ?? null;

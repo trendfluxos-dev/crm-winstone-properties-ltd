@@ -21,7 +21,9 @@ export const shiftSummaries = createServerFn({ method: "POST" })
 
 /** Manual "generate now" for the window that already closed today. */
 export const generateShiftSummaryNow = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ adminToken: z.string().nullable().optional() }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input),
+  )
   .handler(async ({ data }) => {
     const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
     requireAuthority(await resolveCaller(data.adminToken ?? null));
@@ -55,7 +57,6 @@ export const backfillShiftSummariesNow = createServerFn({ method: "POST" })
     const { backfillShiftSummaries } = await import("@/lib/shift-summary.server");
     return backfillShiftSummaries();
   });
-
 
 /** Uploads one stored summary to the company Drive shift folder on demand. */
 export const exportShiftSummaryToDrive = createServerFn({ method: "POST" })

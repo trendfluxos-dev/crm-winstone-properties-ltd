@@ -26,39 +26,39 @@ export const callOpsSummary = createServerFn({ method: "POST" })
     const since = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
     const [reports, recordings, followUps, devices, alerts, leads, jobs, syncEvents, agentRows] =
       await Promise.all([
-      supabaseAdmin
-        .from("call_reports")
-        .select("id, agent_id, status, category, created_at, submitted_at")
-        .gte("created_at", since),
-      supabaseAdmin
-        .from("call_recordings")
-        .select("id, analysis_status, analysis_error, recorder_source, is_two_sided, created_at")
-        .gte("created_at", since),
-      supabaseAdmin
-        .from("follow_up_events")
-        .select("id, agent_id, status, scheduled_at, reminder_minutes"),
-      supabaseAdmin
-        .from("agent_devices")
-        .select(
-          "id, profile_id, device_label, app_version, phone_number, last_seen_at, revoked_at, model, manufacturer, android_version, recording_mode, recording_capable, recording_tested, recording_note, recording_checked_at",
-        ),
-      supabaseAdmin
-        .from("system_alerts")
-        .select("*")
-        .is("acknowledged_at", null)
-        .order("created_at", { ascending: false })
-        .limit(20),
-      supabaseAdmin.from("leads").select("id, assigned_to, status"),
-      supabaseAdmin
-        .from("call_processing_jobs")
-        .select("id, job_type, status, attempts, error_message")
-        .gte("created_at", since),
-      supabaseAdmin
-        .from("sync_events")
-        .select("id, event_type, status, created_at")
-        .gte("created_at", since),
-      supabaseAdmin.from("profiles").select("id, name, sim_number, sim_bound_at"),
-    ]);
+        supabaseAdmin
+          .from("call_reports")
+          .select("id, agent_id, status, category, created_at, submitted_at")
+          .gte("created_at", since),
+        supabaseAdmin
+          .from("call_recordings")
+          .select("id, analysis_status, analysis_error, recorder_source, is_two_sided, created_at")
+          .gte("created_at", since),
+        supabaseAdmin
+          .from("follow_up_events")
+          .select("id, agent_id, status, scheduled_at, reminder_minutes"),
+        supabaseAdmin
+          .from("agent_devices")
+          .select(
+            "id, profile_id, device_label, app_version, phone_number, last_seen_at, revoked_at, model, manufacturer, android_version, recording_mode, recording_capable, recording_tested, recording_note, recording_checked_at",
+          ),
+        supabaseAdmin
+          .from("system_alerts")
+          .select("*")
+          .is("acknowledged_at", null)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabaseAdmin.from("leads").select("id, assigned_to, status"),
+        supabaseAdmin
+          .from("call_processing_jobs")
+          .select("id, job_type, status, attempts, error_message")
+          .gte("created_at", since),
+        supabaseAdmin
+          .from("sync_events")
+          .select("id, event_type, status, created_at")
+          .gte("created_at", since),
+        supabaseAdmin.from("profiles").select("id, name, sim_number, sim_bound_at"),
+      ]);
 
     const simKeyOf = (value: string | null) => {
       const digits = (value ?? "").replace(/\D+/g, "");
@@ -149,14 +149,12 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         ),
         missing: count(
           devices.data,
-          (d) => !d.revoked_at && simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) === null,
+          (d) =>
+            !d.revoked_at && simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) === null,
         ),
       },
       recording: {
-        twoSided: count(
-          devices.data,
-          (d) => !d.revoked_at && d.recording_mode === "two_sided",
-        ),
+        twoSided: count(devices.data, (d) => !d.revoked_at && d.recording_mode === "two_sided"),
         micOnly: count(devices.data, (d) => !d.revoked_at && d.recording_mode === "mic_only"),
         blocked: count(devices.data, (d) => !d.revoked_at && d.recording_mode === "unavailable"),
         untested: count(devices.data, (d) => !d.revoked_at && !d.recording_mode),
@@ -289,9 +287,12 @@ export const auditTrail = createServerFn({ method: "POST" })
     const from = data.page * data.pageSize;
     let query = supabaseAdmin
       .from("audit_logs")
-      .select("id, action, entity_type, entity_id, actor_label, actor_profile_id, metadata, created_at", {
-        count: "exact",
-      })
+      .select(
+        "id, action, entity_type, entity_id, actor_label, actor_profile_id, metadata, created_at",
+        {
+          count: "exact",
+        },
+      )
       .order("created_at", { ascending: false })
       .range(from, from + data.pageSize - 1);
 

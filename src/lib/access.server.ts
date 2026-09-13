@@ -20,7 +20,6 @@ export type Caller = {
 
 const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null, readOnly: true };
 
-
 function isNewKey(value: string) {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
 }
@@ -92,7 +91,12 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
   }
 
   return {
-    scope: profile.role === "admin" ? "authority" : profile.role === "team_leader" ? "coordinator" : "agent",
+    scope:
+      profile.role === "admin"
+        ? "authority"
+        : profile.role === "team_leader"
+          ? "coordinator"
+          : "agent",
     profile,
     userId,
     approval,
@@ -113,7 +117,8 @@ export function requireAuthority(caller: Caller) {
   if (caller.scope !== "authority") throw new Error("Master PIN required");
 }
 
-export const HQ_READ_ONLY = "Executive HQ is view-only — use the coordinator or IT console for this change";
+export const HQ_READ_ONLY =
+  "Executive HQ is view-only — use the coordinator or IT console for this change";
 
 /**
  * Gate for every coordinator/IT mutation. HQ sessions read the whole floor but
@@ -122,4 +127,3 @@ export const HQ_READ_ONLY = "Executive HQ is view-only — use the coordinator o
 export function requireWrite(caller: Caller) {
   if (caller.readOnly) throw new Error(HQ_READ_ONLY);
 }
-

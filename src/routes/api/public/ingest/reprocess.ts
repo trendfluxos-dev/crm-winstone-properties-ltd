@@ -49,7 +49,8 @@ export const Route = createFileRoute("/api/public/ingest/reprocess")({
           ids = (data ?? []).map((row) => row.id);
         }
 
-        const results: { recording_id: string; status: "complete" | "failed"; error?: string }[] = [];
+        const results: { recording_id: string; status: "complete" | "failed"; error?: string }[] =
+          [];
         const { logLeadEvent } = await import("@/lib/lead-events.server");
 
         for (const id of ids) {

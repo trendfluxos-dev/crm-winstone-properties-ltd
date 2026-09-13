@@ -26,23 +26,18 @@ function TermsPage() {
   return (
     <div className="min-h-screen bg-background px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
-        <Link
-          to="/"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
           ← Back to Winstone Connect
         </Link>
-        <h1 className="mt-4 font-display text-3xl font-bold tracking-tight">
-          Terms of Service
-        </h1>
+        <h1 className="mt-4 font-display text-3xl font-bold tracking-tight">Terms of Service</h1>
         <p className="mt-2 text-sm text-muted-foreground">Effective date: 10 September 2026</p>
 
         <div className="mt-8 space-y-6 text-sm leading-7 text-foreground">
           <section>
             <h2 className="text-lg font-semibold">1. Acceptance of terms</h2>
             <p className="mt-2 text-muted-foreground">
-              By accessing or using Winstone Connect (the "Service"), you agree to be bound by
-              these Terms of Service. If you do not agree, do not use the Service.
+              By accessing or using Winstone Connect (the "Service"), you agree to be bound by these
+              Terms of Service. If you do not agree, do not use the Service.
             </p>
           </section>
 
@@ -59,8 +54,8 @@ function TermsPage() {
             <h2 className="text-lg font-semibold">3. User accounts and roles</h2>
             <p className="mt-2 text-muted-foreground">
               Access is granted through role-based controls: Sales Agents, Team Coordinators and
-              Executive Authorities. You are responsible for keeping your PIN and device secure.
-              The master PIN and server tokens must not be shared outside authorised personnel.
+              Executive Authorities. You are responsible for keeping your PIN and device secure. The
+              master PIN and server tokens must not be shared outside authorised personnel.
             </p>
           </section>
 
@@ -70,7 +65,10 @@ function TermsPage() {
               <li>Use the Service only for lawful sales and customer-service purposes.</li>
               <li>Do not upload malicious files, spam or unrelated content.</li>
               <li>Obtain any legally required consent before recording calls.</li>
-              <li>Do not attempt to bypass access controls or access data you are not authorised to view.</li>
+              <li>
+                Do not attempt to bypass access controls or access data you are not authorised to
+                view.
+              </li>
             </ul>
           </section>
 
@@ -104,8 +102,8 @@ function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold">8. Changes to terms</h2>
             <p className="mt-2 text-muted-foreground">
-              We may update these terms from time to time. Continued use of the Service after changes
-              are posted constitutes acceptance of the revised terms.
+              We may update these terms from time to time. Continued use of the Service after
+              changes are posted constitutes acceptance of the revised terms.
             </p>
           </section>
 

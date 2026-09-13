@@ -16,13 +16,23 @@ describe("AI vs agent classification review", () => {
 
   it("stays silent when the AI has no opinion", () => {
     expect(
-      classificationMismatch({ aiTemperature: null, aiGrade: null, humanTemperature: "cold", humanGrade: "D" }),
+      classificationMismatch({
+        aiTemperature: null,
+        aiGrade: null,
+        humanTemperature: "cold",
+        humanGrade: "D",
+      }),
     ).toBeNull();
   });
 
   it("stays silent when the agent has not classified yet", () => {
     expect(
-      classificationMismatch({ aiTemperature: "hot", aiGrade: "A", humanTemperature: null, humanGrade: null }),
+      classificationMismatch({
+        aiTemperature: "hot",
+        aiGrade: "A",
+        humanTemperature: null,
+        humanGrade: null,
+      }),
     ).toBeNull();
   });
 

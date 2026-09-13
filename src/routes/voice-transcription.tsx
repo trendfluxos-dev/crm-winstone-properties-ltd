@@ -9,7 +9,10 @@ export const Route = createFileRoute("/voice-transcription")({
       { title: "Voice Transcription — Winstone Connect" },
       { name: "description", content: "Record Bengali speech and get instant transcription" },
       { property: "og:title", content: "Voice Transcription — Winstone Connect" },
-      { property: "og:description", content: "Record Bengali speech and get instant transcription" },
+      {
+        property: "og:description",
+        content: "Record Bengali speech and get instant transcription",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

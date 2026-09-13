@@ -327,7 +327,9 @@ export async function submitCallReport(input: {
     recordingId: report.recording_id,
     kind: "outcome_logged",
     detail: `${CATEGORY_LABEL[category]}${
-      classified ? ` — ${TEMPERATURE_LABEL[temperature!]} / গ্রেড ${grade}` : " — কথা হয়নি, আবার কল হবে"
+      classified
+        ? ` — ${TEMPERATURE_LABEL[temperature!]} / গ্রেড ${grade}`
+        : " — কথা হয়নি, আবার কল হবে"
     }${input.followUpAt ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}` : ""}`,
   });
 
@@ -443,10 +445,13 @@ function suggestionFrom(recording: {
   const stage = (recording.deal_stage ?? "").toLowerCase();
 
   const interest: AiSuggestion["interest"] =
-    recording.sentiment === "positive" ? "high"
-    : recording.sentiment === "neutral" ? "medium"
-    : recording.sentiment ? "low"
-    : "unknown";
+    recording.sentiment === "positive"
+      ? "high"
+      : recording.sentiment === "neutral"
+        ? "medium"
+        : recording.sentiment
+          ? "low"
+          : "unknown";
 
   let suggested: CallCategory | null = null;
   if (objections.some((o) => /কলব্যাক|callback|পরে ফোন/i.test(o))) suggested = "callback";
@@ -473,14 +478,12 @@ function suggestionFrom(recording: {
         : suggested === "not_interested"
           ? "এই লিড বন্ধ করে কারণ লিখুন"
           : "আগামীকাল সকালে ফলো-আপ কল দিন",
-    suggestedTemperature:
-      LEAD_TEMPERATURES.includes(recording.ai_temperature as LeadTemperature)
-        ? (recording.ai_temperature as LeadTemperature)
-        : null,
-    suggestedGrade:
-      LEAD_GRADES.includes(recording.ai_grade as LeadGrade)
-        ? (recording.ai_grade as LeadGrade)
-        : null,
+    suggestedTemperature: LEAD_TEMPERATURES.includes(recording.ai_temperature as LeadTemperature)
+      ? (recording.ai_temperature as LeadTemperature)
+      : null,
+    suggestedGrade: LEAD_GRADES.includes(recording.ai_grade as LeadGrade)
+      ? (recording.ai_grade as LeadGrade)
+      : null,
     suggestedFollowUpAt:
       suggested === "follow_up" || suggested === "hot_lead" || suggested === "callback"
         ? followUp.toISOString()

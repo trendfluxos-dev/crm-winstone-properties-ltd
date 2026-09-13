@@ -73,9 +73,7 @@ export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
           <SheetTitle className="flex items-center gap-2">
             <Sparkles className="size-4 text-primary" /> এক্সিকিউটিভ এআই কোপাইলট
           </SheetTitle>
-          <SheetDescription>
-            সাধারণ ভাষায় পারফরম্যান্স, বিল বা লিড বণ্টন চান।
-          </SheetDescription>
+          <SheetDescription>সাধারণ ভাষায় পারফরম্যান্স, বিল বা লিড বণ্টন চান।</SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
@@ -110,7 +108,10 @@ export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
                 entry.content
               )}
               {entry.cards?.map((card) => (
-                <div key={card.title} className="rounded-lg border border-primary/30 bg-surface-2 p-3">
+                <div
+                  key={card.title}
+                  className="rounded-lg border border-primary/30 bg-surface-2 p-3"
+                >
                   <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                     {card.title}
                   </p>

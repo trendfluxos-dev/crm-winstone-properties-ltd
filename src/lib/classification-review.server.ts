@@ -98,7 +98,10 @@ export async function reviewSubmittedReport(input: {
             recordingId: input.recordingId,
             fields: mismatch.fields,
             distance: mismatch.distance,
-            ai: { temperature: recording?.ai_temperature ?? null, grade: recording?.ai_grade ?? null },
+            ai: {
+              temperature: recording?.ai_temperature ?? null,
+              grade: recording?.ai_grade ?? null,
+            },
             agent: { temperature: input.temperature, grade: input.grade },
           },
         });

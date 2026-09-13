@@ -159,11 +159,24 @@ function Dispatcher() {
             inputMode="numeric"
             placeholder="20"
           />
-          <Button className="flex-1 sm:flex-none" onClick={() => push.mutate()} disabled={!agentId || push.isPending}>
-            {push.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          <Button
+            className="flex-1 sm:flex-none"
+            onClick={() => push.mutate()}
+            disabled={!agentId || push.isPending}
+          >
+            {push.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
             Push leads
           </Button>
-          <Button variant="secondary" className="flex-1 sm:flex-none" onClick={() => balance.mutate()} disabled={balance.isPending}>
+          <Button
+            variant="secondary"
+            className="flex-1 sm:flex-none"
+            onClick={() => balance.mutate()}
+            disabled={balance.isPending}
+          >
             {balance.isPending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
@@ -186,7 +199,6 @@ function Dispatcher() {
         <h2 className="text-lg font-semibold">Team load</h2>
         <div className="overflow-x-auto card-elevated">
           <table className="w-full min-w-[900px] text-sm">
-
             <thead className="bg-surface-2 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-4 py-2 text-left">Agent</th>

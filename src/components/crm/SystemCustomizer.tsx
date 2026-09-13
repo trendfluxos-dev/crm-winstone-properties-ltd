@@ -73,7 +73,13 @@ export function SystemCustomizer() {
       ...c,
       fields: [
         ...c.fields,
-        { key: `field_${c.fields.length + 1}`, label: "নতুন ফিল্ড", type: "text", required: false, options: [] },
+        {
+          key: `field_${c.fields.length + 1}`,
+          label: "নতুন ফিল্ড",
+          type: "text",
+          required: false,
+          options: [],
+        },
       ],
     }));
 
@@ -106,7 +112,11 @@ export function SystemCustomizer() {
           >
             <RotateCcw className="size-4" /> ডিফল্টে ফিরুন
           </Button>
-          <Button size="sm" onClick={() => save.mutate()} disabled={!dirty || save.isPending || !adminToken}>
+          <Button
+            size="sm"
+            onClick={() => save.mutate()}
+            disabled={!dirty || save.isPending || !adminToken}
+          >
             <Save className="size-4" /> {save.isPending ? "সংরক্ষণ হচ্ছে…" : "নিয়ম সংরক্ষণ"}
           </Button>
         </div>
@@ -124,7 +134,9 @@ export function SystemCustomizer() {
               label="এত সেকেন্ড পর কল 'কথা হয়েছে' গণ্য"
               suffix="সেকেন্ড"
               value={draft.rules.minConnectedSeconds}
-              onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, minConnectedSeconds: v } }))}
+              onChange={(v) =>
+                edit((c) => ({ ...c, rules: { ...c.rules, minConnectedSeconds: v } }))
+              }
             />
             <NumberRow
               label="ফলো-আপ কলের সময়সীমা"
@@ -142,12 +154,14 @@ export function SystemCustomizer() {
               label="এতবার চেষ্টার পর লিড পার্ক হবে"
               suffix="বার"
               value={draft.rules.maxAttemptsBeforeDrop}
-              onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, maxAttemptsBeforeDrop: v } }))}
+              onChange={(v) =>
+                edit((c) => ({ ...c, rules: { ...c.rules, maxAttemptsBeforeDrop: v } }))
+              }
             />
             <NumberRow
               label="সিম কলের খরচ"
               suffix="৳/মিনিট"
-              
+
               value={draft.rules.ratePerMinute}
               onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, ratePerMinute: v } }))}
             />
@@ -157,19 +171,25 @@ export function SystemCustomizer() {
               label="Auto-assign new leads"
               hint="Website and ad leads go to the lightest workload."
               checked={draft.rules.autoAssignNewLeads}
-              onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, autoAssignNewLeads: v } }))}
+              onChange={(v) =>
+                edit((c) => ({ ...c, rules: { ...c.rules, autoAssignNewLeads: v } }))
+              }
             />
             <ToggleRow
               label="Recording required on every call"
               hint="The phone app must upload audio for each dial."
               checked={draft.rules.requireCallRecording}
-              onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, requireCallRecording: v } }))}
+              onChange={(v) =>
+                edit((c) => ({ ...c, rules: { ...c.rules, requireCallRecording: v } }))
+              }
             />
             <ToggleRow
               label="Ask the customer before recording"
               hint="Phone app plays a consent prompt first."
               checked={draft.rules.askRecordingConsent}
-              onChange={(v) => edit((c) => ({ ...c, rules: { ...c.rules, askRecordingConsent: v } }))}
+              onChange={(v) =>
+                edit((c) => ({ ...c, rules: { ...c.rules, askRecordingConsent: v } }))
+              }
             />
           </div>
         </div>
@@ -210,10 +230,13 @@ export function SystemCustomizer() {
           <ShieldCheck className="size-4 text-primary" /> Agent integrations (AI assistants)
         </h3>
         <p className="text-xs text-muted-foreground">
-          Only these email addresses can reach the CRM from an AI assistant such as ChatGPT or Claude. They must sign
-          in with that Google account first. Leave it empty to block everyone.
+          Only these email addresses can reach the CRM from an AI assistant such as ChatGPT or
+          Claude. They must sign in with that Google account first. Leave it empty to block
+          everyone.
         </p>
-        <Label className="text-xs text-muted-foreground">Approved email addresses (comma separated)</Label>
+        <Label className="text-xs text-muted-foreground">
+          Approved email addresses (comma separated)
+        </Label>
         <Input
           value={draft.mcpAllowedEmails.join(", ")}
           placeholder="you@winstonebd.com, manager@winstonebd.com"
@@ -233,7 +256,12 @@ export function SystemCustomizer() {
       <div className="card-elevated space-y-3 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-semibold">Extra lead fields</h3>
-          <Button variant="outline" size="sm" onClick={addField} disabled={draft.fields.length >= 20}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addField}
+            disabled={draft.fields.length >= 20}
+          >
             <Plus className="size-4" /> Add field
           </Button>
         </div>
@@ -250,14 +278,19 @@ export function SystemCustomizer() {
             >
               <div>
                 <Label className="text-xs text-muted-foreground">Label</Label>
-                <Input value={field.label} onChange={(e) => updateField(index, { label: e.target.value })} />
+                <Input
+                  value={field.label}
+                  onChange={(e) => updateField(index, { label: e.target.value })}
+                />
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Key (used by the phone app)</Label>
                 <Input
                   value={field.key}
                   onChange={(e) =>
-                    updateField(index, { key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_") })
+                    updateField(index, {
+                      key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "_"),
+                    })
                   }
                 />
               </div>
@@ -287,13 +320,20 @@ export function SystemCustomizer() {
                   />
                   Required
                 </label>
-                <Button variant="ghost" size="icon" onClick={() => removeField(index)} aria-label="Remove field">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeField(index)}
+                  aria-label="Remove field"
+                >
                   <Trash2 className="size-4 text-destructive" />
                 </Button>
               </div>
               {field.type === "select" && (
                 <div className="sm:col-span-4">
-                  <Label className="text-xs text-muted-foreground">Dropdown choices (comma separated)</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    Dropdown choices (comma separated)
+                  </Label>
                   <Input
                     value={field.options.join(", ")}
                     onChange={(e) =>

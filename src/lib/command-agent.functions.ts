@@ -66,7 +66,11 @@ function str(params: Record<string, string | number | null>, key: string): strin
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-function num(params: Record<string, string | number | null>, key: string, fallback: number): number {
+function num(
+  params: Record<string, string | number | null>,
+  key: string,
+  fallback: number,
+): number {
   const value = params[key];
   const parsed = typeof value === "number" ? value : Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
@@ -75,9 +79,8 @@ function num(params: Record<string, string | number | null>, key: string, fallba
 export const runCommandAgentAction = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => RunInput.parse(input))
   .handler(async ({ data }): Promise<{ ok: boolean; message: string }> => {
-    const { resolveCaller, requireAuthority, requireDispatch, requireWrite } = await import(
-      "@/lib/access.server"
-    );
+    const { resolveCaller, requireAuthority, requireDispatch, requireWrite } =
+      await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
     if (caller.scope === "none") throw new Error("সাইন ইন করুন");
     requireWrite(caller);
@@ -196,9 +199,8 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
         throw new Error("Hot / Warm / Cold এবং A–D গ্রেড দুটোই দিন");
       }
 
-      const { LEAD_OWNER_COLUMNS, leadHeldByOther, LEAD_NOT_YOURS } = await import(
-        "@/lib/lead-access.server"
-      );
+      const { LEAD_OWNER_COLUMNS, leadHeldByOther, LEAD_NOT_YOURS } =
+        await import("@/lib/lead-access.server");
       const { data: lead } = await supabaseAdmin
         .from("leads")
         .select(`id, name, ${LEAD_OWNER_COLUMNS}`)
@@ -212,7 +214,11 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
 
       const note = str(params, "note");
       const source =
-        caller.scope === "agent" ? "manual" : caller.scope === "coordinator" ? "coordinator" : "authority";
+        caller.scope === "agent"
+          ? "manual"
+          : caller.scope === "coordinator"
+            ? "coordinator"
+            : "authority";
       const now = new Date().toISOString();
 
       const { error: leadError } = await supabaseAdmin
@@ -362,4 +368,3 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
       message: `শিফট সারসংক্ষেপ তৈরি হয়েছে (${result.shiftKey}) — ${result.agents} জন এজেন্ট`,
     };
   });
-

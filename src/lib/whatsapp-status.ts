@@ -6,13 +6,7 @@
  * it. Only Meta webhook callbacks produce sent / delivered / read / failed.
  */
 export type WhatsappDeliveryStatus =
-  | "logged"
-  | "queued"
-  | "sent"
-  | "delivered"
-  | "read"
-  | "failed"
-  | "unknown";
+  "logged" | "queued" | "sent" | "delivered" | "read" | "failed" | "unknown";
 
 const LABELS: Record<WhatsappDeliveryStatus, string> = {
   logged: "সংরক্ষিত (নিজের হোয়াটসঅ্যাপ)",

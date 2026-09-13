@@ -24,7 +24,14 @@ import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { Button } from "@/components/ui/button";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import type { CallRecording, Lead, LeadEvent, Profile, TimelineEntry, WhatsappMessage } from "@/lib/crm-data";
+import type {
+  CallRecording,
+  Lead,
+  LeadEvent,
+  Profile,
+  TimelineEntry,
+  WhatsappMessage,
+} from "@/lib/crm-data";
 import {
   whatsappStatusLabel,
   whatsappStatusTicks,
@@ -120,7 +127,7 @@ export function LeadDossier({
                 const calls = timeline.filter((e) => e.kind === "call");
                 if (calls.length === 0) return null;
                 const totalSeconds = calls.reduce(
-                  (sum, e) => sum + (e.kind === "call" ? e.call.duration_seconds ?? 0 : 0),
+                  (sum, e) => sum + (e.kind === "call" ? (e.call.duration_seconds ?? 0) : 0),
                   0,
                 );
                 return (
@@ -140,7 +147,8 @@ export function LeadDossier({
               )}
 
               {timeline.map((entry) => {
-                if (entry.kind === "call") return <CallEntry key={entry.call.id} call={entry.call} />;
+                if (entry.kind === "call")
+                  return <CallEntry key={entry.call.id} call={entry.call} />;
                 if (entry.kind === "message")
                   return <MessageEntry key={entry.message.id} message={entry.message} />;
                 return <LifecycleEntry key={entry.event.id} event={entry.event} />;
@@ -215,7 +223,9 @@ export function CallEntry({ call }: { call: CallRecording }) {
         </span>
         <div className="min-w-0">
           <p className="text-sm font-medium">
-            {call.call_direction === "outgoing" ? "সিম থেকে কল করা হয়েছে" : "ক্রেতা ফিরতি কল করেছেন"}
+            {call.call_direction === "outgoing"
+              ? "সিম থেকে কল করা হয়েছে"
+              : "ক্রেতা ফিরতি কল করেছেন"}
           </p>
           <p className="tabular text-xs text-muted-foreground">
             {dayLabel(call.created_at)} · {clockTime(call.created_at)} ·{" "}
@@ -313,7 +323,8 @@ export function CallEntry({ call }: { call: CallRecording }) {
             )}
             {call.deal_stage && (
               <p className="mt-1 text-xs text-muted-foreground">
-                ডিলের অবস্থা: <span className="text-foreground">{call.deal_stage.replace(/_/g, " ")}</span>
+                ডিলের অবস্থা:{" "}
+                <span className="text-foreground">{call.deal_stage.replace(/_/g, " ")}</span>
               </p>
             )}
           </div>
@@ -411,7 +422,10 @@ function MessageEntry({ message }: { message: WhatsappMessage }) {
         <p className="tabular mt-1 flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
           <span>{clockTime(message.created_at)}</span>
           {fromAgent && (
-            <span className={whatsappStatusTone(message.status)} title={whatsappStatusLabel(message.status)}>
+            <span
+              className={whatsappStatusTone(message.status)}
+              title={whatsappStatusLabel(message.status)}
+            >
               {whatsappStatusTicks(message.status)}
             </span>
           )}

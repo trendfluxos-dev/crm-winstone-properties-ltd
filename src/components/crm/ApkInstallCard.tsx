@@ -95,13 +95,15 @@ export function ApkInstallCard() {
               QR তৈরি হচ্ছে…
             </div>
           )}
-          <p className="text-center text-xs text-muted-foreground">ফোনের ক্যামেরা দিয়ে স্ক্যান করুন</p>
+          <p className="text-center text-xs text-muted-foreground">
+            ফোনের ক্যামেরা দিয়ে স্ক্যান করুন
+          </p>
         </div>
 
         <div className="min-w-0 space-y-3">
           <p className="text-sm text-muted-foreground">
-            QR স্ক্যান করলে সরাসরি এজেন্ট অ্যাপ ডাউনলোড শুরু হবে। ইনস্টলের পর CRM-এর ইমেইল ও পাসওয়ার্ড দিয়ে
-            লগইন করুন।
+            QR স্ক্যান করলে সরাসরি এজেন্ট অ্যাপ ডাউনলোড শুরু হবে। ইনস্টলের পর CRM-এর ইমেইল ও
+            পাসওয়ার্ড দিয়ে লগইন করুন।
           </p>
           <code className="block truncate rounded-md bg-muted px-3 py-2 text-xs">{apkUrl}</code>
           <div className="flex flex-wrap gap-2">
@@ -133,13 +135,16 @@ export function ApkInstallCard() {
           </h3>
           {result ? (
             <span className="text-xs text-muted-foreground">
-              {result.passed}/{result.total} ঠিক আছে · {new Date(result.checkedAt).toLocaleString("bn-BD")}
+              {result.passed}/{result.total} ঠিক আছে ·{" "}
+              {new Date(result.checkedAt).toLocaleString("bn-BD")}
             </span>
           ) : null}
         </div>
 
         {error ? <p className="mt-2 text-xs text-destructive">{error}</p> : null}
-        {!result && running ? <p className="mt-2 text-xs text-muted-foreground">পরীক্ষা চলছে…</p> : null}
+        {!result && running ? (
+          <p className="mt-2 text-xs text-muted-foreground">পরীক্ষা চলছে…</p>
+        ) : null}
 
         <ul className="mt-3 space-y-1.5">
           {result?.checks.map((check) => (
@@ -148,7 +153,9 @@ export function ApkInstallCard() {
               className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted/50 px-3 py-2 text-xs"
             >
               <span className="font-mono">{check.name}</span>
-              <span className={check.ok ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}>
+              <span
+                className={check.ok ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}
+              >
                 {check.ok ? "✔" : "✖"} {check.detail}
                 {check.status ? ` (${check.status})` : ""}
               </span>

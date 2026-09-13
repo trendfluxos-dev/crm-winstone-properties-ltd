@@ -75,7 +75,9 @@ export function LeadTable() {
           (lead.serial_no ?? "").toLowerCase().includes(needle) ||
           (lead.reference_by ?? "").toLowerCase().includes(needle),
       )
-      .sort((a, b) => (a.serial_no ?? "").localeCompare(b.serial_no ?? "", "bn", { numeric: true }));
+      .sort((a, b) =>
+        (a.serial_no ?? "").localeCompare(b.serial_no ?? "", "bn", { numeric: true }),
+      );
   }, [leads, filter, search]);
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
@@ -129,12 +131,18 @@ export function LeadTable() {
           </thead>
           <tbody>
             {rows.map((lead, index) => (
-              <tr key={lead.id} className="border-b border-border/60 last:border-0 hover:bg-surface-2">
+              <tr
+                key={lead.id}
+                className="border-b border-border/60 last:border-0 hover:bg-surface-2"
+              >
                 <td className="tabular px-3 py-2.5 text-muted-foreground">
                   {lead.serial_no ?? index + 1}
                 </td>
                 <td className="px-3 py-2.5">
-                  <button className="text-left font-medium hover:underline" onClick={() => setOpenLeadId(lead.id)}>
+                  <button
+                    className="text-left font-medium hover:underline"
+                    onClick={() => setOpenLeadId(lead.id)}
+                  >
                     {lead.name}
                   </button>
                   {lead.company && (
@@ -162,7 +170,9 @@ export function LeadTable() {
                   </span>
                 </td>
                 <td className="px-3 py-2.5 text-xs text-muted-foreground">
-                  {lead.last_call_at ? relativeTime(lead.last_call_at) : `${lead.call_attempts} বার চেষ্টা`}
+                  {lead.last_call_at
+                    ? relativeTime(lead.last_call_at)
+                    : `${lead.call_attempts} বার চেষ্টা`}
                 </td>
                 <td className="px-3 py-2.5">
                   <div className="flex items-center justify-end gap-2">

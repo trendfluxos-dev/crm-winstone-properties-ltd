@@ -24,7 +24,8 @@ export const leadContactStatus = createServerFn({ method: "POST" })
       throw new Error("এই লিড আপনার নয়");
     }
 
-    const { findDoNotContact, latestConsent, recordingAllowed } = await import("@/lib/comms-guard.server");
+    const { findDoNotContact, latestConsent, recordingAllowed } =
+      await import("@/lib/comms-guard.server");
 
     const voiceBlock = await findDoNotContact(lead.phone_number, "voice");
     const waBlock = await findDoNotContact(lead.phone_number, "whatsapp");

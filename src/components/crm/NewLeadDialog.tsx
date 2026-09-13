@@ -86,7 +86,11 @@ export function NewLeadDialog() {
         <div className="space-y-3">
           <div>
             <Label className="text-xs text-muted-foreground">নাম</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="রাকিব হাসান" />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="রাকিব হাসান"
+            />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">মোবাইল নম্বর</Label>
@@ -102,12 +106,20 @@ export function NewLeadDialog() {
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">ঠিকানা (ইচ্ছা হলে)</Label>
-            <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="মিরপুর, ঢাকা" />
+            <Input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="মিরপুর, ঢাকা"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs text-muted-foreground">ক্রমিক নম্বর</Label>
-              <Input value={serialNo} onChange={(e) => setSerialNo(e.target.value)} placeholder="১২" />
+              <Input
+                value={serialNo}
+                onChange={(e) => setSerialNo(e.target.value)}
+                placeholder="১২"
+              />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">রেফারেন্স</Label>
@@ -135,7 +147,11 @@ export function NewLeadDialog() {
 
         <DialogFooter>
           <Button disabled={!valid || mutation.isPending} onClick={() => mutation.mutate()}>
-            {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+            {mutation.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <UserPlus className="size-4" />
+            )}
             লিড সংরক্ষণ
           </Button>
         </DialogFooter>

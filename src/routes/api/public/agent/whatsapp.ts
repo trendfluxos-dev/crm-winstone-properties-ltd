@@ -56,9 +56,8 @@ export const Route = createFileRoute("/api/public/agent/whatsapp")({
         const body = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { LEAD_OWNER_COLUMNS, leadHeldByOther, LEAD_NOT_YOURS } = await import(
-          "@/lib/lead-access.server"
-        );
+        const { LEAD_OWNER_COLUMNS, leadHeldByOther, LEAD_NOT_YOURS } =
+          await import("@/lib/lead-access.server");
 
         const { data: lead } = await supabaseAdmin
           .from("leads")

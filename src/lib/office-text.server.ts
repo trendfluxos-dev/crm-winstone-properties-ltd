@@ -8,12 +8,7 @@
  * instead of returning half a file.
  */
 
-const TEXT_PARTS = [
-  "word/document.xml",
-  "xl/sharedStrings.xml",
-  "xl/worksheets/",
-  "ppt/slides/",
-];
+const TEXT_PARTS = ["word/document.xml", "xl/sharedStrings.xml", "xl/worksheets/", "ppt/slides/"];
 
 async function inflateRaw(bytes: Uint8Array): Promise<Uint8Array> {
   const stream = new Blob([bytes as unknown as BlobPart])
@@ -23,21 +18,23 @@ async function inflateRaw(bytes: Uint8Array): Promise<Uint8Array> {
 }
 
 function xmlToText(xml: string): string {
-  return xml
-    // Keep row/paragraph/cell boundaries as separators so a table stays a table.
-    // Excel keeps its cell text in a shared-strings list; one string per line
-    // keeps the reading order of the sheet intact.
-    .replace(/<\/(w:p|w:tr|row|a:p|si)>/g, "\n")
-    .replace(/<\/(w:tc|c|a:t)>/g, "\t")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  return (
+    xml
+      // Keep row/paragraph/cell boundaries as separators so a table stays a table.
+      // Excel keeps its cell text in a shared-strings list; one string per line
+      // keeps the reading order of the sheet intact.
+      .replace(/<\/(w:p|w:tr|row|a:p|si)>/g, "\n")
+      .replace(/<\/(w:tc|c|a:t)>/g, "\t")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+  );
 }
 
 /** Returns the readable text of an Office Open XML file, or null when unreadable. */

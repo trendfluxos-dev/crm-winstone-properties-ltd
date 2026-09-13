@@ -81,7 +81,7 @@ export async function fetchReportSheetRows(limit = 200): Promise<ReportSheetRow[
     callEndedAt: r.call_ended_at ?? r.submitted_at ?? new Date().toISOString(),
     agentName: (r.agent_id && agentName.get(r.agent_id)) || "—",
     leadName: (r.lead_id && lead.get(r.lead_id)?.name) || "—",
-    phone: r.phone_number ?? (r.lead_id ? lead.get(r.lead_id)?.phone_number ?? "" : ""),
+    phone: r.phone_number ?? (r.lead_id ? (lead.get(r.lead_id)?.phone_number ?? "") : ""),
     category: CATEGORY_LABEL[r.category ?? ""] ?? r.category ?? "—",
     connected: Boolean(r.connected),
     durationSeconds: r.duration_seconds ?? 0,
@@ -138,9 +138,9 @@ async function gatewayFetch(path: string, init?: RequestInit) {
 }
 
 async function ensureTab() {
-  const meta = (await gatewayFetch(
-    `/spreadsheets/${SHEET_ID}?fields=sheets.properties.title`,
-  )) as { sheets?: { properties?: { title?: string } }[] } | null;
+  const meta = (await gatewayFetch(`/spreadsheets/${SHEET_ID}?fields=sheets.properties.title`)) as {
+    sheets?: { properties?: { title?: string } }[];
+  } | null;
   const exists = (meta?.sheets ?? []).some((s) => s.properties?.title === TAB);
   if (exists) return;
 
@@ -189,10 +189,13 @@ export async function syncReportsToSheet() {
   // Clear stale rows below if the sheet previously had more data.
   const previousRows = (state.rowCount ?? 0) + 1;
   if (previousRows > endRow) {
-    await gatewayFetch(`/spreadsheets/${SHEET_ID}/values/${TAB}!A${endRow + 1}:J${previousRows}:clear`, {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    await gatewayFetch(
+      `/spreadsheets/${SHEET_ID}/values/${TAB}!A${endRow + 1}:J${previousRows}:clear`,
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
   }
 
   const lastSyncedAt = new Date().toISOString();

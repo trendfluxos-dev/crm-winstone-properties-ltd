@@ -124,6 +124,9 @@ export async function askFloorQuestion(question: string): Promise<HqAnswer> {
           : { kind: "none", title: "", xKey: "", series: [], data: [] },
     };
   } catch {
-    return { answer: raw || "No answer returned.", chart: { kind: "none", title: "", xKey: "", series: [], data: [] } };
+    return {
+      answer: raw || "No answer returned.",
+      chart: { kind: "none", title: "", xKey: "", series: [], data: [] },
+    };
   }
 }

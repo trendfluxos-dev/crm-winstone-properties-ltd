@@ -52,7 +52,8 @@ export function SyncedCallsPanel() {
         <h2 className="text-sm font-semibold">সিংক হওয়া কল · সময়, কথার সময় ও রেকর্ডিং</h2>
         {data && (
           <span className="text-xs text-muted-foreground">
-            {data.totals.calls}টি কল · কথা {data.totals.talkLabel} · {data.totals.recordings}টি রেকর্ডিং
+            {data.totals.calls}টি কল · কথা {data.totals.talkLabel} · {data.totals.recordings}টি
+            রেকর্ডিং
           </span>
         )}
         <Button
@@ -62,14 +63,18 @@ export function SyncedCallsPanel() {
           disabled={query.isFetching}
           onClick={() => void query.refetch()}
         >
-          {query.isFetching ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+          {query.isFetching ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <RefreshCw className="size-4" />
+          )}
           রিফ্রেশ
         </Button>
       </header>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        এজেন্টের ফোন থেকে কল সিংক হলেই এখানে সাথে সাথে আসে — কলের সময়, মোট কথার সময় আর জমা হওয়া রেকর্ডিং
-        শোনার লিংক। অডিও জমা না থাকলে লিংকের বদলে আসল অবস্থা লেখা থাকে।
+        এজেন্টের ফোন থেকে কল সিংক হলেই এখানে সাথে সাথে আসে — কলের সময়, মোট কথার সময় আর জমা হওয়া
+        রেকর্ডিং শোনার লিংক। অডিও জমা না থাকলে লিংকের বদলে আসল অবস্থা লেখা থাকে।
       </p>
 
       {query.isError && (
@@ -103,7 +108,12 @@ export function SyncedCallsPanel() {
                   <td className="tabular py-1.5 pr-3">{call.durationLabel}</td>
                   <td className="py-1.5 text-xs">
                     {call.audioUrl ? (
-                      <a href={call.audioUrl} target="_blank" rel="noreferrer" className="text-primary underline">
+                      <a
+                        href={call.audioUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary underline"
+                      >
                         শুনুন
                       </a>
                     ) : (

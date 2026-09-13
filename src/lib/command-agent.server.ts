@@ -80,35 +80,42 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
   const me = caller.profile?.id ?? null;
   const isAgentScope = caller.scope === "agent";
 
-  const [{ data: profiles }, { data: leads }, { data: calls }, { data: reports }, { data: followUps }] =
-    await Promise.all([
-      supabaseAdmin.from("profiles").select("id, name, role, is_active, approval_status, presence"),
-      supabaseAdmin
-        .from("leads")
-        .select(
-          "id, name, phone_number, status, assigned_to, assigned_agent_id, temperature, grade, call_attempts, last_call_at, created_at",
-        )
-        .order("updated_at", { ascending: false })
-        .limit(1200),
-      supabaseAdmin
-        .from("call_recordings")
-        .select(
-          "id, agent_id, lead_id, duration_seconds, created_at, sync_status, analysis_status, stt_status, ai_summary, ai_temperature, ai_grade",
-        )
-        .order("created_at", { ascending: false })
-        .limit(600),
-      supabaseAdmin
-        .from("call_reports")
-        .select("id, agent_id, lead_id, status, category, temperature, grade, submitted_at, created_at")
-        .order("created_at", { ascending: false })
-        .limit(600),
-      supabaseAdmin
-        .from("follow_up_events")
-        .select("id, agent_id, lead_id, status, scheduled_at, category, priority")
-        .in("status", ["scheduled", "pending", "due"])
-        .order("scheduled_at")
-        .limit(300),
-    ]);
+  const [
+    { data: profiles },
+    { data: leads },
+    { data: calls },
+    { data: reports },
+    { data: followUps },
+  ] = await Promise.all([
+    supabaseAdmin.from("profiles").select("id, name, role, is_active, approval_status, presence"),
+    supabaseAdmin
+      .from("leads")
+      .select(
+        "id, name, phone_number, status, assigned_to, assigned_agent_id, temperature, grade, call_attempts, last_call_at, created_at",
+      )
+      .order("updated_at", { ascending: false })
+      .limit(1200),
+    supabaseAdmin
+      .from("call_recordings")
+      .select(
+        "id, agent_id, lead_id, duration_seconds, created_at, sync_status, analysis_status, stt_status, ai_summary, ai_temperature, ai_grade",
+      )
+      .order("created_at", { ascending: false })
+      .limit(600),
+    supabaseAdmin
+      .from("call_reports")
+      .select(
+        "id, agent_id, lead_id, status, category, temperature, grade, submitted_at, created_at",
+      )
+      .order("created_at", { ascending: false })
+      .limit(600),
+    supabaseAdmin
+      .from("follow_up_events")
+      .select("id, agent_id, lead_id, status, scheduled_at, category, priority")
+      .in("status", ["scheduled", "pending", "due"])
+      .order("scheduled_at")
+      .limit(300),
+  ]);
 
   const owner = (lead: { assigned_to: string | null; assigned_agent_id: string | null }) =>
     lead.assigned_to ?? lead.assigned_agent_id ?? null;
@@ -118,7 +125,9 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
   const myCalls = isAgentScope
     ? (calls ?? []).filter((c) => c.agent_id === me || (c.lead_id && myLeadIds.has(c.lead_id)))
     : (calls ?? []);
-  const myReports = isAgentScope ? (reports ?? []).filter((r) => r.agent_id === me) : (reports ?? []);
+  const myReports = isAgentScope
+    ? (reports ?? []).filter((r) => r.agent_id === me)
+    : (reports ?? []);
   const myFollowUps = isAgentScope
     ? (followUps ?? []).filter((f) => f.agent_id === me)
     : (followUps ?? []);
@@ -176,8 +185,9 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
       dials: agentCalls.length,
       connected: agentCalls.filter((c) => (c.duration_seconds ?? 0) > CONNECTED).length,
       talk_minutes: Math.round(agentCalls.reduce((s, c) => s + (c.duration_seconds ?? 0), 0) / 60),
-      unfinished_reports: (reports ?? []).filter((r) => r.agent_id === p.id && r.status === "pending")
-        .length,
+      unfinished_reports: (reports ?? []).filter(
+        (r) => r.agent_id === p.id && r.status === "pending",
+      ).length,
     };
   });
 
@@ -430,7 +440,6 @@ export async function runCommandAgent(
   } catch {
     return { answer: raw || "উত্তর তৈরি হয়নি — আবার চেষ্টা করুন", facts: [], actions: [] };
   }
-
 
   // Never surface an action this caller may not run, whatever the model returned.
   const actions = (parsed.actions ?? [])

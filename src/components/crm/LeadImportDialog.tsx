@@ -19,8 +19,7 @@ import { Label } from "@/components/ui/label";
 import { importMyLeads, parseLeadFile, type ParsedLeadRow } from "@/lib/lead-import.functions";
 import { useAdminToken } from "@/lib/local-session";
 
-const ACCEPT =
-  ".csv,.tsv,.txt,.json,.pdf,.docx,.xlsx,.pptx,image/*,text/csv,application/pdf";
+const ACCEPT = ".csv,.tsv,.txt,.json,.pdf,.docx,.xlsx,.pptx,image/*,text/csv,application/pdf";
 
 function toBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -130,9 +129,7 @@ export function LeadImportDialog() {
               )}
               ফাইল বাছুন
             </Button>
-            <p className="text-xs text-muted-foreground">
-              {fileName ?? "সর্বোচ্চ ৮ মেগাবাইট"}
-            </p>
+            <p className="text-xs text-muted-foreground">{fileName ?? "সর্বোচ্চ ৮ মেগাবাইট"}</p>
           </div>
 
           {rows.length > 0 && (

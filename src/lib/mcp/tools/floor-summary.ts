@@ -18,18 +18,23 @@ export default defineTool({
       const db = await crmDb();
       const since = new Date(Date.now() - days * 86_400_000).toISOString();
 
-      const [{ data: agents }, { data: calls }, { data: messages }, { data: leads }] = await Promise.all([
-        db.from("profiles").select("id, name, employee_id, role, is_active"),
-        db
-          .from("call_recordings")
-          .select("id, agent_id, duration_seconds, sentiment, created_at")
-          .gte("created_at", since),
-        db.from("whatsapp_interactions").select("id, agent_id, created_at").gte("created_at", since),
-        db.from("leads").select("id, status, source, assigned_to, updated_at"),
-      ]);
+      const [{ data: agents }, { data: calls }, { data: messages }, { data: leads }] =
+        await Promise.all([
+          db.from("profiles").select("id, name, employee_id, role, is_active"),
+          db
+            .from("call_recordings")
+            .select("id, agent_id, duration_seconds, sentiment, created_at")
+            .gte("created_at", since),
+          db
+            .from("whatsapp_interactions")
+            .select("id, agent_id, created_at")
+            .gte("created_at", since),
+          db.from("leads").select("id, status, source, assigned_to, updated_at"),
+        ]);
 
       const stageMix: Record<string, number> = {};
-      for (const lead of leads ?? []) stageMix[lead.status ?? "unknown"] = (stageMix[lead.status ?? "unknown"] ?? 0) + 1;
+      for (const lead of leads ?? [])
+        stageMix[lead.status ?? "unknown"] = (stageMix[lead.status ?? "unknown"] ?? 0) + 1;
 
       const scorecard = (agents ?? []).map((agent) => {
         const agentCalls = (calls ?? []).filter((c) => c.agent_id === agent.id);
@@ -50,7 +55,9 @@ export default defineTool({
         window_days: days,
         totals: {
           calls: calls?.length ?? 0,
-          talk_minutes: Math.round((calls ?? []).reduce((s, c) => s + (c.duration_seconds ?? 0), 0) / 60),
+          talk_minutes: Math.round(
+            (calls ?? []).reduce((s, c) => s + (c.duration_seconds ?? 0), 0) / 60,
+          ),
           whatsapp_messages: messages?.length ?? 0,
           leads: leads?.length ?? 0,
         },

@@ -43,7 +43,10 @@ Rules:
 function stripFence(text: string): string {
   const trimmed = text.trim();
   if (!trimmed.startsWith("```")) return trimmed;
-  return trimmed.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "").trim();
+  return trimmed
+    .replace(/^```[a-zA-Z]*\n?/, "")
+    .replace(/```$/, "")
+    .trim();
 }
 
 /** Reads a CSV/doc/image/PDF upload into reviewable lead rows. */
@@ -79,7 +82,10 @@ export const parseLeadFile = createServerFn({ method: "POST" })
     } else if (isPdf) {
       content.push({
         type: "file",
-        file: { filename: data.fileName, file_data: `data:application/pdf;base64,${data.dataBase64}` },
+        file: {
+          filename: data.fileName,
+          file_data: `data:application/pdf;base64,${data.dataBase64}`,
+        },
       });
     } else if (isOffice) {
       const { extractOfficeText } = await import("@/lib/office-text.server");
@@ -111,8 +117,10 @@ export const parseLeadFile = createServerFn({ method: "POST" })
 
     if (!response.ok) {
       const detail = await response.text();
-      if (response.status === 429) throw new Error("এখন অনেক অনুরোধ চলছে — একটু পরে আবার চেষ্টা করুন");
-      if (response.status === 402) throw new Error("AI ক্রেডিট শেষ — মালিককে ক্রেডিট যোগ করতে বলুন");
+      if (response.status === 429)
+        throw new Error("এখন অনেক অনুরোধ চলছে — একটু পরে আবার চেষ্টা করুন");
+      if (response.status === 402)
+        throw new Error("AI ক্রেডিট শেষ — মালিককে ক্রেডিট যোগ করতে বলুন");
       if (response.status === 403) throw new Error("এই কাজের জন্য AI এখন বন্ধ আছে");
       throw new Error(`ফাইল পড়া যায়নি (${response.status}): ${detail.slice(0, 200)}`);
     }

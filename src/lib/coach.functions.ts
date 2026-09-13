@@ -18,8 +18,7 @@ export const getCoachBriefing = createServerFn({ method: "POST" })
     const caller = await resolveCaller(data.token ?? null);
 
     if (caller.scope === "none") throw new Error("Sign in to see coaching data");
-    const agentId =
-      caller.scope === "agent" ? (caller.profile?.id ?? "") : data.agentId;
+    const agentId = caller.scope === "agent" ? (caller.profile?.id ?? "") : data.agentId;
     if (!agentId) throw new Error("No agent profile found");
 
     const { buildCoachBriefing } = await import("@/lib/coach.server");

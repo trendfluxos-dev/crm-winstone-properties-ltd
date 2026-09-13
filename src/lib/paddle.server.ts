@@ -30,7 +30,11 @@ export function getPaddleClient(env: PaddleEnv): Paddle {
 }
 
 /** For Paddle REST calls the SDK does not cover (e.g. external_id filtering). */
-export async function gatewayFetch(env: PaddleEnv, path: string, init?: RequestInit): Promise<Response> {
+export async function gatewayFetch(
+  env: PaddleEnv,
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
   const connectionApiKey = getConnectionApiKey(env);
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
   return fetch(`${GATEWAY_BASE_URL}${path}`, {

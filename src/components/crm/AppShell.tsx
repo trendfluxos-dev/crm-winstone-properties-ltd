@@ -19,9 +19,6 @@ import { useMyAccount, useSignOut } from "@/lib/session";
 const APK_URL = "/api/public/download/apk";
 void apkAsset;
 
-
-
-
 type Scope = "authority" | "coordinator" | "agent" | "none";
 
 const NAV = [
@@ -45,8 +42,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [pinOpen, setPinOpen] = useState(false);
   const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope));
 
-
-
   return (
     <div className="min-h-screen grid-noise">
       <header className="glass sticky top-0 z-40 border-b border-border">
@@ -58,7 +53,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               className="size-9 rounded-full object-cover shadow-sm ring-1 ring-border"
             />
             <span className="leading-tight">
-              <span className="block whitespace-nowrap text-[13px] font-bold tracking-tight">Winstone Connect</span>
+              <span className="block whitespace-nowrap text-[13px] font-bold tracking-tight">
+                Winstone Connect
+              </span>
               <span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 Tele-Sales OS
               </span>
@@ -81,7 +78,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
 
-
             <button
               type="button"
               onClick={() => {
@@ -99,7 +95,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               }
             >
               {adminToken ? <LockOpen className="size-3.5" /> : <Lock className="size-3.5" />}
-              <span className="hidden lg:inline">{adminToken ? "Authority unlocked" : "Master PIN"}</span>
+              <span className="hidden lg:inline">
+                {adminToken ? "Authority unlocked" : "Master PIN"}
+              </span>
             </button>
 
             {scope !== "none" && !adminToken && (
@@ -188,7 +186,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="fixed bottom-5 right-5 z-40">
           <CopilotDrawer
             trigger={
-              <Button size="lg" className="gap-2 rounded-full shadow-md transition-all duration-300 hover:shadow-lg">
+              <Button
+                size="lg"
+                className="gap-2 rounded-full shadow-md transition-all duration-300 hover:shadow-lg"
+              >
                 <Sparkles className="size-4" /> AI Copilot
               </Button>
             }

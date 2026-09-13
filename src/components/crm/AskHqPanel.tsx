@@ -33,8 +33,7 @@ export function AskHqPanel() {
   const [question, setQuestion] = useState("");
 
   const run = useMutation({
-    mutationFn: (value: string) =>
-      ask({ data: { adminToken: getAdminToken(), question: value } }),
+    mutationFn: (value: string) => ask({ data: { adminToken: getAdminToken(), question: value } }),
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -68,7 +67,11 @@ export function AskHqPanel() {
           disabled={question.trim().length < 3 || run.isPending}
           onClick={() => run.mutate(question.trim())}
         >
-          {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+          {run.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Sparkles className="size-4" />
+          )}
           জিজ্ঞেস করুন
         </Button>
       </div>

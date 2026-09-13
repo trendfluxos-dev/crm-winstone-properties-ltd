@@ -1,4 +1,10 @@
-import { buildAgentStats, type CallRecording, type Lead, type Profile, type WhatsappMessage } from "@/lib/crm-data";
+import {
+  buildAgentStats,
+  type CallRecording,
+  type Lead,
+  type Profile,
+  type WhatsappMessage,
+} from "@/lib/crm-data";
 import { parseConfig, type AppConfig } from "@/lib/crm-config";
 import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
 
@@ -35,7 +41,11 @@ async function loadAgentData(agentId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [profileRes, leadsRes, configRes] = await Promise.all([
     supabaseAdmin.from("profiles").select(PROFILE_SAFE_COLUMNS).eq("id", agentId).maybeSingle(),
-    supabaseAdmin.from("leads").select("*").eq("assigned_to", agentId).order("updated_at", { ascending: false }),
+    supabaseAdmin
+      .from("leads")
+      .select("*")
+      .eq("assigned_to", agentId)
+      .order("updated_at", { ascending: false }),
     supabaseAdmin.from("app_config").select("data").eq("id", "default").maybeSingle(),
   ]);
   if (profileRes.error) throw new Error(profileRes.error.message);
@@ -88,8 +98,7 @@ function buildMetrics(
   const slaMs = config.rules.followUpSlaHours * 60 * 60 * 1000;
   const overdueFollowUps = leads.filter(
     (l) =>
-      l.status === "follow_up" &&
-      now - new Date(l.last_call_at ?? l.updated_at).getTime() > slaMs,
+      l.status === "follow_up" && now - new Date(l.last_call_at ?? l.updated_at).getTime() > slaMs,
   ).length;
   const untouchedLeads = leads.filter((l) => l.call_attempts === 0 && l.status !== "closed").length;
 
@@ -167,22 +176,36 @@ Rules:
 Reply as strict JSON only:
 {"headline":"max 12 words","summary":"2-3 sentences","strengths":["..."],"risks":["..."],"next_steps":[{"lead":"lead name or null","action":"..."}]}`;
 
-function fallback(name: string, metrics: CoachBriefing["metrics"]): Pick<CoachBriefing, "headline" | "summary" | "strengths" | "risks" | "nextSteps"> {
+function fallback(
+  name: string,
+  metrics: CoachBriefing["metrics"],
+): Pick<CoachBriefing, "headline" | "summary" | "strengths" | "risks" | "nextSteps"> {
   const steps: CoachBriefing["nextSteps"] = [];
   if (metrics.overdueFollowUps) {
-    steps.push({ lead: null, action: `Call back ${metrics.overdueFollowUps} overdue follow-up lead(s) today.` });
+    steps.push({
+      lead: null,
+      action: `Call back ${metrics.overdueFollowUps} overdue follow-up lead(s) today.`,
+    });
   }
   if (metrics.untouchedLeads) {
-    steps.push({ lead: null, action: `Make first contact with ${metrics.untouchedLeads} lead(s) never dialled.` });
+    steps.push({
+      lead: null,
+      action: `Make first contact with ${metrics.untouchedLeads} lead(s) never dialled.`,
+    });
   }
-  if (!steps.length) steps.push({ lead: null, action: "Keep dialling — nothing is overdue right now." });
+  if (!steps.length)
+    steps.push({ lead: null, action: "Keep dialling — nothing is overdue right now." });
   return {
-    headline: metrics.dials ? `${metrics.connected} connected of ${metrics.dials} dials` : "No calls logged yet",
+    headline: metrics.dials
+      ? `${metrics.connected} connected of ${metrics.dials} dials`
+      : "No calls logged yet",
     summary: metrics.dials
       ? `${name} has ${metrics.dials} dials, ${metrics.talkMinutes} minutes of talk time and ${metrics.dealsWon} deal(s) won across ${metrics.assigned} leads.`
       : `${name} has ${metrics.assigned} leads assigned and no calls logged yet, so there is nothing to review.`,
     strengths: [],
-    risks: metrics.overdueFollowUps ? [`${metrics.overdueFollowUps} follow-up(s) past the callback deadline`] : [],
+    risks: metrics.overdueFollowUps
+      ? [`${metrics.overdueFollowUps} follow-up(s) past the callback deadline`]
+      : [],
     nextSteps: steps,
   };
 }
@@ -208,7 +231,10 @@ export async function buildCoachBriefing(agentId: string): Promise<CoachBriefing
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: "system", content: `${SYSTEM}\nToday is ${new Date().toISOString().slice(0, 10)}.` },
+          {
+            role: "system",
+            content: `${SYSTEM}\nToday is ${new Date().toISOString().slice(0, 10)}.`,
+          },
           {
             role: "user",
             content: JSON.stringify({

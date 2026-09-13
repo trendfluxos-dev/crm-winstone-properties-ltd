@@ -88,7 +88,6 @@ function ImportScreen() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-
   const load = (text: string, label: string) => {
     const parsed = toLeadRows(parseCsv(text));
     setRows(parsed);
@@ -206,7 +205,6 @@ function ImportScreen() {
         ) : null}
       </section>
 
-
       {fileName ? (
         <section className="card-elevated space-y-3 p-4">
           <header className="flex flex-wrap items-center justify-between gap-2">
@@ -262,7 +260,10 @@ function ImportScreen() {
                   </thead>
                   <tbody>
                     {rows.slice(0, 50).map((row, index) => (
-                      <tr key={`${row.phone_number}-${index}`} className="border-t border-border/60">
+                      <tr
+                        key={`${row.phone_number}-${index}`}
+                        className="border-t border-border/60"
+                      >
                         <td className="py-2 pr-3">{row.name}</td>
                         <td className="tabular py-2 pr-3">{row.phone_number}</td>
                         <td className="py-2 pr-3">{row.company ?? "—"}</td>

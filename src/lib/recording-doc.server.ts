@@ -143,7 +143,7 @@ export async function buildRecordingDocLines(dateKey: string) {
       leadName: lead,
       phone: row.phone_number,
       durationLabel: hms(row.duration_seconds ?? 0),
-      audioUrl: row.audio_url ? signedByPath.get(row.audio_url) ?? null : null,
+      audioUrl: row.audio_url ? (signedByPath.get(row.audio_url) ?? null) : null,
       recordingState: RECORDING_TEXT[status] ?? status,
     };
   });

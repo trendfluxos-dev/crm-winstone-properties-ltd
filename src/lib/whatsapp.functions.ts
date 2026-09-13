@@ -56,7 +56,11 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
     const { getWhatsAppProvider } = await import("@/lib/whatsapp-provider.server");
     const provider = getWhatsAppProvider();
     if (provider.status !== "configured") {
-      return { ok: false as const, status: "not_configured" as const, error: "WhatsApp Business API সংযুক্ত নয়" };
+      return {
+        ok: false as const,
+        status: "not_configured" as const,
+        error: "WhatsApp Business API সংযুক্ত নয়",
+      };
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -11,22 +11,27 @@ const base = {
 
 describe("post-call report rules", () => {
   it("rejects an unknown category", () => {
-    expect(validateReport({ ...base, category: "nonsense", temperature: "hot", grade: "A" })?.field).toBe(
-      "category",
-    );
+    expect(
+      validateReport({ ...base, category: "nonsense", temperature: "hot", grade: "A" })?.field,
+    ).toBe("category");
   });
 
   it("requires a summary, a note and a follow-up time", () => {
-    expect(validateReport({ ...base, summary: "", temperature: "hot", grade: "A" })?.field).toBe("summary");
-    expect(validateReport({ ...base, note: "", temperature: "hot", grade: "A" })?.field).toBe("note");
-    expect(validateReport({ ...base, followUpAt: null, temperature: "hot", grade: "A" })?.field).toBe(
-      "followUpAt",
+    expect(validateReport({ ...base, summary: "", temperature: "hot", grade: "A" })?.field).toBe(
+      "summary",
     );
+    expect(validateReport({ ...base, note: "", temperature: "hot", grade: "A" })?.field).toBe(
+      "note",
+    );
+    expect(
+      validateReport({ ...base, followUpAt: null, temperature: "hot", grade: "A" })?.field,
+    ).toBe("followUpAt");
   });
 
   it("requires a reason for not_interested and wrong_number", () => {
     expect(
-      validateReport({ ...base, category: "not_interested", temperature: "cold", grade: "D" })?.field,
+      validateReport({ ...base, category: "not_interested", temperature: "cold", grade: "D" })
+        ?.field,
     ).toBe("reason");
     expect(
       validateReport({
@@ -50,10 +55,12 @@ describe("post-call report rules", () => {
   });
 
   it("rejects classification values outside the allowed sets", () => {
-    expect(validateReport({ ...base, connected: true, temperature: "lukewarm", grade: "A" })?.field).toBe(
-      "temperature",
-    );
-    expect(validateReport({ ...base, connected: true, temperature: "hot", grade: "F" })?.field).toBe("grade");
+    expect(
+      validateReport({ ...base, connected: true, temperature: "lukewarm", grade: "A" })?.field,
+    ).toBe("temperature");
+    expect(
+      validateReport({ ...base, connected: true, temperature: "hot", grade: "F" })?.field,
+    ).toBe("grade");
     expect(LEAD_TEMPERATURES).toEqual(["hot", "warm", "cold"]);
     expect(LEAD_GRADES).toEqual(["A", "B", "C", "D"]);
   });

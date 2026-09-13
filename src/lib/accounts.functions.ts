@@ -41,7 +41,6 @@ export const resolveSignInEmail = createServerFn({ method: "POST" })
     return { email: match.email };
   });
 
-
 /**
  * Called right after sign-up / first sign-in. Everybody — roster staff
  * included — lands in "pending" and waits for the IT Console to approve the
@@ -115,8 +114,6 @@ export const registerMyAccount = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const, created: true as const };
   });
-
-
 
 /** Who am I? Drives the role-aware shell, nav and landing redirect. */
 export const getMyAccount = createServerFn({ method: "POST" })
@@ -212,7 +209,10 @@ export const decideAccount = createServerFn({ method: "POST" })
         : {
             approval_status: "approved",
             is_active: true,
-            role: data.decision === "approve_coordinator" ? ("team_leader" as const) : ("agent" as const),
+            role:
+              data.decision === "approve_coordinator"
+                ? ("team_leader" as const)
+                : ("agent" as const),
           };
 
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.profileId);
@@ -261,7 +261,9 @@ export const listStaffAccounts = createServerFn({ method: "POST" })
     const [staffRes, leadsRes] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("id, user_id, name, email, phone, employee_id, role, is_active, approval_status, created_at")
+        .select(
+          "id, user_id, name, email, phone, employee_id, role, is_active, approval_status, created_at",
+        )
         .order("employee_id", { ascending: true }),
       supabaseAdmin.from("leads").select("assigned_to"),
     ]);
@@ -270,7 +272,8 @@ export const listStaffAccounts = createServerFn({ method: "POST" })
 
     const assigned = new Map<string, number>();
     for (const lead of leadsRes.data ?? []) {
-      if (lead.assigned_to) assigned.set(lead.assigned_to, (assigned.get(lead.assigned_to) ?? 0) + 1);
+      if (lead.assigned_to)
+        assigned.set(lead.assigned_to, (assigned.get(lead.assigned_to) ?? 0) + 1);
     }
     return {
       staff: (staffRes.data ?? []).map((row) => ({

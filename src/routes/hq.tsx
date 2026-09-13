@@ -10,15 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { AgentDossier } from "@/components/crm/AgentDossier";
 import { AgentRadar } from "@/components/crm/AgentRadar";
@@ -114,7 +106,6 @@ function ControlBoard() {
     talkMinutes: Math.round(row.talkSeconds / 60),
   }));
 
-
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
   const openAgent = profiles.find((p) => p.id === openAgentId) ?? null;
 
@@ -148,9 +139,6 @@ function ControlBoard() {
         <AskHqPanel />
 
         <SelfClaimsFeed />
-
-
-
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile
@@ -209,8 +197,6 @@ function ControlBoard() {
             hint={`${leads.filter((l) => l.work_state === "completed").length}টি লিড শ্রেণিবিন্যাসসহ শেষ`}
           />
         </div>
-
-
 
         <AgentRadar agents={agents} calls={calls} onSelectAgent={setOpenAgentId} />
 
@@ -336,7 +322,11 @@ function Sparkline({ seed }: { seed: number }) {
     return `${(i / 11) * 100},${y}`;
   }).join(" ");
   return (
-    <svg viewBox="0 0 100 20" className="mt-3 h-5 w-full text-primary/60" preserveAspectRatio="none">
+    <svg
+      viewBox="0 0 100 20"
+      className="mt-3 h-5 w-full text-primary/60"
+      preserveAspectRatio="none"
+    >
       <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );

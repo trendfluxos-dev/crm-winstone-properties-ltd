@@ -55,7 +55,11 @@ export function OpenLeadsCard() {
           onClick={() => void open.refetch()}
           disabled={open.isFetching}
         >
-          {open.isFetching ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+          {open.isFetching ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="size-3.5" />
+          )}
           রিফ্রেশ
         </Button>
       </header>

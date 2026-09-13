@@ -111,7 +111,8 @@ async function runTool(
   }
 
   if (name === "billing_report") {
-    const rate = Number(args["rate_per_minute"] ?? DEFAULT_RATE_PER_MINUTE) || DEFAULT_RATE_PER_MINUTE;
+    const rate =
+      Number(args["rate_per_minute"] ?? DEFAULT_RATE_PER_MINUTE) || DEFAULT_RATE_PER_MINUTE;
     const bill = buildBillingSummary(snap.calls, snap.leads, rate);
     return {
       data: bill,
@@ -131,7 +132,9 @@ async function runTool(
   }
 
   if (name === "assign_leads") {
-    const wanted = String(args["agent_name"] ?? "").toLowerCase().trim();
+    const wanted = String(args["agent_name"] ?? "")
+      .toLowerCase()
+      .trim();
     const count = Math.max(1, Math.min(Number(args["count"] ?? 0) || 0, 1000));
     const agent =
       snap.profiles.find((p) => p.name.toLowerCase() === wanted) ??
@@ -139,14 +142,18 @@ async function runTool(
       snap.profiles.find((p) => (p.employee_id ?? "").toLowerCase() === wanted);
     if (!agent) {
       return {
-        data: { error: `No agent matching "${args["agent_name"]}"`, agents: snap.profiles.map((p) => p.name) },
+        data: {
+          error: `No agent matching "${args["agent_name"]}"`,
+          agents: snap.profiles.map((p) => p.name),
+        },
         mutated: false,
       };
     }
     const pool = snap.leads
       .filter((l) => l.assigned_to === null && l.status === "pending")
       .slice(0, count);
-    if (!pool.length) return { data: { assigned: 0, note: "No unassigned pending leads left" }, mutated: false };
+    if (!pool.length)
+      return { data: { assigned: 0, note: "No unassigned pending leads left" }, mutated: false };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
@@ -241,5 +248,9 @@ export async function runCopilot(history: CopilotMessage[]) {
     return { reply: message.content?.trim() || "Done.", cards, mutated };
   }
 
-  return { reply: "I gathered the data but could not finish the summary. Please retry.", cards, mutated };
+  return {
+    reply: "I gathered the data but could not finish the summary. Please retry.",
+    cards,
+    mutated,
+  };
 }

@@ -26,7 +26,9 @@ describe("lead ownership", () => {
   });
 
   it("keeps the web helper in agreement with the server helper", () => {
-    expect(leadOwner({ assigned_to: null, assigned_agent_id: A })).toBe(leadOwnerId({ assigned_agent_id: A }));
+    expect(leadOwner({ assigned_to: null, assigned_agent_id: A })).toBe(
+      leadOwnerId({ assigned_agent_id: A }),
+    );
   });
 
   it("selects both owner columns everywhere", () => {
@@ -37,7 +39,13 @@ describe("lead ownership", () => {
 
 describe("phone normalisation (duplicate detection key)", () => {
   it("maps every Bangladeshi form to one canonical number", () => {
-    for (const raw of ["01712345678", "+8801712345678", "8801712345678", "1712345678", "017-1234-5678"]) {
+    for (const raw of [
+      "01712345678",
+      "+8801712345678",
+      "8801712345678",
+      "1712345678",
+      "017-1234-5678",
+    ]) {
       expect(normalizePhone(raw)).toBe("01712345678");
     }
   });

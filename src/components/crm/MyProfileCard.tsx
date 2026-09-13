@@ -92,7 +92,12 @@ export function MyProfileCard() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="my-phone">Phone</Label>
-            <Input id="my-phone" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" />
+            <Input
+              id="my-phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              inputMode="tel"
+            />
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label>Avatar colour</Label>
@@ -117,7 +122,11 @@ export function MyProfileCard() {
               disabled={name.trim().length < 2 || mutation.isPending}
               onClick={() => mutation.mutate()}
             >
-              {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+              {mutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Check className="size-4" />
+              )}
               Save profile
             </Button>
           </div>

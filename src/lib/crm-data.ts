@@ -71,9 +71,17 @@ function useLiveCrmRefresh() {
     const channel = supabase
       .channel(`crm-snapshot-${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "lead_events" }, invalidate)
-      .on("postgres_changes", { event: "*", schema: "public", table: "call_recordings" }, invalidate)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "call_recordings" },
+        invalidate,
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, invalidate)
-      .on("postgres_changes", { event: "*", schema: "public", table: "call_reports" }, invalidateReports)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "call_reports" },
+        invalidateReports,
+      )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "follow_up_events" },
@@ -138,9 +146,7 @@ export function buildAgentStats(
 
   return agents
     .map((profile) => {
-      const agentCalls = calls.filter(
-        (c) => c.agent_id === profile.id && inWindow(c.created_at),
-      );
+      const agentCalls = calls.filter((c) => c.agent_id === profile.id && inWindow(c.created_at));
       const agentMessages = messages.filter(
         (m) => m.agent_id === profile.id && m.sender_type === "agent" && inWindow(m.created_at),
       );
@@ -262,9 +268,7 @@ export function buildBillingSummary(
     aiAnalysed: monthCalls.filter((c) => c.ai_summary).length,
     dealsWon: leads.filter(
       (l) =>
-        l.status === "closed" &&
-        l.outcome_category === "deal_won" &&
-        sameMonth(l.updated_at, ref),
+        l.status === "closed" && l.outcome_category === "deal_won" && sameMonth(l.updated_at, ref),
     ).length,
     newLeads: leads.filter((l) => sameMonth(l.created_at, ref)).length,
   };

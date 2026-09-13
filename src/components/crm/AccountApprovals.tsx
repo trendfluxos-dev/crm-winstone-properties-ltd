@@ -27,8 +27,10 @@ export function AccountApprovals() {
   });
 
   const act = useMutation({
-    mutationFn: (input: { profileId: string; decision: "approve_agent" | "approve_coordinator" | "reject" }) =>
-      decide({ data: { adminToken: getAdminToken() ?? "", ...input } }),
+    mutationFn: (input: {
+      profileId: string;
+      decision: "approve_agent" | "approve_coordinator" | "reject";
+    }) => decide({ data: { adminToken: getAdminToken() ?? "", ...input } }),
     onSuccess: () => {
       toast.success("অ্যাকাউন্ট হালনাগাদ হয়েছে");
       void queryClient.invalidateQueries({ queryKey: ["account-requests"] });
@@ -48,7 +50,9 @@ export function AccountApprovals() {
         <span className="ml-auto text-xs text-muted-foreground">{pending.length}টি অপেক্ষমাণ</span>
       </header>
 
-      {list.isPending && <p className="mt-3 text-sm text-muted-foreground">অ্যাকাউন্ট আনা হচ্ছে…</p>}
+      {list.isPending && (
+        <p className="mt-3 text-sm text-muted-foreground">অ্যাকাউন্ট আনা হচ্ছে…</p>
+      )}
 
       {!list.isPending && accounts.length === 0 && (
         <p className="mt-3 text-sm text-muted-foreground">
@@ -78,7 +82,11 @@ export function AccountApprovals() {
                   disabled={act.isPending}
                   onClick={() => act.mutate({ profileId: account.id, decision: "approve_agent" })}
                 >
-                  {act.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
+                  {act.isPending ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Check className="size-3.5" />
+                  )}
                   এজেন্ট
                 </Button>
                 <Button

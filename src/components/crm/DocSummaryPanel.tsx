@@ -75,7 +75,11 @@ export function DocSummaryPanel() {
           disabled={run.isPending}
           onClick={() => fileRef.current?.click()}
         >
-          {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+          {run.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Upload className="size-4" />
+          )}
           নথি বেছে নিন
         </Button>
         {run.isPending && <span className="text-xs text-muted-foreground">বোঝা হচ্ছে…</span>}
@@ -96,7 +100,12 @@ export function DocSummaryPanel() {
                   <AgentSection icon="✓" title="হাইলাইটস" items={agent.highlights} />
                   <AgentSection icon="#" title="সংখ্যা" items={agent.numbers} />
                   <AgentSection icon="⚠" title="ঝুঁকি" items={agent.risks} tone="warning" />
-                  <AgentSection icon="→" title="পরবর্তী পদক্ষেপ" items={agent.actions} tone="action" />
+                  <AgentSection
+                    icon="→"
+                    title="পরবর্তী পদক্ষেপ"
+                    items={agent.actions}
+                    tone="action"
+                  />
                 </CardContent>
               </Card>
             ))}
