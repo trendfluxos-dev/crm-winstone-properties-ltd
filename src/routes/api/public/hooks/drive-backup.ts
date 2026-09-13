@@ -69,7 +69,7 @@ export const Route = createFileRoute("/api/public/hooks/drive-backup")({
             doc = { error: error instanceof Error ? error.message : "failed" };
           }
 
-          return Response.json({ ok: true, dateKey, recordings, doc });
+          return Response.json({ ok: true, dateKey, agentFolders, recordings, doc });
         } catch (error) {
           console.error("drive backup job failed", error);
           return new Response(
