@@ -124,6 +124,8 @@ export const Route = createFileRoute("/api/public/agent/report")({
             reason: body.reason ?? null,
             followUpAt: body.follow_up_at ?? null,
             reminderMinutes: body.reminder_minutes,
+            temperature: body.temperature ?? null,
+            grade: body.grade ?? null,
             aiDecision: body.ai_decision ?? null,
           });
           return json({ ...result, ok: true });
