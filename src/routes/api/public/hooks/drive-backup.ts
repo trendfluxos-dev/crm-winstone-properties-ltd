@@ -51,6 +51,16 @@ export const Route = createFileRoute("/api/public/hooks/drive-backup")({
             url.searchParams.get("date") ??
             new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
+          // Keep agent folders in step first (new joiners, renames, moved root)
+          // so tonight's files land in the right folder.
+          let agentFolders: unknown = null;
+          try {
+            const { syncAgentDriveFolders } = await import("@/lib/drive-agent-folders.server");
+            agentFolders = await syncAgentDriveFolders(settings.folderId);
+          } catch (error) {
+            agentFolders = { error: error instanceof Error ? error.message : "failed" };
+          }
+
           const recordings = await syncDayRecordingsToDrive(dateKey);
           let doc: unknown = null;
           try {
