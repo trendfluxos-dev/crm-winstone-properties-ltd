@@ -239,6 +239,13 @@
       "when": 1789307304974,
       "tag": "0033_lead_work_date_and_year_archive",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789308740280,
+      "tag": "0034_tighten_credential_and_support_access",
+      "breakpoints": true
     }
   ]
 }
