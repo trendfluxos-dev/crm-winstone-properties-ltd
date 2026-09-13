@@ -20,6 +20,10 @@ const Body = z.object({
   android_version: z.string().trim().max(40).nullable().optional(),
   manufacturer: z.string().trim().max(80).nullable().optional(),
   model: z.string().trim().max(80).nullable().optional(),
+  // The phone also reports the SIM it is signed in with, so the CRM can verify
+  // the SIM ↔ desk binding automatically instead of trusting the device token
+  // alone.
+  sim_number: z.string().trim().max(25).nullable().optional(),
 });
 
 function json(body: unknown, status = 200): Response {
@@ -69,6 +73,26 @@ export const Route = createFileRoute("/api/public/agent/device-capability")({
           .eq("id", caller.device.id);
         if (error) return json({ error: error.message }, 500);
 
+        // Automatic SIM check: bind on first sight, confirm on every later
+        // beacon, and refuse (without changing anything) when the SIM belongs to
+        // another desk.
+        let simStatus: string = "unknown";
+        let simMessage: string | null = null;
+        if (body.sim_number) {
+          const { bindAgentSim } = await import("@/lib/agent-sim.server");
+          const result = await bindAgentSim({
+            profileId: caller.profile.id,
+            sim: body.sim_number,
+            deviceId: caller.device.id,
+          });
+          simStatus = result.status;
+          if (result.status === "conflict") {
+            simMessage = `এই সিম নম্বরটি ${result.ownerName}-এর অ্যাকাউন্টে যুক্ত — নিজের সিম দিয়ে সাইন ইন করুন`;
+          } else if (result.status === "invalid") {
+            simMessage = "সিম নম্বরটি সঠিক নয়";
+          }
+        }
+
         // Only log a sync event when the verdict actually changed, so the IT
         // timeline shows real capability changes and not every heartbeat.
         if (caller.device.recording_mode !== body.recording_mode) {
@@ -92,6 +116,8 @@ export const Route = createFileRoute("/api/public/agent/device-capability")({
           recording_mode: body.recording_mode,
           recording_capable: capable,
           checked_at: now,
+          sim_status: simStatus,
+          sim_message: simMessage,
         });
       },
     },
