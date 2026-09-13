@@ -10,6 +10,7 @@
  */
 
 import { logAudit } from "./audit.server";
+import { resolveAgentDriveFolder, syncAgentDriveFolders } from "./drive-agent-folders.server";
 import { createDriveDoc, getOrCreateDriveFolder, uploadToDrive } from "./gdrive.server";
 import { syncRecordingDoc } from "./recording-doc.server";
 
@@ -56,6 +57,17 @@ export async function saveDriveBackupSettings(input: {
     { onConflict: "key" },
   );
   if (error) throw new Error(`Drive সেটিংস সংরক্ষণ করা যায়নি: ${error.message}`);
+
+  // Company folder changed: move every existing agent folder under the new one
+  // so later recordings keep landing in the right place.
+  if (input.enabled && input.folderId) {
+    try {
+      await syncAgentDriveFolders(input.folderId);
+    } catch (syncError) {
+      console.error("[gdrive] agent folder realign failed", syncError);
+    }
+  }
+
   await logAudit({
     action: "drive_settings_updated",
     entityType: "system_settings",
@@ -114,7 +126,11 @@ export async function backupRecordingToDrive(recordingId: string) {
       ? supabaseAdmin.from("leads").select("id, name").eq("id", recording.lead_id).maybeSingle()
       : Promise.resolve({ data: null }),
     recording.agent_id
-      ? supabaseAdmin.from("profiles").select("id, name").eq("id", recording.agent_id).maybeSingle()
+      ? supabaseAdmin
+          .from("profiles")
+          .select("id, name, employee_id, phone")
+          .eq("id", recording.agent_id)
+          .maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
 
@@ -132,11 +148,28 @@ export async function backupRecordingToDrive(recordingId: string) {
   }
   const bytes = await blobToBytes(audioBlob);
 
+  // Each agent gets their own folder inside the company folder. A new agent's
+  // folder is created here on their first recording; a renamed agent keeps the
+  // same folder. If Drive rejects the folder step we still store the file in
+  // the company folder rather than losing the backup.
+  let targetFolderId = settings.folderId;
+  if (recording.agent_id && agents) {
+    try {
+      const folder = await resolveAgentDriveFolder(
+        { id: agents.id, name: agents.name, employee_id: agents.employee_id, phone: agents.phone },
+        settings.folderId,
+      );
+      targetFolderId = folder.folderId;
+    } catch (error) {
+      console.error("[gdrive] agent folder failed, using company folder", error);
+    }
+  }
+
   const uploaded = await uploadToDrive({
     name: driveFileName,
     mimeType: recording.mime_type ?? `audio/${ext}`,
     bytes,
-    folderId: settings.folderId,
+    folderId: targetFolderId,
   });
 
   const backup = {
@@ -144,7 +177,7 @@ export async function backupRecordingToDrive(recordingId: string) {
     drive_file_id: uploaded.id,
     drive_file_name: uploaded.name,
     drive_file_url: uploaded.webViewLink ?? `https://drive.google.com/file/d/${uploaded.id}/view`,
-    drive_folder_id: settings.folderId,
+    drive_folder_id: targetFolderId,
     bytes: recording.file_size_bytes ?? bytes.length,
     mime_type: recording.mime_type ?? `audio/${ext}`,
     status: "done" as const,
