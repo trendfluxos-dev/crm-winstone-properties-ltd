@@ -136,6 +136,9 @@ export function PostCallReportGate() {
       setSummary(suggestion.summary.join(" • "));
     }
     if (!note.trim() && suggestion.nextAction) setNote(suggestion.nextAction);
+    // AI never overwrites a classification the agent already picked.
+    if (!temperature && suggestion.suggestedTemperature) setTemperature(suggestion.suggestedTemperature);
+    if (!grade && suggestion.suggestedGrade) setGrade(suggestion.suggestedGrade);
     setAiDecision("accepted");
   };
 
@@ -183,6 +186,15 @@ export function PostCallReportGate() {
             <p className="text-xs">
               আগ্রহ: {suggestion.interest} · পরামর্শ: {suggestion.nextAction}
             </p>
+            {suggestion.suggestedTemperature || suggestion.suggestedGrade ? (
+              <p className="text-xs">
+                পরামর্শ শ্রেণি:{" "}
+                {suggestion.suggestedTemperature
+                  ? { hot: "হট", warm: "ওয়ার্ম", cold: "কোল্ড" }[suggestion.suggestedTemperature]
+                  : "—"}{" "}
+                · গ্রেড {suggestion.suggestedGrade ?? "—"}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={applySuggestion} className="gap-1">
                 <Check className="size-3.5" /> মেনে নিন

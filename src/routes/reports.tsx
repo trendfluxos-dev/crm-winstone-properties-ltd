@@ -20,6 +20,9 @@ import {
 } from "recharts";
 
 import { RoleGate } from "@/components/crm/RoleGate";
+import { DayCallExportPanel } from "@/components/crm/DayCallExportPanel";
+import { SyncedCallsPanel } from "@/components/crm/SyncedCallsPanel";
+import { useMyAccount } from "@/lib/session";
 import { AppShell } from "@/components/crm/AppShell";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
@@ -100,6 +103,8 @@ const PRESETS = [
 
 function ReportsBoard() {
   const data = useSnapshot();
+  const { scope } = useMyAccount();
+  const canSeeDayExport = scope === "authority" || scope === "coordinator";
   const [filters, setFilters] = useState<ReportFilters>(() => defaultFilters(30));
 
   const sources = useMemo(() => leadSources(data.leads), [data.leads]);
@@ -114,6 +119,13 @@ function ReportsBoard() {
 
   return (
     <div className="space-y-6">
+      {canSeeDayExport && (
+        <div className="space-y-4">
+          <DayCallExportPanel />
+          <SyncedCallsPanel />
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Custom Reports</h1>

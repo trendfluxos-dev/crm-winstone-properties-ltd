@@ -40,6 +40,7 @@ import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/
 import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
 import { Route as ApiPublicAgentTwilioCallRouteImport } from './routes/api/public/agent/twilio-call'
 import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/agent/version'
+import { Route as ApiPublicAgentWhatsappRouteImport } from './routes/api/public/agent/whatsapp'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
@@ -221,6 +222,11 @@ const ApiPublicAgentVersionRoute = ApiPublicAgentVersionRouteImport.update({
   path: '/api/public/agent/version',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentWhatsappRoute = ApiPublicAgentWhatsappRouteImport.update({
+  id: '/api/public/agent/whatsapp',
+  path: '/api/public/agent/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentWorkspaceRoute = ApiPublicAgentWorkspaceRouteImport.update({
   id: '/api/public/agent/workspace',
   path: '/api/public/agent/workspace',
@@ -367,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
+  '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
@@ -421,6 +428,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
+  '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
@@ -476,6 +484,7 @@ export interface FileRoutesById {
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
+  '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
@@ -532,6 +541,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/report'
     | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
+    | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
@@ -586,6 +596,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/report'
     | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
+    | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
@@ -640,6 +651,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/report'
     | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
+    | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
@@ -695,6 +707,7 @@ export interface RootRouteChildren {
   ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
   ApiPublicAgentTwilioCallRoute: typeof ApiPublicAgentTwilioCallRoute
   ApiPublicAgentVersionRoute: typeof ApiPublicAgentVersionRoute
+  ApiPublicAgentWhatsappRoute: typeof ApiPublicAgentWhatsappRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
@@ -937,6 +950,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentVersionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/whatsapp': {
+      id: '/api/public/agent/whatsapp'
+      path: '/api/public/agent/whatsapp'
+      fullPath: '/api/public/agent/whatsapp'
+      preLoaderRoute: typeof ApiPublicAgentWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/workspace': {
       id: '/api/public/agent/workspace'
       path: '/api/public/agent/workspace'
@@ -1120,6 +1140,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
   ApiPublicAgentTwilioCallRoute: ApiPublicAgentTwilioCallRoute,
   ApiPublicAgentVersionRoute: ApiPublicAgentVersionRoute,
+  ApiPublicAgentWhatsappRoute: ApiPublicAgentWhatsappRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,

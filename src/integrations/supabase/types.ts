@@ -350,10 +350,12 @@ export type Database = {
         Row: {
           agent_id: string | null
           agent_phone: string | null
+          ai_grade: string | null
           ai_intent: string | null
           ai_lead_category: string | null
           ai_next_action: string | null
           ai_summary: string | null
+          ai_temperature: string | null
           analysis_attempts: number
           analysis_error: string | null
           analysis_status: string
@@ -402,10 +404,12 @@ export type Database = {
         Insert: {
           agent_id?: string | null
           agent_phone?: string | null
+          ai_grade?: string | null
           ai_intent?: string | null
           ai_lead_category?: string | null
           ai_next_action?: string | null
           ai_summary?: string | null
+          ai_temperature?: string | null
           analysis_attempts?: number
           analysis_error?: string | null
           analysis_status?: string
@@ -454,10 +458,12 @@ export type Database = {
         Update: {
           agent_id?: string | null
           agent_phone?: string | null
+          ai_grade?: string | null
           ai_intent?: string | null
           ai_lead_category?: string | null
           ai_next_action?: string | null
           ai_summary?: string | null
+          ai_temperature?: string | null
           analysis_attempts?: number
           analysis_error?: string | null
           analysis_status?: string

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Pause, Play, RotateCcw, RotateCw } from "lucide-react";
+import { Download, Loader2, Pause, Play, RotateCcw, RotateCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,8 @@ export function CallAudioPlayer({
   const [duration, setDuration] = useState(fallbackDuration);
   const [speed, setSpeed] = useState<number>(1);
   const [bars, setBars] = useState<number[]>(FLAT_BARS);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(false);
   const adminToken = useAdminToken();
 
   const resolveUrl = useServerFn(getAudioUrl);
@@ -201,6 +203,34 @@ export function CallAudioPlayer({
         >
           <RotateCw className="size-3.5" /> 5s
         </Button>
+        <Button
+          size="sm"
+          className="rounded-full bg-ink-foreground/10 text-ink-foreground hover:bg-ink-foreground/20"
+          disabled={!source?.url || downloading}
+          onClick={async () => {
+            const url = source?.url;
+            if (!url) return;
+            setDownloading(true);
+            try {
+              const res = await fetch(url);
+              if (!res.ok) throw new Error("download failed");
+              const blob = await res.blob();
+              const href = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = href;
+              link.download = `call-${recordingId}.mp3`;
+              link.click();
+              URL.revokeObjectURL(href);
+            } catch {
+              setDownloadError(true);
+            } finally {
+              setDownloading(false);
+            }
+          }}
+        >
+          {downloading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}{" "}
+          ডাউনলোড
+        </Button>
         <div className="ml-auto flex items-center gap-1 rounded-full bg-ink-foreground/10 p-1">
           {SPEEDS.map((option) => (
             <button
@@ -223,6 +253,10 @@ export function CallAudioPlayer({
         <p className="mt-2 text-xs text-destructive">
           This recording could not be loaded for playback.
         </p>
+      )}
+
+      {downloadError && (
+        <p className="mt-2 text-xs text-destructive">রেকর্ডিং ডাউনলোড করা যায়নি — আবার চেষ্টা করুন।</p>
       )}
     </div>
   );
