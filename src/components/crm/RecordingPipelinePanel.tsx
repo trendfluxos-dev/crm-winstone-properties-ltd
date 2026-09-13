@@ -67,6 +67,7 @@ const OVERALL_LABEL: Record<PipelineRow["overall"], string> = {
  */
 export function RecordingPipelinePanel() {
   const [filter, setFilter] = useState("all");
+  const adminToken = useAdminToken();
   const loadPipeline = useServerFn(recordingPipeline);
   const runRetry = useServerFn(retryPipelineItem);
   const runVerify = useServerFn(verifyDriveBackups);
@@ -75,13 +76,13 @@ export function RecordingPipelinePanel() {
   const pipeline = useQuery({
     queryKey: ["recording-pipeline", filter],
     queryFn: () =>
-      loadPipeline({ data: { adminToken: adminToken(), filter: filter as "all", days: 7, limit: 60 } }),
+      loadPipeline({ data: { adminToken, filter: filter as "all", days: 7, limit: 60 } }),
     refetchInterval: 30_000,
   });
 
   const retry = useMutation({
     mutationFn: (input: { recordingId: string; step: "drive" | "analysis" }) =>
-      runRetry({ data: { adminToken: adminToken(), ...input } }),
+      runRetry({ data: { adminToken, ...input } }),
     onSuccess: (result) => {
       if (result.ok) toast.success(`রিট্রাই: ${result.outcome}`);
       else toast.error(result.detail ?? "রিট্রাই ব্যর্থ");
@@ -91,7 +92,7 @@ export function RecordingPipelinePanel() {
   });
 
   const verify = useMutation({
-    mutationFn: () => runVerify({ data: { adminToken: adminToken(), limit: 25 } }),
+    mutationFn: () => runVerify({ data: { adminToken, limit: 25 } }),
     onSuccess: (result) => {
       toast.success(
         `Drive যাচাই: ${result.verified}টি ফাইল আছে, ${result.missing}টি পাওয়া যায়নি (সারসংক্ষেপ ডক ${result.docsVerified} ঠিক / ${result.docsMissing} নেই)`,
