@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Coins, Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AccountApprovals } from "@/components/crm/AccountApprovals";
@@ -148,15 +148,22 @@ function SystemBoard() {
           <h2 className="flex items-center gap-2 text-lg font-semibold">
             <Receipt className="size-4 text-primary" /> {billing.monthLabel} মাসের বিল
           </h2>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            রেট ৳/মিনিট
-            <Input
-              value={rate}
-              onChange={(e) => setRate(e.target.value.replace(/[^\d.]/g, ""))}
-              className="w-20"
-              inputMode="decimal"
-            />
-          </label>
+          <div className="flex items-center gap-2">
+            <Link to="/credits">
+              <Button variant="outline" size="sm">
+                <Coins className="size-4" /> ক্রেডিট বিল রিপোর্ট
+              </Button>
+            </Link>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              রেট ৳/মিনিট
+              <Input
+                value={rate}
+                onChange={(e) => setRate(e.target.value.replace(/[^\d.]/g, ""))}
+                className="w-20"
+                inputMode="decimal"
+              />
+            </label>
+          </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Tile label="করা কল" value={String(billing.dials)} hint={`${billing.newLeads}টি নতুন লিড`} />
