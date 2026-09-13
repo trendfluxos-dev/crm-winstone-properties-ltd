@@ -45,6 +45,30 @@ const LEAD_STATUS_FOR: Record<CallCategory, "pending" | "contacted" | "follow_up
   closed_converted: "closed",
 };
 
+/**
+ * Classification is the business decision on a received call: how warm the
+ * customer is, and how valuable the lead is. It is always a human decision —
+ * AI may suggest, never write it.
+ */
+export const LEAD_TEMPERATURES = ["hot", "warm", "cold"] as const;
+export const LEAD_GRADES = ["A", "B", "C", "D"] as const;
+
+export type LeadTemperature = (typeof LEAD_TEMPERATURES)[number];
+export type LeadGrade = (typeof LEAD_GRADES)[number];
+
+export const TEMPERATURE_LABEL: Record<LeadTemperature, string> = {
+  hot: "HOT — এখনই কিনবেন",
+  warm: "WARM — আগ্রহ আছে",
+  cold: "COLD — এখন নয়",
+};
+
+export const GRADE_LABEL: Record<LeadGrade, string> = {
+  A: "A — সর্বোচ্চ মান",
+  B: "B — ভালো",
+  C: "C — সাধারণ",
+  D: "D — দুর্বল",
+};
+
 export type ReportValidationError = { field: string; message: string };
 
 /** Same rules as the database trigger, so the UI can show them before submit. */
@@ -54,6 +78,10 @@ export function validateReport(input: {
   note?: string | null;
   reason?: string | null;
   followUpAt?: string | null;
+  /** A received call must be classified; an unanswered one goes back to the retry queue. */
+  connected?: boolean;
+  temperature?: string | null;
+  grade?: string | null;
 }): ReportValidationError | null {
   const category = input.category as CallCategory | null;
   if (!category || !CALL_CATEGORIES.includes(category)) {
@@ -71,6 +99,14 @@ export function validateReport(input: {
   }
   if ((category === "not_interested" || category === "wrong_number") && !reason) {
     return { field: "reason", message: "কারণ লিখুন" };
+  }
+  if (input.connected !== false) {
+    if (!LEAD_TEMPERATURES.includes((input.temperature ?? "") as LeadTemperature)) {
+      return { field: "temperature", message: "কথা হওয়া কলে Hot / Warm / Cold বাছাই করুন" };
+    }
+    if (!LEAD_GRADES.includes((input.grade ?? "") as LeadGrade)) {
+      return { field: "grade", message: "কথা হওয়া কলে গ্রেড A / B / C / D বাছাই করুন" };
+    }
   }
   return null;
 }
@@ -148,6 +184,11 @@ export async function openCallReport(input: {
  * Submits the report: validates, closes it, moves the lead forward and creates
  * the linked calendar event for FOLLOW UP / CALLBACK. The human category is
  * final — an AI suggestion is stored beside it and never overwrites it.
+ *
+ * Completion rule, enforced here and in the database trigger:
+ *   received + classified (temperature + grade) -> lead work_state = completed
+ *   received, not classified                    -> refused, report stays open
+ *   not received                                -> lead stays pending, retry queue
  */
 export async function submitCallReport(input: {
   reportId: string;
@@ -158,11 +199,10 @@ export async function submitCallReport(input: {
   reason?: string | null;
   followUpAt?: string | null;
   reminderMinutes?: number;
+  temperature?: string | null;
+  grade?: string | null;
   aiDecision?: "accepted" | "edited" | "rejected" | null;
 }) {
-  const invalid = validateReport(input);
-  if (invalid) throw new Error(invalid.message);
-
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const category = input.category as CallCategory;
 
@@ -176,6 +216,16 @@ export async function submitCallReport(input: {
   if (report.agent_id !== input.agentId) throw new Error("এই রিপোর্ট আপনার নয়");
   if (report.status === "submitted") return { ok: true, alreadySubmitted: true as const };
 
+  // `connected` is set when the call ends, so the phone cannot skip the
+  // classification requirement by omitting it from the submit payload.
+  const received = report.connected !== false;
+  const invalid = validateReport({ ...input, connected: received });
+  if (invalid) throw new Error(invalid.message);
+
+  const temperature = received ? ((input.temperature ?? null) as LeadTemperature | null) : null;
+  const grade = received ? ((input.grade ?? null) as LeadGrade | null) : null;
+  const classified = Boolean(temperature && grade);
+
   const { error } = await supabaseAdmin
     .from("call_reports")
     .update({
@@ -185,6 +235,8 @@ export async function submitCallReport(input: {
       note: input.note?.trim() || null,
       reason: input.reason?.trim() || null,
       follow_up_at: input.followUpAt ?? null,
+      temperature,
+      grade,
       ai_decision: input.aiDecision ?? null,
       submitted_at: new Date().toISOString(),
     })
@@ -198,18 +250,52 @@ export async function submitCallReport(input: {
     .eq("id", report.lead_id)
     .maybeSingle();
 
-  await supabaseAdmin
-    .from("leads")
-    .update({
-      status: LEAD_STATUS_FOR[category],
-      outcome_category: category,
-      notes:
-        [input.summary?.trim(), input.note?.trim(), input.reason?.trim()]
-          .filter(Boolean)
-          .join(" — ") || null,
-      last_call_at: new Date().toISOString(),
-    })
-    .eq("id", report.lead_id);
+  const nowIso = new Date().toISOString();
+  const notes =
+    [input.summary?.trim(), input.note?.trim(), input.reason?.trim()].filter(Boolean).join(" — ") ||
+    null;
+
+  if (received && classified) {
+    await supabaseAdmin
+      .from("leads")
+      .update({
+        status: LEAD_STATUS_FOR[category],
+        outcome_category: category,
+        notes,
+        last_call_at: nowIso,
+        temperature,
+        grade,
+        classification_note: input.note?.trim() || null,
+        classified_at: nowIso,
+        classified_by: input.agentId,
+        work_state: "completed",
+      })
+      .eq("id", report.lead_id);
+
+    await supabaseAdmin.from("lead_classifications").insert({
+      lead_id: report.lead_id,
+      agent_id: input.agentId,
+      report_id: report.id,
+      temperature: temperature!,
+      grade: grade!,
+      note: input.note?.trim() || null,
+      source: "manual",
+      classified_at: nowIso,
+    });
+  } else {
+    // Not received: the lead stays in the working queue for a retry call and is
+    // never silently completed.
+    await supabaseAdmin
+      .from("leads")
+      .update({
+        status: "pending",
+        outcome_category: category,
+        notes,
+        last_call_at: nowIso,
+        work_state: "pending",
+      })
+      .eq("id", report.lead_id);
+  }
 
   let followUpId: string | null = null;
   if (input.followUpAt) {
@@ -240,7 +326,9 @@ export async function submitCallReport(input: {
     agentId: input.agentId,
     recordingId: report.recording_id,
     kind: "outcome_logged",
-    detail: `${CATEGORY_LABEL[category]}${input.followUpAt ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}` : ""}`,
+    detail: `${CATEGORY_LABEL[category]}${
+      classified ? ` — ${TEMPERATURE_LABEL[temperature!]} / গ্রেড ${grade}` : " — কথা হয়নি, আবার কল হবে"
+    }${input.followUpAt ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}` : ""}`,
   });
 
   const { logAudit } = await import("@/lib/audit.server");
@@ -252,6 +340,10 @@ export async function submitCallReport(input: {
     metadata: {
       leadId: report.lead_id,
       category,
+      received,
+      temperature,
+      grade,
+      workState: received && classified ? "completed" : "pending",
       aiDecision: input.aiDecision ?? null,
       followUpAt: input.followUpAt ?? null,
     },
@@ -266,7 +358,7 @@ export async function submitCallReport(input: {
     entityType: "call_report",
     entityId: report.id,
     idempotencyKey: `report_submitted:${report.id}`,
-    payload: { leadId: report.lead_id, category },
+    payload: { leadId: report.lead_id, category, temperature, grade },
   });
 
   // The spreadsheet is updated as soon as the agent's update is accepted.
@@ -280,7 +372,12 @@ export async function submitCallReport(input: {
     console.error("report sheet sync after submit failed:", error);
   }
 
-  return { ok: true, followUpId, sheet };
+  return {
+    ok: true,
+    followUpId,
+    sheet,
+    workState: received && classified ? ("completed" as const) : ("pending" as const),
+  };
 }
 
 /**

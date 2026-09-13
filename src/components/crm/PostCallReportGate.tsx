@@ -26,6 +26,20 @@ const CATEGORIES = [
 
 const NEEDS_REASON = new Set(["not_interested", "wrong_number"]);
 
+/** Classification, mandatory whenever the customer actually answered. */
+const TEMPERATURES = [
+  { value: "hot", label: "HOT — গরম" },
+  { value: "warm", label: "WARM — কিছুটা আগ্রহী" },
+  { value: "cold", label: "COLD — ঠান্ডা" },
+] as const;
+
+const GRADES = [
+  { value: "A", label: "A" },
+  { value: "B", label: "B" },
+  { value: "C", label: "C" },
+  { value: "D", label: "D" },
+] as const;
+
 /**
  * The next-lead lock, on the web desk.
  *
@@ -51,6 +65,8 @@ export function PostCallReportGate() {
   const [note, setNote] = useState("");
   const [reason, setReason] = useState("");
   const [when, setWhen] = useState("");
+  const [temperature, setTemperature] = useState<"hot" | "warm" | "cold" | null>(null);
+  const [grade, setGrade] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [aiDecision, setAiDecision] = useState<"accepted" | "edited" | "rejected" | null>(null);
 
   const detail = pending.data;
@@ -63,6 +79,8 @@ export function PostCallReportGate() {
       setNote("");
       setReason("");
       setWhen("");
+      setTemperature(null);
+      setGrade(null);
       setAiDecision(null);
     }
   }, [detail?.report?.id, detail]);
@@ -79,6 +97,8 @@ export function PostCallReportGate() {
           reason: reason.trim() || null,
           followUpAt: when ? new Date(when).toISOString() : null,
           reminderMinutes: 15,
+          temperature,
+          grade,
           aiDecision,
         },
       }),
@@ -94,12 +114,16 @@ export function PostCallReportGate() {
   if (!detail) return null;
 
   const reasonRequired = NEEDS_REASON.has(category);
+  // The customer answered -> classification (Hot/Warm/Cold + A/B/C/D) is what
+  // turns the lead into COMPLETED. Not answered -> the lead goes back to retry.
+  const received = detail.report.connected !== false;
   // Every call: category + summary + note + follow-up date are all mandatory.
   const ready =
     Boolean(category) &&
     summary.trim().length > 1 &&
     note.trim().length > 1 &&
     Boolean(when) &&
+    (!received || (Boolean(temperature) && Boolean(grade))) &&
     (!reasonRequired || reason.trim().length > 1);
 
   const applySuggestion = () => {
@@ -202,6 +226,61 @@ export function PostCallReportGate() {
             ))}
           </div>
         </div>
+
+        {received ? (
+          <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+            <p className="text-xs font-bold">
+              শ্রেণিবিন্যাস (বাধ্যতামূলক — কথা হয়েছে)
+            </p>
+            <div className="space-y-1.5">
+              <Label className="text-xs">লিডের তাপমাত্রা</Label>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {TEMPERATURES.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setTemperature(item.value)}
+                    className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                      temperature === item.value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:bg-muted"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">গ্রেড</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {GRADES.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setGrade(item.value)}
+                    className={`rounded-lg border px-3 py-2 text-xs font-bold transition ${
+                      grade === item.value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:bg-muted"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              শ্রেণিবিন্যাস ছাড়া লিড COMPLETED হবে না। AI নিজে থেকে এটি বসাবে না।
+            </p>
+          </div>
+        ) : (
+          <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+            কথা হয়নি — লিড PENDING থাকবে এবং আবার কলের তালিকায় ফিরে যাবে।
+          </p>
+        )}
+
+
 
         <div className="space-y-1.5">
           <Label htmlFor="call-summary" className="text-xs">

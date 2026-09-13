@@ -110,6 +110,12 @@ export type AgentStats = {
   closedWon: number;
   assigned: number;
   conversionRate: number;
+  /** Classification counts on the agent's own leads. */
+  hot: number;
+  warm: number;
+  cold: number;
+  /** Assigned leads that are not COMPLETED yet (unclassified or not reached). */
+  pendingWork: number;
 };
 
 function isToday(iso: string): boolean {
@@ -156,6 +162,10 @@ export function buildAgentStats(
         closedWon,
         assigned: assignedLeads.length,
         conversionRate: assignedLeads.length ? (closedWon / assignedLeads.length) * 100 : 0,
+        hot: assignedLeads.filter((l) => l.temperature === "hot").length,
+        warm: assignedLeads.filter((l) => l.temperature === "warm").length,
+        cold: assignedLeads.filter((l) => l.temperature === "cold").length,
+        pendingWork: assignedLeads.filter((l) => l.work_state !== "completed").length,
       };
     })
     .sort((a, b) => b.connected - a.connected || b.talkSeconds - a.talkSeconds);

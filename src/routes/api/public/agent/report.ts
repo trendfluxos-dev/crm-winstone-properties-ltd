@@ -29,6 +29,8 @@ const Body = z.discriminatedUnion("action", [
     reason: z.string().trim().max(2000).nullable().optional(),
     follow_up_at: z.string().datetime({ offset: true }).nullable().optional(),
     reminder_minutes: z.number().int().min(0).max(1440).default(15),
+    temperature: z.enum(["hot", "warm", "cold"]).nullable().optional(),
+    grade: z.enum(["A", "B", "C", "D"]).nullable().optional(),
     ai_decision: z.enum(["accepted", "edited", "rejected"]).nullable().optional(),
   }),
 ]);
@@ -122,6 +124,8 @@ export const Route = createFileRoute("/api/public/agent/report")({
             reason: body.reason ?? null,
             followUpAt: body.follow_up_at ?? null,
             reminderMinutes: body.reminder_minutes,
+            temperature: body.temperature ?? null,
+            grade: body.grade ?? null,
             aiDecision: body.ai_decision ?? null,
           });
           return json({ ...result, ok: true });
