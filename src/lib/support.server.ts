@@ -146,23 +146,33 @@ export async function appendMessage(input: {
     .eq("id", input.conversationId)
     .maybeSingle();
 
-  const patch: Record<string, unknown> = {
+  const patch: {
+    last_message_at: string;
+    updated_at: string;
+    message_count: number;
+    unread_for_agent?: boolean;
+    unread_for_customer?: boolean;
+    first_customer_message_at?: string;
+    first_human_response_at?: string;
+    status?: string;
+  } = {
     last_message_at: now,
     updated_at: now,
     message_count: (conversation?.message_count ?? 0) + 1,
   };
   if (input.authorKind === "customer") {
-    patch["unread_for_agent"] = true;
-    patch["unread_for_customer"] = false;
-    if (!conversation?.first_customer_message_at) patch["first_customer_message_at"] = now;
-    if (conversation?.status === "resolved") patch["status"] = "open";
+    patch.unread_for_agent = true;
+    patch.unread_for_customer = false;
+    if (!conversation?.first_customer_message_at) patch.first_customer_message_at = now;
+    if (conversation?.status === "resolved") patch.status = "open";
   }
   if (input.authorKind === "agent") {
-    patch["unread_for_customer"] = true;
-    patch["unread_for_agent"] = false;
-    if (!conversation?.first_human_response_at) patch["first_human_response_at"] = now;
+    patch.unread_for_customer = true;
+    patch.unread_for_agent = false;
+    if (!conversation?.first_human_response_at) patch.first_human_response_at = now;
   }
-  if (input.authorKind === "ai") patch["unread_for_customer"] = true;
+  if (input.authorKind === "ai") patch.unread_for_customer = true;
+
 
   await supabaseAdmin.from("support_conversations").update(patch).eq("id", input.conversationId);
   return data;
