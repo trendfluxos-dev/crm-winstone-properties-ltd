@@ -19,8 +19,12 @@ import {
   generateShiftSummaryNow,
   liveShiftSheetNow,
   exportShiftSummaryToDrive,
+  exportShiftSummaryToSheets,
   shiftSummaries,
 } from "@/lib/shift-summary.functions";
+
+const SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/1cS2BH_T9USf7lbVfKMWGi18EV53y1jDGqENzkNTiG7s/edit";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
@@ -152,6 +156,14 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const toSheets = useServerFn(exportShiftSummaryToSheets);
+  const pushSheets = useMutation({
+    mutationFn: (shiftKey: string) =>
+      toSheets({ data: { adminToken: adminToken ?? null, shiftKey } }),
+    onSuccess: () => toast.success("Google Sheets-এ লেখা হয়েছে"),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const fill = useMutation({
     mutationFn: () => backfill({ data: { adminToken: getAdminToken() } }),
     onSuccess: (result) => {
@@ -195,6 +207,15 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
           শিফট সামারি {scope === "hq" ? "(চলতি মাস)" : "(সম্পূর্ণ সংরক্ষণ)"}
         </h2>
         <span className="ml-auto text-xs text-muted-foreground">{rows.length}টি</span>
+        <a
+          href={SHEET_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs text-primary hover:underline"
+        >
+          <ExternalLink className="size-3.5" />
+          Google Sheets
+        </a>
         <Button
           size="sm"
           variant="secondary"
@@ -353,6 +374,16 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                   Drive-এ জমা দিন
                 </Button>
               )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 gap-1 px-2 text-xs"
+                disabled={pushSheets.isPending}
+                onClick={() => pushSheets.mutate(row.shift_key)}
+              >
+                <UploadCloud className="size-3" />
+                Sheets-এ জমা দিন
+              </Button>
             </div>
 
             <div className="mt-2 overflow-x-auto">
