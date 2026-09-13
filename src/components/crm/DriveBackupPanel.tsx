@@ -18,12 +18,14 @@ import {
   syncRecordingDocToDriveFn,
   syncRecordingsToDriveFn,
 } from "@/lib/drive-backup.functions";
+import { useAdminToken } from "@/lib/local-session";
 
 function todayDhaka() {
   return new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 export function DriveBackupPanel() {
+  const adminToken = useAdminToken();
   const getSettings = useServerFn(getDriveBackupSettingsFn);
   const saveSettings = useServerFn(saveDriveBackupSettingsFn);
   const initFolder = useServerFn(initializeDriveBackupFolderFn);
@@ -42,7 +44,7 @@ export function DriveBackupPanel() {
     refetch,
   } = useQuery({
     queryKey: ["drive-backup-settings"],
-    queryFn: () => getSettings({}),
+    queryFn: () => getSettings({ data: { adminToken } }),
   });
 
   const [enabledDraft, setEnabledDraft] = useState<boolean | null>(null);
@@ -51,7 +53,7 @@ export function DriveBackupPanel() {
   const save = useMutation({
     mutationFn: async () => {
       const folderId = folderIdDraft.trim() || (settings?.folderId ?? null);
-      return saveSettings({ data: { enabled: enabledDraft ?? settings?.enabled ?? false, folderId } });
+      return saveSettings({ data: { adminToken, enabled: enabledDraft ?? settings?.enabled ?? false, folderId } });
     },
     onSuccess: () => {
       toast.success("Google Drive ব্যাকআপ সেটিংস সংরক্ষিত হয়েছে");
@@ -63,7 +65,7 @@ export function DriveBackupPanel() {
   });
 
   const init = useMutation({
-    mutationFn: () => initFolder({}),
+    mutationFn: () => initFolder({ data: { adminToken } }),
     onSuccess: (data) => {
       toast.success("Drive ফোল্ডার তৈরি/লোড হয়েছে");
       setFolderIdDraft(data.folderId ?? "");
@@ -73,7 +75,7 @@ export function DriveBackupPanel() {
   });
 
   const recordingsSync = useMutation({
-    mutationFn: () => syncRecordings({ data: { dateKey } }),
+    mutationFn: () => syncRecordings({ data: { adminToken, dateKey } }),
     onSuccess: (data) => {
       toast.success(
         `${data.attempted}টি চেষ্টা · ${data.done}টি জমা · ${data.failed}টি ব্যর্থ`,
@@ -84,7 +86,7 @@ export function DriveBackupPanel() {
   });
 
   const docSync = useMutation({
-    mutationFn: () => syncDoc({ data: { dateKey } }),
+    mutationFn: () => syncDoc({ data: { adminToken, dateKey } }),
     onSuccess: (data) => {
       toast.success(`${data.calls}টি কল · ${data.recordings}টি রেকর্ডিংয়ের ডক Google Drive-ে জমা হয়েছে`);
       window.open(data.docUrl, "_blank", "noopener,noreferrer");
@@ -93,7 +95,7 @@ export function DriveBackupPanel() {
   });
 
   const singleBackup = useMutation({
-    mutationFn: () => backupOne({ data: { recordingId } }),
+    mutationFn: () => backupOne({ data: { adminToken, recordingId } }),
     onSuccess: (data) => {
       toast.success(`${data.driveFileName} Google Drive-ে জমা হয়েছে`);
     },
@@ -102,11 +104,11 @@ export function DriveBackupPanel() {
 
   const { data: agentFolders, refetch: refetchAgentFolders } = useQuery({
     queryKey: ["drive-agent-folders"],
-    queryFn: () => listAgentFolders({}),
+    queryFn: () => listAgentFolders({ data: { adminToken } }),
   });
 
   const agentFolderSync = useMutation({
-    mutationFn: () => syncAgentFolders({}),
+    mutationFn: () => syncAgentFolders({ data: { adminToken } }),
     onSuccess: (data) => {
       toast.success(
         `${data.total}জন এজেন্ট · নতুন ${data.created} · নাম বদল ${data.renamed} · সরানো ${data.moved}`,
