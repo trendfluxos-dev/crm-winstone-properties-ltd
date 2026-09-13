@@ -21,9 +21,27 @@ export const Route = createFileRoute("/api/public/ingest/analyze")({
       POST: async ({ request }) => {
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
-        const cron = process.env["LOVABLE_CRON_SECRET"];
         const cronHeader = request.headers.get("x-cron-secret") ?? "";
-        const cronOk = Boolean(cron) && cron === cronHeader;
+
+        // The database scheduler signs with the shared secret stored in
+        // settings, the same one the shift-summary schedule uses.
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: stored } = await supabaseAdmin
+          .from("system_settings")
+          .select("value")
+          .eq("key", "shift_cron_secret")
+          .maybeSingle();
+        const storedSecret =
+          stored && typeof stored.value === "object" && stored.value !== null
+            ? (stored.value as { secret?: string }).secret
+            : undefined;
+
+        const accepted = [
+          process.env["LOVABLE_CRON_SECRET"],
+          process.env["SHIFT_CRON_SECRET"],
+          storedSecret,
+        ].filter((value): value is string => Boolean(value));
+        const cronOk = Boolean(cronHeader) && accepted.includes(cronHeader);
         if (caller.kind === "none" && !cronOk) return json({ error: "Unauthorized" }, 401);
 
         const url = new URL(request.url);
