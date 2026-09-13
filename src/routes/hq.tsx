@@ -23,7 +23,7 @@ import { LeadDossier } from "@/components/crm/LeadDossier";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
-import { SystemNoticeBar } from "@/components/crm/SystemNoticeBar";
+
 import {
   buildAgentStats,
   buildTimeline,
