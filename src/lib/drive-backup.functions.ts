@@ -21,9 +21,10 @@ export const getDriveBackupSettingsFn = createServerFn({ method: "GET" })
 export const saveDriveBackupSettingsFn = createServerFn({ method: "POST" })
   .inputValidator((input: { enabled: boolean; folderId?: string | null }) => input)
   .handler(async ({ data }) => {
-    const { resolveCaller, requireAuthority } = await import("./access.server");
+    const { resolveCaller, requireAuthority, requireWrite } = await import("./access.server");
     const caller = await resolveCaller();
     requireAuthority(caller);
+    requireWrite(caller);
     return saveDriveBackupSettings({
       enabled: data.enabled,
       folderId: data.folderId ?? null,
@@ -33,9 +34,10 @@ export const saveDriveBackupSettingsFn = createServerFn({ method: "POST" })
 
 export const initializeDriveBackupFolderFn = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { resolveCaller, requireAuthority } = await import("./access.server");
+    const { resolveCaller, requireAuthority, requireWrite } = await import("./access.server");
     const caller = await resolveCaller();
     requireAuthority(caller);
+    requireWrite(caller);
     return initializeDriveBackupFolder();
   });
 

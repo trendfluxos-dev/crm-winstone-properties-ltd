@@ -8,10 +8,12 @@ import { z } from "zod";
  */
 const Input = z.object({ adminToken: z.string().nullable().optional() });
 
-async function requireSupervisor(adminToken: string | null) {
-  const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+async function requireSupervisor(adminToken: string | null, write = false) {
+  const { resolveCaller, requireDispatch, requireWrite } = await import("@/lib/access.server");
   const caller = await resolveCaller(adminToken);
   requireDispatch(caller);
+  // HQ sessions may read every board here but never change system state.
+  if (write) requireWrite(caller);
   return caller;
 }
 
@@ -189,7 +191,7 @@ export const callOpsSummary = createServerFn({ method: "POST" })
 export const revokeAgentDevice = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.extend({ deviceId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
-    const caller = await requireSupervisor(data.adminToken ?? null);
+    const caller = await requireSupervisor(data.adminToken ?? null, true);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: device } = await supabaseAdmin
@@ -239,7 +241,7 @@ export const assignmentHistory = createServerFn({ method: "POST" })
 export const runAnalysisSweep = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
-    await requireSupervisor(data.adminToken ?? null);
+    await requireSupervisor(data.adminToken ?? null, true);
     const { analyzePending } = await import("@/lib/analysis-queue.server");
     const results = await analyzePending(10);
     return { processed: results.length, results };
@@ -249,7 +251,7 @@ export const runAnalysisSweep = createServerFn({ method: "POST" })
 export const acknowledgeAlert = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.extend({ alertId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
-    const caller = await requireSupervisor(data.adminToken ?? null);
+    const caller = await requireSupervisor(data.adminToken ?? null, true);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("system_alerts")
