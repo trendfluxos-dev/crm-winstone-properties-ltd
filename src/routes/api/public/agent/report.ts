@@ -92,6 +92,7 @@ export const Route = createFileRoute("/api/public/agent/report")({
 
         if (body.action === "open") {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { leadHeldByOther } = await import("@/lib/lead-access.server");
           const { data: lead } = await supabaseAdmin
             .from("leads")
             .select("id, assigned_to, assigned_agent_id")
