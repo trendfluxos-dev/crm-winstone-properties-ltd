@@ -77,7 +77,7 @@ export function FollowUpCalendar() {
           <p className="text-xs text-muted-foreground">
             {overdue > 0 ? `${overdue}টি সময় পার হয়েছে · ` : ""}
             {due > 0 ? `${due}টি এখনই করার সময় · ` : ""}
-            রিমাইন্ডার কল/মেসেজের ১৫ মিনিট আগে।
+            রিমাইন্ডার কল/মেসেজের ৩০ মিনিট আগে — ফোনে অ্যালার্ম আসবে।
           </p>
         </div>
         <Tabs value={view} onValueChange={(value) => setView(value as View)}>
