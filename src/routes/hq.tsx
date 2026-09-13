@@ -169,6 +169,36 @@ function ControlBoard() {
           />
         </div>
 
+        {/* Classification board: what agents actually decided after talking. */}
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatTile
+            icon={<Flame className="size-4" />}
+            label="HOT লিড"
+            value={String(leads.filter((l) => l.temperature === "hot").length)}
+            hint="এজেন্টের নিজের সিদ্ধান্ত অনুযায়ী"
+          />
+          <StatTile
+            icon={<Flame className="size-4" />}
+            label="WARM লিড"
+            value={String(leads.filter((l) => l.temperature === "warm").length)}
+            hint="কিছুটা আগ্রহী"
+          />
+          <StatTile
+            icon={<Snowflake className="size-4" />}
+            label="COLD লিড"
+            value={String(leads.filter((l) => l.temperature === "cold").length)}
+            hint="এখন আগ্রহ কম"
+          />
+          <StatTile
+            icon={<ListChecks className="size-4" />}
+            label="বাকি কাজ (PENDING)"
+            value={String(leads.filter((l) => l.work_state !== "completed").length)}
+            hint={`${leads.filter((l) => l.work_state === "completed").length}টি লিড শ্রেণিবিন্যাসসহ শেষ`}
+          />
+        </div>
+
+
+
         <AgentRadar agents={agents} calls={calls} onSelectAgent={setOpenAgentId} />
 
         <section className="space-y-3">
