@@ -399,6 +399,7 @@ export async function submitCallReport(input: {
     ok: true,
     followUpId,
     sheet,
+    review,
     workState: received && classified ? ("completed" as const) : ("pending" as const),
   };
 }
