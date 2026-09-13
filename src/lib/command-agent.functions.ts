@@ -204,7 +204,7 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
         .maybeSingle();
       if (!lead) throw new Error("লিড পাওয়া যায়নি");
       // An agent may only classify a lead that is actually theirs.
-      if (caller.scope === "agent" && leadHeldByOther(lead, caller.profile?.id ?? null)) {
+      if (caller.scope === "agent" && leadHeldByOther(lead, caller.profile?.id ?? "")) {
         throw new Error(LEAD_NOT_YOURS);
       }
 
@@ -259,7 +259,7 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
         const { backupRecordingToDrive } = await import("@/lib/recording-drive.server");
         const result = await backupRecordingToDrive(recordingId);
         await audit(`drive:${result.status}`);
-        return { ok: result.status !== "failed", message: `Drive ব্যাকআপ: ${result.status}` };
+        return { ok: true, message: `Drive ব্যাকআপ: ${result.status}` };
       }
       const { analyzeOne } = await import("@/lib/analysis-queue.server");
       const outcome = await analyzeOne(recordingId);

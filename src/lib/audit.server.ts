@@ -40,7 +40,8 @@ export type AuditAction =
   | "agent_sim_verified"
   | "drive_settings_updated"
   | "pipeline_retry"
-  | "drive_backup_verified";
+  | "drive_backup_verified"
+  | "command_agent_action";
 
 export async function logAudit(input: {
   action: AuditAction;
