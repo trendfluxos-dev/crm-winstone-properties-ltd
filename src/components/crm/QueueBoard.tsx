@@ -107,7 +107,7 @@ export function QueueBoard({
         {LEAD_STATUSES.map((status) => {
           const columnLeads = filtered.filter((lead) => lead.status === status.key);
           return (
-            <section key={status.key} className="space-y-3">
+            <section key={status.key} className="min-w-0 space-y-3">
               <header className="flex items-center justify-between rounded-lg bg-surface-2 px-3 py-2">
                 <h3 className="text-sm font-semibold">{status.label}</h3>
                 <span className="tabular text-xs text-muted-foreground">{columnLeads.length}</span>
