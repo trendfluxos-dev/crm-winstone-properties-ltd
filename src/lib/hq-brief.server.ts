@@ -182,29 +182,34 @@ async function loadBlock(
     : { data: [] as { id: string; name: string; phone_number: string }[] };
   const leadById = new Map((leadRows ?? []).map((l) => [l.id, l]));
 
-  const calls: BriefCall[] = reports.map((r) => {
-    const lead = r.lead_id ? leadById.get(r.lead_id) : undefined;
-    const seconds = r.duration_seconds ?? 0;
-    return {
-      id: r.id,
-      agentName: (r.agent_id && agentById.get(r.agent_id)?.name) || "এজেন্ট",
-      leadName: lead?.name ?? "লিড",
-      phone: lead?.phone_number ?? r.phone_number ?? "—",
-      fromLabel: clock(r.call_started_at ?? r.call_ended_at),
-      toLabel: clock(r.call_ended_at),
-      talkSeconds: seconds,
-      talkLabel: talkLabel(seconds),
-      connected: r.connected,
-      category: r.category ?? "",
-      categoryLabel: CATEGORY_LABEL[r.category ?? ""] ?? r.category ?? "—",
-      temperature: r.temperature,
-      grade: r.grade,
-      summary: (r.summary ?? r.note ?? "").trim(),
-      followUpLabel: r.follow_up_at
-        ? `${dayLabel(r.follow_up_at)} ${clock(r.follow_up_at)}`
-        : null,
-    };
-  });
+  const callById = new Map<string, BriefCall>(
+    reports.map((r) => {
+      const lead = r.lead_id ? leadById.get(r.lead_id) : undefined;
+      const seconds = r.duration_seconds ?? 0;
+      return [
+        r.id,
+        {
+          id: r.id,
+          agentName: (r.agent_id && agentById.get(r.agent_id)?.name) || "এজেন্ট",
+          leadName: lead?.name ?? "লিড",
+          phone: lead?.phone_number ?? r.phone_number ?? "—",
+          fromLabel: clock(r.call_started_at ?? r.call_ended_at),
+          toLabel: clock(r.call_ended_at),
+          talkSeconds: seconds,
+          talkLabel: talkLabel(seconds),
+          connected: r.connected,
+          category: r.category ?? "",
+          categoryLabel: CATEGORY_LABEL[r.category ?? ""] ?? r.category ?? "—",
+          temperature: r.temperature,
+          grade: r.grade,
+          summary: (r.summary ?? r.note ?? "").trim(),
+          followUpLabel: r.follow_up_at
+            ? `${dayLabel(r.follow_up_at)} ${clock(r.follow_up_at)}`
+            : null,
+        } satisfies BriefCall,
+      ];
+    }),
+  );
 
   const byAgent = new Map<string, BriefAgent>();
   for (const r of reports) {
@@ -235,12 +240,9 @@ async function loadBlock(
     if (r.temperature === "warm") line.warm += 1;
     if (r.temperature === "cold") line.cold += 1;
     if (r.follow_up_at) line.followUps += 1;
+    const detail = callById.get(r.id);
+    if (detail) line.calls_detail.push(detail);
     byAgent.set(id, line);
-  }
-  for (const call of calls) {
-    for (const line of byAgent.values()) {
-      if (line.name === call.agentName) line.calls_detail.push(call);
-    }
   }
 
   const categoryTotals = new Map<string, number>();
