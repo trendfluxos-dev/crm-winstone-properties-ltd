@@ -312,7 +312,7 @@ export async function submitCallReport(input: {
         priority: category === "callback" ? "high" : "normal",
         note: input.note?.trim() || null,
         scheduled_at: input.followUpAt,
-        reminder_minutes: input.reminderMinutes ?? 15,
+        reminder_minutes: input.reminderMinutes ?? 30,
         status: "upcoming",
       })
       .select("id")

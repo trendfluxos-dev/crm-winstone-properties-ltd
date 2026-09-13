@@ -5,28 +5,41 @@
 
 export type ShiftId = "morning" | "evening";
 
+/** Dhaka minute-of-day when the working day ends (5:20 pm). */
+export const DAY_CLOSE_MINUTES = 17 * 60 + 20;
+
 export const SHIFTS: {
   id: ShiftId;
   label: string;
+  /** Working hours agents are expected to be calling in. */
   startMinutes: number;
   endMinutes: number;
   summaryMinutes: number;
+  /**
+   * Start of the window the summary counts. Minutes are relative to Dhaka
+   * midnight of the shift's own date, so a negative value reaches into the
+   * previous day: anything an agent submits after 5:20 pm is counted in the
+   * NEXT morning's 12:50 summary instead of being lost.
+   */
+  windowStartMinutes: number;
 }[] = [
-  // 09:00 – 12:45, summary at 12:50
+  // Counts previous day 17:20 → today 12:45, reported at 12:50
   {
     id: "morning",
     label: "সকালের শিফট (৯:০০–১২:৪৫)",
     startMinutes: 9 * 60,
     endMinutes: 12 * 60 + 45,
     summaryMinutes: 12 * 60 + 50,
+    windowStartMinutes: DAY_CLOSE_MINUTES - 24 * 60,
   },
-  // 14:00 – 17:20, summary at 17:30
+  // Counts today 12:45 → 17:20, reported at 17:30
   {
     id: "evening",
     label: "বিকেলের শিফট (২:০০–৫:২০)",
     startMinutes: 14 * 60,
-    endMinutes: 17 * 60 + 20,
+    endMinutes: DAY_CLOSE_MINUTES,
     summaryMinutes: 17 * 60 + 30,
+    windowStartMinutes: 12 * 60 + 45,
   },
 ];
 
@@ -71,7 +84,7 @@ export function shiftDueForSummary(at: Date = new Date()) {
     shift: due,
     dateKey,
     shiftKey: `${dateKey}:${due.id}`,
-    windowStart: dhakaInstant(dateKey, due.startMinutes),
+    windowStart: dhakaInstant(dateKey, due.windowStartMinutes),
     windowEnd: dhakaInstant(dateKey, due.endMinutes),
   };
 }

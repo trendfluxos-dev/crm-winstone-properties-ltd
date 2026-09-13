@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { CheckCircle2, PhoneOutgoing, Search } from "lucide-react";
+import { CheckCircle2, Search } from "lucide-react";
 
 import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
+import { WebCallButton } from "@/components/crm/WebCallButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -176,11 +177,12 @@ export function LeadTable() {
                 </td>
                 <td className="px-3 py-2.5">
                   <div className="flex items-center justify-end gap-2">
-                    <Button asChild size="sm" className="gap-1.5">
-                      <a href={`tel:${lead.phone_number}`}>
-                        <PhoneOutgoing className="size-4" /> কল
-                      </a>
-                    </Button>
+                    <WebCallButton
+                      leadId={lead.id}
+                      phone={lead.phone_number}
+                      label="কল"
+                      className="h-9 flex-none text-sm"
+                    />
                     <CallbackLogButton leadId={lead.id} label="" />
                     <WhatsAppAction phone={lead.phone_number} leadId={lead.id} label="" />
                   </div>

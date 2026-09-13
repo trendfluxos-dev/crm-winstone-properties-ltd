@@ -126,7 +126,7 @@ export function PostCallReportGate() {
     note: note.trim() || null,
     reason: reason.trim() || null,
     followUpAt: !noFollowUp && when ? new Date(when).toISOString() : null,
-    reminderMinutes: 15,
+    reminderMinutes: 30,
     temperature,
     grade,
     aiDecision,

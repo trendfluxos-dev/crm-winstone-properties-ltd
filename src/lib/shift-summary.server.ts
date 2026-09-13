@@ -158,7 +158,7 @@ export async function liveShiftSheet(at: Date = new Date()): Promise<ShiftSheet>
       .filter((s) => minutes > s.endMinutes)
       .sort((a, b) => b.endMinutes - a.endMinutes)[0] ??
     SHIFTS[0]!;
-  const windowStart = dhakaInstant(dateKey, shift.startMinutes);
+  const windowStart = dhakaInstant(dateKey, shift.windowStartMinutes);
   const windowEnd = open ? at : dhakaInstant(dateKey, shift.endMinutes);
   const { lines, totals } = await buildShiftLines(
     windowStart.toISOString(),
@@ -244,7 +244,7 @@ export async function backfillShiftSummaries(days = 14, at: Date = new Date()) {
     for (const shift of SHIFTS) {
       const closedToday = back > 0 || minutes >= shift.summaryMinutes;
       if (!closedToday) continue;
-      const windowStart = dhakaInstant(dateKey, shift.startMinutes);
+      const windowStart = dhakaInstant(dateKey, shift.windowStartMinutes);
       const windowEnd = dhakaInstant(dateKey, shift.endMinutes);
       const { lines, totals } = await buildShiftLines(
         windowStart.toISOString(),

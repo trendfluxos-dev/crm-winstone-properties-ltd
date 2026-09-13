@@ -27,6 +27,12 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 const DAY_START = 9 * 60;
+/**
+ * Windows start at the previous day's 5:20 pm close, so an update an agent
+ * submits after hours is carried into the next 12:50 presentation instead of
+ * disappearing. Minutes are relative to Dhaka midnight of the shown day.
+ */
+const CARRY_START = 17 * 60 + 20 - 24 * 60;
 const MORNING_END = 12 * 60 + 45;
 const MORNING_REPORT = 12 * 60 + 50;
 const DAY_END = 17 * 60 + 20;
@@ -465,7 +471,7 @@ export async function executiveBriefNow(at: Date = new Date()): Promise<Executiv
     const main = await loadBlock(
       `${dayLabel(dhakaInstant(yesterday, DAY_START).toISOString())} — পুরো দিনের রিপোর্ট`,
       false,
-      dhakaInstant(yesterday, DAY_START),
+      dhakaInstant(yesterday, CARRY_START),
       dhakaInstant(yesterday, DAY_END),
     );
     return {
@@ -483,7 +489,7 @@ export async function executiveBriefNow(at: Date = new Date()): Promise<Executiv
     const main = await loadBlock(
       "সকালের শিফট (৯:০০–১২:৪৫)",
       true,
-      dhakaInstant(dateKey, DAY_START),
+      dhakaInstant(dateKey, CARRY_START),
       at,
     );
     return {
@@ -499,9 +505,9 @@ export async function executiveBriefNow(at: Date = new Date()): Promise<Executiv
   // 12:50 – 17:29 → the 12:50 report, plus the afternoon syncing in live.
   if (minutes < DAY_REPORT) {
     const main = await loadBlock(
-      "১২:৫০-এর রিপোর্ট · সকালের শিফট (৯:০০–১২:৪৫)",
+      "১২:৫০-এর রিপোর্ট · সকালের শিফট (৯:০০–১২:৪৫, গতকাল ৫:২০-এর পরের কাজসহ)",
       false,
-      dhakaInstant(dateKey, DAY_START),
+      dhakaInstant(dateKey, CARRY_START),
       dhakaInstant(dateKey, MORNING_END),
     );
     const liveAddon = await loadBlock(
@@ -514,7 +520,8 @@ export async function executiveBriefNow(at: Date = new Date()): Promise<Executiv
       generatedAtLabel,
       windowKind: "midday_report",
       headline: "১২:৫০-এর রিপোর্ট",
-      subline: "৫:৩০-এ পুরো দিনের প্রেজেন্টেশন আসবে; ততক্ষণ বিকেলের আপডেট নিচে লাইভ যোগ হচ্ছে।",
+      subline:
+      "গতকাল ৫:২০-এর পরের কাজও এতে যোগ হয়েছে। ৫:৩০-এ পুরো দিনের প্রেজেন্টেশন আসবে; ততক্ষণ বিকেলের আপডেট নিচে লাইভ যোগ হচ্ছে।",
       main,
       liveAddon,
     };
@@ -525,7 +532,7 @@ export async function executiveBriefNow(at: Date = new Date()): Promise<Executiv
   const main = await loadBlock(
     `${dayLabel(at.toISOString())} — পুরো দিনের রিপোর্ট`,
     false,
-    dhakaInstant(dateKey, DAY_START),
+    dhakaInstant(dateKey, CARRY_START),
     end,
   );
   return {
