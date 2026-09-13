@@ -195,6 +195,7 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
     var error by remember { mutableStateOf<String?>(null) }
     var aiSummary by remember { mutableStateOf<String?>(null) }
     var aiCategory by remember { mutableStateOf<String?>(null) }
+    var talkSeconds by remember { mutableLongStateOf(0L) }
 
     // Wait for the server-side report (opened by the sync worker when the call ended).
     LaunchedEffect(Unit) {
@@ -202,6 +203,7 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
             runCatching { WinstoneApi.pendingReport() }.getOrNull()?.let { body ->
                 body.optJSONObject("pending")?.let { pending ->
                     reportId = pending.optString("id").takeIf { it.isNotBlank() }
+                    talkSeconds = pending.optLong("duration_seconds", 0L)
                     pending.optJSONObject("lead")?.let { lead ->
                         leadLabel = listOfNotNull(
                             lead.optString("name").takeIf { it.isNotBlank() && it != "null" },
