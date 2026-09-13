@@ -84,7 +84,7 @@ export function shiftDueForSummary(at: Date = new Date()) {
     shift: due,
     dateKey,
     shiftKey: `${dateKey}:${due.id}`,
-    windowStart: dhakaInstant(dateKey, due.startMinutes),
+    windowStart: dhakaInstant(dateKey, due.windowStartMinutes),
     windowEnd: dhakaInstant(dateKey, due.endMinutes),
   };
 }
