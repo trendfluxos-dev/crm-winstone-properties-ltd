@@ -137,7 +137,6 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                             items(leads) { lead ->
                                 LeadCard(
                                     lead = lead,
-                                    twilioBusy = state.twilioCallingLeadId == lead.id,
                                     recordingMode = state.recordingMode,
                                     recordingReason = state.recordingReason,
                                     onCall = {
@@ -154,7 +153,6 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                             }
                                         }
                                     },
-                                    onTwilioCall = { vm.twilioCall(lead.id) },
                                 )
                             }
                         }
@@ -255,11 +253,9 @@ private fun WinCard(content: @Composable () -> Unit) {
 @Composable
 private fun LeadCard(
     lead: Lead,
-    twilioBusy: Boolean,
     recordingMode: String?,
     recordingReason: String?,
     onCall: () -> Unit,
-    onTwilioCall: () -> Unit,
 ) {
     // Honest per-lead recording state, straight from this phone's own probe.
     val blocked = recordingMode == "unavailable"
@@ -298,20 +294,6 @@ private fun LeadCard(
             onClick = onCall,
             modifier = Modifier.fillMaxWidth(),
         ) { Text(if (blocked) "কল করুন (রেকর্ডিং ছাড়া)" else "কল করুন") }
-        Spacer(Modifier.height(6.dp))
-        OutlinedButton(
-            onClick = onTwilioCall,
-            enabled = !twilioBusy && !blocked,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                when {
-                    blocked -> "রেকর্ড কল বন্ধ"
-                    twilioBusy -> "Twilio কল শুরু হচ্ছে…"
-                    else -> "Twilio কল (রেকর্ড হবে)"
-                },
-            )
-        }
     }
 }
 
