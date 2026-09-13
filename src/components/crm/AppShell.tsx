@@ -163,8 +163,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="mx-auto w-full max-w-[1600px] animate-rise px-3 py-5 sm:px-6 sm:py-6">
+        <OfflineSyncBar />
         {children}
       </main>
+
 
       <footer className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
         <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
