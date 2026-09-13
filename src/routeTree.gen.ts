@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as CreditsRouteImport } from './routes/credits'
+import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as DeskRouteImport } from './routes/desk'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocsRouteImport } from './routes/docs'
@@ -28,6 +29,7 @@ import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as VoiceTranscriptionRouteImport } from './routes/voice-transcription'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DocsSlugRouteImport } from './routes/docs_.$slug'
@@ -78,6 +80,11 @@ const CoachRoute = CoachRouteImport.update({
 const CreditsRoute = CreditsRouteImport.update({
   id: '/credits',
   path: '/credits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomersRoute = CustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeskRoute = DeskRouteImport.update({
@@ -153,6 +160,11 @@ const SystemRoute = SystemRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TicketsRoute = TicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VoiceTranscriptionRoute = VoiceTranscriptionRouteImport.update({
@@ -324,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
   '/credits': typeof CreditsRoute
+  '/customers': typeof CustomersRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
@@ -339,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/tickets': typeof TicketsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
@@ -376,6 +390,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
   '/credits': typeof CreditsRoute
+  '/customers': typeof CustomersRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
@@ -391,6 +406,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/tickets': typeof TicketsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
@@ -429,6 +445,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
   '/credits': typeof CreditsRoute
+  '/customers': typeof CustomersRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
@@ -444,6 +461,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
+  '/tickets': typeof TicketsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs_/$slug': typeof DocsSlugRoute
@@ -483,6 +501,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/coach'
     | '/credits'
+    | '/customers'
     | '/desk'
     | '/dispatch'
     | '/docs'
@@ -498,6 +517,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/system'
     | '/terms'
+    | '/tickets'
     | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
@@ -535,6 +555,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/coach'
     | '/credits'
+    | '/customers'
     | '/desk'
     | '/dispatch'
     | '/docs'
@@ -550,6 +571,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/system'
     | '/terms'
+    | '/tickets'
     | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
@@ -587,6 +609,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/coach'
     | '/credits'
+    | '/customers'
     | '/desk'
     | '/dispatch'
     | '/docs'
@@ -602,6 +625,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/system'
     | '/terms'
+    | '/tickets'
     | '/voice-transcription'
     | '/.well-known/oauth-protected-resource'
     | '/docs_/$slug'
@@ -640,6 +664,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CoachRoute: typeof CoachRoute
   CreditsRoute: typeof CreditsRoute
+  CustomersRoute: typeof CustomersRoute
   DeskRoute: typeof DeskRoute
   DispatchRoute: typeof DispatchRoute
   DocsRoute: typeof DocsRoute
@@ -655,6 +680,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
+  TicketsRoute: typeof TicketsRoute
   VoiceTranscriptionRoute: typeof VoiceTranscriptionRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DocsSlugRoute: typeof DocsSlugRoute
@@ -716,6 +742,13 @@ declare module '@tanstack/react-router' {
       path: '/credits'
       fullPath: '/credits'
       preLoaderRoute: typeof CreditsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customers': {
+      id: '/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof CustomersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desk': {
@@ -821,6 +854,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tickets': {
+      id: '/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof TicketsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/voice-transcription': {
@@ -1048,6 +1088,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CoachRoute: CoachRoute,
   CreditsRoute: CreditsRoute,
+  CustomersRoute: CustomersRoute,
   DeskRoute: DeskRoute,
   DispatchRoute: DispatchRoute,
   DocsRoute: DocsRoute,
@@ -1063,6 +1104,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
+  TicketsRoute: TicketsRoute,
   VoiceTranscriptionRoute: VoiceTranscriptionRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
