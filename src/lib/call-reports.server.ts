@@ -361,6 +361,29 @@ export async function submitCallReport(input: {
     payload: { leadId: report.lead_id, category, temperature, grade },
   });
 
+  // Review alerts for IT / Authority: AI-vs-agent disagreement and a received
+  // call with no recording. Neither changes the agent's decision, and a failure
+  // here must never reject an accepted report.
+  let review: { mismatchAlertId: string | null; missingRecordingAlertId: string | null } = {
+    mismatchAlertId: null,
+    missingRecordingAlertId: null,
+  };
+  try {
+    const { reviewSubmittedReport } = await import("@/lib/classification-review.server");
+    review = await reviewSubmittedReport({
+      reportId: report.id,
+      leadId: report.lead_id,
+      agentId: input.agentId,
+      recordingId: report.recording_id,
+      connected: received,
+      durationSeconds: report.duration_seconds ?? 0,
+      temperature,
+      grade,
+    });
+  } catch (error) {
+    console.error("classification review after submit failed:", error);
+  }
+
   // The spreadsheet is updated as soon as the agent's update is accepted.
   // Best effort: a spreadsheet outage must never reject an accepted report.
   let sheet: { appended: number } | null = null;
