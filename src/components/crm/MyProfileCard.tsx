@@ -58,30 +58,49 @@ export function MyProfileCard() {
 
   return (
     <section className="card-elevated p-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <span
-          className="grid size-11 place-items-center rounded-full text-sm font-bold text-white"
-          style={{ backgroundColor: `hsl(${profile.avatar_hue} 65% 45%)` }}
-        >
-          {profile.name.slice(0, 2).toUpperCase()}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{profile.name}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            {profile.role === "team_leader" ? "Coordinator" : "Sales agent"}
-            {profile.employee_id ? ` · ${profile.employee_id}` : ""}
-            {profile.email ? ` · ${profile.email}` : ""}
-          </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            className="grid size-11 shrink-0 place-items-center rounded-full text-sm font-bold text-white"
+            style={{ backgroundColor: `hsl(${profile.avatar_hue} 65% 45%)` }}
+          >
+            {profile.name.slice(0, 2).toUpperCase()}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{profile.name}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {profile.role === "team_leader" ? "Coordinator" : "Sales agent"}
+              {profile.employee_id ? ` · ${profile.employee_id}` : ""}
+              {profile.email ? ` · ${profile.email}` : ""}
+            </p>
+          </div>
         </div>
-        <Button variant="secondary" size="sm" onClick={() => setOpen((v) => !v)}>
-          <Palette className="size-4" /> Edit profile
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => setPwOpen((v) => !v)}>
-          <KeyRound className="size-4" /> পাসওয়ার্ড বদল
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => void signOut()}>
-          <LogOut className="size-4" /> Sign out
-        </Button>
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1 sm:flex-none"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <Palette className="size-4" /> Edit profile
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1 sm:flex-none"
+            onClick={() => setPwOpen((v) => !v)}
+          >
+            <KeyRound className="size-4" /> পাসওয়ার্ড বদল
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1 sm:flex-none"
+            onClick={() => void signOut()}
+          >
+            <LogOut className="size-4" /> Sign out
+          </Button>
+        </div>
       </div>
 
       {open && (

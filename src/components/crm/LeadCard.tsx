@@ -69,11 +69,11 @@ export function LeadCard({
         <span className="ml-auto truncate">{agent?.name ?? "Unassigned"}</span>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           asChild
           size="lg"
-          className="h-11 flex-1 rounded-xl text-base font-semibold shadow-sm transition-all duration-300 hover:shadow-md"
+          className="h-11 min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-xl text-base font-semibold shadow-sm transition-all duration-300 hover:shadow-md"
         >
           <a href={`tel:${lead.phone_number}`}>
             <PhoneOutgoing className="size-5" /> Call
@@ -84,18 +84,19 @@ export function LeadCard({
           leadId={lead.id}
           label="WhatsApp"
           size="lg"
-          className="h-11 flex-1 rounded-xl bg-whatsapp text-base font-semibold text-live-foreground shadow-sm transition-all duration-300 hover:bg-whatsapp/90 hover:shadow-md"
+          className="h-11 min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-xl bg-whatsapp text-base font-semibold text-live-foreground shadow-sm transition-all duration-300 hover:bg-whatsapp/90 hover:shadow-md"
         />
-        <CallbackLogButton leadId={lead.id} className="h-11 rounded-xl" label="" />
+        <CallbackLogButton leadId={lead.id} className="h-11 shrink-0 rounded-xl" label="" />
         <Button
           size="lg"
           variant="outline"
-          className="expand-btn h-11 rounded-xl px-3"
+          className="expand-btn h-11 min-w-0 flex-1 rounded-xl px-3"
           onClick={onOpen}
           aria-label="Open dossier"
         >
           <FolderOpen className="size-5" />
-          <span className="expand-label text-sm">Dossier</span>
+          <span className="text-sm font-semibold sm:hidden">Dossier</span>
+          <span className="expand-label hidden text-sm sm:inline">Dossier</span>
         </Button>
       </div>
     </article>
