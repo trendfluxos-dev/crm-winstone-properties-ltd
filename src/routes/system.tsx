@@ -13,6 +13,7 @@ import { StaffAccountsTable } from "@/components/crm/StaffAccountsTable";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
+import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { SystemCustomizer } from "@/components/crm/SystemCustomizer";
 import { SystemNoticeBar } from "@/components/crm/SystemNoticeBar";
@@ -110,6 +111,8 @@ function SystemBoard() {
       </div>
 
       <SystemNoticeBar surface="it" />
+
+      <CommandAgentPanel surface="system" />
 
       <CallOpsPanel showControls />
 

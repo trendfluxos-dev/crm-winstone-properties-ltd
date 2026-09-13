@@ -22,6 +22,7 @@ import {
 
 import { AgentDossier } from "@/components/crm/AgentDossier";
 import { AgentRadar } from "@/components/crm/AgentRadar";
+import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { AskHqPanel } from "@/components/crm/AskHqPanel";
 import { CallOpsPanel } from "@/components/crm/CallOpsPanel";
 import { DayCallExportPanel } from "@/components/crm/DayCallExportPanel";
@@ -141,6 +142,8 @@ function ControlBoard() {
         <DayCallExportPanel />
 
         <ShiftSummaryPanel scope="hq" />
+
+        <CommandAgentPanel surface="hq" />
 
         <AskHqPanel />
 

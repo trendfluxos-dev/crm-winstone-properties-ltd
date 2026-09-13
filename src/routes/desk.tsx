@@ -3,6 +3,7 @@ import { Clock, LogIn, MessageCircle, PhoneCall, Timer, Users } from "lucide-rea
 import { useMemo } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
+import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
@@ -191,6 +192,8 @@ function DeskPage() {
         </div>
 
         <DeskStats />
+
+        <CommandAgentPanel surface="desk" />
 
         <Tabs defaultValue="leads" className="space-y-4">
           <TabsList className="flex w-full flex-wrap">

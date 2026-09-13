@@ -12,6 +12,7 @@ import { SelfClaimsFeed } from "@/components/crm/SelfClaimsFeed";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
+import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { Button } from "@/components/ui/button";
@@ -172,6 +173,8 @@ function Dispatcher() {
           </Button>
         </div>
       </section>
+
+      <CommandAgentPanel surface="dispatch" />
 
       <CallOpsPanel />
 
