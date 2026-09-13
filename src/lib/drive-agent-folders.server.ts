@@ -173,3 +173,20 @@ export async function listAgentDriveFolders() {
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => ({ ...row, folder_url: folderUrl(row.folder_id) }));
 }
+
+/**
+ * Best-effort folder upkeep after a staff record changes (new agent approved,
+ * name or Agent ID edited). Never throws: a Drive hiccup must not block the
+ * CRM change that triggered it.
+ */
+export async function refreshAgentDriveFolder(profileId: string) {
+  try {
+    const { getDriveBackupSettings } = await import("./recording-drive.server");
+    const settings = await getDriveBackupSettings();
+    if (!settings.enabled || !settings.folderId) return null;
+    return await agentDriveFolderById(profileId, settings.folderId);
+  } catch (error) {
+    console.error("[gdrive] agent folder refresh failed", error);
+    return null;
+  }
+}
