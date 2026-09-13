@@ -101,7 +101,7 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         due: count(followUps.data, (f) => {
           if (f.status === "done") return false;
           const at = new Date(f.scheduled_at).getTime();
-          return at >= now && at - (f.reminder_minutes ?? 15) * 60_000 <= now;
+          return at >= now && at - (f.reminder_minutes ?? 30) * 60_000 <= now;
         }),
         upcoming: count(
           followUps.data,

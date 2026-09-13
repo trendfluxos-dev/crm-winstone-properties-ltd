@@ -175,7 +175,7 @@ export const submitMyReport = createServerFn({ method: "POST" })
       note: z.string().trim().max(4000).nullable().optional(),
       reason: z.string().trim().max(2000).nullable().optional(),
       followUpAt: z.string().nullable().optional(),
-      reminderMinutes: z.number().int().min(0).max(1440).default(15),
+      reminderMinutes: z.number().int().min(0).max(1440).default(30),
       temperature: z.enum(["hot", "warm", "cold"]).nullable().optional(),
       grade: z.enum(["A", "B", "C", "D"]).nullable().optional(),
       aiDecision: z.enum(["accepted", "edited", "rejected"]).nullable().optional(),
@@ -229,7 +229,7 @@ export const myFollowUps = createServerFn({ method: "POST" })
     const now = Date.now();
     return (events ?? []).map((event) => {
       const at = new Date(event.scheduled_at).getTime();
-      const due = at - (event.reminder_minutes ?? 15) * 60_000;
+      const due = at - (event.reminder_minutes ?? 30) * 60_000;
       const state =
         event.status === "done" ? "done" : at < now ? "overdue" : due <= now ? "due" : "upcoming";
       return { ...event, state } as typeof event & {
