@@ -182,7 +182,7 @@ function Dispatcher() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Team load</h2>
         <div className="overflow-x-auto card-elevated">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[900px] text-sm">
 
             <thead className="bg-surface-2 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
