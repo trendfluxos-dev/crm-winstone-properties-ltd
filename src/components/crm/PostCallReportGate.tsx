@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, Bot, Check, Loader2, Pencil, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AlertTriangle, Bot, Check, Loader2, Pencil, Sparkles, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { DictateButton } from "@/components/crm/DictateButton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { myPendingReport, submitMyReport } from "@/lib/call-reports.functions";
 import { useAdminToken } from "@/lib/local-session";
+import { enqueue } from "@/lib/offline-queue";
+import { draftReportSummary } from "@/lib/report-summary.functions";
+
+/** Adds dictated words to what the agent already typed — never erases it. */
+function joinText(previous: string, addition: string): string {
+  return previous.trim() ? `${previous.trim()} ${addition}` : addition;
+}
+
 
 /** Categories in the order agents pick them, with their Bengali labels. */
 const CATEGORIES = [
@@ -333,9 +342,12 @@ export function PostCallReportGate() {
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="call-summary" className="text-xs">
-            কলের সারাংশ (বাধ্যতামূলক)
-          </Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="call-summary" className="text-xs">
+              কলের সারাংশ (বাধ্যতামূলক)
+            </Label>
+            <DictateButton onAppend={(text) => setSummary((prev) => joinText(prev, text))} />
+          </div>
           <Textarea
             id="call-summary"
             rows={3}
@@ -346,15 +358,71 @@ export function PostCallReportGate() {
         </div>
 
         <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="note" className="text-xs">
+              নোট (বাধ্যতামূলক)
+            </Label>
+            <DictateButton onAppend={(text) => setNote((prev) => joinText(prev, text))} />
+          </div>
+          <Textarea
+            id="note"
+            rows={3}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="ক্রেতা কী বলেছেন, পরের ধাপ কী"
+          />
+        </div>
+
+        {smartBusy || smart ? (
+          <div className="space-y-1.5 rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <p className="flex items-center gap-1.5 text-xs font-bold text-primary">
+              <Sparkles className="size-3.5" /> আপনার লেখা থেকে সাজানো সারাংশ
+            </p>
+            {smartBusy ? (
+              <p className="text-xs text-muted-foreground">তৈরি হচ্ছে…</p>
+            ) : (
+              <>
+                <p className="whitespace-pre-line text-xs text-muted-foreground">{smart}</p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="h-7 px-2 text-[11px]"
+                  onClick={() => {
+                    setSummary(smart ?? "");
+                    toast.success("সারাংশে বসানো হয়েছে — দরকার হলে বদলে নিন");
+                  }}
+                >
+                  সারাংশে বসান
+                </Button>
+              </>
+            )}
+          </div>
+        ) : null}
+
+        <div className="space-y-1.5">
           <Label htmlFor="follow-when" className="text-xs">
-            ফলো-আপের তারিখ ও সময় (বাধ্যতামূলক)
+            ফলো-আপের তারিখ ও সময়
           </Label>
           <Input
             id="follow-when"
             type="datetime-local"
             value={when}
+            disabled={noFollowUp}
             onChange={(event) => setWhen(event.target.value)}
           />
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              className="size-3.5"
+              checked={noFollowUp}
+              onChange={(event) => {
+                setNoFollowUp(event.target.checked);
+                if (event.target.checked) setWhen("");
+              }}
+            />
+            ফলো-আপ দরকার নেই
+          </label>
         </div>
 
         {reasonRequired ? (
@@ -372,18 +440,6 @@ export function PostCallReportGate() {
           </div>
         ) : null}
 
-        <div className="space-y-1.5">
-          <Label htmlFor="note" className="text-xs">
-            নোট (বাধ্যতামূলক)
-          </Label>
-          <Textarea
-            id="note"
-            rows={3}
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="ক্রেতা কী বলেছেন, পরের ধাপ কী"
-          />
-        </div>
 
         <Button
           className="w-full"
