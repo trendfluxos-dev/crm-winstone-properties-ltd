@@ -38,7 +38,6 @@ import { Route as ApiPublicAgentIncomingCallRouteImport } from './routes/api/pub
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
 import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
-import { Route as ApiPublicAgentTwilioCallRouteImport } from './routes/api/public/agent/twilio-call'
 import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/agent/version'
 import { Route as ApiPublicAgentWhatsappRouteImport } from './routes/api/public/agent/whatsapp'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
@@ -54,13 +53,6 @@ import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/publi
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
 import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
-import { Route as ApiPublicTwilioBridgeRouteImport } from './routes/api/public/twilio/bridge'
-import { Route as ApiPublicTwilioCallStatusRouteImport } from './routes/api/public/twilio/call-status'
-import { Route as ApiPublicTwilioRecordingRouteImport } from './routes/api/public/twilio/recording'
-import { Route as ApiPublicTwilioRelayRouteImport } from './routes/api/public/twilio/relay'
-import { Route as ApiPublicTwilioRelayActionRouteImport } from './routes/api/public/twilio/relay-action'
-import { Route as ApiPublicTwilioVoiceRouteImport } from './routes/api/public/twilio/voice'
-import { Route as ApiPublicTwilioWhatsappRouteImport } from './routes/api/public/twilio/whatsapp'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -211,12 +203,6 @@ const ApiPublicAgentReportRoute = ApiPublicAgentReportRouteImport.update({
   path: '/api/public/agent/report',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicAgentTwilioCallRoute =
-  ApiPublicAgentTwilioCallRouteImport.update({
-    id: '/api/public/agent/twilio-call',
-    path: '/api/public/agent/twilio-call',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicAgentVersionRoute = ApiPublicAgentVersionRouteImport.update({
   id: '/api/public/agent/version',
   path: '/api/public/agent/version',
@@ -296,44 +282,6 @@ const ApiPublicReportsSummaryRoute = ApiPublicReportsSummaryRouteImport.update({
   path: '/api/public/reports/summary',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicTwilioBridgeRoute = ApiPublicTwilioBridgeRouteImport.update({
-  id: '/api/public/twilio/bridge',
-  path: '/api/public/twilio/bridge',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicTwilioCallStatusRoute =
-  ApiPublicTwilioCallStatusRouteImport.update({
-    id: '/api/public/twilio/call-status',
-    path: '/api/public/twilio/call-status',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicTwilioRecordingRoute =
-  ApiPublicTwilioRecordingRouteImport.update({
-    id: '/api/public/twilio/recording',
-    path: '/api/public/twilio/recording',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicTwilioRelayRoute = ApiPublicTwilioRelayRouteImport.update({
-  id: '/api/public/twilio/relay',
-  path: '/api/public/twilio/relay',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicTwilioRelayActionRoute =
-  ApiPublicTwilioRelayActionRouteImport.update({
-    id: '/api/public/twilio/relay-action',
-    path: '/api/public/twilio/relay-action',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicTwilioVoiceRoute = ApiPublicTwilioVoiceRouteImport.update({
-  id: '/api/public/twilio/voice',
-  path: '/api/public/twilio/voice',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicTwilioWhatsappRoute = ApiPublicTwilioWhatsappRouteImport.update({
-  id: '/api/public/twilio/whatsapp',
-  path: '/api/public/twilio/whatsapp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicWhatsappWebhookRoute =
   ApiPublicWhatsappWebhookRouteImport.update({
     id: '/api/public/whatsapp/webhook',
@@ -371,7 +319,6 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
-  '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -387,13 +334,6 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
-  '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
-  '/api/public/twilio/call-status': typeof ApiPublicTwilioCallStatusRoute
-  '/api/public/twilio/recording': typeof ApiPublicTwilioRecordingRoute
-  '/api/public/twilio/relay': typeof ApiPublicTwilioRelayRoute
-  '/api/public/twilio/relay-action': typeof ApiPublicTwilioRelayActionRoute
-  '/api/public/twilio/voice': typeof ApiPublicTwilioVoiceRoute
-  '/api/public/twilio/whatsapp': typeof ApiPublicTwilioWhatsappRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -426,7 +366,6 @@ export interface FileRoutesByTo {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
-  '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -442,13 +381,6 @@ export interface FileRoutesByTo {
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
-  '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
-  '/api/public/twilio/call-status': typeof ApiPublicTwilioCallStatusRoute
-  '/api/public/twilio/recording': typeof ApiPublicTwilioRecordingRoute
-  '/api/public/twilio/relay': typeof ApiPublicTwilioRelayRoute
-  '/api/public/twilio/relay-action': typeof ApiPublicTwilioRelayActionRoute
-  '/api/public/twilio/voice': typeof ApiPublicTwilioVoiceRoute
-  '/api/public/twilio/whatsapp': typeof ApiPublicTwilioWhatsappRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesById {
@@ -482,7 +414,6 @@ export interface FileRoutesById {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
-  '/api/public/agent/twilio-call': typeof ApiPublicAgentTwilioCallRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
@@ -498,13 +429,6 @@ export interface FileRoutesById {
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
-  '/api/public/twilio/bridge': typeof ApiPublicTwilioBridgeRoute
-  '/api/public/twilio/call-status': typeof ApiPublicTwilioCallStatusRoute
-  '/api/public/twilio/recording': typeof ApiPublicTwilioRecordingRoute
-  '/api/public/twilio/relay': typeof ApiPublicTwilioRelayRoute
-  '/api/public/twilio/relay-action': typeof ApiPublicTwilioRelayActionRoute
-  '/api/public/twilio/voice': typeof ApiPublicTwilioVoiceRoute
-  '/api/public/twilio/whatsapp': typeof ApiPublicTwilioWhatsappRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRouteTypes {
@@ -539,7 +463,6 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
-    | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
     | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
@@ -555,13 +478,6 @@ export interface FileRouteTypes {
     | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
-    | '/api/public/twilio/bridge'
-    | '/api/public/twilio/call-status'
-    | '/api/public/twilio/recording'
-    | '/api/public/twilio/relay'
-    | '/api/public/twilio/relay-action'
-    | '/api/public/twilio/voice'
-    | '/api/public/twilio/whatsapp'
     | '/api/public/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -594,7 +510,6 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
-    | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
     | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
@@ -610,13 +525,6 @@ export interface FileRouteTypes {
     | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
-    | '/api/public/twilio/bridge'
-    | '/api/public/twilio/call-status'
-    | '/api/public/twilio/recording'
-    | '/api/public/twilio/relay'
-    | '/api/public/twilio/relay-action'
-    | '/api/public/twilio/voice'
-    | '/api/public/twilio/whatsapp'
     | '/api/public/whatsapp/webhook'
   id:
     | '__root__'
@@ -649,7 +557,6 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/presence'
     | '/api/public/agent/report'
-    | '/api/public/agent/twilio-call'
     | '/api/public/agent/version'
     | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
@@ -665,13 +572,6 @@ export interface FileRouteTypes {
     | '/api/public/ingest/reprocess'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
-    | '/api/public/twilio/bridge'
-    | '/api/public/twilio/call-status'
-    | '/api/public/twilio/recording'
-    | '/api/public/twilio/relay'
-    | '/api/public/twilio/relay-action'
-    | '/api/public/twilio/voice'
-    | '/api/public/twilio/whatsapp'
     | '/api/public/whatsapp/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -705,7 +605,6 @@ export interface RootRouteChildren {
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
   ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
-  ApiPublicAgentTwilioCallRoute: typeof ApiPublicAgentTwilioCallRoute
   ApiPublicAgentVersionRoute: typeof ApiPublicAgentVersionRoute
   ApiPublicAgentWhatsappRoute: typeof ApiPublicAgentWhatsappRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
@@ -721,13 +620,6 @@ export interface RootRouteChildren {
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
   ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
-  ApiPublicTwilioBridgeRoute: typeof ApiPublicTwilioBridgeRoute
-  ApiPublicTwilioCallStatusRoute: typeof ApiPublicTwilioCallStatusRoute
-  ApiPublicTwilioRecordingRoute: typeof ApiPublicTwilioRecordingRoute
-  ApiPublicTwilioRelayRoute: typeof ApiPublicTwilioRelayRoute
-  ApiPublicTwilioRelayActionRoute: typeof ApiPublicTwilioRelayActionRoute
-  ApiPublicTwilioVoiceRoute: typeof ApiPublicTwilioVoiceRoute
-  ApiPublicTwilioWhatsappRoute: typeof ApiPublicTwilioWhatsappRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
 }
 
@@ -936,13 +828,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentReportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/agent/twilio-call': {
-      id: '/api/public/agent/twilio-call'
-      path: '/api/public/agent/twilio-call'
-      fullPath: '/api/public/agent/twilio-call'
-      preLoaderRoute: typeof ApiPublicAgentTwilioCallRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/agent/version': {
       id: '/api/public/agent/version'
       path: '/api/public/agent/version'
@@ -1048,55 +933,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReportsSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/twilio/bridge': {
-      id: '/api/public/twilio/bridge'
-      path: '/api/public/twilio/bridge'
-      fullPath: '/api/public/twilio/bridge'
-      preLoaderRoute: typeof ApiPublicTwilioBridgeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/twilio/call-status': {
-      id: '/api/public/twilio/call-status'
-      path: '/api/public/twilio/call-status'
-      fullPath: '/api/public/twilio/call-status'
-      preLoaderRoute: typeof ApiPublicTwilioCallStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/twilio/recording': {
-      id: '/api/public/twilio/recording'
-      path: '/api/public/twilio/recording'
-      fullPath: '/api/public/twilio/recording'
-      preLoaderRoute: typeof ApiPublicTwilioRecordingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/twilio/relay': {
-      id: '/api/public/twilio/relay'
-      path: '/api/public/twilio/relay'
-      fullPath: '/api/public/twilio/relay'
-      preLoaderRoute: typeof ApiPublicTwilioRelayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/twilio/relay-action': {
-      id: '/api/public/twilio/relay-action'
-      path: '/api/public/twilio/relay-action'
-      fullPath: '/api/public/twilio/relay-action'
-      preLoaderRoute: typeof ApiPublicTwilioRelayActionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/twilio/voice': {
-      id: '/api/public/twilio/voice'
-      path: '/api/public/twilio/voice'
-      fullPath: '/api/public/twilio/voice'
-      preLoaderRoute: typeof ApiPublicTwilioVoiceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/twilio/whatsapp': {
-      id: '/api/public/twilio/whatsapp'
-      path: '/api/public/twilio/whatsapp'
-      fullPath: '/api/public/twilio/whatsapp'
-      preLoaderRoute: typeof ApiPublicTwilioWhatsappRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/whatsapp/webhook': {
       id: '/api/public/whatsapp/webhook'
       path: '/api/public/whatsapp/webhook'
@@ -1138,7 +974,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
   ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
-  ApiPublicAgentTwilioCallRoute: ApiPublicAgentTwilioCallRoute,
   ApiPublicAgentVersionRoute: ApiPublicAgentVersionRoute,
   ApiPublicAgentWhatsappRoute: ApiPublicAgentWhatsappRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
@@ -1154,13 +989,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
   ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,
-  ApiPublicTwilioBridgeRoute: ApiPublicTwilioBridgeRoute,
-  ApiPublicTwilioCallStatusRoute: ApiPublicTwilioCallStatusRoute,
-  ApiPublicTwilioRecordingRoute: ApiPublicTwilioRecordingRoute,
-  ApiPublicTwilioRelayRoute: ApiPublicTwilioRelayRoute,
-  ApiPublicTwilioRelayActionRoute: ApiPublicTwilioRelayActionRoute,
-  ApiPublicTwilioVoiceRoute: ApiPublicTwilioVoiceRoute,
-  ApiPublicTwilioWhatsappRoute: ApiPublicTwilioWhatsappRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
 }
 export const routeTree = rootRouteImport

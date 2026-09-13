@@ -29,11 +29,9 @@ export type AuditAction =
   | "shift_summary_generated"
   | "shift_summary_hq_cleared"
   | "document_summarized"
-  | "twilio_number_wired"
-  | "twilio_number_purchased"
   | "do_not_contact_added"
   | "do_not_contact_removed"
-  | "ai_voice_settings_updated"
+  
   | "recording_doc_synced"
   | "agent_sim_bound"
   | "recording_backed_up_to_drive"

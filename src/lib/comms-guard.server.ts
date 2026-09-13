@@ -6,7 +6,7 @@
  * only announced when the notice is actually configured.
  */
 
-import { normalizePhone } from "@/lib/twilio.server";
+import { normalizePhone } from "@/lib/ingest-resolve.server";
 
 export type CommsChannel = "voice" | "sms" | "whatsapp" | "all";
 export type ConsentType = "recording" | "marketing";

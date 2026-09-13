@@ -10,9 +10,6 @@ import { DriveBackupPanel } from "@/components/crm/DriveBackupPanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
 import { StaffAccountsTable } from "@/components/crm/StaffAccountsTable";
-import { AiVoicePanel } from "@/components/crm/AiVoicePanel";
-import { TwilioOpsPanel } from "@/components/crm/TwilioOpsPanel";
-import { TwilioStatusCard } from "@/components/crm/TwilioStatusCard";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
@@ -127,10 +124,6 @@ function SystemBoard() {
       <DocSummaryPanel />
 
       <ReportSheetPanel />
-
-      <TwilioStatusCard />
-      <TwilioOpsPanel />
-      <AiVoicePanel />
 
       <StaffAccountsTable />
 
