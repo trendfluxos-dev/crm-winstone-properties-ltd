@@ -202,6 +202,12 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
             runCatching { WinstoneApi.pendingReport() }.getOrNull()?.let { body ->
                 body.optJSONObject("pending")?.let { pending ->
                     reportId = pending.optString("id").takeIf { it.isNotBlank() }
+                    pending.optJSONObject("lead")?.let { lead ->
+                        leadLabel = listOfNotNull(
+                            lead.optString("name").takeIf { it.isNotBlank() && it != "null" },
+                            lead.optString("phone_number").takeIf { it.isNotBlank() && it != "null" },
+                        ).joinToString(" · ").takeIf { it.isNotBlank() }
+                    }
                     pending.optJSONObject("recording")?.let { rec ->
                         aiSummary = rec.optString("ai_summary").takeIf { it.isNotBlank() && it != "null" }
                     }
@@ -225,9 +231,13 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
     ModalBottomSheet(onDismissRequest = { /* বাধ্যতামূলক — বন্ধ করা যাবে না */ }, sheetState = sheet) {
         Column(Modifier.padding(20.dp)) {
             Text("কল রিপোর্ট (বাধ্যতামূলক)", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            leadLabel?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(it, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+            }
             Spacer(Modifier.height(4.dp))
             Text(
-                if (reportId == null) "রিপোর্ট তৈরি হচ্ছে…" else "ক্যাটাগরি বেছে নিয়ে জমা দিন",
+                if (reportId == null) "রিপোর্ট তৈরি হচ্ছে…" else "ক্যাটাগরি বেছে নিয়ে জমা দিন — জমা না দিলে পরের কল হবে না",
                 fontSize = 12.sp,
             )
             aiSummary?.let {
@@ -311,7 +321,7 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
                             )
                         }
                         busy = false
-                        result.onSuccess { LiveCallLauncher.clear() }
+                        result.onSuccess { LiveCallLauncher.clear(); onSubmitted() }
                             .onFailure { error = it.message ?: "রিপোর্ট জমা হয়নি" }
                     }
                 },
