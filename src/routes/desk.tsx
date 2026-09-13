@@ -8,6 +8,7 @@ import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
 import { CarryOverLeads } from "@/components/crm/CarryOverLeads";
+import { LeadDayBoard } from "@/components/crm/LeadDayBoard";
 import { FollowUpAlarm } from "@/components/crm/FollowUpAlarm";
 import { FollowUpCalendar } from "@/components/crm/FollowUpCalendar";
 import { MyReports } from "@/components/crm/MyReports";
@@ -198,6 +199,8 @@ function DeskPage() {
         <FollowUpAlarm />
 
         <CarryOverLeads />
+
+        <LeadDayBoard />
 
         <CommandAgentPanel surface="desk" />
 

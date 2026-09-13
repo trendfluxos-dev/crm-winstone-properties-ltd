@@ -8,6 +8,7 @@ import { AppReleasePanel } from "@/components/crm/AppReleasePanel";
 import { AuditTrail } from "@/components/crm/AuditTrail";
 import { DocSummaryPanel } from "@/components/crm/DocSummaryPanel";
 import { DriveBackupPanel } from "@/components/crm/DriveBackupPanel";
+import { YearArchivePanel } from "@/components/crm/YearArchivePanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
 import { StaffAccountsTable } from "@/components/crm/StaffAccountsTable";
@@ -140,6 +141,8 @@ function SystemBoard() {
       <ApkInstallCard />
 
       <AppReleasePanel />
+
+      <YearArchivePanel />
 
       <AuditTrail />
 
