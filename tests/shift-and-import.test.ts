@@ -19,6 +19,22 @@ describe("Dhaka shift windows", () => {
     expect(SHIFTS.map((s) => s.summaryMinutes)).toEqual([12 * 60 + 50, 17 * 60 + 30]);
   });
 
+  it("carries work done after 5:20 pm into the next 12:50 summary window", () => {
+    const morning = SHIFTS[0]!;
+    // Window starts the previous day at 17:20, so after-hours updates are counted.
+    expect(morning.windowStartMinutes).toBe(17 * 60 + 20 - 24 * 60);
+    const start = dhakaInstant("2026-09-14", morning.windowStartMinutes);
+    expect(dhakaParts(start).dateKey).toBe("2026-09-13");
+    expect(dhakaParts(start).minutes).toBe(17 * 60 + 20);
+    // The two windows meet without a gap or an overlap.
+    expect(SHIFTS[1]!.windowStartMinutes).toBe(morning.endMinutes);
+  });
+
+  it("reports the summary window from the carry-over start", () => {
+    const due = shiftDueForSummary(dhaka("2026-09-14", 12 * 60 + 50));
+    expect(dhakaParts(due!.windowStart).dateKey).toBe("2026-09-13");
+  });
+
   it("converts Dhaka wall clock to UTC and back", () => {
     const at = dhaka("2026-09-13", 10 * 60);
     expect(dhakaParts(at).minutes).toBe(600);
