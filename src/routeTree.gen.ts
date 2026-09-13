@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CoachRouteImport } from './routes/coach'
+import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DeskRouteImport } from './routes/desk'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocsRouteImport } from './routes/docs'
@@ -68,6 +69,11 @@ const AuthRoute = AuthRouteImport.update({
 const CoachRoute = CoachRouteImport.update({
   id: '/coach',
   path: '/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditsRoute = CreditsRouteImport.update({
+  id: '/credits',
+  path: '/credits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeskRoute = DeskRouteImport.update({
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/credits': typeof CreditsRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/credits': typeof CreditsRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
@@ -388,6 +396,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/coach': typeof CoachRoute
+  '/credits': typeof CreditsRoute
   '/desk': typeof DeskRoute
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
@@ -437,6 +446,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/coach'
+    | '/credits'
     | '/desk'
     | '/dispatch'
     | '/docs'
@@ -484,6 +494,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/coach'
+    | '/credits'
     | '/desk'
     | '/dispatch'
     | '/docs'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/coach'
+    | '/credits'
     | '/desk'
     | '/dispatch'
     | '/docs'
@@ -579,6 +591,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   CoachRoute: typeof CoachRoute
+  CreditsRoute: typeof CreditsRoute
   DeskRoute: typeof DeskRoute
   DispatchRoute: typeof DispatchRoute
   DocsRoute: typeof DocsRoute
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       path: '/coach'
       fullPath: '/coach'
       preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credits': {
+      id: '/credits'
+      path: '/credits'
+      fullPath: '/credits'
+      preLoaderRoute: typeof CreditsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desk': {
@@ -947,6 +967,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   CoachRoute: CoachRoute,
+  CreditsRoute: CreditsRoute,
   DeskRoute: DeskRoute,
   DispatchRoute: DispatchRoute,
   DocsRoute: DocsRoute,
