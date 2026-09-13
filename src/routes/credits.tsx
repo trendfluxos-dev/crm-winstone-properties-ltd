@@ -71,7 +71,7 @@ function CreditsBoard() {
       "এজেন্ট,কাজের সংখ্যা,অনুমানিত ক্রেডিট",
       ...report.agents.map((a) => `"${a.name}",${a.calls},${a.credits}`),
     ].join("\r\n");
-    const blob = new Blob([`﻿${lines}`], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([`\uFEFF${lines}`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;

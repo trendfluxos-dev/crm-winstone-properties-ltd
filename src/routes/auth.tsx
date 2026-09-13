@@ -179,7 +179,8 @@ function AuthPage() {
               placeholder="At least 6 characters"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && canSubmit && !busy) {
-                  isSignup ? signUp.mutate() : signIn.mutate();
+                  if (isSignup) signUp.mutate();
+                  else signIn.mutate();
                 }
               }}
             />
