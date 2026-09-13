@@ -112,3 +112,41 @@ export async function getOrCreateDriveFolder(name: string, parentId?: string | n
   if (!created?.id) throw new Error("Google Drive ফোল্ডার তৈরি হয়নি");
   return created.id;
 }
+
+/** Rename a Drive file or folder in place (keeps the same id and contents). */
+export async function renameDriveFile(fileId: string, name: string) {
+  const updated = await driveFetch<{ id: string; name: string }>(
+    `/files/${fileId}?fields=id,name`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    },
+  );
+  if (!updated?.id) throw new Error("Google Drive ফোল্ডারের নাম বদলানো যায়নি");
+  return updated;
+}
+
+/** Move a Drive file or folder under a new parent (id and contents stay). */
+export async function moveDriveFile(fileId: string, addParentId: string, removeParentId?: string | null) {
+  const params = new URLSearchParams({ addParents: addParentId, fields: "id,parents" });
+  if (removeParentId) params.set("removeParents", removeParentId);
+  const updated = await driveFetch<{ id: string; parents?: string[] }>(
+    `/files/${fileId}?${params.toString()}`,
+    { method: "PATCH", headers: { "Content-Type": "application/json" }, body: "{}" },
+  );
+  if (!updated?.id) throw new Error("Google Drive ফোল্ডার সরানো যায়নি");
+  return updated;
+}
+
+/** True when the folder still exists and is not in the trash. */
+export async function driveFolderExists(folderId: string): Promise<boolean> {
+  try {
+    const meta = await driveFetch<{ id: string; trashed?: boolean }>(
+      `/files/${folderId}?fields=id,trashed`,
+    );
+    return Boolean(meta?.id) && meta?.trashed !== true;
+  } catch {
+    return false;
+  }
+}

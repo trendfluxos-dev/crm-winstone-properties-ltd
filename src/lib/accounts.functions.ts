@@ -212,6 +212,11 @@ export const decideAccount = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.profileId);
     if (error) throw new Error(error.message);
 
+    if (data.decision !== "reject") {
+      const { refreshAgentDriveFolder } = await import("@/lib/drive-agent-folders.server");
+      await refreshAgentDriveFolder(data.profileId);
+    }
+
     const { logAudit } = await import("@/lib/audit.server");
     await logAudit({
       action: data.decision === "reject" ? "account_rejected" : "account_approved",
@@ -346,6 +351,9 @@ export const createStaffAccount = createServerFn({ method: "POST" })
       metadata: { employeeId, role },
     });
 
+    const { refreshAgentDriveFolder } = await import("@/lib/drive-agent-folders.server");
+    await refreshAgentDriveFolder(profile.id);
+
     return { ok: true, profileId: profile.id, email };
   });
 
@@ -391,6 +399,10 @@ export const updateStaffAccount = createServerFn({ method: "POST" })
 
     if (Object.keys(patch).length) {
       const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", profile.id);
+      if (!error && ("name" in patch || "employee_id" in patch)) {
+        const { refreshAgentDriveFolder } = await import("@/lib/drive-agent-folders.server");
+        await refreshAgentDriveFolder(profile.id);
+      }
       if (error) throw new Error(error.message);
     }
 
