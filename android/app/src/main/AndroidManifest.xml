@@ -59,5 +59,13 @@
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
+        <!-- Calls dialled from the phone's own dialer still reach the CRM. -->
+        <receiver
+            android:name=".telephony.OutgoingCallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
