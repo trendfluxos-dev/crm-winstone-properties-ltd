@@ -14,9 +14,12 @@ export type Caller = {
   userId: string | null;
   /** Present when a signed-in account exists but is not approved yet. */
   approval: "pending" | "approved" | "rejected" | null;
+  /** True for HQ viewing sessions and unapproved accounts: reads only. */
+  readOnly: boolean;
 };
 
-const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null };
+const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null, readOnly: true };
+
 
 function isNewKey(value: string) {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
