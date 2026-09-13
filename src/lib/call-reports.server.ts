@@ -326,7 +326,9 @@ export async function submitCallReport(input: {
     agentId: input.agentId,
     recordingId: report.recording_id,
     kind: "outcome_logged",
-    detail: `${CATEGORY_LABEL[category]}${input.followUpAt ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}` : ""}`,
+    detail: `${CATEGORY_LABEL[category]}${
+      classified ? ` — ${TEMPERATURE_LABEL[temperature!]} / গ্রেড ${grade}` : " — কথা হয়নি, আবার কল হবে"
+    }${input.followUpAt ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}` : ""}`,
   });
 
   const { logAudit } = await import("@/lib/audit.server");
@@ -338,6 +340,10 @@ export async function submitCallReport(input: {
     metadata: {
       leadId: report.lead_id,
       category,
+      received,
+      temperature,
+      grade,
+      workState: received && classified ? "completed" : "pending",
       aiDecision: input.aiDecision ?? null,
       followUpAt: input.followUpAt ?? null,
     },
