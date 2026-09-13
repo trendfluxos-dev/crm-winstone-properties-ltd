@@ -353,12 +353,13 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
     requireDispatch(caller);
     const { generateShiftSummary } = await import("@/lib/shift-summary.server");
     const result = await generateShiftSummary();
-    await audit("shift_summary_generated");
+    await audit(result.generated ? "shift_summary_generated" : "shift_summary_not_due");
+    // A window that has not closed yet produces nothing — say so instead of
+    // reporting a summary that does not exist.
+    if (!result.generated) return { ok: false, message: result.reason };
     return {
       ok: true,
-      message:
-        "shiftLabel" in (result as Record<string, unknown>)
-          ? `শিফট সারসংক্ষেপ তৈরি হয়েছে: ${String((result as { shiftLabel?: string }).shiftLabel ?? "")}`
-          : "শিফট সারসংক্ষেপ তৈরি হয়েছে",
+      message: `শিফট সারসংক্ষেপ তৈরি হয়েছে (${result.shiftKey}) — ${result.agents} জন এজেন্ট`,
     };
   });
+
