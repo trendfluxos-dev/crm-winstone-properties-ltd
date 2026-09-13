@@ -76,14 +76,31 @@ export async function analyzeOne(recordingId: string): Promise<AnalysisState> {
   try {
     const outcome = await processRecording(recordingId);
     if (outcome === "empty") {
+      // Silence in the file is permanent: re-running the same audio only spends
+      // credits. The call stays truthful as "no speech in the recording" and the
+      // agent's own submitted report remains HQ's source for this call.
       await supabaseAdmin
         .from("call_recordings")
         .update({
-          analysis_status: attempts >= MAX_ATTEMPTS ? "not_available" : "failed",
-          analysis_error: "transcript was empty (no speech detected)",
+          analysis_status: "not_available",
+          analysis_error: "রেকর্ডিংয়ে কথা পাওয়া যায়নি — এজেন্টের রিপোর্টই এই কলের সূত্র",
+          recording_status: "not_available",
         })
         .eq("id", recordingId);
-      return attempts >= MAX_ATTEMPTS ? "not_available" : "failed";
+      await upsertCallJob({
+        recordingId,
+        jobType: "transcription",
+        status: "failed",
+        errorMessage: "no speech detected in recording",
+      });
+      await logLeadEvent({
+        leadId: row.lead_id,
+        agentId: row.agent_id,
+        recordingId,
+        kind: "transcript_failed",
+        detail: "রেকর্ডিংয়ে কথা পাওয়া যায়নি — এজেন্টের জমা দেওয়া রিপোর্ট থেকেই সারসংক্ষেপ হবে",
+      });
+      return "not_available";
     }
 
     await supabaseAdmin
