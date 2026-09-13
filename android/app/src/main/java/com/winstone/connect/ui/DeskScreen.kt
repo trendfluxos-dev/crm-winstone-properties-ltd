@@ -140,13 +140,24 @@ fun DeskScreen(
                 )
             }
 
-            callBlocked?.let { message ->
-                Text(
-                    message,
-                    color = WinRed,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                )
+            // মূল ব্যানার: আগের কলের রিপোর্ট বাকি — এক ট্যাপে শিট খোলে
+            if (reportPending || callBlocked != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        callBlocked ?: "আগের কলের রিপোর্ট জমা বাকি",
+                        color = WinRed,
+                        fontSize = 12.sp,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = { showPendingReport = true }) {
+                        Text("এখনই জমা দিন", color = WinRed, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
+                }
             }
 
             StatsRow(state)
@@ -237,6 +248,18 @@ fun DeskScreen(
         )
     }
 
+    // অ্যাপ চালু হওয়ার পরই পেন্ডিং রিপোর্ট থাকলে নিজে খুলে যায়; জমা না দিলে বন্ধ হয় না।
+    if (reportPending || showPendingReport) {
+        ReportSheet(
+            notes = "",
+            onSubmitted = {
+                showPendingReport = false
+                callBlocked = null
+                onReportSubmitted()
+                vm.refresh()
+            },
+        )
+    }
 }
 
 /**
