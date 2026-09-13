@@ -173,6 +173,7 @@ export const listAccountRequests = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
     requireAuthority(await resolveCaller(data.adminToken));
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("profiles")
@@ -197,7 +198,12 @@ export const decideAccount = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
-    requireAuthority(await resolveCaller(data.adminToken));
+    {
+      const decider = await resolveCaller(data.adminToken);
+      requireAuthority(decider);
+      const { requireWrite } = await import("@/lib/access.server");
+      requireWrite(decider);
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const patch =
@@ -297,6 +303,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
     const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
     requireAuthority(caller);
+    (await import("@/lib/access.server")).requireWrite(caller);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const employeeId = data.employeeId.toUpperCase().replace(/\s+/g, "");
@@ -376,6 +383,7 @@ export const updateStaffAccount = createServerFn({ method: "POST" })
     const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
     requireAuthority(caller);
+    (await import("@/lib/access.server")).requireWrite(caller);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: profile, error: readError } = await supabaseAdmin

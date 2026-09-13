@@ -71,6 +71,7 @@ function ControlBoardPage() {
   return (
     <AppShell>
       <RoleGate
+        surface="hq"
         allow={["authority"]}
         icon={<ShieldCheck className="size-7" />}
         title="এক্সিকিউটিভ এইচকিউ"

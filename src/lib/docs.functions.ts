@@ -9,10 +9,11 @@ const STATUS = ["draft", "in_review", "published", "archived"] as const;
 
 const Token = z.string().nullable().optional();
 
-async function requireEditor(adminToken: string | null) {
-  const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+async function requireEditor(adminToken: string | null, write = false) {
+  const { resolveCaller, requireDispatch, requireWrite } = await import("@/lib/access.server");
   const caller = await resolveCaller(adminToken);
   requireDispatch(caller);
+  if (write) requireWrite(caller);
   return caller;
 }
 
@@ -93,7 +94,7 @@ const SaveInput = z.object({
 export const saveDoc = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SaveInput.parse(input))
   .handler(async ({ data }) => {
-    const caller = await requireEditor(data.adminToken ?? null);
+    const caller = await requireEditor(data.adminToken ?? null, true);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: saved, error } = await supabaseAdmin
       .from("doc_pages")

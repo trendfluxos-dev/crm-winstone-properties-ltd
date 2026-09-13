@@ -78,11 +78,23 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
 
 /** Verifies the master PIN and returns an opaque token the browser keeps locally. */
 export const unlockAdmin = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ pin: z.string().min(1).max(32) }).parse(input))
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        pin: z.string().min(1).max(32),
+        // Which board is being unlocked. HQ gets a read-only token.
+        surface: z.enum(["hq", "system"]).default("system"),
+      })
+      .parse(input),
+  )
   .handler(async ({ data }) => {
     const { pinMatches, mintAdminToken } = await import("@/lib/admin-gate.server");
     if (!pinMatches(data.pin)) return { ok: false as const };
-    return { ok: true as const, token: mintAdminToken() };
+    return {
+      ok: true as const,
+      token: mintAdminToken(data.surface === "hq" ? "hq" : "full"),
+      readOnly: data.surface === "hq",
+    };
   });
 
 /** Lets the browser confirm a stored token is still valid (e.g. after a secret rotation). */
@@ -127,8 +139,10 @@ export const getAudioUrl = createServerFn({ method: "POST" })
 export const autoDistributeLeads = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ adminToken: OptionalToken }).parse(input))
   .handler(async ({ data }) => {
-    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
-    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const { resolveCaller, requireDispatch, requireWrite } = await import("@/lib/access.server");
+    const mutator = await resolveCaller(data.adminToken ?? null);
+    requireDispatch(mutator);
+    requireWrite(mutator);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [{ data: agents, error: agentError }, { data: leads, error: leadError }] =
@@ -189,6 +203,7 @@ export const importLeads = createServerFn({ method: "POST" })
     const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
     const importer = await resolveCaller(data.adminToken ?? null);
     requireDispatch(importer);
+    (await import("@/lib/access.server")).requireWrite(importer);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const normalize = (p: string) => p.replace(/[^\d+]/g, "");
@@ -268,8 +283,10 @@ const ManualCallInput = z.object({
 export const uploadCallRecording = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ManualCallInput.parse(input))
   .handler(async ({ data }) => {
-    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
-    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const { resolveCaller, requireDispatch, requireWrite } = await import("@/lib/access.server");
+    const mutator = await resolveCaller(data.adminToken ?? null);
+    requireDispatch(mutator);
+    requireWrite(mutator);
     const { adminToken: _token, ...payload } = data;
     const { ingestRecording, processRecording } = await import("@/lib/call-intel.server");
     const recordingId = await ingestRecording(payload);
@@ -290,8 +307,10 @@ const ManualMessageInput = z.object({
 export const logWhatsappMessage = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ManualMessageInput.parse(input))
   .handler(async ({ data }) => {
-    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
-    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const { resolveCaller, requireDispatch, requireWrite } = await import("@/lib/access.server");
+    const mutator = await resolveCaller(data.adminToken ?? null);
+    requireDispatch(mutator);
+    requireWrite(mutator);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("whatsapp_interactions").insert({
       lead_id: data.leadId,
@@ -337,6 +356,7 @@ export const assignLeadsToAgent = createServerFn({ method: "POST" })
     const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
     requireDispatch(caller);
+    (await import("@/lib/access.server")).requireWrite(caller);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     let query = supabaseAdmin

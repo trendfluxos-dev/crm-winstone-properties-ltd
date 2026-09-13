@@ -7,9 +7,13 @@ import { resolveCaller } from "@/lib/access.server";
 
 const Base = z.object({ adminToken: z.string().nullable().optional() });
 
-async function requireAuthority(adminToken: string | null) {
+async function requireAuthority(adminToken: string | null, write = false) {
   const caller = await resolveCaller(adminToken);
   if (caller.scope !== "authority") throw new Error("শুধুমাত্র IT Console/HQ এই কাজ করতে পারবেন");
+  if (write) {
+    const { requireWrite } = await import("@/lib/access.server");
+    requireWrite(caller);
+  }
   return caller;
 }
 
@@ -53,7 +57,7 @@ export const updateAiVoice = createServerFn({ method: "POST" })
     }).parse(data),
   )
   .handler(async ({ data }) => {
-    const caller = await requireAuthority(data.adminToken ?? null);
+    const caller = await requireAuthority(data.adminToken ?? null, true);
     const { saveRelaySettings } = await import("@/lib/relay.server");
     const { adminToken: _token, ...patch } = data;
     const saved = await saveRelaySettings(patch);

@@ -21,21 +21,24 @@ export function AdminPinDialog({
   open,
   onOpenChange,
   onUnlocked,
+  surface = "system",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUnlocked?: () => void;
+  /** "hq" mints a view-only session; "system" mints the full IT session. */
+  surface?: "hq" | "system";
 }) {
   const [pin, setPin] = useState("");
   const [attemptNo, setAttemptNo] = useState(0);
   const unlock = useServerFn(unlockAdmin);
 
   const attempt = useMutation({
-    mutationFn: (value: string) => unlock({ data: { pin: value } }),
+    mutationFn: (value: string) => unlock({ data: { pin: value, surface } }),
     onSuccess: (result) => {
       if (result.ok) {
         setAdminToken(result.token);
-        toast.success("Control board unlocked");
+        toast.success(surface === "hq" ? "Executive HQ unlocked (view-only)" : "Control board unlocked");
         setPin("");
         onOpenChange(false);
         onUnlocked?.();
@@ -113,9 +116,11 @@ export function AdminPinDialog({
 export function AdminGate({
   children,
   locked,
+  surface = "system",
 }: {
   children: ReactNode;
   locked: (openPin: () => void) => ReactNode;
+  surface?: "hq" | "system";
 }) {
   const token = useAdminToken();
   const [open, setOpen] = useState(false);
@@ -124,7 +129,7 @@ export function AdminGate({
   return (
     <>
       {locked(() => setOpen(true))}
-      <AdminPinDialog open={open} onOpenChange={setOpen} />
+      <AdminPinDialog open={open} onOpenChange={setOpen} surface={surface} />
     </>
   );
 }

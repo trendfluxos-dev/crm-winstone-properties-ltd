@@ -11,10 +11,14 @@ import { resolveCaller } from "@/lib/access.server";
 
 const AdminInput = z.object({ adminToken: z.string().nullable().optional() });
 
-async function requireAuthority(adminToken: string | null) {
+async function requireAuthority(adminToken: string | null, write = false) {
   const caller = await resolveCaller(adminToken);
   if (caller.scope !== "authority") {
     throw new Error("শুধুমাত্র IT Console/HQ এই কাজ করতে পারবেন");
+  }
+  if (write) {
+    const { requireWrite } = await import("@/lib/access.server");
+    requireWrite(caller);
   }
   return caller;
 }
@@ -68,7 +72,7 @@ export const wireTwilioNumber = createServerFn({ method: "POST" })
     AdminInput.extend({ sid: z.string().min(10) }).parse(data),
   )
   .handler(async ({ data }) => {
-    const caller = await requireAuthority(data.adminToken ?? null);
+    const caller = await requireAuthority(data.adminToken ?? null, true);
     const { updateNumberWebhooks } = await import("@/lib/twilio.server");
     const expected = webhookUrls();
     const updated = await updateNumberWebhooks({
@@ -106,7 +110,7 @@ export const buyTwilioNumber = createServerFn({ method: "POST" })
     AdminInput.extend({ phoneNumber: z.string().min(6) }).parse(data),
   )
   .handler(async ({ data }) => {
-    const caller = await requireAuthority(data.adminToken ?? null);
+    const caller = await requireAuthority(data.adminToken ?? null, true);
     const { purchaseNumber } = await import("@/lib/twilio.server");
     const expected = webhookUrls();
     const bought = await purchaseNumber({
@@ -181,7 +185,7 @@ export const upsertDoNotContact = createServerFn({ method: "POST" })
     }).parse(data),
   )
   .handler(async ({ data }) => {
-    const caller = await requireAuthority(data.adminToken ?? null);
+    const caller = await requireAuthority(data.adminToken ?? null, true);
     const { addDoNotContact, removeDoNotContact } = await import("@/lib/comms-guard.server");
 
     if (data.remove) {

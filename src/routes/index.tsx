@@ -142,6 +142,7 @@ function EntryHall() {
       <AdminPinDialog
         open={pinOpen}
         onOpenChange={setPinOpen}
+        surface={pinTarget === "/hq" ? "hq" : "system"}
         onUnlocked={() => void navigate({ to: pinTarget })}
       />
     </div>

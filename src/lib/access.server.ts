@@ -14,9 +14,12 @@ export type Caller = {
   userId: string | null;
   /** Present when a signed-in account exists but is not approved yet. */
   approval: "pending" | "approved" | "rejected" | null;
+  /** True for HQ viewing sessions and unapproved accounts: reads only. */
+  readOnly: boolean;
 };
 
-const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null };
+const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null, readOnly: true };
+
 
 function isNewKey(value: string) {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -58,9 +61,17 @@ async function userIdFromRequest(): Promise<string | null> {
  * signed-in agent or coordinator account. Everything else is anonymous.
  */
 export async function resolveCaller(adminToken?: string | null): Promise<Caller> {
-  const { adminTokenValid } = await import("@/lib/admin-gate.server");
-  if (adminTokenValid(adminToken ?? null)) {
-    return { scope: "authority", profile: null, userId: null, approval: "approved" };
+  const { adminTokenScope } = await import("@/lib/admin-gate.server");
+  const pinScope = adminTokenScope(adminToken ?? null);
+  if (pinScope) {
+    return {
+      scope: "authority",
+      profile: null,
+      userId: null,
+      approval: "approved",
+      // Executive HQ unlock is a viewing session: reads pass, mutations do not.
+      readOnly: pinScope === "hq",
+    };
   }
 
   const userId = await userIdFromRequest();
@@ -77,7 +88,7 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
 
   const approval = (profile.approval_status ?? "pending") as Caller["approval"];
   if (approval !== "approved" || !profile.is_active) {
-    return { scope: "none", profile, userId, approval };
+    return { scope: "none", profile, userId, approval, readOnly: true };
   }
 
   return {
@@ -85,6 +96,7 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
     profile,
     userId,
     approval,
+    readOnly: false,
   };
 }
 
@@ -100,3 +112,14 @@ export function requireDispatch(caller: Caller) {
 export function requireAuthority(caller: Caller) {
   if (caller.scope !== "authority") throw new Error("Master PIN required");
 }
+
+export const HQ_READ_ONLY = "Executive HQ is view-only — use the coordinator or IT console for this change";
+
+/**
+ * Gate for every coordinator/IT mutation. HQ sessions read the whole floor but
+ * may never change assignments, classifications, follow-ups or system settings.
+ */
+export function requireWrite(caller: Caller) {
+  if (caller.readOnly) throw new Error(HQ_READ_ONLY);
+}
+

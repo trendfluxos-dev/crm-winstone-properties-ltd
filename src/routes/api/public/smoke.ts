@@ -16,25 +16,24 @@ import { createFileRoute } from "@tanstack/react-router";
  */
 const ROUTES = ["/", "/auth", "/desk", "/dispatch", "/hq", "/system", "/import", "/docs"] as const;
 
-/** Every route path compiled into this build. */
-async function deployedPaths(): Promise<Set<string>> {
-  // Imported lazily: routeTree.gen imports this file, so a top-level import
-  // would make the module graph circular and crash every SSR request.
-  const { routeTree } = await import("@/routeTree.gen");
+/**
+ * Every page route bundled into this build.
+ *
+ * Read from the route modules themselves, never from routeTree.gen: that file
+ * imports this one, so touching it here (even lazily) makes the module graph
+ * circular and every SSR request crashes.
+ */
+function deployedPaths(): Set<string> {
+  const modules = import.meta.glob("/src/routes/**/*.tsx", { eager: false });
   const found = new Set<string>();
-  const walk = (node: unknown) => {
-    const route = node as { options?: { path?: string }; children?: unknown };
-    const path = route?.options?.path;
-    if (typeof path === "string") found.add(path);
-    const children = route?.children;
-    const list = Array.isArray(children)
-      ? children
-      : children && typeof children === "object"
-        ? Object.values(children as Record<string, unknown>)
-        : [];
-    for (const child of list) walk(child);
-  };
-  walk(routeTree);
+  for (const file of Object.keys(modules)) {
+    const path = file
+      .replace("/src/routes", "")
+      .replace(/\.tsx$/, "")
+      .replace(/\/index$/, "/")
+      .replace(/^\/route$/, "/");
+    found.add(path === "" ? "/" : path);
+  }
   return found;
 }
 
@@ -78,7 +77,7 @@ export const Route = createFileRoute("/api/public/smoke")({
         }
 
         // 2. Every key CRM page is really part of this deployment
-        const deployed = await deployedPaths();
+        const deployed = deployedPaths();
         for (const path of ROUTES) {
           const present = deployed.has(path);
           checks.push({
