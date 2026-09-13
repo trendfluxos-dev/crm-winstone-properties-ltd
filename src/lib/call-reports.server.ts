@@ -397,6 +397,8 @@ export type AiSuggestion = {
   suggestedCategory: CallCategory | null;
   nextAction: string;
   suggestedFollowUpAt: string | null;
+  suggestedTemperature: LeadTemperature | null;
+  suggestedGrade: LeadGrade | null;
   source: "call_analysis";
 };
 
@@ -406,6 +408,8 @@ function suggestionFrom(recording: {
   customer_objections: string[] | null;
   deal_stage: string | null;
   duration_seconds: number;
+  ai_temperature?: string | null;
+  ai_grade?: string | null;
 }): AiSuggestion {
   const summary = (recording.ai_summary ?? "")
     .split("\n")
@@ -445,6 +449,14 @@ function suggestionFrom(recording: {
         : suggested === "not_interested"
           ? "এই লিড বন্ধ করে কারণ লিখুন"
           : "আগামীকাল সকালে ফলো-আপ কল দিন",
+    suggestedTemperature:
+      LEAD_TEMPERATURES.includes(recording.ai_temperature as LeadTemperature)
+        ? (recording.ai_temperature as LeadTemperature)
+        : null,
+    suggestedGrade:
+      LEAD_GRADES.includes(recording.ai_grade as LeadGrade)
+        ? (recording.ai_grade as LeadGrade)
+        : null,
     suggestedFollowUpAt:
       suggested === "follow_up" || suggested === "hot_lead" || suggested === "callback"
         ? followUp.toISOString()
@@ -474,7 +486,7 @@ export async function loadPendingReportDetail(agentId: string) {
     ? await supabaseAdmin
         .from("call_recordings")
         .select(
-          "id, analysis_status, analysis_error, ai_summary, sentiment, customer_objections, deal_stage, duration_seconds, is_two_sided, recorder_source",
+          "id, analysis_status, analysis_error, ai_summary, sentiment, customer_objections, deal_stage, duration_seconds, is_two_sided, recorder_source, ai_temperature, ai_grade",
         )
         .eq("id", report.recording_id)
         .maybeSingle()

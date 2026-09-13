@@ -47,6 +47,8 @@ export type CallAnalysis = {
   intent: string;
   lead_category: (typeof AI_LEAD_CATEGORIES)[number];
   next_action: string;
+  suggested_temperature: "hot" | "warm" | "cold";
+  suggested_grade: "A" | "B" | "C" | "D";
   timestamped_transcript: string;
 };
 
@@ -61,6 +63,8 @@ const ANALYSIS_SCHEMA = {
     "intent",
     "lead_category",
     "next_action",
+    "suggested_temperature",
+    "suggested_grade",
     "timestamped_transcript",
   ],
   properties: {
@@ -79,6 +83,16 @@ const ANALYSIS_SCHEMA = {
       description: "Exactly three short bullets summarising the call.",
     },
     sentiment: { type: "string", enum: ["positive", "neutral", "negative", "critical"] },
+    suggested_temperature: {
+      type: "string",
+      enum: ["hot", "warm", "cold"],
+      description: "Suggested lead temperature based on buying intent in this call.",
+    },
+    suggested_grade: {
+      type: "string",
+      enum: ["A", "B", "C", "D"],
+      description: "Suggested lead grade: A best fit / highest value, D weakest.",
+    },
     objections: { type: "array", items: { type: "string" } },
     deal_stage: { type: "string" },
     timestamped_transcript: {
@@ -244,6 +258,8 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
         ai_intent: analysis.intent,
         ai_lead_category: analysis.lead_category,
         ai_next_action: analysis.next_action,
+        ai_temperature: analysis.suggested_temperature,
+        ai_grade: analysis.suggested_grade,
         sync_status: recording.is_two_sided ? "verified" : "uploaded",
       })
       .eq("id", recordingId);
