@@ -22,6 +22,8 @@ export type ShiftAgentLine = {
   reports: number;
   pending: number;
   followUps: number;
+  /** Total talk time from the agents' own call reports, in seconds. */
+  talkSeconds: number;
   categories: Record<string, number>;
 };
 
@@ -39,6 +41,7 @@ export type ShiftSummaryRow = {
     reports: number;
     pending: number;
     followUps: number;
+    talkSeconds?: number;
   };
   agents: ShiftAgentLine[];
 };
@@ -76,7 +79,9 @@ async function buildShiftLines(startIso: string, endIso: string) {
       .eq("role", "agent"),
     supabaseAdmin
       .from("call_reports")
-      .select("agent_id, status, category, connected, call_ended_at, created_at")
+      .select(
+        "agent_id, status, category, connected, call_ended_at, created_at, duration_seconds",
+      )
       .gte("created_at", startIso)
       .lte("created_at", endIso),
     supabaseAdmin.from("leads").select("assigned_to"),
@@ -119,6 +124,7 @@ async function buildShiftLines(startIso: string, endIso: string) {
       reports: submitted.length,
       pending: mine.filter((r) => r.status === "pending").length,
       followUps: followCount.get(agent.id) ?? 0,
+      talkSeconds: mine.reduce((sum, r) => sum + (r.duration_seconds ?? 0), 0),
       categories,
     };
   });
@@ -130,8 +136,9 @@ async function buildShiftLines(startIso: string, endIso: string) {
       reports: acc.reports + line.reports,
       pending: acc.pending + line.pending,
       followUps: acc.followUps + line.followUps,
+      talkSeconds: acc.talkSeconds + line.talkSeconds,
     }),
-    { called: 0, connected: 0, reports: 0, pending: 0, followUps: 0 },
+    { called: 0, connected: 0, reports: 0, pending: 0, followUps: 0, talkSeconds: 0 },
   );
 
   return { lines, totals };

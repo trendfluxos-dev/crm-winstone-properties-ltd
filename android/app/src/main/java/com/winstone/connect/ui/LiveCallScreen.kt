@@ -195,6 +195,7 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
     var error by remember { mutableStateOf<String?>(null) }
     var aiSummary by remember { mutableStateOf<String?>(null) }
     var aiCategory by remember { mutableStateOf<String?>(null) }
+    var talkSeconds by remember { mutableLongStateOf(0L) }
 
     // Wait for the server-side report (opened by the sync worker when the call ended).
     LaunchedEffect(Unit) {
@@ -202,6 +203,7 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
             runCatching { WinstoneApi.pendingReport() }.getOrNull()?.let { body ->
                 body.optJSONObject("pending")?.let { pending ->
                     reportId = pending.optString("id").takeIf { it.isNotBlank() }
+                    talkSeconds = pending.optLong("duration_seconds", 0L)
                     pending.optJSONObject("lead")?.let { lead ->
                         leadLabel = listOfNotNull(
                             lead.optString("name").takeIf { it.isNotBlank() && it != "null" },
@@ -240,6 +242,15 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
                 if (reportId == null) "রিপোর্ট তৈরি হচ্ছে…" else "ক্যাটাগরি বেছে নিয়ে জমা দিন — জমা না দিলে পরের কল হবে না",
                 fontSize = 12.sp,
             )
+            if (talkSeconds > 0L) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "এই কলে কথা হয়েছে: ${formatDuration(talkSeconds)}",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             aiSummary?.let {
                 Spacer(Modifier.height(8.dp))
                 Text("AI সারসংক্ষেপ: $it", fontSize = 12.sp)

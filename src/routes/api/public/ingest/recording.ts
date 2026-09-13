@@ -233,11 +233,17 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             });
           }
 
-          // Analysis runs out of band; the sweep endpoint owns retries.
-          const { analyzePending } = await import("@/lib/analysis-queue.server");
-          void analyzePending(1).catch((error) =>
-            console.error("[ingest] background analysis failed", error),
-          );
+          // Transcription + AI analysis must be awaited here: this runs on a
+          // serverless worker that is torn down as soon as the response is
+          // returned, so a fire-and-forget promise never completes. A bounded
+          // race keeps the phone's upload fast; the cron sweep retries the rest.
+          const { analyzeOne } = await import("@/lib/analysis-queue.server");
+          await Promise.race([
+            analyzeOne(recordingId).catch((error) =>
+              console.error("[ingest] analysis failed", error),
+            ),
+            new Promise((resolve) => setTimeout(resolve, 25_000)),
+          ]);
 
           // Google Drive copy is best-effort and only runs when IT switched it
           // on with a folder; a Drive failure never fails the phone's upload.

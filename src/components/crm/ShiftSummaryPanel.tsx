@@ -32,6 +32,14 @@ function dhaka(iso: string) {
   return new Date(iso).toLocaleString("bn-BD", { timeZone: "Asia/Dhaka" });
 }
 
+/** কথা বলার মোট সময় — এজেন্টদের নিজের রিপোর্টের কল-দৈর্ঘ্য থেকে। */
+function talkTime(seconds: number | undefined) {
+  const total = Math.max(0, Math.round(seconds ?? 0));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return m > 0 ? `${m} মি ${s} সে` : `${s} সে`;
+}
+
 const EXPORT_HEADER = [
   "শিফট",
   "উইন্ডো শেষ",
@@ -43,6 +51,7 @@ const EXPORT_HEADER = [
   "আপডেট",
   "বাকি",
   "ফলো-আপ",
+  "কথা বলার সময়",
   "ক্যাটাগরি",
 ];
 
@@ -70,6 +79,7 @@ function buildCsv(rows: ShiftSummaryRow[]) {
           agent.reports,
           agent.pending,
           agent.followUps,
+          talkTime(agent.talkSeconds),
           Object.entries(agent.categories)
             .map(([label, count]) => `${label} ${count}`)
             .join(" | "),
@@ -294,6 +304,7 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                   <th className="py-1.5 pr-3">কল</th>
                   <th className="py-1.5 pr-3">ধরেছে</th>
                   <th className="py-1.5 pr-3">আপডেট</th>
+                  <th className="py-1.5 pr-3">কথা বলার সময়</th>
                   <th className="py-1.5">ক্যাটাগরি</th>
                 </tr>
               </thead>
@@ -311,6 +322,7 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                         </span>
                       ) : null}
                     </td>
+                    <td className="py-1.5 pr-3 tabular">{talkTime(agent.talkSeconds)}</td>
                     <td className="py-1.5 text-xs text-muted-foreground">
                       {Object.entries(agent.categories)
                         .map(([label, count]) => `${label} ${count}`)
@@ -341,7 +353,8 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
               <span className="text-xs text-muted-foreground">{dhaka(row.window_end)}</span>
               <span className="ml-auto text-xs text-muted-foreground">
                 কল {row.totals.called} · সংযুক্ত {row.totals.connected} · আপডেট {row.totals.reports}{" "}
-                · বাকি {row.totals.pending} · ফলো-আপ {row.totals.followUps}
+                · বাকি {row.totals.pending} · ফলো-আপ {row.totals.followUps} · কথা{" "}
+                {talkTime(row.totals.talkSeconds)}
               </span>
               <Button
                 size="sm"
@@ -395,6 +408,7 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                     <th className="py-1.5 pr-3">কল</th>
                     <th className="py-1.5 pr-3">ধরেছে</th>
                     <th className="py-1.5 pr-3">আপডেট</th>
+                    <th className="py-1.5 pr-3">কথা বলার সময়</th>
                     <th className="py-1.5">ক্যাটাগরি</th>
                   </tr>
                 </thead>
@@ -420,6 +434,7 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                           </span>
                         ) : null}
                       </td>
+                      <td className="py-1.5 pr-3 tabular">{talkTime(agent.talkSeconds)}</td>
                       <td className="py-1.5 text-xs text-muted-foreground">
                         {Object.entries(agent.categories)
                           .map(([label, count]) => `${label} ${count}`)
