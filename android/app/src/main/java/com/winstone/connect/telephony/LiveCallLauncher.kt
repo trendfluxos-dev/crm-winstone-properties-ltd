@@ -72,8 +72,8 @@ object LiveCallLauncher {
     ) {
         pendingCall = PendingCall(leadId, phone, agentId, leadName)
 
-        val granted = ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE)
-            == PackageManager.PERMISSION_GRANTED
+        val granted =
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
 
         if (granted) {
             doCall(activity, direct = true)
