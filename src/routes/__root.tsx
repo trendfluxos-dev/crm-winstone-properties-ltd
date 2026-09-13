@@ -78,22 +78,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Tele-Sales CRM OS" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover",
+      },
+      { title: "Winstone CRM" },
       {
         name: "description",
-        content: "Enterprise tele-sales command center with live call intelligence.",
+        content: "উইনস্টোন টিমের কল, লিড ও রিপোর্ট — ফোনের হোম স্ক্রিন থেকেই চলবে।",
       },
-      { property: "og:title", content: "Tele-Sales CRM OS" },
+      { property: "og:title", content: "Winstone CRM" },
       {
         property: "og:description",
-        content: "Enterprise tele-sales command center with live call intelligence.",
+        content: "উইনস্টোন টিমের কল, লিড ও রিপোর্ট — ফোনের হোম স্ক্রিন থেকেই চলবে।",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary" },
+      // Home-screen install (manifest-only; no offline caching).
+      { name: "theme-color", content: "#1f9d55" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "Winstone" },
     ],
     links: [
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -104,7 +113,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/icons/favicon-32.png" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,
