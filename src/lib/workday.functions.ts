@@ -140,8 +140,8 @@ export const recordYearArchive = createServerFn({ method: "POST" })
     );
     if (error) throw new Error(error.message);
 
-    const { writeAudit } = await import("@/lib/audit.server");
-    await writeAudit({
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
       actorProfileId: caller.profile!.id,
       actorLabel: caller.profile!.name,
       action: "year_archive_recorded",

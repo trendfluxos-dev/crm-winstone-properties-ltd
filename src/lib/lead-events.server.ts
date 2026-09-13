@@ -17,7 +17,8 @@ export type LeadEventKind =
   | "outcome_logged"
   | "whatsapp_message"
   | "self_claimed"
-  | "lead_classified";
+  | "lead_classified"
+  | "workday_moved";
 
 export async function logLeadEvent(input: {
   leadId: string | null;
