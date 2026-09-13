@@ -19,12 +19,15 @@ export function RoleGate({
   description,
   icon,
   children,
+  surface = "system",
 }: {
   allow: Scope[];
   title: string;
   description: string;
   icon: ReactNode;
   children: ReactNode;
+  /** Which board is behind this gate — HQ unlocks read-only. */
+  surface?: "hq" | "system";
 }) {
   const { scope, isPending } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
@@ -55,7 +58,7 @@ export function RoleGate({
           </Link>
         </Button>
       </div>
-      <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />
+      <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} surface={surface} />
     </div>
   );
 }
