@@ -172,6 +172,8 @@ export const submitMyReport = createServerFn({ method: "POST" })
       reason: z.string().trim().max(2000).nullable().optional(),
       followUpAt: z.string().nullable().optional(),
       reminderMinutes: z.number().int().min(0).max(1440).default(15),
+      temperature: z.enum(["hot", "warm", "cold"]).nullable().optional(),
+      grade: z.enum(["A", "B", "C", "D"]).nullable().optional(),
       aiDecision: z.enum(["accepted", "edited", "rejected"]).nullable().optional(),
     }).parse(input),
   )
@@ -187,6 +189,8 @@ export const submitMyReport = createServerFn({ method: "POST" })
       reason: data.reason ?? null,
       followUpAt: data.followUpAt ? new Date(data.followUpAt).toISOString() : null,
       reminderMinutes: data.reminderMinutes,
+      temperature: data.temperature ?? null,
+      grade: data.grade ?? null,
       aiDecision: data.aiDecision ?? null,
     });
   });
