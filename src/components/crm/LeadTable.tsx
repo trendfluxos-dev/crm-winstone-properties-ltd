@@ -5,6 +5,7 @@ import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
+import { WebCallButton } from "@/components/crm/WebCallButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

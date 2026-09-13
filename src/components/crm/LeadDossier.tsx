@@ -23,6 +23,7 @@ import { ContactSuppressionNotice } from "@/components/crm/ContactSuppressionNot
 import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { Button } from "@/components/ui/button";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
+import { WebCallButton } from "@/components/crm/WebCallButton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type {
   CallRecording,
