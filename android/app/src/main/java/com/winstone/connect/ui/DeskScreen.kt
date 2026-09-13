@@ -63,12 +63,18 @@ import com.winstone.connect.ui.theme.WinRed
 
 /** Mirrors the web CRM /desk screen: stats, lead queue, call log, device/sync status, AI copilot. */
 @Composable
-fun DeskScreen(activity: Activity, vm: DeskViewModel) {
+fun DeskScreen(
+    activity: Activity,
+    vm: DeskViewModel,
+    reportPending: Boolean = false,
+    onReportSubmitted: () -> Unit = {},
+) {
     val state by vm.state.collectAsStateSafe()
     val snackbar = remember { SnackbarHostState() }
     var tab by remember { mutableStateOf(0) }
     val callScope = rememberCoroutineScope()
     var callBlocked by remember { mutableStateOf<String?>(null) }
+    var showPendingReport by remember { mutableStateOf(false) }
     var showNewLead by remember { mutableStateOf(false) }
     var whatsappLead by remember { mutableStateOf<Lead?>(null) }
     val context = LocalContext.current

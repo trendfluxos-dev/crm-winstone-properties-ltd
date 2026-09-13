@@ -29,6 +29,22 @@ class MainActivity : ComponentActivity() {
                 val vm: DeskViewModel = viewModel { DeskViewModel(application) }
                 val state by vm.state.collectAsStateSafe()
                 val phase by LiveCallLauncher.phase.collectAsStateSafe()
+
+                // Mandatory post-call report gate: even if the app was closed
+                // after the call, the report opens itself on the next launch
+                // and no new call is possible before it is submitted.
+                var pendingReport by androidx.compose.runtime.remember {
+                    androidx.compose.runtime.mutableStateOf(false)
+                }
+                androidx.compose.runtime.LaunchedEffect(phase, state.employeeId) {
+                    if (phase == CallPhase.Idle && !state.employeeId.isNullOrBlank()) {
+                        val body = runCatching {
+                            com.winstone.connect.data.remote.WinstoneApi.pendingReport()
+                        }.getOrNull()
+                        pendingReport = body?.optJSONObject("pending") != null
+                    }
+                }
+
                 if (phase != CallPhase.Idle) {
                     LiveCallScreen(phase = phase)
                 } else if (state.employeeId.isNullOrBlank()) {
@@ -38,7 +54,12 @@ class MainActivity : ComponentActivity() {
                         onSignIn = vm::signIn,
                     )
                 } else {
-                    DeskScreen(activity = this, vm = vm)
+                    DeskScreen(
+                        activity = this,
+                        vm = vm,
+                        reportPending = pendingReport,
+                        onReportSubmitted = { pendingReport = false },
+                    )
                 }
             }
         }
