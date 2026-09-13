@@ -72,21 +72,29 @@ object LiveCallLauncher {
     ) {
         pendingCall = PendingCall(leadId, phone, agentId, leadName)
 
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CALL_PHONE), REQ_CALL)
+        val granted = ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE)
+            == PackageManager.PERMISSION_GRANTED
+
+        if (granted) {
+            doCall(activity, direct = true)
             return
         }
-        doCall(activity)
+
+        // Even without CALL_PHONE we can still open the system dialer so the
+        // agent is never stuck. Ask for the permission at the same time so the
+        // next tap can use ACTION_CALL.
+        doCall(activity, direct = false)
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CALL_PHONE)) {
+            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CALL_PHONE), REQ_CALL)
+        }
     }
 
     /** Called from MainActivity.onRequestPermissionsResult after CALL_PHONE is granted. */
     fun retryPendingCall(activity: Activity) {
-        doCall(activity)
+        doCall(activity, direct = true)
     }
 
-    private fun doCall(activity: Activity) {
+    private fun doCall(activity: Activity, direct: Boolean) {
         val pending = pendingCall ?: return
         pendingCall = null
 
@@ -115,24 +123,26 @@ object LiveCallLauncher {
         setPhase(CallPhase.Dialing)
 
         val dialUri = Uri.parse("tel:$clean")
-        try {
-            activity.startActivity(Intent(Intent.ACTION_CALL, dialUri))
-        } catch (e: Exception) {
-            // If ACTION_CALL is unavailable or permission is still denied, fall back
-            // to the system dialer preview which never needs CALL_PHONE.
+        if (direct) {
             try {
-                activity.startActivity(
-                    Intent(Intent.ACTION_DIAL, dialUri)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                )
-            } catch (_: Exception) {
-                setPhase(CallPhase.Idle)
-                android.widget.Toast.makeText(
-                    activity,
-                    "কোনো ডায়ালার পাওয়া যায়নি",
-                    android.widget.Toast.LENGTH_LONG,
-                ).show()
+                activity.startActivity(Intent(Intent.ACTION_CALL, dialUri))
+                return
+            } catch (e: Exception) {
+                // Fall through to ACTION_DIAL so the agent can still call.
             }
+        }
+        try {
+            activity.startActivity(
+                Intent(Intent.ACTION_DIAL, dialUri)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        } catch (_: Exception) {
+            setPhase(CallPhase.Idle)
+            android.widget.Toast.makeText(
+                activity,
+                "কোনো ডায়ালার পাওয়া যায়নি",
+                android.widget.Toast.LENGTH_LONG,
+            ).show()
         }
     }
 
