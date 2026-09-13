@@ -56,6 +56,9 @@ class CallStateReceiver : BroadcastReceiver() {
                 // is up — we never infer it from the agent pressing CALL.
                 if (outgoing) {
                     reportState(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                } else if (DialerCallTracker.callUid != null) {
+                    // Dialled from the phone's own dialer: outgoing, no lead id yet.
+                    reportDialer(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
                 } else {
                     IncomingCallTracker.ensure(intent.incomingNumber())
                     reportIncoming(app, CallLifecycle.incomingState(CallLifecycle.ANDROID_OFFHOOK, false))
@@ -103,6 +106,14 @@ class CallStateReceiver : BroadcastReceiver() {
                     else CallLifecycle.incomingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
                 if (outgoing) {
                     reportState(app, ended, duration, uploadable)
+                } else if (DialerCallTracker.callUid != null) {
+                    reportDialer(
+                        app,
+                        CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall),
+                        duration,
+                        uploadable,
+                    )
+                    DialerCallTracker.clear()
                 } else {
                     // Callback finished: the CRM resolves or creates the lead from
                     // the caller's number and opens the same mandatory report.
@@ -136,7 +147,7 @@ class CallStateReceiver : BroadcastReceiver() {
             TelephonyManager.EXTRA_STATE_RINGING -> {
                 lastState = state
                 // Only a call the app did not dial is an incoming call.
-                if (!outgoing) {
+                if (!outgoing && DialerCallTracker.callUid == null) {
                     IncomingCallTracker.begin(intent.incomingNumber())
                     reportIncoming(app, CallLifecycle.incomingState(CallLifecycle.ANDROID_RINGING, false))
                 }
@@ -172,6 +183,32 @@ class CallStateReceiver : BroadcastReceiver() {
             durationSeconds = durationSeconds,
             recordingSupported = recordingCaptured,
             recordingNote = RecordingCapabilityCheck.cachedOrNull()?.reason,
+        )
+    }
+
+    /**
+     * Queues one observed state of a call dialled outside the app. The CRM
+     * matches the number to a lead (creating it when new) and opens the same
+     * mandatory report, so work done from the phone dialer is never missing.
+     */
+    private fun reportDialer(
+        app: Context,
+        callState: CallState,
+        durationSeconds: Int = 0,
+        recordingCaptured: Boolean? = null,
+    ) {
+        val wire = callState.wire ?: return
+        val callUid = DialerCallTracker.callUid ?: return
+        val number = DialerCallTracker.number ?: return
+        CallSyncQueue.queueIncomingCall(
+            context = app,
+            callUid = callUid,
+            phoneNumber = number,
+            state = wire,
+            durationSeconds = durationSeconds,
+            recordingSupported = recordingCaptured,
+            recordingNote = RecordingCapabilityCheck.cachedOrNull()?.reason,
+            direction = "outgoing",
         )
     }
 
