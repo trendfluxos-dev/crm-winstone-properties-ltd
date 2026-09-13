@@ -31,7 +31,7 @@ export type AuditAction =
   | "document_summarized"
   | "do_not_contact_added"
   | "do_not_contact_removed"
-  | "ai_voice_settings_updated"
+  
   | "recording_doc_synced"
   | "agent_sim_bound"
   | "recording_backed_up_to_drive"
