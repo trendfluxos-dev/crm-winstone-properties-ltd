@@ -812,6 +812,47 @@ export type Database = {
           },
         ]
       }
+      drive_agent_folders: {
+        Row: {
+          created_at: string
+          folder_id: string
+          folder_name: string
+          id: string
+          last_synced_at: string
+          parent_folder_id: string
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id: string
+          folder_name: string
+          id?: string
+          last_synced_at?: string
+          parent_folder_id: string
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string
+          folder_name?: string
+          id?: string
+          last_synced_at?: string
+          parent_folder_id?: string
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drive_agent_folders_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follow_up_events: {
         Row: {
           agent_id: string | null

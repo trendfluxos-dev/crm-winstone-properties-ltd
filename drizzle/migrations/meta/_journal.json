@@ -169,6 +169,13 @@
       "when": 1789261217272,
       "tag": "0023_lead_owner_column_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789261480277,
+      "tag": "0024_drive_agent_folders",
+      "breakpoints": true
     }
   ]
 }
