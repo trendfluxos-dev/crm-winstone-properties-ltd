@@ -228,12 +228,13 @@ export const updateSupportSettings = createServerFn({ method: "POST" })
     requireWrite(caller);
 
     const { saveSupportSettings } = await import("@/lib/support.server");
-    const { adminToken: _ignored, ...patch } = data;
+    const { adminToken: _ignored, ...rest } = data;
+    const patch = rest as Partial<import("@/lib/support-shared").SupportSettings>;
     const saved = await saveSupportSettings(patch);
 
     const { logAudit } = await import("@/lib/audit.server");
     await logAudit({
-      action: "settings_updated",
+      action: "support_settings_updated",
       entityType: "support_settings",
       entityId: "support",
       actorProfileId: caller.profile?.id ?? null,
