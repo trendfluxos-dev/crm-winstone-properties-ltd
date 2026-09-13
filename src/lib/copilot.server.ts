@@ -1,4 +1,5 @@
 import { buildAgentStats, buildBillingSummary, DEFAULT_RATE_PER_MINUTE } from "@/lib/crm-data";
+import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3-flash";

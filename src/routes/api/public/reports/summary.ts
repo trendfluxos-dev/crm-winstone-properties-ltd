@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import type { CallRecording, Lead, Profile, WhatsappMessage } from "@/lib/crm-data";
 import { buildReport, defaultFilters, isoDay, reportToCsv } from "@/lib/crm-reports";
+import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
 
 /**
  * Custom reports feed for the Winstone Connect Android app.

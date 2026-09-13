@@ -1,5 +1,6 @@
 import { buildAgentStats, type CallRecording, type Lead, type Profile, type WhatsappMessage } from "@/lib/crm-data";
 import { parseConfig, type AppConfig } from "@/lib/crm-config";
+import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.8-flash";
