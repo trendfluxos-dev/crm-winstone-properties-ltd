@@ -242,6 +242,15 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
                 if (reportId == null) "রিপোর্ট তৈরি হচ্ছে…" else "ক্যাটাগরি বেছে নিয়ে জমা দিন — জমা না দিলে পরের কল হবে না",
                 fontSize = 12.sp,
             )
+            if (talkSeconds > 0L) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "এই কলে কথা হয়েছে: ${formatDuration(talkSeconds)}",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             aiSummary?.let {
                 Spacer(Modifier.height(8.dp))
                 Text("AI সারসংক্ষেপ: $it", fontSize = 12.sp)
