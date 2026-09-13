@@ -231,7 +231,7 @@ function ControlBoard() {
         <Leaderboard stats={stats} onSelectAgent={setOpenAgentId} />
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">সর্বশেষ যাচাই হওয়া কথাবার্তা</h2>
+          <h2 className="text-lg font-semibold">সর্বশেষ কথাবার্তার সারসংক্ষেপ</h2>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {calls
               .filter((c) => c.ai_summary)
@@ -245,10 +245,8 @@ function ControlBoard() {
                     onClick={() => lead && setOpenLeadId(lead.id)}
                     className="card-elevated p-4 text-left transition-colors hover:border-primary/40"
                   >
-                    <p className="font-medium">{lead?.name ?? "অজানা লিড"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {agent?.name} · {call.sentiment ?? "রেটিং নেই"}
-                    </p>
+                    <p className="font-medium">{lead?.name ?? "লিড"}</p>
+                    <p className="text-xs text-muted-foreground">{agent?.name}</p>
                     <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
                       {call.ai_summary}
                     </p>
