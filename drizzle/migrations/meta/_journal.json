@@ -148,6 +148,13 @@
       "when": 1789250398716,
       "tag": "0020_agent_sim_binding",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789259306063,
+      "tag": "0021_restrict_pin_hash_to_service_role",
+      "breakpoints": true
     }
   ]
 }

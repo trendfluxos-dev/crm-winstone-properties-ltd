@@ -2,8 +2,9 @@ import { createClient } from "@supabase/supabase-js";
 import { getRequest } from "@tanstack/react-start/server";
 
 import type { Database } from "@/integrations/supabase/types";
+import { PROFILE_SAFE_COLUMNS, type SafeProfile } from "@/lib/profile-columns";
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Profile = SafeProfile;
 export type Scope = "authority" | "coordinator" | "agent" | "none";
 
 export type Caller = {
@@ -68,7 +69,7 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: profile } = await supabaseAdmin
     .from("profiles")
-    .select("*")
+    .select(PROFILE_SAFE_COLUMNS)
     .eq("user_id", userId)
     .maybeSingle();
 

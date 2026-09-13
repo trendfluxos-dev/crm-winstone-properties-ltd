@@ -1,4 +1,5 @@
 import { buildAgentStats, buildBillingSummary, DEFAULT_RATE_PER_MINUTE } from "@/lib/crm-data";
+import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3-flash";
@@ -57,7 +58,7 @@ const TOOLS = [
 async function snapshot() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [profiles, leads, calls, messages] = await Promise.all([
-    supabaseAdmin.from("profiles").select("*").order("name"),
+    supabaseAdmin.from("profiles").select(PROFILE_SAFE_COLUMNS).order("name"),
     supabaseAdmin.from("leads").select("*").order("updated_at", { ascending: false }),
     supabaseAdmin.from("call_recordings").select("*").limit(2000),
     supabaseAdmin.from("whatsapp_interactions").select("*").limit(2000),
