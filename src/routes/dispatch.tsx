@@ -189,7 +189,11 @@ function Dispatcher() {
                 <th className="px-4 py-2 text-left">Agent</th>
                 <th className="px-4 py-2 text-right">Assigned</th>
                 <th className="px-4 py-2 text-right">Pending</th>
+                <th className="px-4 py-2 text-right">Open work</th>
                 <th className="px-4 py-2 text-right">Connected</th>
+                <th className="px-4 py-2 text-right">Hot</th>
+                <th className="px-4 py-2 text-right">Warm</th>
+                <th className="px-4 py-2 text-right">Cold</th>
                 <th className="px-4 py-2 text-right">Talk time</th>
                 <th className="px-4 py-2 text-right">Won</th>
               </tr>
@@ -211,7 +215,11 @@ function Dispatcher() {
                     </td>
                     <td className="tabular px-4 py-2 text-right">{row.assigned}</td>
                     <td className="tabular px-4 py-2 text-right">{pending}</td>
+                    <td className="tabular px-4 py-2 text-right">{row.pendingWork}</td>
                     <td className="tabular px-4 py-2 text-right">{row.connected}</td>
+                    <td className="tabular px-4 py-2 text-right">{row.hot}</td>
+                    <td className="tabular px-4 py-2 text-right">{row.warm}</td>
+                    <td className="tabular px-4 py-2 text-right">{row.cold}</td>
                     <td className="tabular px-4 py-2 text-right">
                       {formatTalkTime(row.talkSeconds)}
                     </td>
