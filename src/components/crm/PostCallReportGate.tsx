@@ -65,6 +65,8 @@ export function PostCallReportGate() {
   const [note, setNote] = useState("");
   const [reason, setReason] = useState("");
   const [when, setWhen] = useState("");
+  const [temperature, setTemperature] = useState<"hot" | "warm" | "cold" | null>(null);
+  const [grade, setGrade] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [aiDecision, setAiDecision] = useState<"accepted" | "edited" | "rejected" | null>(null);
 
   const detail = pending.data;
@@ -77,6 +79,8 @@ export function PostCallReportGate() {
       setNote("");
       setReason("");
       setWhen("");
+      setTemperature(null);
+      setGrade(null);
       setAiDecision(null);
     }
   }, [detail?.report?.id, detail]);
@@ -93,6 +97,8 @@ export function PostCallReportGate() {
           reason: reason.trim() || null,
           followUpAt: when ? new Date(when).toISOString() : null,
           reminderMinutes: 15,
+          temperature,
+          grade,
           aiDecision,
         },
       }),
@@ -108,12 +114,16 @@ export function PostCallReportGate() {
   if (!detail) return null;
 
   const reasonRequired = NEEDS_REASON.has(category);
+  // The customer answered -> classification (Hot/Warm/Cold + A/B/C/D) is what
+  // turns the lead into COMPLETED. Not answered -> the lead goes back to retry.
+  const received = detail.report.connected !== false;
   // Every call: category + summary + note + follow-up date are all mandatory.
   const ready =
     Boolean(category) &&
     summary.trim().length > 1 &&
     note.trim().length > 1 &&
     Boolean(when) &&
+    (!received || (Boolean(temperature) && Boolean(grade))) &&
     (!reasonRequired || reason.trim().length > 1);
 
   const applySuggestion = () => {
