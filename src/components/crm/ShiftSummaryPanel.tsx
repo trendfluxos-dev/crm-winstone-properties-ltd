@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, Download, Loader2, RefreshCw } from "lucide-react";
+import { CalendarClock, Download, ExternalLink, Loader2, RefreshCw, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   backfillShiftSummariesNow,
   generateShiftSummaryNow,
   liveShiftSheetNow,
+  exportShiftSummaryToDrive,
   shiftSummaries,
 } from "@/lib/shift-summary.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,6 +131,17 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
     queryKey: ["shift-summaries", scope],
     queryFn: () => load({ data: { adminToken: adminToken ?? null, scope } }),
     refetchInterval: 120_000,
+  });
+
+  const driveLinks = list.data?.driveLinks ?? {};
+  const toDrive = useServerFn(exportShiftSummaryToDrive);
+  const pushDrive = useMutation({
+    mutationFn: (shiftKey: string) => toDrive({ data: { adminToken: adminToken ?? null, shiftKey } }),
+    onSuccess: () => {
+      toast.success("Drive ফোল্ডারে জমা হয়েছে");
+      void queryClient.invalidateQueries({ queryKey: ["shift-summaries"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const fill = useMutation({
@@ -291,6 +303,28 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                 <Download className="size-3" />
                 CSV
               </Button>
+              {driveLinks[row.shift_key] ? (
+                <a
+                  href={driveLinks[row.shift_key]}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs text-primary hover:underline"
+                >
+                  <ExternalLink className="size-3" />
+                  Drive
+                </a>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 gap-1 px-2 text-xs"
+                  disabled={pushDrive.isPending}
+                  onClick={() => pushDrive.mutate(row.shift_key)}
+                >
+                  <UploadCloud className="size-3" />
+                  Drive-এ জমা দিন
+                </Button>
+              )}
             </div>
 
             <div className="mt-2 overflow-x-auto">
