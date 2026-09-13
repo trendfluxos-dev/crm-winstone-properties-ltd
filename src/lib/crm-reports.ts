@@ -280,7 +280,14 @@ export function reportToCsv(report: ReportResult): string {
   blocks.push(
     toCsv(
       ["Date", "Dials", "Connected", "Talk minutes", "WhatsApp", "New leads"],
-      report.daily.map((d) => [d.date, d.dials, d.connected, d.talkMinutes, d.whatsapp, d.newLeads]),
+      report.daily.map((d) => [
+        d.date,
+        d.dials,
+        d.connected,
+        d.talkMinutes,
+        d.whatsapp,
+        d.newLeads,
+      ]),
     ),
   );
   blocks.push(

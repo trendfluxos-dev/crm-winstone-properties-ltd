@@ -40,7 +40,10 @@ Rules:
 function stripFence(text: string): string {
   const trimmed = text.trim();
   if (!trimmed.startsWith("```")) return trimmed;
-  return trimmed.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "").trim();
+  return trimmed
+    .replace(/^```[a-zA-Z]*\n?/, "")
+    .replace(/```$/, "")
+    .trim();
 }
 
 /** Loads the active agent roster so the AI can match names accurately. */
@@ -53,7 +56,9 @@ async function activeAgentNames() {
     .eq("is_active", true)
     .order("name");
   if (error) throw new Error(error.message);
-  return (data ?? []).map((p) => `${p.name}${p.employee_id ? ` (${p.employee_id})` : ""}`).join("\n");
+  return (data ?? [])
+    .map((p) => `${p.name}${p.employee_id ? ` (${p.employee_id})` : ""}`)
+    .join("\n");
 }
 
 /** Reads a doc/xlsx/pdf/image/text upload and returns a decorated summary grouped by agent name. */
@@ -89,15 +94,16 @@ export const summarizeDocument = createServerFn({ method: "POST" })
     } else if (isPdf) {
       content.push({
         type: "file",
-        file: { filename: data.fileName, file_data: `data:application/pdf;base64,${data.dataBase64}` },
+        file: {
+          filename: data.fileName,
+          file_data: `data:application/pdf;base64,${data.dataBase64}`,
+        },
       });
     } else if (isOffice) {
       const { extractOfficeText } = await import("@/lib/office-text.server");
       const text = await extractOfficeText(bytes.buffer as ArrayBuffer);
       if (!text) {
-        throw new Error(
-          "এই ফাইলটি পড়া যায়নি — একটি CSV, PDF বা ছবি দিলে সহজে পড়া যাবে",
-        );
+        throw new Error("এই ফাইলটি পড়া যায়নি — একটি CSV, PDF বা ছবি দিলে সহজে পড়া যাবে");
       }
       content.push({ type: "text", text: `Document text:\n${text.slice(0, 60_000)}` });
     } else {
@@ -123,8 +129,10 @@ export const summarizeDocument = createServerFn({ method: "POST" })
 
     if (!response.ok) {
       const detail = await response.text();
-      if (response.status === 429) throw new Error("এখন অনেক অনুরোধ চলছে — একটু পরে আবার চেষ্টা করুন");
-      if (response.status === 402) throw new Error("AI ক্রেডিট শেষ — মালিককে ক্রেডিট যোগ করতে বলুন");
+      if (response.status === 429)
+        throw new Error("এখন অনেক অনুরোধ চলছে — একটু পরে আবার চেষ্টা করুন");
+      if (response.status === 402)
+        throw new Error("AI ক্রেডিট শেষ — মালিককে ক্রেডিট যোগ করতে বলুন");
       if (response.status === 403) throw new Error("এই কাজের জন্য AI এখন বন্ধ আছে");
       throw new Error(`সারসংক্ষেপ তৈরি করা গেল না (${response.status}): ${detail.slice(0, 200)}`);
     }

@@ -101,17 +101,24 @@ export const recordingPipeline = createServerFn({ method: "POST" })
       ids.length
         ? supabaseAdmin
             .from("recording_drive_backups")
-            .select("call_recording_id, status, drive_file_id, drive_file_name, drive_file_url, error_message, updated_at")
+            .select(
+              "call_recording_id, status, drive_file_id, drive_file_name, drive_file_url, error_message, updated_at",
+            )
             .in("call_recording_id", ids)
         : Promise.resolve({ data: [] as never[] }),
       ids.length
         ? supabaseAdmin
             .from("call_reports")
-            .select("id, recording_id, lead_id, status, category, temperature, grade, submitted_at, updated_at")
+            .select(
+              "id, recording_id, lead_id, status, category, temperature, grade, submitted_at, updated_at",
+            )
             .in("recording_id", ids)
         : Promise.resolve({ data: [] as never[] }),
       leadIds.length
-        ? supabaseAdmin.from("leads").select("id, name, work_state, temperature, grade").in("id", leadIds)
+        ? supabaseAdmin
+            .from("leads")
+            .select("id, name, work_state, temperature, grade")
+            .in("id", leadIds)
         : Promise.resolve({ data: [] as never[] }),
       agentIds.length
         ? supabaseAdmin.from("profiles").select("id, name").in("id", agentIds)
@@ -126,7 +133,7 @@ export const recordingPipeline = createServerFn({ method: "POST" })
     const built: PipelineRow[] = rows.map((r) => {
       const backup = backupBy.get(r.id) ?? null;
       const report = reportBy.get(r.id) ?? null;
-      const lead = r.lead_id ? leadBy.get(r.lead_id) ?? null : null;
+      const lead = r.lead_id ? (leadBy.get(r.lead_id) ?? null) : null;
 
       // 1. Call lifecycle — from the timestamps the phone actually reported.
       const callState: StageState = r.finished_at
@@ -161,16 +168,15 @@ export const recordingPipeline = createServerFn({ method: "POST" })
                 : "skipped";
 
       // 5. Transcription.
-      const sttState: StageState =
-        r.transcription_text
-          ? "success"
-          : r.stt_status === "failed"
-            ? "failed"
-            : r.analysis_status === "processing"
-              ? "processing"
-              : r.storage_path
-                ? "pending"
-                : "skipped";
+      const sttState: StageState = r.transcription_text
+        ? "success"
+        : r.stt_status === "failed"
+          ? "failed"
+          : r.analysis_status === "processing"
+            ? "processing"
+            : r.storage_path
+              ? "pending"
+              : "skipped";
 
       // 6. AI analysis.
       const aiState: StageState =
@@ -201,18 +207,28 @@ export const recordingPipeline = createServerFn({ method: "POST" })
           r.finished_at,
           `${r.duration_seconds ?? 0} সেকেন্ড`,
         ),
-        stage("supabase", "সার্ভার", supabaseState, r.created_at, r.storage_path ? "জমা হয়েছে" : null),
+        stage(
+          "supabase",
+          "সার্ভার",
+          supabaseState,
+          r.created_at,
+          r.storage_path ? "জমা হয়েছে" : null,
+        ),
         stage(
           "drive",
           "Drive",
           driveState,
           backup?.updated_at ?? null,
-          backup?.status === "failed"
-            ? backup.error_message
-            : backup?.drive_file_name ?? null,
+          backup?.status === "failed" ? backup.error_message : (backup?.drive_file_name ?? null),
         ),
         stage("stt", "ট্রান্সক্রিপ্ট", sttState, r.created_at, r.stt_error_message),
-        stage("ai", "এআই সারসংক্ষেপ", aiState, r.created_at, r.analysis_error ?? r.ai_lead_category),
+        stage(
+          "ai",
+          "এআই সারসংক্ষেপ",
+          aiState,
+          r.created_at,
+          r.analysis_error ?? r.ai_lead_category,
+        ),
         stage(
           "crm",
           "শ্রেণিবিন্যাস",
@@ -244,7 +260,7 @@ export const recordingPipeline = createServerFn({ method: "POST" })
         leadId: r.lead_id,
         leadName: lead?.name ?? null,
         agentId: r.agent_id,
-        agentName: r.agent_id ? agentBy.get(r.agent_id)?.name ?? null : null,
+        agentName: r.agent_id ? (agentBy.get(r.agent_id)?.name ?? null) : null,
         phone: r.phone_number,
         durationSeconds: r.duration_seconds ?? 0,
         startedAt: r.started_at,
@@ -386,7 +402,10 @@ export const verifyDriveBackups = createServerFn({ method: "POST" })
       if (ok) verified += 1;
       else {
         missing += 1;
-        failures.push({ recordingId: row.call_recording_id ?? row.id, fileName: row.drive_file_name });
+        failures.push({
+          recordingId: row.call_recording_id ?? row.id,
+          fileName: row.drive_file_name,
+        });
       }
       await supabaseAdmin
         .from("recording_drive_backups")
@@ -422,5 +441,12 @@ export const verifyDriveBackups = createServerFn({ method: "POST" })
         .eq("id", doc.id);
     }
 
-    return { checked: backups?.length ?? 0, verified, missing, failures, docsVerified, docsMissing };
+    return {
+      checked: backups?.length ?? 0,
+      verified,
+      missing,
+      failures,
+      docsVerified,
+      docsMissing,
+    };
   });

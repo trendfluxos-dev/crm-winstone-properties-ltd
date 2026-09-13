@@ -19,8 +19,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Winstone Connect — Tele-Sales Entry Hall" },
       {
         property: "og:description",
-        content:
-          "Four ways in: Sales Agent desk, Coordinator Deck, Executive HQ and IT Console.",
+        content: "Four ways in: Sales Agent desk, Coordinator Deck, Executive HQ and IT Console.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -66,12 +65,16 @@ function EntryHall() {
             description="Your own lead queue, call log, WhatsApp threads and AI coaching."
             primary={
               <Button asChild className="flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signin" }}>Sign in</Link>
+                <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
+                  Sign in
+                </Link>
               </Button>
             }
             secondary={
               <Button asChild variant="secondary" className="flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signup" }}>Create account</Link>
+                <Link to="/auth" search={{ role: "agent", mode: "signup" }}>
+                  Create account
+                </Link>
               </Button>
             }
           />
@@ -82,12 +85,16 @@ function EntryHall() {
             description="Assign and balance leads, import lists and watch the whole floor queue."
             primary={
               <Button asChild className="flex-1">
-                <Link to="/auth" search={{ role: "coordinator", mode: "signin" }}>Sign in</Link>
+                <Link to="/auth" search={{ role: "coordinator", mode: "signin" }}>
+                  Sign in
+                </Link>
               </Button>
             }
             secondary={
               <Button asChild variant="secondary" className="flex-1">
-                <Link to="/auth" search={{ role: "coordinator", mode: "signup" }}>Create account</Link>
+                <Link to="/auth" search={{ role: "coordinator", mode: "signup" }}>
+                  Create account
+                </Link>
               </Button>
             }
           />
@@ -128,11 +135,18 @@ function EntryHall() {
           <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
           <p className="mt-1">Developed &amp; Powered by Zahid Hasan Emon.</p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+            <Link to="/privacy" className="hover:text-foreground">
+              Privacy Policy
+            </Link>
             <span className="hidden sm:inline">·</span>
-            <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
+            <Link to="/terms" className="hover:text-foreground">
+              Terms of Service
+            </Link>
             <span className="hidden sm:inline">·</span>
-            <Link to="/voice-transcription" className="inline-flex items-center gap-1 hover:text-foreground">
+            <Link
+              to="/voice-transcription"
+              className="inline-flex items-center gap-1 hover:text-foreground"
+            >
               <Mic className="size-3" /> Voice Transcription
             </Link>
           </div>

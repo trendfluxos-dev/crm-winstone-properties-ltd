@@ -14,7 +14,10 @@ import {
 } from "@/lib/pipeline.functions";
 import { useAdminToken } from "@/lib/local-session";
 
-const FILTERS: { key: Parameters<typeof recordingPipeline>[0] extends never ? string : string; label: string }[] = [
+const FILTERS: {
+  key: Parameters<typeof recordingPipeline>[0] extends never ? string : string;
+  label: string;
+}[] = [
   { key: "all", label: "সব" },
   { key: "failed", label: "ব্যর্থ" },
   { key: "retry", label: "রিট্রাই" },
@@ -113,8 +116,8 @@ export function RecordingPipelinePanel() {
             <ListChecks className="size-4 text-primary" /> রেকর্ডিং পাইপলাইন ও রিট্রাই কিউ
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            কল → রেকর্ডিং → সার্ভার → Drive → ট্রান্সক্রিপ্ট → এআই → শ্রেণিবিন্যাস। প্রতিটি ধাপ ডেটাবেসের
-            প্রকৃত অবস্থা থেকে আসে।
+            কল → রেকর্ডিং → সার্ভার → Drive → ট্রান্সক্রিপ্ট → এআই → শ্রেণিবিন্যাস। প্রতিটি ধাপ
+            ডেটাবেসের প্রকৃত অবস্থা থেকে আসে।
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -124,10 +127,15 @@ export function RecordingPipelinePanel() {
             onClick={() => void pipeline.refetch()}
             disabled={pipeline.isFetching}
           >
-            <RefreshCw className={`size-3.5 ${pipeline.isFetching ? "animate-spin" : ""}`} /> রিফ্রেশ
+            <RefreshCw className={`size-3.5 ${pipeline.isFetching ? "animate-spin" : ""}`} />{" "}
+            রিফ্রেশ
           </Button>
           <Button size="sm" onClick={() => verify.mutate()} disabled={verify.isPending}>
-            {verify.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <CloudCheck className="size-3.5" />}{" "}
+            {verify.isPending ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <CloudCheck className="size-3.5" />
+            )}{" "}
             Drive ফাইল যাচাই
           </Button>
         </div>
@@ -160,7 +168,9 @@ export function RecordingPipelinePanel() {
             type="button"
             onClick={() => setFilter(f.key)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-              filter === f.key ? "bg-primary text-primary-foreground" : "bg-surface-2 text-muted-foreground"
+              filter === f.key
+                ? "bg-primary text-primary-foreground"
+                : "bg-surface-2 text-muted-foreground"
             }`}
           >
             {f.label}
@@ -180,7 +190,9 @@ export function RecordingPipelinePanel() {
         {rows.map((row) => {
           const driveFailed = row.stages.find((s) => s.key === "drive")?.state === "failed";
           const aiStuck = row.stages.some(
-            (s) => (s.key === "stt" || s.key === "ai") && (s.state === "failed" || s.state === "pending"),
+            (s) =>
+              (s.key === "stt" || s.key === "ai") &&
+              (s.state === "failed" || s.state === "pending"),
           );
           return (
             <div key={row.recordingId} className="rounded-xl border border-border/60 p-3">
@@ -214,12 +226,16 @@ export function RecordingPipelinePanel() {
                   <div key={s.key} className="rounded-lg bg-surface-2 px-2.5 py-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-medium">{s.label}</span>
-                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${stateClass(s.state)}`}>
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${stateClass(s.state)}`}
+                      >
                         {STATE_LABEL[s.state]}
                       </span>
                     </div>
                     {s.detail && (
-                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{s.detail}</p>
+                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                        {s.detail}
+                      </p>
                     )}
                   </div>
                 ))}

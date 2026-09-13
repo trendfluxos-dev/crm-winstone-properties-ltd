@@ -46,7 +46,9 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
       });
       // Paddle fires no promise on completion — refresh the licence shortly after opening.
       setTimeout(() => queryClient.invalidateQueries({ queryKey: ["license"] }), 20_000);
-      toast.info(isSandbox ? "Test checkout opened — no real money moves." : "Secure checkout opened");
+      toast.info(
+        isSandbox ? "Test checkout opened — no real money moves." : "Secure checkout opened",
+      );
     } catch (error) {
       toast.error("Could not open checkout", {
         description: error instanceof Error ? error.message : undefined,
@@ -77,7 +79,9 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
   };
 
   const lic = license.data;
-  const periodEnd = lic?.currentPeriodEnd ? new Date(lic.currentPeriodEnd).toLocaleDateString() : null;
+  const periodEnd = lic?.currentPeriodEnd
+    ? new Date(lic.currentPeriodEnd).toLocaleDateString()
+    : null;
 
   return (
     <div className="card-elevated p-4 sm:p-5">
@@ -93,8 +97,8 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
           </p>
           {!compact && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Full CRM per agent seat: lead workspace, call &amp; WhatsApp logs, AI Copilot, AI Coach and
-              realtime analytics.
+              Full CRM per agent seat: lead workspace, call &amp; WhatsApp logs, AI Copilot, AI
+              Coach and realtime analytics.
             </p>
           )}
         </div>
@@ -119,7 +123,13 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
             </span>
           )}
           {adminToken && (
-            <Button size="sm" variant="outline" className="ml-auto h-8 gap-1.5" onClick={manageBilling} disabled={busy}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto h-8 gap-1.5"
+              onClick={manageBilling}
+              disabled={busy}
+            >
               <Settings2 className="size-3.5" /> Manage billing
             </Button>
           )}
@@ -136,7 +146,9 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
             >
               <Minus className="size-3.5" />
             </button>
-            <span className="min-w-14 text-center text-sm font-semibold tabular">{seats} seats</span>
+            <span className="min-w-14 text-center text-sm font-semibold tabular">
+              {seats} seats
+            </span>
             <button
               type="button"
               aria-label="More seats"
@@ -147,7 +159,11 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
               <Plus className="size-3.5" />
             </button>
           </div>
-          <Button className="h-9 gap-1.5 rounded-full px-5 font-semibold" onClick={startCheckout} disabled={busy}>
+          <Button
+            className="h-9 gap-1.5 rounded-full px-5 font-semibold"
+            onClick={startCheckout}
+            disabled={busy}
+          >
             {busy ? <Loader2 className="size-4 animate-spin" /> : <CreditCard className="size-4" />}
             Subscribe — ${29 * seats}/mo
           </Button>

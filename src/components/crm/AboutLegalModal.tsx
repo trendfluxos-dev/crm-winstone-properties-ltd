@@ -42,8 +42,8 @@ export function AboutLegalModal() {
           </p>
 
           <p className="text-muted-foreground">
-            Unauthorized copying, distribution, modification, reverse engineering, or commercial
-            use without express written permission is strictly prohibited.
+            Unauthorized copying, distribution, modification, reverse engineering, or commercial use
+            without express written permission is strictly prohibited.
           </p>
 
           <p className="text-xs text-muted-foreground">

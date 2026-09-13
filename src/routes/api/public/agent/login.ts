@@ -47,7 +47,6 @@ async function resolveLoginEmail(raw: string): Promise<string | null> {
   return match?.email ?? null;
 }
 
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -100,7 +99,6 @@ export const Route = createFileRoute("/api/public/agent/login")({
           return json({ error: "লগইন তথ্য মিলছে না" }, 401);
         }
 
-
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: profile } = await supabaseAdmin
           .from("profiles")
@@ -109,7 +107,10 @@ export const Route = createFileRoute("/api/public/agent/login")({
           .maybeSingle();
 
         if (!profile) {
-          return json({ error: "এই অ্যাকাউন্টের ডেস্ক প্রোফাইল তৈরি হয়নি — CRM এ একবার সাইন ইন করুন" }, 403);
+          return json(
+            { error: "এই অ্যাকাউন্টের ডেস্ক প্রোফাইল তৈরি হয়নি — CRM এ একবার সাইন ইন করুন" },
+            403,
+          );
         }
         if (profile.approval_status !== "approved" || !profile.is_active) {
           return json({ error: "অ্যাকাউন্ট এখনও অনুমোদনের অপেক্ষায় আছে" }, 403);
@@ -120,7 +121,10 @@ export const Route = createFileRoute("/api/public/agent/login")({
         let employeeId = profile.employee_id;
         if (!employeeId) {
           employeeId = `WIN${String(Date.now()).slice(-6)}`;
-          await supabaseAdmin.from("profiles").update({ employee_id: employeeId }).eq("id", profile.id);
+          await supabaseAdmin
+            .from("profiles")
+            .update({ employee_id: employeeId })
+            .eq("id", profile.id);
         }
 
         // A SIM already bound to another desk is refused before any token is
@@ -145,7 +149,11 @@ export const Route = createFileRoute("/api/public/agent/login")({
           phoneNumber: "sim" in preCheck ? preCheck.sim : null,
         });
         if ("sim" in preCheck && preCheck.sim) {
-          await bindAgentSim({ profileId: profile.id, sim: preCheck.sim, deviceId: device.deviceId });
+          await bindAgentSim({
+            profileId: profile.id,
+            sim: preCheck.sim,
+            deviceId: device.deviceId,
+          });
         }
 
         return json({

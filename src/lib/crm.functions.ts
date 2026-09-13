@@ -57,7 +57,9 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       return {
         profiles: (profiles.data ?? []).filter((p) => p.id === me),
         leads: myLeads,
-        calls: (calls.data ?? []).filter((c) => c.agent_id === me || (c.lead_id && myLeadIds.has(c.lead_id))),
+        calls: (calls.data ?? []).filter(
+          (c) => c.agent_id === me || (c.lead_id && myLeadIds.has(c.lead_id)),
+        ),
         messages: (messages.data ?? []).filter(
           (m) => m.agent_id === me || (m.lead_id && myLeadIds.has(m.lead_id)),
         ),
@@ -165,7 +167,10 @@ export const autoDistributeLeads = createServerFn({ method: "POST" })
       leads.map((lead, index) =>
         supabaseAdmin
           .from("leads")
-          .update({ assigned_to: agents[index % agents.length]!.id, assignment_source: "coordinator" })
+          .update({
+            assigned_to: agents[index % agents.length]!.id,
+            assignment_source: "coordinator",
+          })
           .eq("id", lead.id),
       ),
     );

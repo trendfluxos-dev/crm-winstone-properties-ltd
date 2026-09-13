@@ -89,7 +89,6 @@ export function DayCallExportPanel() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-
   const build = useMutation({
     mutationFn: () => run({ data: { adminToken: getAdminToken(), dateKey } }),
     onSuccess: (data) => {
@@ -105,7 +104,9 @@ export function DayCallExportPanel() {
       link.download = `winstone-calls-${data.dateKey}.csv`;
       link.click();
       URL.revokeObjectURL(url);
-      toast.success(`${data.calls.length}টি কল · ${data.totals.recordings}টি রেকর্ডিং লিংক নামানো হয়েছে`);
+      toast.success(
+        `${data.calls.length}টি কল · ${data.totals.recordings}টি রেকর্ডিং লিংক নামানো হয়েছে`,
+      );
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -123,7 +124,11 @@ export function DayCallExportPanel() {
           className="ml-auto rounded-lg border border-border bg-surface px-2 py-1 text-xs"
         />
         <Button size="sm" disabled={build.isPending} onClick={() => build.mutate()}>
-          {build.isPending ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+          {build.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Download className="size-4" />
+          )}
           সামারি ও রেকর্ডিং
         </Button>
         <Button
@@ -132,15 +137,19 @@ export function DayCallExportPanel() {
           disabled={toDoc.isPending}
           onClick={() => toDoc.mutate()}
         >
-          {toDoc.isPending ? <Loader2 className="size-4 animate-spin" /> : <FileText className="size-4" />}
+          {toDoc.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <FileText className="size-4" />
+          )}
           Google Doc
         </Button>
       </header>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        ওই দিনের প্রতিটি কল, সঠিক সংখ্যা ও কথার সময়, আর প্রতিটি রেকর্ডিংয়ের ৬ ঘণ্টার জন্য সাইন করা শোনার লিংক
-        একটি ফাইলে নামে। যে কলের অডিও জমা নেই, সেখানে লিংকের বদলে আসল অবস্থাই লেখা থাকে। Google Doc-এ প্রতিদিনের
-        তালিকা যায় — ফাইলের নাম: তারিখ_এজেন্ট_লিড_নম্বর_কল-নম্বর।
+        ওই দিনের প্রতিটি কল, সঠিক সংখ্যা ও কথার সময়, আর প্রতিটি রেকর্ডিংয়ের ৬ ঘণ্টার জন্য সাইন করা
+        শোনার লিংক একটি ফাইলে নামে। যে কলের অডিও জমা নেই, সেখানে লিংকের বদলে আসল অবস্থাই লেখা থাকে।
+        Google Doc-এ প্রতিদিনের তালিকা যায় — ফাইলের নাম: তারিখ_এজেন্ট_লিড_নম্বর_কল-নম্বর।
       </p>
 
       {docLink && (
@@ -156,7 +165,11 @@ export function DayCallExportPanel() {
 
       {result && (
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          <Tile label="মোট কল" value={String(result.totals.calls)} hint={`${result.totals.connected}টিতে কথা হয়েছে`} />
+          <Tile
+            label="মোট কল"
+            value={String(result.totals.calls)}
+            hint={`${result.totals.connected}টিতে কথা হয়েছে`}
+          />
           <Tile label="মোট কথার সময়" value={result.totals.talkLabel} hint="ঘণ্টা:মিনিট:সেকেন্ড" />
           <Tile
             label="রেকর্ডিং"
@@ -212,7 +225,9 @@ export function DayCallExportPanel() {
 function Tile({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
       <p className="tabular mt-1 text-xl font-bold">{value}</p>
       <p className="text-xs text-muted-foreground">{hint}</p>
     </div>

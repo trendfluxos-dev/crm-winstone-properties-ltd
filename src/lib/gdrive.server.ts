@@ -128,7 +128,11 @@ export async function renameDriveFile(fileId: string, name: string) {
 }
 
 /** Move a Drive file or folder under a new parent (id and contents stay). */
-export async function moveDriveFile(fileId: string, addParentId: string, removeParentId?: string | null) {
+export async function moveDriveFile(
+  fileId: string,
+  addParentId: string,
+  removeParentId?: string | null,
+) {
   const params = new URLSearchParams({ addParents: addParentId, fields: "id,parents" });
   if (removeParentId) params.set("removeParents", removeParentId);
   const updated = await driveFetch<{ id: string; parents?: string[] }>(
@@ -156,9 +160,13 @@ export async function driveFolderExists(folderId: string): Promise<boolean> {
  * the file (deleted, wrong id, or no access) so callers can report
  * DRIVE_VERIFICATION_FAILED instead of trusting a database flag.
  */
-export async function driveFileMeta(fileId: string): Promise<
-  { id: string; name: string; size: number | null; trashed: boolean; webViewLink: string | null } | null
-> {
+export async function driveFileMeta(fileId: string): Promise<{
+  id: string;
+  name: string;
+  size: number | null;
+  trashed: boolean;
+  webViewLink: string | null;
+} | null> {
   try {
     const meta = await driveFetch<{
       id?: string;

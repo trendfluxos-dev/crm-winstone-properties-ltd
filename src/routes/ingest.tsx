@@ -195,7 +195,8 @@ function IngestBoard() {
         <div className="card-elevated space-y-3 p-4">
           <h2 className="text-sm font-semibold">Payload tester</h2>
           <p className="text-xs text-muted-foreground">
-            Paste what the phone app sends. Nothing is saved — it only reports what would be rejected.
+            Paste what the phone app sends. Nothing is saved — it only reports what would be
+            rejected.
           </p>
           <div>
             <Label className="text-xs text-muted-foreground">Endpoint</Label>
@@ -226,13 +227,18 @@ function IngestBoard() {
           <Button onClick={() => check.mutate()} disabled={check.isPending}>
             {check.isPending ? "Checking…" : "Validate payload"}
           </Button>
-          {check.isError && <p className="text-sm text-destructive">{(check.error as Error).message}</p>}
+          {check.isError && (
+            <p className="text-sm text-destructive">{(check.error as Error).message}</p>
+          )}
           {result && result.ok && (
             <div className="rounded-lg border border-live/40 bg-live/10 p-3 text-sm">
               <p className="flex items-center gap-2 font-medium">
-                <CheckCircle2 className="size-4 text-live" /> Accepted — this payload would be stored.
+                <CheckCircle2 className="size-4 text-live" /> Accepted — this payload would be
+                stored.
               </p>
-              <pre className="mt-2 overflow-x-auto text-xs text-muted-foreground">{result.normalized}</pre>
+              <pre className="mt-2 overflow-x-auto text-xs text-muted-foreground">
+                {result.normalized}
+              </pre>
             </div>
           )}
           {result && !result.ok && (

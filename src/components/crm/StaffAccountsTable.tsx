@@ -20,7 +20,13 @@ import {
 } from "@/lib/accounts.functions";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
-type Draft = { name: string; employeeId: string; phone: string; password: string; role: "agent" | "coordinator" };
+type Draft = {
+  name: string;
+  employeeId: string;
+  phone: string;
+  password: string;
+  role: "agent" | "coordinator";
+};
 
 const EMPTY: Draft = { name: "", employeeId: "", phone: "", password: "", role: "agent" };
 
@@ -32,7 +38,12 @@ export function StaffAccountsTable() {
   const update = useServerFn(updateStaffAccount);
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [editing, setEditing] = useState<string | null>(null);
-  const [edit, setEdit] = useState<{ name: string; employeeId: string; phone: string; password: string }>({
+  const [edit, setEdit] = useState<{
+    name: string;
+    employeeId: string;
+    phone: string;
+    password: string;
+  }>({
     name: "",
     employeeId: "",
     phone: "",
@@ -139,10 +150,20 @@ export function StaffAccountsTable() {
           </Select>
           <Button
             className="flex-1"
-            disabled={add.isPending || !draft.name || !draft.employeeId || !draft.phone || draft.password.length < 6}
+            disabled={
+              add.isPending ||
+              !draft.name ||
+              !draft.employeeId ||
+              !draft.phone ||
+              draft.password.length < 6
+            }
             onClick={() => add.mutate()}
           >
-            {add.isPending ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+            {add.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <UserPlus className="size-4" />
+            )}
             খুলুন
           </Button>
         </div>
@@ -184,7 +205,7 @@ export function StaffAccountsTable() {
                         onChange={(e) => setEdit((s) => ({ ...s, employeeId: e.target.value }))}
                       />
                     ) : (
-                      row.employee_id ?? "—"
+                      (row.employee_id ?? "—")
                     )}
                   </td>
                   <td className="py-2 pr-3 tabular">
@@ -195,7 +216,7 @@ export function StaffAccountsTable() {
                         onChange={(e) => setEdit((s) => ({ ...s, phone: e.target.value }))}
                       />
                     ) : (
-                      row.phone ?? "—"
+                      (row.phone ?? "—")
                     )}
                   </td>
                   <td className="py-2 pr-3">
@@ -217,7 +238,11 @@ export function StaffAccountsTable() {
                       </span>
                       {isEditing ? (
                         <>
-                          <Button size="sm" disabled={save.isPending} onClick={() => save.mutate(row.id)}>
+                          <Button
+                            size="sm"
+                            disabled={save.isPending}
+                            onClick={() => save.mutate(row.id)}
+                          >
                             সেভ
                           </Button>
                           <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>
@@ -240,7 +265,9 @@ export function StaffAccountsTable() {
                             size="sm"
                             variant="ghost"
                             disabled={toggle.isPending}
-                            onClick={() => toggle.mutate({ profileId: row.id, isActive: !row.is_active })}
+                            onClick={() =>
+                              toggle.mutate({ profileId: row.id, isActive: !row.is_active })
+                            }
                           >
                             {row.is_active ? "বন্ধ করুন" : "চালু করুন"}
                           </Button>

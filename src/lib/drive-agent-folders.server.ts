@@ -39,7 +39,10 @@ async function adminClient() {
 }
 
 function clean(value: string) {
-  return value.replace(/[\\/:*?"<>|\r\n\t]+/g, " ").replace(/\s+/g, " ").trim();
+  return value
+    .replace(/[\\/:*?"<>|\r\n\t]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** Stable, human-readable folder name for one agent. */
@@ -146,7 +149,9 @@ export async function syncAgentDriveFolders(parentFolderId: string) {
     try {
       results.push(await resolveAgentDriveFolder(agent, parentFolderId));
     } catch (err) {
-      failures.push(`${agent.name ?? agent.id}: ${err instanceof Error ? err.message : String(err)}`);
+      failures.push(
+        `${agent.name ?? agent.id}: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

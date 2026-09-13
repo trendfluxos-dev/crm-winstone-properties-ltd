@@ -15,7 +15,11 @@ export const RecordingPayload = z.object({
   agent_id: z.string().uuid().nullable().optional(),
   audio_base64: z.string().min(1, "Recording audio is missing"),
   file_extension: z.enum(["mp3", "m4a", "aac", "wav", "ogg", "amr"]).default("mp3"),
-  duration_seconds: z.number().int().min(0).max(60 * 60 * 4),
+  duration_seconds: z
+    .number()
+    .int()
+    .min(0)
+    .max(60 * 60 * 4),
   call_direction: z.enum(["outgoing", "incoming_callback"]).default("outgoing"),
   is_two_sided: z.boolean().default(true),
 });
@@ -126,9 +130,14 @@ export function validatePayload(
       });
     }
     if (kind === "message" && !data["message_content"] && !data["media_url"]) {
-      issues.push({ field: "message_content", message: "Message text or a media link is required" });
+      issues.push({
+        field: "message_content",
+        message: "Message text or a media link is required",
+      });
     }
-    return issues.length ? { ok: false, issues } : { ok: true, issues: [], normalized: result.data };
+    return issues.length
+      ? { ok: false, issues }
+      : { ok: true, issues: [], normalized: result.data };
   }
   return {
     ok: false,

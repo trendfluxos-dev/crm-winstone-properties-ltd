@@ -7,11 +7,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
  */
 
 export type AiUsageCategory =
-  | "command_agent"
-  | "transcription"
-  | "analysis"
-  | "doc_summary"
-  | "other";
+  "command_agent" | "transcription" | "analysis" | "doc_summary" | "other";
 
 /** Flat per-call estimates in Lovable credits, agreed with the bill report. */
 export const AI_USAGE_RATES: Record<AiUsageCategory, number> = {

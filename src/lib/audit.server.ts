@@ -31,7 +31,6 @@ export type AuditAction =
   | "document_summarized"
   | "do_not_contact_added"
   | "do_not_contact_removed"
-  
   | "recording_doc_synced"
   | "agent_sim_bound"
   | "recording_backed_up_to_drive"
@@ -41,7 +40,8 @@ export type AuditAction =
   | "drive_settings_updated"
   | "pipeline_retry"
   | "drive_backup_verified"
-  | "command_agent_action";
+  | "command_agent_action"
+  | "ai_agent_mismatch_flagged";
 
 export async function logAudit(input: {
   action: AuditAction;

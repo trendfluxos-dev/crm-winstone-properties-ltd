@@ -137,12 +137,7 @@ function ReportsBoard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() =>
-              downloadCsv(
-                `winstone-report_${stamp}.csv`,
-                reportToCsv(report),
-              )
-            }
+            onClick={() => downloadCsv(`winstone-report_${stamp}.csv`, reportToCsv(report))}
           >
             <Download className="size-4" /> Full report CSV
           </Button>
@@ -153,7 +148,18 @@ function ReportsBoard() {
               downloadCsv(
                 `winstone-agent-scorecard_${stamp}.csv`,
                 toCsv(
-                  ["Agent", "Employee ID", "Dials", "Connected", "Connect %", "Talk minutes", "WhatsApp", "Assigned", "Deals won", "Conversion %"],
+                  [
+                    "Agent",
+                    "Employee ID",
+                    "Dials",
+                    "Connected",
+                    "Connect %",
+                    "Talk minutes",
+                    "WhatsApp",
+                    "Assigned",
+                    "Deals won",
+                    "Conversion %",
+                  ],
                   report.rows.map((r) => [
                     r.agent,
                     r.employeeId,
@@ -265,14 +271,26 @@ function ReportsBoard() {
 
       {/* Totals */}
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Tile label="Dials" value={String(report.totals.dials)} hint={`${report.totals.activeAgents} agents in scope`} />
+        <Tile
+          label="Dials"
+          value={String(report.totals.dials)}
+          hint={`${report.totals.activeAgents} agents in scope`}
+        />
         <Tile
           label="Connected"
           value={`${report.totals.connectRate.toFixed(0)}%`}
           hint={`${report.totals.connected} conversations`}
         />
-        <Tile label="Talk minutes" value={report.totals.talkMinutes.toFixed(0)} hint={`${report.totals.whatsapp} WhatsApp touches`} />
-        <Tile label="Deals won" value={String(report.totals.dealsWon)} hint={`${report.totals.newLeads} new leads`} />
+        <Tile
+          label="Talk minutes"
+          value={report.totals.talkMinutes.toFixed(0)}
+          hint={`${report.totals.whatsapp} WhatsApp touches`}
+        />
+        <Tile
+          label="Deals won"
+          value={String(report.totals.dealsWon)}
+          hint={`${report.totals.newLeads} new leads`}
+        />
       </section>
 
       {/* Trend */}
@@ -293,12 +311,35 @@ function ReportsBoard() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" interval="preserveStartEnd" />
-              <YAxis tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" allowDecimals={false} />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                allowDecimals={false}
+              />
               <Tooltip contentStyle={TOOLTIP} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Area type="monotone" dataKey="dials" name="Dials" stroke="var(--chart-1)" fill="url(#rp-dials)" strokeWidth={2} />
-              <Area type="monotone" dataKey="connected" name="Connected" stroke="var(--chart-3)" fill="url(#rp-conn)" strokeWidth={2} />
+              <Area
+                type="monotone"
+                dataKey="dials"
+                name="Dials"
+                stroke="var(--chart-1)"
+                fill="url(#rp-dials)"
+                strokeWidth={2}
+              />
+              <Area
+                type="monotone"
+                dataKey="connected"
+                name="Connected"
+                stroke="var(--chart-3)"
+                fill="url(#rp-conn)"
+                strokeWidth={2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -311,13 +352,43 @@ function ReportsBoard() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={report.daily} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" interval="preserveStartEnd" />
-                <YAxis tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" allowDecimals={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 11 }}
+                  stroke="var(--muted-foreground)"
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  tick={{ fontSize: 11 }}
+                  stroke="var(--muted-foreground)"
+                  allowDecimals={false}
+                />
                 <Tooltip contentStyle={TOOLTIP} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="newLeads" name="New leads" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="whatsapp" name="WhatsApp" stroke="var(--chart-4)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="talkMinutes" name="Talk min" stroke="var(--chart-3)" strokeWidth={2} dot={false} />
+                <Line
+                  type="monotone"
+                  dataKey="newLeads"
+                  name="New leads"
+                  stroke="var(--chart-1)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="whatsapp"
+                  name="WhatsApp"
+                  stroke="var(--chart-4)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="talkMinutes"
+                  name="Talk min"
+                  stroke="var(--chart-3)"
+                  strokeWidth={2}
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -330,10 +401,17 @@ function ReportsBoard() {
               <Empty />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={report.statusMix} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
+                <BarChart
+                  data={report.statusMix}
+                  margin={{ top: 6, right: 8, left: -18, bottom: 0 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" allowDecimals={false} />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    stroke="var(--muted-foreground)"
+                    allowDecimals={false}
+                  />
                   <Tooltip contentStyle={TOOLTIP} />
                   <Bar dataKey="value" name="Leads" radius={[6, 6, 0, 0]}>
                     {report.statusMix.map((entry, i) => (
@@ -477,7 +555,5 @@ function Tile({ label, value, hint }: { label: string; value: string; hint: stri
 }
 
 function Empty({ text = "Nothing to chart for this range." }: { text?: string }) {
-  return (
-    <div className="grid h-full place-items-center text-sm text-muted-foreground">{text}</div>
-  );
+  return <div className="grid h-full place-items-center text-sm text-muted-foreground">{text}</div>;
 }

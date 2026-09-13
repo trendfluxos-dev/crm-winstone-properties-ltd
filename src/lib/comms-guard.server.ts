@@ -17,7 +17,10 @@ export type DncHit = {
   reason: string | null;
 };
 
-export async function findDoNotContact(rawPhone: string, channel: CommsChannel): Promise<DncHit | null> {
+export async function findDoNotContact(
+  rawPhone: string,
+  channel: CommsChannel,
+): Promise<DncHit | null> {
   const phone = normalizePhone(rawPhone);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
@@ -65,7 +68,10 @@ export async function assertContactable(rawPhone: string, channel: CommsChannel)
  * Recording is allowed when the consent notice is configured (announced to the
  * customer at call start) and the customer has not explicitly refused before.
  */
-export async function recordingAllowed(rawPhone: string, noticeConfigured: boolean): Promise<boolean> {
+export async function recordingAllowed(
+  rawPhone: string,
+  noticeConfigured: boolean,
+): Promise<boolean> {
   if (!noticeConfigured) return false;
   const consent = await latestConsent(rawPhone, "recording");
   if (consent && !consent.granted) return false;
@@ -103,21 +109,22 @@ export async function addDoNotContact(input: {
   addedBy?: string | null;
 }): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin
-    .from("do_not_contact")
-    .upsert(
-      {
-        phone_number: normalizePhone(input.phoneNumber),
-        channel: input.channel,
-        reason: input.reason ?? null,
-        source: input.source ?? "manual",
-        added_by: input.addedBy ?? null,
-      },
-      { onConflict: "phone_number,channel" },
-    );
+  await supabaseAdmin.from("do_not_contact").upsert(
+    {
+      phone_number: normalizePhone(input.phoneNumber),
+      channel: input.channel,
+      reason: input.reason ?? null,
+      source: input.source ?? "manual",
+      added_by: input.addedBy ?? null,
+    },
+    { onConflict: "phone_number,channel" },
+  );
 }
 
-export async function removeDoNotContact(phoneNumber: string, channel: CommsChannel): Promise<void> {
+export async function removeDoNotContact(
+  phoneNumber: string,
+  channel: CommsChannel,
+): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin
     .from("do_not_contact")

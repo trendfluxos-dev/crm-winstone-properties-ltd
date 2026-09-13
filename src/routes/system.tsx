@@ -140,9 +140,6 @@ function SystemBoard() {
 
       <AuditTrail />
 
-
-
-
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
@@ -166,7 +163,11 @@ function SystemBoard() {
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Tile label="করা কল" value={String(billing.dials)} hint={`${billing.newLeads}টি নতুন লিড`} />
+          <Tile
+            label="করা কল"
+            value={String(billing.dials)}
+            hint={`${billing.newLeads}টি নতুন লিড`}
+          />
           <Tile
             label="কথা হয়েছে"
             value={`${billing.connectedPct.toFixed(0)}%`}
@@ -191,18 +192,29 @@ function SystemBoard() {
             <Database className="size-4 text-primary" /> ডেটার অবস্থা
           </h2>
           <dl className="mt-3 space-y-1.5 text-sm">
-            <Row label="এজেন্ট প্রোফাইল" value={`${profiles.filter((p) => p.is_active).length} জন চালু / ${profiles.length}`} />
+            <Row
+              label="এজেন্ট প্রোফাইল"
+              value={`${profiles.filter((p) => p.is_active).length} জন চালু / ${profiles.length}`}
+            />
             <Row label="লিড" value={String(leads.length)} />
             <Row label="কল রেকর্ডিং" value={String(calls.length)} />
-            <Row label="যাচাই হওয়া অডিও" value={String(calls.filter((c) => c.sync_status === "verified").length)} />
+            <Row
+              label="যাচাই হওয়া অডিও"
+              value={String(calls.filter((c) => c.sync_status === "verified").length)}
+            />
             <Row label="হোয়াটসঅ্যাপ মেসেজ" value={String(messages.length)} />
-            <Row label="ডিল জেতা (সব সময়ের)" value={String(leads.filter((l) => l.outcome_category === "deal_won").length)} />
+            <Row
+              label="ডিল জেতা (সব সময়ের)"
+              value={String(leads.filter((l) => l.outcome_category === "deal_won").length)}
+            />
           </dl>
           <h3 className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             লিড কোথা থেকে এসেছে
           </h3>
           <dl className="mt-2 space-y-1.5 text-sm">
-            {sources.length === 0 && <p className="text-sm text-muted-foreground">এখনো কোনো লিড নেই।</p>}
+            {sources.length === 0 && (
+              <p className="text-sm text-muted-foreground">এখনো কোনো লিড নেই।</p>
+            )}
             {sources.map(([source, total]) => (
               <Row key={source} label={SOURCE_LABELS[source] ?? source} value={String(total)} />
             ))}

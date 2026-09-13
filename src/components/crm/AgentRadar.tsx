@@ -54,12 +54,12 @@ export function AgentRadar({
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="min-w-0">
           <h2 className="text-base font-semibold sm:text-lg">লাইভ এজেন্ট রাডার</h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">এই মুহূর্তে কে কথা বলছে, কতক্ষণ ধরে</p>
-
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            এই মুহূর্তে কে কথা বলছে, কতক্ষণ ধরে
+          </p>
         </div>
         <span className="tabular text-xs text-muted-foreground">
-          {agents.filter((a) => a.presence === "on_call").length} জন কলে /{" "}
-          {agents.length} জন এজেন্ট
+          {agents.filter((a) => a.presence === "on_call").length} জন কলে / {agents.length} জন এজেন্ট
         </span>
       </div>
 
@@ -68,9 +68,7 @@ export function AgentRadar({
           const style = PRESENCE[agent.presence];
           const lastCall = calls
             .filter((c) => c.agent_id === agent.id)
-            .sort(
-              (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-            )[0];
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
           const liveSeconds = agent.current_call_started_at
             ? Math.max(0, (now - new Date(agent.current_call_started_at).getTime()) / 1000)
             : null;

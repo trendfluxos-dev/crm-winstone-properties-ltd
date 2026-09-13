@@ -13,9 +13,21 @@ export const SHIFTS: {
   summaryMinutes: number;
 }[] = [
   // 09:00 – 12:45, summary at 12:50
-  { id: "morning", label: "সকালের শিফট (৯:০০–১২:৪৫)", startMinutes: 9 * 60, endMinutes: 12 * 60 + 45, summaryMinutes: 12 * 60 + 50 },
+  {
+    id: "morning",
+    label: "সকালের শিফট (৯:০০–১২:৪৫)",
+    startMinutes: 9 * 60,
+    endMinutes: 12 * 60 + 45,
+    summaryMinutes: 12 * 60 + 50,
+  },
   // 14:00 – 17:20, summary at 17:30
-  { id: "evening", label: "বিকেলের শিফট (২:০০–৫:২০)", startMinutes: 14 * 60, endMinutes: 17 * 60 + 20, summaryMinutes: 17 * 60 + 30 },
+  {
+    id: "evening",
+    label: "বিকেলের শিফট (২:০০–৫:২০)",
+    startMinutes: 14 * 60,
+    endMinutes: 17 * 60 + 20,
+    summaryMinutes: 17 * 60 + 30,
+  },
 ];
 
 const DHAKA_OFFSET_MS = 6 * 60 * 60 * 1000;

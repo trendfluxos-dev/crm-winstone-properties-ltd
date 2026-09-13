@@ -46,11 +46,13 @@ export function whatsAppDeepLink(msisdn: string, text?: string | null): string {
 }
 
 export type WhatsAppOpenResult =
-  | { ok: true; url: string; msisdn: string }
-  | { ok: false; reason: "invalid_number" | "blocked" };
+  { ok: true; url: string; msisdn: string } | { ok: false; reason: "invalid_number" | "blocked" };
 
 /** Opens WhatsApp externally. Returns a result the UI can turn into a message. */
-export function openWhatsApp(phone: string | null | undefined, text?: string | null): WhatsAppOpenResult {
+export function openWhatsApp(
+  phone: string | null | undefined,
+  text?: string | null,
+): WhatsAppOpenResult {
   const msisdn = normalizeWhatsAppNumber(phone);
   if (!msisdn) return { ok: false, reason: "invalid_number" };
   const url = whatsAppDeepLink(msisdn, text);

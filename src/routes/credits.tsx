@@ -71,7 +71,7 @@ function CreditsBoard() {
       "এজেন্ট,কাজের সংখ্যা,অনুমানিত ক্রেডিট",
       ...report.agents.map((a) => `"${a.name}",${a.calls},${a.credits}`),
     ].join("\r\n");
-    const blob = new Blob([`﻿${lines}`], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([`\uFEFF${lines}`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -119,12 +119,16 @@ function CreditsBoard() {
             />
             <Tile
               label="এআই প্রশ্ন (Winstone AI)"
-              value={String(report.categories.find((c) => c.category === "command_agent")?.calls ?? 0)}
+              value={String(
+                report.categories.find((c) => c.category === "command_agent")?.calls ?? 0,
+              )}
               hint={`${report.categories.find((c) => c.category === "command_agent")?.credits ?? 0} ক্রেডিট`}
             />
             <Tile
               label="ট্রান্সক্রিপ্ট"
-              value={String(report.categories.find((c) => c.category === "transcription")?.calls ?? 0)}
+              value={String(
+                report.categories.find((c) => c.category === "transcription")?.calls ?? 0,
+              )}
               hint={`${report.categories.find((c) => c.category === "transcription")?.credits ?? 0} ক্রেডিট`}
             />
             <Tile
@@ -139,15 +143,24 @@ function CreditsBoard() {
               <Coins className="size-4 text-primary" /> হার (প্রতি কাজে)
             </h2>
             <dl className="mt-3 space-y-1.5 text-sm">
-              <Row label="Winstone AI-তে একটা প্রশ্ন" value={`≈ ${AI_USAGE_RATES.command_agent} ক্রেডিট`} />
-              <Row label="একটা কলের ট্রান্সক্রিপ্ট" value={`≈ ${AI_USAGE_RATES.transcription} ক্রেডিট`} />
-              <Row label="একটা কলের এআই সারসংক্ষেপ" value={`≈ ${AI_USAGE_RATES.analysis} ক্রেডিট`} />
+              <Row
+                label="Winstone AI-তে একটা প্রশ্ন"
+                value={`≈ ${AI_USAGE_RATES.command_agent} ক্রেডিট`}
+              />
+              <Row
+                label="একটা কলের ট্রান্সক্রিপ্ট"
+                value={`≈ ${AI_USAGE_RATES.transcription} ক্রেডিট`}
+              />
+              <Row
+                label="একটা কলের এআই সারসংক্ষেপ"
+                value={`≈ ${AI_USAGE_RATES.analysis} ক্রেডিট`}
+              />
               <Row label="ডকুমেন্ট সারসংক্ষেপ" value={`≈ ${AI_USAGE_RATES.doc_summary} ক্রেডিট`} />
             </dl>
             <p className="mt-3 text-xs text-muted-foreground">
-              ৮ জন এজেন্ট নিয়ে মাসজুড়ে চালালে অনুমান: এআই কাজে ≈ {report.projection.aiOnly} ক্রেডিট,
-              সিস্টেম উন্নয়নসহ ≈ {report.projection.withDevelopment} ক্রেডিট/মাস। টাকার দাম ও
-              টপ-আপ Settings → Plans &amp; credits থেকে দেখুন।
+              ৮ জন এজেন্ট নিয়ে মাসজুড়ে চালালে অনুমান: এআই কাজে ≈ {report.projection.aiOnly}{" "}
+              ক্রেডিট, সিস্টেম উন্নয়নসহ ≈ {report.projection.withDevelopment} ক্রেডিট/মাস। টাকার
+              দাম ও টপ-আপ Settings → Plans &amp; credits থেকে দেখুন।
             </p>
           </section>
 
@@ -155,7 +168,9 @@ function CreditsBoard() {
             <div className="card-elevated p-4">
               <h2 className="text-sm font-semibold">দিনভিত্তিক খরচ</h2>
               {report.daily.length === 0 && (
-                <p className="mt-3 text-sm text-muted-foreground">এই মাসে এখনো কোনো এআই কাজ হয়নি।</p>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  এই মাসে এখনো কোনো এআই কাজ হয়নি।
+                </p>
               )}
               <div className="mt-3 max-h-96 space-y-1.5 overflow-y-auto text-sm">
                 {report.daily.map((d) => (
@@ -190,7 +205,11 @@ function CreditsBoard() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        আইটি কনসোলে ফিরে যেতে <Link to="/system" className="underline">এখানে চাপুন</Link>।
+        আইটি কনসোলে ফিরে যেতে{" "}
+        <Link to="/system" className="underline">
+          এখানে চাপুন
+        </Link>
+        ।
       </p>
     </div>
   );

@@ -63,7 +63,11 @@ export async function markWebhookProcessed(id: string | null, note?: string): Pr
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin
     .from("webhook_deliveries")
-    .update({ status: "processed", processed_at: new Date().toISOString(), error_message: note ?? null })
+    .update({
+      status: "processed",
+      processed_at: new Date().toISOString(),
+      error_message: note ?? null,
+    })
     .eq("id", id);
 }
 

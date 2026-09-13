@@ -14,7 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveSignInEmail } from "@/lib/accounts.functions";
 import { ensureRegistered, saveSignupDraft } from "@/lib/session";
 
-
 const SearchSchema = z.object({
   role: z.enum(["agent", "coordinator"]).catch("agent"),
   mode: z.enum(["signin", "signup"]).catch("signin"),
@@ -59,7 +58,6 @@ function AuthPage() {
     setPinOpen(true);
   };
 
-
   const signIn = useMutation({
     mutationFn: async () => {
       const loginId = email.trim();
@@ -76,7 +74,6 @@ function AuthPage() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
-
 
   const signUp = useMutation({
     mutationFn: async () => {
@@ -109,7 +106,6 @@ function AuthPage() {
     password.length >= 6 &&
     (!isSignup || name.trim().length >= 2);
 
-
   return (
     <div className="grid-noise flex min-h-screen items-center justify-center px-4 py-10">
       <div className="card-elevated w-full max-w-md p-6">
@@ -141,11 +137,22 @@ function AuthPage() {
             <>
               <div className="space-y-1.5">
                 <Label htmlFor="name">Full name</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mst. Soniya Yeasmin" />
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Mst. Soniya Yeasmin"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01805049668" inputMode="tel" />
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="01805049668"
+                  inputMode="tel"
+                />
               </div>
             </>
           )}
@@ -172,7 +179,8 @@ function AuthPage() {
               placeholder="At least 6 characters"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && canSubmit && !busy) {
-                  isSignup ? signUp.mutate() : signIn.mutate();
+                  if (isSignup) signUp.mutate();
+                  else signIn.mutate();
                 }
               }}
             />

@@ -36,13 +36,7 @@ async function fileToBase64(file: File): Promise<string> {
   return btoa(binary);
 }
 
-export function ManualIngestDialog({
-  leads,
-  agents,
-}: {
-  leads: Lead[];
-  agents: Profile[];
-}) {
+export function ManualIngestDialog({ leads, agents }: { leads: Lead[]; agents: Profile[] }) {
   const operatorId = useOperatorId();
   const [open, setOpen] = useState(false);
   const [leadId, setLeadId] = useState<string>("");

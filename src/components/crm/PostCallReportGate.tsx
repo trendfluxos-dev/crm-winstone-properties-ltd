@@ -137,7 +137,8 @@ export function PostCallReportGate() {
     }
     if (!note.trim() && suggestion.nextAction) setNote(suggestion.nextAction);
     // AI never overwrites a classification the agent already picked.
-    if (!temperature && suggestion.suggestedTemperature) setTemperature(suggestion.suggestedTemperature);
+    if (!temperature && suggestion.suggestedTemperature)
+      setTemperature(suggestion.suggestedTemperature);
     if (!grade && suggestion.suggestedGrade) setGrade(suggestion.suggestedGrade);
     setAiDecision("accepted");
   };
@@ -241,9 +242,7 @@ export function PostCallReportGate() {
 
         {received ? (
           <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
-            <p className="text-xs font-bold">
-              শ্রেণিবিন্যাস (বাধ্যতামূলক — কথা হয়েছে)
-            </p>
+            <p className="text-xs font-bold">শ্রেণিবিন্যাস (বাধ্যতামূলক — কথা হয়েছে)</p>
             <div className="space-y-1.5">
               <Label className="text-xs">লিডের তাপমাত্রা</Label>
               <div className="grid gap-2 sm:grid-cols-3">
@@ -291,8 +290,6 @@ export function PostCallReportGate() {
             কথা হয়নি — লিড PENDING থাকবে এবং আবার কলের তালিকায় ফিরে যাবে।
           </p>
         )}
-
-
 
         <div className="space-y-1.5">
           <Label htmlFor="call-summary" className="text-xs">

@@ -120,7 +120,6 @@ export function WhatsappInbox() {
               ? "WhatsApp Business API: সংযুক্ত · ✓ পাঠানো · ✓✓ পৌঁছেছে · নীল ✓✓ পড়া হয়েছে · ! পৌঁছায়নি"
               : "WhatsApp Business API: সংযুক্ত নয় (INTEGRATION REQUIRED) — মেসেজ এজেন্টের নিজের হোয়াটসঅ্যাপ থেকে যাবে, তাই শুধু “সংরক্ষিত” দেখাবে"}
           </p>
-
         </div>
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -177,7 +176,9 @@ export function WhatsappInbox() {
               <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{active.lead.name}</p>
-                  <p className="tabular text-xs text-muted-foreground">{active.lead.phone_number}</p>
+                  <p className="tabular text-xs text-muted-foreground">
+                    {active.lead.phone_number}
+                  </p>
                 </div>
                 <WhatsAppAction
                   phone={active.lead.phone_number}
@@ -240,7 +241,11 @@ export function WhatsappInbox() {
                     onChange={(e) => setDraft(e.target.value)}
                     rows={2}
                     className="resize-none"
-                    placeholder={integrationStatus === "configured" ? "মেসেজ লিখে পাঠান" : "যে মেসেজটি পাঠিয়েছেন তা এখানে লিখে রাখুন"}
+                    placeholder={
+                      integrationStatus === "configured"
+                        ? "মেসেজ লিখে পাঠান"
+                        : "যে মেসেজটি পাঠিয়েছেন তা এখানে লিখে রাখুন"
+                    }
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();

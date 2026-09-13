@@ -112,7 +112,11 @@ export const logIncomingCallback = createServerFn({ method: "POST" })
     if (!lead.assigned_to) {
       await supabaseAdmin
         .from("leads")
-        .update({ assigned_to: me.id, assigned_agent_id: me.id, assignment_source: "callback_claim" })
+        .update({
+          assigned_to: me.id,
+          assigned_agent_id: me.id,
+          assignment_source: "callback_claim",
+        })
         .eq("id", lead.id);
     }
 
@@ -250,7 +254,9 @@ export const completeFollowUp = createServerFn({ method: "POST" })
 
 /** The agent's own submitted call reports plus the next upcoming follow-ups. */
 export const myCallReports = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => Base.extend({ limit: z.number().int().min(1).max(100).optional() }).parse(input))
+  .inputValidator((input: unknown) =>
+    Base.extend({ limit: z.number().int().min(1).max(100).optional() }).parse(input),
+  )
   .handler(async ({ data }) => {
     const me = await agentOf(data.adminToken ?? null);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -266,14 +272,19 @@ export const myCallReports = createServerFn({ method: "POST" })
 
     const leadIds = [...new Set((reports ?? []).map((r) => r.lead_id).filter(Boolean))] as string[];
     const { data: leads } = leadIds.length
-      ? await supabaseAdmin.from("leads").select("id, name, phone_number, company").in("id", leadIds)
+      ? await supabaseAdmin
+          .from("leads")
+          .select("id, name, phone_number, company")
+          .in("id", leadIds)
       : { data: [] };
     const leadById = new Map((leads ?? []).map((l) => [l.id, l]));
 
     const nowIso = new Date().toISOString();
     const { data: upcoming } = await supabaseAdmin
       .from("follow_up_events")
-      .select("id, lead_id, customer_name, phone_number, category, priority, note, scheduled_at, status")
+      .select(
+        "id, lead_id, customer_name, phone_number, category, priority, note, scheduled_at, status",
+      )
       .eq("agent_id", me.id)
       .neq("status", "done")
       .order("scheduled_at", { ascending: true })

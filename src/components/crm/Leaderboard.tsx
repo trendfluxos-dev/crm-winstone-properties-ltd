@@ -17,9 +17,7 @@ export function Leaderboard({
       <div className="flex items-end justify-between">
         <div>
           <h2 className="text-lg font-semibold">দৈনিক পারফরম্যান্স লিডারবোর্ড</h2>
-          <p className="text-sm text-muted-foreground">
-            ১০ সেকেন্ডের বেশি কথা হলে কলটি গণনা হয়
-          </p>
+          <p className="text-sm text-muted-foreground">১০ সেকেন্ডের বেশি কথা হলে কলটি গণনা হয়</p>
         </div>
         <Trophy className="size-5 text-idle" />
       </div>

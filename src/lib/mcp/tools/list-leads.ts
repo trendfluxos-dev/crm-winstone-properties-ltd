@@ -20,7 +20,10 @@ export default defineTool({
       .trim()
       .min(2)
       .max(60)
-      .regex(/^[\p{L}\p{N}\s+.'-]+$/u, "Search may only contain letters, numbers, spaces, +, period, apostrophe, or hyphen.")
+      .regex(
+        /^[\p{L}\p{N}\s+.'-]+$/u,
+        "Search may only contain letters, numbers, spaces, +, period, apostrophe, or hyphen.",
+      )
       .optional()
       .describe("Match on lead name or phone number."),
     limit: z.number().int().min(1).max(200).default(50),

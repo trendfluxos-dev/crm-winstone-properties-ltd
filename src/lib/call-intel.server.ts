@@ -141,7 +141,12 @@ export async function analyzeTranscript(
         },
       ],
       text: {
-        format: { type: "json_schema", name: "call_analysis", strict: true, schema: ANALYSIS_SCHEMA },
+        format: {
+          type: "json_schema",
+          name: "call_analysis",
+          strict: true,
+          schema: ANALYSIS_SCHEMA,
+        },
       },
     }),
   });
@@ -239,7 +244,6 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
       if (stt.status === "failed") throw new Error(stt.errorMessage ?? "Transcription failed");
       return "empty";
     }
-
 
     const transcript = stt.transcript;
     await logAiUsage({

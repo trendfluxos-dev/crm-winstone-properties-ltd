@@ -82,7 +82,9 @@ export function MyPhoneSetup() {
               onChange={(e) => setPhone(e.target.value)}
             />
             {phone.trim().length > 0 && !valid && (
-              <p className="text-xs text-destructive">বাংলাদেশি মোবাইল নম্বর দিন (যেমন 01712345678)।</p>
+              <p className="text-xs text-destructive">
+                বাংলাদেশি মোবাইল নম্বর দিন (যেমন 01712345678)।
+              </p>
             )}
           </div>
           <Button disabled={!valid || mutation.isPending} onClick={() => mutation.mutate()}>

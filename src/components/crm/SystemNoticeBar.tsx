@@ -131,9 +131,7 @@ export function SystemNoticeBar({ surface }: { surface: "it" | "hq" }) {
               <AlertTriangle className="size-5 text-destructive" />
               মনোযোগ প্রয়োজন
             </DialogTitle>
-            <DialogDescription>
-              সিস্টেম চালু রাখতে নিচের বিষয়গুলো এখনই দেখুন।
-            </DialogDescription>
+            <DialogDescription>সিস্টেম চালু রাখতে নিচের বিষয়গুলো এখনই দেখুন।</DialogDescription>
           </DialogHeader>
           <ul className="space-y-2">
             {urgent.map((notice) => (

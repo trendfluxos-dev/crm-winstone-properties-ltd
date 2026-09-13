@@ -106,7 +106,11 @@ export async function backupRecordingToDrive(recordingId: string) {
     .eq("call_recording_id", recordingId)
     .maybeSingle();
   if (existing?.status === "done" && existing.drive_file_id) {
-    return { status: "already_done" as const, driveFileId: existing.drive_file_id, driveFileUrl: existing.drive_file_url };
+    return {
+      status: "already_done" as const,
+      driveFileId: existing.drive_file_id,
+      driveFileUrl: existing.drive_file_url,
+    };
   }
 
   const { data: recording } = await supabaseAdmin
@@ -254,10 +258,7 @@ export async function backupRecordingDocToDrive(dateKey: string) {
   // Daily summaries live in their own branch of the company Drive tree, not in
   // the recordings folder.
   const { driveBranchFolder, dhakaYear } = await import("./drive-tree.server");
-  const docFolderId = await driveBranchFolder(
-    "day_exports",
-    dhakaYear(`${dateKey}T00:00:00Z`),
-  );
+  const docFolderId = await driveBranchFolder("day_exports", dhakaYear(`${dateKey}T00:00:00Z`));
 
   const { data: existing } = await supabaseAdmin
     .from("recording_doc_backups")
@@ -286,7 +287,9 @@ export async function backupRecordingDocToDrive(dateKey: string) {
     error_message: null as string | null,
   };
 
-  const { error } = await supabaseAdmin.from("recording_doc_backups").upsert(backup, { onConflict: "date_key" });
+  const { error } = await supabaseAdmin
+    .from("recording_doc_backups")
+    .upsert(backup, { onConflict: "date_key" });
   if (error) throw new Error(`ডক ব্যাকআপ রো সংরক্ষণ ব্যর্থ: ${error.message}`);
 
   await logAudit({

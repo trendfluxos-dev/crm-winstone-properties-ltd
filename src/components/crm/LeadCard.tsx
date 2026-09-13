@@ -1,10 +1,4 @@
-import {
-  BadgeCheck,
-  FolderOpen,
-  PhoneOutgoing,
-  Repeat,
-  Sparkles,
-} from "lucide-react";
+import { BadgeCheck, FolderOpen, PhoneOutgoing, Repeat, Sparkles } from "lucide-react";
 
 import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { Button } from "@/components/ui/button";

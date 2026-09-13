@@ -61,8 +61,7 @@ export async function buildSystemNotices(): Promise<{
       id: "pending-accounts",
       level: "warning",
       title: `${count(pending)} জন নতুন অ্যাকাউন্ট অনুমোদনের অপেক্ষায়`,
-      detail:
-        "তারা অনুমোদন না পাওয়া পর্যন্ত ডেস্কে ঢুকতে পারবে না, তাই কাজ শুরু করতে পারছে না।",
+      detail: "তারা অনুমোদন না পাওয়া পর্যন্ত ডেস্কে ঢুকতে পারবে না, তাই কাজ শুরু করতে পারছে না।",
       action: "IT Console → Account approvals থেকে অনুমোদন দিন",
     });
   }
@@ -72,8 +71,7 @@ export async function buildSystemNotices(): Promise<{
       id: "unassigned-leads",
       level: "warning",
       title: `${count(unassigned)}টি লিডের কোনো মালিক নেই`,
-      detail:
-        "এজেন্টের কাছে না গেলে এই লিডগুলোতে কেউ কল করবে না, ফলে পাইপলাইন থেমে থাকছে।",
+      detail: "এজেন্টের কাছে না গেলে এই লিডগুলোতে কেউ কল করবে না, ফলে পাইপলাইন থেমে থাকছে।",
       action: "Coordinator Deck → Balance all চাপুন",
     });
   }
@@ -94,8 +92,7 @@ export async function buildSystemNotices(): Promise<{
       id: "missing-audio",
       level: "warning",
       title: `আজকের ${count(missingAudio)}টি কলে অডিও ফাইল নেই`,
-      detail:
-        "অডিও ছাড়া ট্রান্সক্রিপ্ট, সেন্টিমেন্ট ও AI কোচিং তৈরি হবে না।",
+      detail: "অডিও ছাড়া ট্রান্সক্রিপ্ট, সেন্টিমেন্ট ও AI কোচিং তৈরি হবে না।",
       action: "এজেন্টের ফোনে রেকর্ডিং পারমিশন ও স্টোরেজ চালু আছে কিনা দেখুন",
     });
   }
@@ -130,8 +127,7 @@ export async function buildSystemNotices(): Promise<{
       id: "billing",
       level: "info",
       title: "সক্রিয় কোনো বিল/সাবস্ক্রিপশন পাওয়া যায়নি",
-      detail:
-        "সিস্টেম এখন চালু আছে, তবে দীর্ঘদিন চালু রাখতে বিল পরিশোধ নিশ্চিত করা দরকার।",
+      detail: "সিস্টেম এখন চালু আছে, তবে দীর্ঘদিন চালু রাখতে বিল পরিশোধ নিশ্চিত করা দরকার।",
       action: "IT Console → Billing থেকে পেমেন্ট দেখুন",
     });
   } else if (activeSub.status === "past_due") {

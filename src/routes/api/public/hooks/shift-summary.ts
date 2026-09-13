@@ -40,9 +40,8 @@ export const Route = createFileRoute("/api/public/hooks/shift-summary")({
         }
 
         try {
-          const { generateShiftSummary, purgeHqSummaries, backfillShiftSummaries } = await import(
-            "@/lib/shift-summary.server"
-          );
+          const { generateShiftSummary, purgeHqSummaries, backfillShiftSummaries } =
+            await import("@/lib/shift-summary.server");
           const summary = await generateShiftSummary();
           // Catches up any earlier window the schedule missed.
           await backfillShiftSummaries(3);

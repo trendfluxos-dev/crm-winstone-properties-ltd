@@ -123,9 +123,8 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
 
         const { ingestRecording } = await import("@/lib/call-intel.server");
         const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
-        const { bindAgentSim, resolveAgentBySim, simMatchesAgent } = await import(
-          "@/lib/agent-sim.server"
-        );
+        const { bindAgentSim, resolveAgentBySim, simMatchesAgent } =
+          await import("@/lib/agent-sim.server");
 
         let agent: { id: string } | null = null;
         if (caller.kind === "device") {
@@ -244,9 +243,8 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
           // on with a folder; a Drive failure never fails the phone's upload.
           void (async () => {
             try {
-              const { getDriveBackupSettings, backupRecordingToDrive } = await import(
-                "@/lib/recording-drive.server"
-              );
+              const { getDriveBackupSettings, backupRecordingToDrive } =
+                await import("@/lib/recording-drive.server");
               const settings = await getDriveBackupSettings();
               if (!settings.enabled || !settings.folderId) return;
               await backupRecordingToDrive(recordingId);

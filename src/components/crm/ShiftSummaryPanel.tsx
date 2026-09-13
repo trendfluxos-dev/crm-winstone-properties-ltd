@@ -1,7 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, Download, ExternalLink, Loader2, RefreshCw, UploadCloud } from "lucide-react";
+import {
+  CalendarClock,
+  Download,
+  ExternalLink,
+  Loader2,
+  RefreshCw,
+  UploadCloud,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -136,7 +143,8 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
   const driveLinks = list.data?.driveLinks ?? {};
   const toDrive = useServerFn(exportShiftSummaryToDrive);
   const pushDrive = useMutation({
-    mutationFn: (shiftKey: string) => toDrive({ data: { adminToken: adminToken ?? null, shiftKey } }),
+    mutationFn: (shiftKey: string) =>
+      toDrive({ data: { adminToken: adminToken ?? null, shiftKey } }),
     onSuccess: () => {
       toast.success("Drive ফোল্ডারে জমা হয়েছে");
       void queryClient.invalidateQueries({ queryKey: ["shift-summaries"] });
@@ -190,15 +198,26 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
         <Button
           size="sm"
           variant="secondary"
-          onClick={() => downloadCsv(rows, `winstone-shift-summary-${new Date().toISOString().slice(0, 10)}.csv`)}
+          onClick={() =>
+            downloadCsv(rows, `winstone-shift-summary-${new Date().toISOString().slice(0, 10)}.csv`)
+          }
         >
           <Download className="size-4" />
           সব এক্সপোর্ট
         </Button>
         {scope === "it" && (
           <>
-            <Button size="sm" variant="secondary" disabled={run.isPending} onClick={() => run.mutate()}>
-              {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={run.isPending}
+              onClick={() => run.mutate()}
+            >
+              {run.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <RefreshCw className="size-4" />
+              )}
               এখনই তৈরি
             </Button>
             <Button
@@ -215,7 +234,8 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
       </header>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        ১২:৫০ ও ৫:৩০-এ স্বয়ংক্রিয়ভাবে তৈরি ও এক্সপোর্টের জন্য প্রস্তুত হয় — এজেন্টদের দেওয়া আপডেট অনুযায়ী।
+        ১২:৫০ ও ৫:৩০-এ স্বয়ংক্রিয়ভাবে তৈরি ও এক্সপোর্টের জন্য প্রস্তুত হয় — এজেন্টদের দেওয়া
+        আপডেট অনুযায়ী।
         {scope === "hq" && " প্রতি মাসের ৫ তারিখে এখান থেকে সরে যায়, আইটি কনসোলে সব থাকে।"}
       </p>
 
@@ -227,14 +247,19 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
             </span>
             <p className="text-sm font-semibold">{liveSheet?.shiftLabel}</p>
             <span className="ml-auto text-xs text-muted-foreground">
-              কল {liveRow.totals.called} · ধরেছে {liveRow.totals.connected} · আপডেট {liveRow.totals.reports} · বাকি{" "}
-              {liveRow.totals.pending}
+              কল {liveRow.totals.called} · ধরেছে {liveRow.totals.connected} · আপডেট{" "}
+              {liveRow.totals.reports} · বাকি {liveRow.totals.pending}
             </span>
             <Button
               size="sm"
               variant="ghost"
               className="h-7 gap-1 px-2 text-xs"
-              onClick={() => downloadCsv([liveRow], `winstone-shift-live-${new Date().toISOString().slice(0, 10)}.csv`)}
+              onClick={() =>
+                downloadCsv(
+                  [liveRow],
+                  `winstone-shift-live-${new Date().toISOString().slice(0, 10)}.csv`,
+                )
+              }
             >
               <Download className="size-3" />
               CSV
@@ -260,7 +285,9 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                     <td className="py-1.5 pr-3 tabular">
                       {agent.reports}
                       {agent.pending ? (
-                        <span className="ml-1 text-xs text-destructive">({agent.pending} বাকি)</span>
+                        <span className="ml-1 text-xs text-destructive">
+                          ({agent.pending} বাকি)
+                        </span>
                       ) : null}
                     </td>
                     <td className="py-1.5 text-xs text-muted-foreground">
@@ -274,7 +301,8 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
             </table>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            এজেন্ট আপডেট জমা দিলেই এই শিট সাথে সাথে বদলায়। শিফট শেষে এটিই সংরক্ষিত সামারি হয়ে যায়।
+            এজেন্ট আপডেট জমা দিলেই এই শিট সাথে সাথে বদলায়। শিফট শেষে এটিই সংরক্ষিত সামারি হয়ে
+            যায়।
           </p>
         </div>
       )}
@@ -291,8 +319,8 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
               <p className="text-sm font-semibold">{row.shift_label}</p>
               <span className="text-xs text-muted-foreground">{dhaka(row.window_end)}</span>
               <span className="ml-auto text-xs text-muted-foreground">
-                কল {row.totals.called} · সংযুক্ত {row.totals.connected} · আপডেট {row.totals.reports} · বাকি{" "}
-                {row.totals.pending} · ফলো-আপ {row.totals.followUps}
+                কল {row.totals.called} · সংযুক্ত {row.totals.connected} · আপডেট {row.totals.reports}{" "}
+                · বাকি {row.totals.pending} · ফলো-আপ {row.totals.followUps}
               </span>
               <Button
                 size="sm"
@@ -345,7 +373,9 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                       <td className="py-1.5 pr-3">
                         {agent.name}
                         {agent.employeeId ? (
-                          <span className="ml-1 text-xs text-muted-foreground">{agent.employeeId}</span>
+                          <span className="ml-1 text-xs text-muted-foreground">
+                            {agent.employeeId}
+                          </span>
                         ) : null}
                       </td>
                       <td className="py-1.5 pr-3 tabular">{agent.assigned}</td>
@@ -354,7 +384,9 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                       <td className="py-1.5 pr-3 tabular">
                         {agent.reports}
                         {agent.pending ? (
-                          <span className="ml-1 text-xs text-destructive">({agent.pending} বাকি)</span>
+                          <span className="ml-1 text-xs text-destructive">
+                            ({agent.pending} বাকি)
+                          </span>
                         ) : null}
                       </td>
                       <td className="py-1.5 text-xs text-muted-foreground">

@@ -45,7 +45,10 @@ function describe(status: number): { message: string; recoverable: boolean } {
     return { message: "Sarvam key rejected (authentication failed)", recoverable: true };
   }
   if (status === 400 || status === 413 || status === 422) {
-    return { message: "Sarvam rejected the audio (invalid or too long for sync STT)", recoverable: true };
+    return {
+      message: "Sarvam rejected the audio (invalid or too long for sync STT)",
+      recoverable: true,
+    };
   }
   if (status === 429) return { message: "Sarvam rate limit reached", recoverable: true };
   if (status >= 500) return { message: "Sarvam service error", recoverable: true };

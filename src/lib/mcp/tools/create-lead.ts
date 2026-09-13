@@ -25,7 +25,12 @@ export default defineTool({
     source: z.string().trim().max(40).default("mcp"),
     employee_id: z.string().trim().min(2).max(32).optional(),
   },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   handler: async ({ name, phone_number, company, notes, source, employee_id }, ctx) => {
     try {
       const email = await requireAllowedUser(ctx);
@@ -37,11 +42,20 @@ export default defineTool({
         .select("id, name, status")
         .eq("phone_number", phone)
         .maybeSingle();
-      if (existing) return text({ duplicate: true, message: "This phone number is already a lead.", lead: existing });
+      if (existing)
+        return text({
+          duplicate: true,
+          message: "This phone number is already a lead.",
+          lead: existing,
+        });
 
       let assignedTo: string | null = null;
       if (employee_id) {
-        const { data: agent } = await db.from("profiles").select("id").eq("employee_id", employee_id).maybeSingle();
+        const { data: agent } = await db
+          .from("profiles")
+          .select("id")
+          .eq("employee_id", employee_id)
+          .maybeSingle();
         if (!agent) throw new ToolError(`No agent with employee ID ${employee_id}.`);
         assignedTo = agent.id;
       }
@@ -52,7 +66,9 @@ export default defineTool({
           name,
           phone_number: phone,
           company: company ?? null,
-          notes: notes ? `${notes}\n\n(added via agent integration by ${email})` : `Added via agent integration by ${email}`,
+          notes: notes
+            ? `${notes}\n\n(added via agent integration by ${email})`
+            : `Added via agent integration by ${email}`,
           source,
           assigned_to: assignedTo,
           status: "pending",

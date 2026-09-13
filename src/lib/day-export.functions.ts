@@ -95,7 +95,9 @@ export const dayCallExport = createServerFn({ method: "POST" })
         : Promise.resolve({ data: [] as { id: string; name: string }[] }),
       agentIds.length
         ? supabaseAdmin.from("profiles").select("id, name, employee_id").in("id", agentIds)
-        : Promise.resolve({ data: [] as { id: string; name: string; employee_id: string | null }[] }),
+        : Promise.resolve({
+            data: [] as { id: string; name: string; employee_id: string | null }[],
+          }),
     ]);
 
     const leadName = new Map((leads ?? []).map((l) => [l.id, l.name]));
@@ -116,7 +118,7 @@ export const dayCallExport = createServerFn({ method: "POST" })
     const CONNECTED_SECONDS = 30;
     const calls: DayCallRow[] = inDay.map((row) => {
       const agent = row.agent_id ? agentMap.get(row.agent_id) : undefined;
-      const audio = row.audio_url ? signedByPath.get(row.audio_url) ?? null : null;
+      const audio = row.audio_url ? (signedByPath.get(row.audio_url) ?? null) : null;
       return {
         id: row.id,
         atDhaka: dhakaLabel(row.started_at ?? row.created_at),
@@ -199,7 +201,9 @@ export const recentSyncedCalls = createServerFn({ method: "POST" })
         : Promise.resolve({ data: [] as { id: string; name: string }[] }),
       agentIds.length
         ? supabaseAdmin.from("profiles").select("id, name, employee_id").in("id", agentIds)
-        : Promise.resolve({ data: [] as { id: string; name: string; employee_id: string | null }[] }),
+        : Promise.resolve({
+            data: [] as { id: string; name: string; employee_id: string | null }[],
+          }),
     ]);
     const leadName = new Map((leads ?? []).map((l) => [l.id, l.name]));
     const agentMap = new Map((agents ?? []).map((a) => [a.id, a]));
@@ -217,7 +221,7 @@ export const recentSyncedCalls = createServerFn({ method: "POST" })
 
     const calls = list.map((row) => {
       const agent = row.agent_id ? agentMap.get(row.agent_id) : undefined;
-      const audio = row.audio_url ? signedByPath.get(row.audio_url) ?? null : null;
+      const audio = row.audio_url ? (signedByPath.get(row.audio_url) ?? null) : null;
       return {
         id: row.id,
         atDhaka: dhakaLabel(row.started_at ?? row.created_at),

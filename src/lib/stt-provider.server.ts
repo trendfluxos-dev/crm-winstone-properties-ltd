@@ -14,7 +14,6 @@
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
-
 export type SttProviderName = "gemini" | "openai" | "sarvam";
 
 /** Gateway-served models per provider; both work from Bangladesh. */
@@ -94,7 +93,9 @@ async function transcribeWithGateway(
     const retryable = res.status === 429 || res.status >= 500;
     throw new SttProviderError({
       code: `${provider.toUpperCase()}_${res.status}`,
-      message: retryable ? "ট্রান্সক্রিপশন সেবা ব্যস্ত, পরে আবার চেষ্টা হবে" : "অডিও ট্রান্সক্রাইব করা যায়নি",
+      message: retryable
+        ? "ট্রান্সক্রিপশন সেবা ব্যস্ত, পরে আবার চেষ্টা হবে"
+        : "অডিও ট্রান্সক্রাইব করা যায়নি",
       retryable,
     });
   }
@@ -113,7 +114,12 @@ async function transcribeWithSarvam(
   bytes: Uint8Array,
   filename: string,
   contentType: string,
-): Promise<{ transcript: string; model: string; requestId: string | null; language: string | null }> {
+): Promise<{
+  transcript: string;
+  model: string;
+  requestId: string | null;
+  language: string | null;
+}> {
   const { sarvamTranscribeDetailed, SarvamError } = await import("@/lib/sarvam-stt.server");
 
   try {
@@ -166,7 +172,12 @@ export async function transcribeWithAdapter(
   const primary = sttPrimaryProvider();
   // Chain: preferred provider first, then the other Bangladesh-reachable
   // gateway provider, and Sarvam only when it is explicitly enabled.
-  const chain: SttProviderName[] = [primary, "gemini", "openai", ...(sarvamEnabled() ? ["sarvam" as const] : [])];
+  const chain: SttProviderName[] = [
+    primary,
+    "gemini",
+    "openai",
+    ...(sarvamEnabled() ? ["sarvam" as const] : []),
+  ];
   const order: SttProviderName[] = chain.filter(
     (p, i) => chain.indexOf(p) === i && (p !== "sarvam" || sarvamEnabled()),
   );
@@ -184,7 +195,10 @@ export async function transcribeWithAdapter(
       const out =
         provider === "sarvam"
           ? await transcribeWithSarvam(bytes, filename, contentType)
-          : { ...(await transcribeWithGateway(provider, bytes, filename, contentType)), language: null };
+          : {
+              ...(await transcribeWithGateway(provider, bytes, filename, contentType)),
+              language: null,
+            };
 
       return {
         transcript: out.transcript,

@@ -12,8 +12,7 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: "Privacy Policy — Winstone Connect" },
       {
         property: "og:description",
-        content:
-          "How Winstone Connect handles tele-sales data, recordings and user information.",
+        content: "How Winstone Connect handles tele-sales data, recordings and user information.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -26,15 +25,10 @@ function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
-        <Link
-          to="/"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
           ← Back to Winstone Connect
         </Link>
-        <h1 className="mt-4 font-display text-3xl font-bold tracking-tight">
-          Privacy Policy
-        </h1>
+        <h1 className="mt-4 font-display text-3xl font-bold tracking-tight">Privacy Policy</h1>
         <p className="mt-2 text-sm text-muted-foreground">Effective date: 10 September 2026</p>
 
         <div className="mt-8 space-y-6 text-sm leading-7 text-foreground">
@@ -81,8 +75,8 @@ function PrivacyPage() {
             <p className="mt-2 text-muted-foreground">
               Call recordings and interaction logs are retained for as long as the account requires
               them for compliance and coaching. Administrators may request deletion of records at
-              any time; deletion will permanently remove the record and any associated private
-              audio file.
+              any time; deletion will permanently remove the record and any associated private audio
+              file.
             </p>
           </section>
 

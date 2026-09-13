@@ -4,7 +4,13 @@
  * Executive HQ keeps one month of these; the IT Console keeps all of them.
  */
 import { CATEGORY_LABEL } from "@/lib/report-sheet.server";
-import { SHIFTS, currentShift, dhakaInstant, dhakaParts, shiftDueForSummary } from "@/lib/shift.server";
+import {
+  SHIFTS,
+  currentShift,
+  dhakaInstant,
+  dhakaParts,
+  shiftDueForSummary,
+} from "@/lib/shift.server";
 
 export type ShiftAgentLine = {
   agentId: string;
@@ -27,7 +33,13 @@ export type ShiftSummaryRow = {
   window_end: string;
   generated_at: string;
   hq_visible: boolean;
-  totals: { called: number; connected: number; reports: number; pending: number; followUps: number };
+  totals: {
+    called: number;
+    connected: number;
+    reports: number;
+    pending: number;
+    followUps: number;
+  };
   agents: ShiftAgentLine[];
 };
 
@@ -38,7 +50,13 @@ export type ShiftSheet = {
   windowStart: string;
   windowEnd: string;
   generatedAt: string;
-  totals: { called: number; connected: number; reports: number; pending: number; followUps: number };
+  totals: {
+    called: number;
+    connected: number;
+    reports: number;
+    pending: number;
+    followUps: number;
+  };
   agents: ShiftAgentLine[];
 };
 
@@ -75,7 +93,8 @@ async function buildShiftLines(startIso: string, endIso: string) {
 
   const assignedCount = new Map<string, number>();
   for (const lead of leadsRes.data ?? []) {
-    if (lead.assigned_to) assignedCount.set(lead.assigned_to, (assignedCount.get(lead.assigned_to) ?? 0) + 1);
+    if (lead.assigned_to)
+      assignedCount.set(lead.assigned_to, (assignedCount.get(lead.assigned_to) ?? 0) + 1);
   }
   const followCount = new Map<string, number>();
   for (const row of followRes.data ?? []) {
@@ -128,11 +147,16 @@ export async function liveShiftSheet(at: Date = new Date()): Promise<ShiftSheet>
   const open = currentShift(at);
   const shift =
     open ??
-    [...SHIFTS].filter((s) => minutes > s.endMinutes).sort((a, b) => b.endMinutes - a.endMinutes)[0] ??
+    [...SHIFTS]
+      .filter((s) => minutes > s.endMinutes)
+      .sort((a, b) => b.endMinutes - a.endMinutes)[0] ??
     SHIFTS[0]!;
   const windowStart = dhakaInstant(dateKey, shift.startMinutes);
   const windowEnd = open ? at : dhakaInstant(dateKey, shift.endMinutes);
-  const { lines, totals } = await buildShiftLines(windowStart.toISOString(), windowEnd.toISOString());
+  const { lines, totals } = await buildShiftLines(
+    windowStart.toISOString(),
+    windowEnd.toISOString(),
+  );
   return {
     shiftKey: `${dateKey}:${shift.id}:live`,
     shiftLabel: shift.label,

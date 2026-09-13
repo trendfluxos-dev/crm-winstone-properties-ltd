@@ -38,7 +38,8 @@ export const Route = createFileRoute("/coach")({
       { property: "og:title", content: "AI Sales Coach — Winstone Connect" },
       {
         property: "og:description",
-        content: "Per-agent performance summary and next steps from real call and WhatsApp activity.",
+        content:
+          "Per-agent performance summary and next steps from real call and WhatsApp activity.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -169,11 +170,27 @@ function BriefingView({ briefing }: { briefing: Briefing }) {
           value={`${m.connectRate.toFixed(0)}%`}
           hint={`${m.connected} of ${m.dials} calls`}
         />
-        <Tile label="Talk time" value={`${m.talkMinutes} min`} hint={`Avg ${m.avgCallSeconds}s per call`} />
+        <Tile
+          label="Talk time"
+          value={`${m.talkMinutes} min`}
+          hint={`Avg ${m.avgCallSeconds}s per call`}
+        />
         <Tile label="Deals won" value={String(m.dealsWon)} hint={`${m.assigned} leads assigned`} />
-        <Tile label="WhatsApp touches" value={String(m.whatsappTouches)} hint="Messages sent by this agent" />
-        <Tile label="Overdue follow-ups" value={String(m.overdueFollowUps)} hint="Past the callback deadline" />
-        <Tile label="Never dialled" value={String(m.untouchedLeads)} hint="Leads with zero attempts" />
+        <Tile
+          label="WhatsApp touches"
+          value={String(m.whatsappTouches)}
+          hint="Messages sent by this agent"
+        />
+        <Tile
+          label="Overdue follow-ups"
+          value={String(m.overdueFollowUps)}
+          hint="Past the callback deadline"
+        />
+        <Tile
+          label="Never dialled"
+          value={String(m.untouchedLeads)}
+          hint="Leads with zero attempts"
+        />
         <Tile
           label="Call mood"
           value={`${m.sentiment.positive}+ / ${m.sentiment.negative + m.sentiment.critical}-`}

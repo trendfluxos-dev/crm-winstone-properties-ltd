@@ -20,10 +20,7 @@ export function leadOwnerId(lead: LeadOwnerRow | null | undefined): string | nul
 }
 
 /** True when the lead belongs to somebody other than this profile. */
-export function leadHeldByOther(
-  lead: LeadOwnerRow | null | undefined,
-  profileId: string,
-): boolean {
+export function leadHeldByOther(lead: LeadOwnerRow | null | undefined, profileId: string): boolean {
   const owner = leadOwnerId(lead);
   return Boolean(owner) && owner !== profileId;
 }

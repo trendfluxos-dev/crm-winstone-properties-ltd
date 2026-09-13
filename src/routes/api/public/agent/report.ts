@@ -70,7 +70,9 @@ export const Route = createFileRoute("/api/public/agent/report")({
         const { data: recording } = report.recording_id
           ? await supabaseAdmin
               .from("call_recordings")
-              .select("id, analysis_status, ai_summary, sentiment, customer_objections, deal_stage, is_two_sided, recorder_source")
+              .select(
+                "id, analysis_status, ai_summary, sentiment, customer_objections, deal_stage, is_two_sided, recorder_source",
+              )
               .eq("id", report.recording_id)
               .maybeSingle()
           : { data: null };
@@ -131,10 +133,7 @@ export const Route = createFileRoute("/api/public/agent/report")({
           });
           return json({ ...result, ok: true });
         } catch (error) {
-          return json(
-            { error: error instanceof Error ? error.message : "রিপোর্ট জমা হয়নি" },
-            422,
-          );
+          return json({ error: error instanceof Error ? error.message : "রিপোর্ট জমা হয়নি" }, 422);
         }
       },
     },

@@ -29,8 +29,7 @@ export function CsvImportDialog() {
   const run = useServerFn(importLeads);
 
   const mutation = useMutation({
-    mutationFn: () =>
-      run({ data: { adminToken: getAdminToken() ?? "", rows, autoAssign } }),
+    mutationFn: () => run({ data: { adminToken: getAdminToken() ?? "", rows, autoAssign } }),
     onSuccess: (r) => {
       toast.success(`${r.imported} leads imported`, {
         description: r.skipped ? `${r.skipped} skipped (duplicate or invalid number)` : undefined,
@@ -97,7 +96,11 @@ export function CsvImportDialog() {
             disabled={!rows.length || mutation.isPending}
             onClick={() => mutation.mutate()}
           >
-            {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+            {mutation.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Upload className="size-4" />
+            )}
             Import {rows.length || ""} leads
           </Button>
         </div>

@@ -66,8 +66,7 @@ export const Route = createFileRoute("/api/public/agent/presence")({
           .from("profiles")
           .update({
             presence,
-            current_call_started_at:
-              presence === "on_call" ? (call_started_at ?? now) : null,
+            current_call_started_at: presence === "on_call" ? (call_started_at ?? now) : null,
             last_active_at: now,
           })
           .eq("id", agent.id);

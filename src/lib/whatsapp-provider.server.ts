@@ -10,24 +10,36 @@
 export type WhatsAppStatus = "configured" | "not_configured";
 
 export type WhatsAppSendResult =
-  | { ok: true; providerMessageId: string }
-  | { ok: false; error: string; status: WhatsAppStatus };
+  { ok: true; providerMessageId: string } | { ok: false; error: string; status: WhatsAppStatus };
 
 export type WhatsAppMessageStatus = "queued" | "sent" | "delivered" | "read" | "failed" | "unknown";
 
 export interface WhatsAppProvider {
   readonly name: string;
   readonly status: WhatsAppStatus;
-  sendMessage(input: { to: string; body: string; leadId?: string | null }): Promise<WhatsAppSendResult>;
+  sendMessage(input: {
+    to: string;
+    body: string;
+    leadId?: string | null;
+  }): Promise<WhatsAppSendResult>;
   sendTemplate(input: {
     to: string;
     template: string;
     variables?: Record<string, string>;
   }): Promise<WhatsAppSendResult>;
   receiveMessage(payload: unknown): Promise<{ handled: boolean; reason?: string }>;
-  processWebhook(input: { rawBody: string; signature: string | null }): Promise<{ ok: boolean; reason?: string }>;
+  processWebhook(input: {
+    rawBody: string;
+    signature: string | null;
+  }): Promise<{ ok: boolean; reason?: string }>;
   getConversation(leadId: string): Promise<
-    Array<{ id: string; direction: "in" | "out"; body: string | null; at: string; status: WhatsAppMessageStatus }>
+    Array<{
+      id: string;
+      direction: "in" | "out";
+      body: string | null;
+      at: string;
+      status: WhatsAppMessageStatus;
+    }>
   >;
   getMessageStatus(providerMessageId: string): Promise<WhatsAppMessageStatus>;
 }
@@ -71,7 +83,14 @@ export async function logWhatsAppFailure(input: {
 
 const NOT_CONFIGURED = "WhatsApp Business API সংযুক্ত নয় — INTEGRATION REQUIRED";
 
-const STATUSES: WhatsAppMessageStatus[] = ["queued", "sent", "delivered", "read", "failed", "unknown"];
+const STATUSES: WhatsAppMessageStatus[] = [
+  "queued",
+  "sent",
+  "delivered",
+  "read",
+  "failed",
+  "unknown",
+];
 
 function asStatus(raw: string | null | undefined): WhatsAppMessageStatus {
   const value = (raw ?? "").toLowerCase();
@@ -132,7 +151,8 @@ export async function applyStatusCallback(input: {
 
   // Never move a message backwards (a late "sent" must not undo "read").
   const rank: Record<string, number> = { queued: 0, sent: 1, delivered: 2, read: 3 };
-  if (status !== "failed" && (rank[status] ?? -1) < (rank[existing.status ?? ""] ?? -1)) return true;
+  if (status !== "failed" && (rank[status] ?? -1) < (rank[existing.status ?? ""] ?? -1))
+    return true;
 
   await supabaseAdmin
     .from("whatsapp_interactions")
@@ -232,7 +252,11 @@ class MetaWhatsApp implements WhatsAppProvider {
   }
 
   sendMessage(input: { to: string; body: string }) {
-    return this.post({ to: input.to, type: "text", text: { preview_url: false, body: input.body } });
+    return this.post({
+      to: input.to,
+      type: "text",
+      text: { preview_url: false, body: input.body },
+    });
   }
 
   sendTemplate(input: { to: string; template: string; variables?: Record<string, string> }) {
@@ -253,7 +277,8 @@ class MetaWhatsApp implements WhatsAppProvider {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { normalizeWhatsAppNumber } = await import("@/lib/whatsapp");
 
-    const entries = (payload as { entry?: Array<{ changes?: Array<{ value?: unknown }> }> }).entry ?? [];
+    const entries =
+      (payload as { entry?: Array<{ changes?: Array<{ value?: unknown }> }> }).entry ?? [];
     let handled = 0;
     for (const entry of entries) {
       for (const change of entry.changes ?? []) {
@@ -313,7 +338,9 @@ class MetaWhatsApp implements WhatsAppProvider {
         }
       }
     }
-    return handled > 0 ? { handled: true } : { handled: false, reason: "no message or status in payload" };
+    return handled > 0
+      ? { handled: true }
+      : { handled: false, reason: "no message or status in payload" };
   }
 
   async processWebhook(input: { rawBody: string; signature: string | null }) {

@@ -27,7 +27,9 @@ function dhakaStamp(iso: string) {
 export function shiftSummaryCsv(row: ShiftSummaryRow): string {
   const lines: string[] = [];
   lines.push([cell("শিফট"), cell(row.shift_label), cell(row.shift_key)].join(","));
-  lines.push([cell("সময়"), cell(dhakaStamp(row.window_start)), cell(dhakaStamp(row.window_end))].join(","));
+  lines.push(
+    [cell("সময়"), cell(dhakaStamp(row.window_start)), cell(dhakaStamp(row.window_end))].join(","),
+  );
   lines.push([cell("তৈরি"), cell(dhakaStamp(row.generated_at))].join(","));
   lines.push("");
   lines.push(
@@ -151,7 +153,13 @@ export async function backupShiftSummaryToDrive(shiftKey: string) {
     metadata: { driveFileId: uploaded.id, driveFileName: uploaded.name, folderId },
   });
 
-  return { shiftKey, driveFileId: uploaded.id, driveFileName: uploaded.name, driveFileUrl, folderId };
+  return {
+    shiftKey,
+    driveFileId: uploaded.id,
+    driveFileName: uploaded.name,
+    driveFileUrl,
+    folderId,
+  };
 }
 
 /** Drive links for a set of shift keys, for the IT Console list. */

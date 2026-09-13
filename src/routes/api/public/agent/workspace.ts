@@ -79,7 +79,9 @@ export const Route = createFileRoute("/api/public/agent/workspace")({
                 .limit(limit),
               supabaseAdmin
                 .from("whatsapp_interactions")
-                .select("id, lead_id, agent_id, sender_type, message_type, message_content, created_at")
+                .select(
+                  "id, lead_id, agent_id, sender_type, message_type, message_content, created_at",
+                )
                 .in("lead_id", leadIds)
                 .order("created_at", { ascending: false })
                 .limit(limit),

@@ -38,7 +38,9 @@ export function AdminPinDialog({
     onSuccess: (result) => {
       if (result.ok) {
         setAdminToken(result.token);
-        toast.success(surface === "hq" ? "Executive HQ unlocked (view-only)" : "Control board unlocked");
+        toast.success(
+          surface === "hq" ? "Executive HQ unlocked (view-only)" : "Control board unlocked",
+        );
         setPin("");
         onOpenChange(false);
         onUnlocked?.();

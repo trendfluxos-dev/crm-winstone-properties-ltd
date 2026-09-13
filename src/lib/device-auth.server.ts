@@ -19,9 +19,7 @@ export type Profile = SafeProfile;
 export type AgentDevice = Database["public"]["Tables"]["agent_devices"]["Row"];
 
 export type ApiCaller =
-  | { kind: "device"; device: AgentDevice; profile: Profile }
-  | { kind: "server" }
-  | { kind: "none" };
+  { kind: "device"; device: AgentDevice; profile: Profile } | { kind: "server" } | { kind: "none" };
 
 export function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -153,11 +151,7 @@ export async function resolveApiCaller(request: Request): Promise<ApiCaller> {
         .select("*")
         .eq("id", device.profile_id)
         .maybeSingle();
-      if (
-        profile &&
-        profile.is_active &&
-        (profile.approval_status ?? "pending") === "approved"
-      ) {
+      if (profile && profile.is_active && (profile.approval_status ?? "pending") === "approved") {
         void supabaseAdmin
           .from("agent_devices")
           .update({ last_seen_at: new Date().toISOString() })

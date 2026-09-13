@@ -327,7 +327,9 @@ export async function submitCallReport(input: {
     recordingId: report.recording_id,
     kind: "outcome_logged",
     detail: `${CATEGORY_LABEL[category]}${
-      classified ? ` — ${TEMPERATURE_LABEL[temperature!]} / গ্রেড ${grade}` : " — কথা হয়নি, আবার কল হবে"
+      classified
+        ? ` — ${TEMPERATURE_LABEL[temperature!]} / গ্রেড ${grade}`
+        : " — কথা হয়নি, আবার কল হবে"
     }${input.followUpAt ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}` : ""}`,
   });
 
@@ -361,6 +363,29 @@ export async function submitCallReport(input: {
     payload: { leadId: report.lead_id, category, temperature, grade },
   });
 
+  // Review alerts for IT / Authority: AI-vs-agent disagreement and a received
+  // call with no recording. Neither changes the agent's decision, and a failure
+  // here must never reject an accepted report.
+  let review: { mismatchAlertId: string | null; missingRecordingAlertId: string | null } = {
+    mismatchAlertId: null,
+    missingRecordingAlertId: null,
+  };
+  try {
+    const { reviewSubmittedReport } = await import("@/lib/classification-review.server");
+    review = await reviewSubmittedReport({
+      reportId: report.id,
+      leadId: report.lead_id,
+      agentId: input.agentId,
+      recordingId: report.recording_id,
+      connected: received,
+      durationSeconds: report.duration_seconds ?? 0,
+      temperature,
+      grade,
+    });
+  } catch (error) {
+    console.error("classification review after submit failed:", error);
+  }
+
   // The spreadsheet is updated as soon as the agent's update is accepted.
   // Best effort: a spreadsheet outage must never reject an accepted report.
   let sheet: { appended: number } | null = null;
@@ -376,6 +401,7 @@ export async function submitCallReport(input: {
     ok: true,
     followUpId,
     sheet,
+    review,
     workState: received && classified ? ("completed" as const) : ("pending" as const),
   };
 }
@@ -419,10 +445,13 @@ function suggestionFrom(recording: {
   const stage = (recording.deal_stage ?? "").toLowerCase();
 
   const interest: AiSuggestion["interest"] =
-    recording.sentiment === "positive" ? "high"
-    : recording.sentiment === "neutral" ? "medium"
-    : recording.sentiment ? "low"
-    : "unknown";
+    recording.sentiment === "positive"
+      ? "high"
+      : recording.sentiment === "neutral"
+        ? "medium"
+        : recording.sentiment
+          ? "low"
+          : "unknown";
 
   let suggested: CallCategory | null = null;
   if (objections.some((o) => /কলব্যাক|callback|পরে ফোন/i.test(o))) suggested = "callback";
@@ -449,14 +478,12 @@ function suggestionFrom(recording: {
         : suggested === "not_interested"
           ? "এই লিড বন্ধ করে কারণ লিখুন"
           : "আগামীকাল সকালে ফলো-আপ কল দিন",
-    suggestedTemperature:
-      LEAD_TEMPERATURES.includes(recording.ai_temperature as LeadTemperature)
-        ? (recording.ai_temperature as LeadTemperature)
-        : null,
-    suggestedGrade:
-      LEAD_GRADES.includes(recording.ai_grade as LeadGrade)
-        ? (recording.ai_grade as LeadGrade)
-        : null,
+    suggestedTemperature: LEAD_TEMPERATURES.includes(recording.ai_temperature as LeadTemperature)
+      ? (recording.ai_temperature as LeadTemperature)
+      : null,
+    suggestedGrade: LEAD_GRADES.includes(recording.ai_grade as LeadGrade)
+      ? (recording.ai_grade as LeadGrade)
+      : null,
     suggestedFollowUpAt:
       suggested === "follow_up" || suggested === "hot_lead" || suggested === "callback"
         ? followUp.toISOString()

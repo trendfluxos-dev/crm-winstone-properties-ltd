@@ -33,7 +33,9 @@ export function ContactSuppressionNotice({ leadId }: { leadId: string }) {
               ? "রেকর্ডিং বন্ধ"
               : "রেকর্ডিং সম্মতি নেই"}
       </span>
-      {data.optedOut && data.reason ? <span className="text-muted-foreground">{data.reason}</span> : null}
+      {data.optedOut && data.reason ? (
+        <span className="text-muted-foreground">{data.reason}</span>
+      ) : null}
     </div>
   );
 }

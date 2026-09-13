@@ -66,7 +66,12 @@ export function AuditTrail() {
             কে কী করেছেন তার স্থায়ী রেকর্ড — এখান থেকে কিছু মুছে ফেলা বা বদলানো যায় না।
           </p>
         </div>
-        <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => void trail.refetch()}>
+        <Button
+          size="sm"
+          variant="secondary"
+          className="gap-1.5"
+          onClick={() => void trail.refetch()}
+        >
           <RefreshCw className="size-3.5" /> রিফ্রেশ
         </Button>
       </header>

@@ -22,7 +22,8 @@ export const transcribeAudio = createServerFn({ method: "POST" })
 
     const bytes = Uint8Array.from(atob(data.audioBase64), (c) => c.charCodeAt(0));
     if (bytes.byteLength < 2048) throw new Error("Recording too short — please speak again");
-    if (bytes.byteLength > 14 * 1024 * 1024) throw new Error("Recording too long — split into smaller clips");
+    if (bytes.byteLength > 14 * 1024 * 1024)
+      throw new Error("Recording too long — split into smaller clips");
 
     const blob = new Blob([bytes], { type: "audio/wav" });
     const form = new FormData();

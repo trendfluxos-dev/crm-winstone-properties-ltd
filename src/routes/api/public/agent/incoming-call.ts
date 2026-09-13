@@ -18,7 +18,12 @@ const Body = z.object({
   contact_name: z.string().trim().max(120).nullable().optional(),
   state: z.enum(["ringing", "answered", "completed", "no_answer", "failed"]),
   at: z.string().datetime({ offset: true }).optional(),
-  duration_seconds: z.number().int().min(0).max(24 * 3600).optional(),
+  duration_seconds: z
+    .number()
+    .int()
+    .min(0)
+    .max(24 * 3600)
+    .optional(),
   recording_supported: z.boolean().optional(),
   recording_note: z.string().trim().max(300).nullable().optional(),
 });
@@ -176,10 +181,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
         const connected = body.state === "completed";
 
         if (body.state === "completed" || body.state === "no_answer" || body.state === "failed") {
-          await supabaseAdmin
-            .from("leads")
-            .update({ last_call_at: at })
-            .eq("id", leadId);
+          await supabaseAdmin.from("leads").update({ last_call_at: at }).eq("id", leadId);
 
           if (connected) {
             const { openCallReport } = await import("@/lib/call-reports.server");

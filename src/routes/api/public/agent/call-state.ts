@@ -18,7 +18,12 @@ const Body = z.object({
   lead_id: z.string().uuid(),
   state: z.enum(["initiated", "ringing", "answered", "completed", "failed", "no_answer"]),
   at: z.string().datetime({ offset: true }).optional(),
-  duration_seconds: z.number().int().min(0).max(24 * 3600).optional(),
+  duration_seconds: z
+    .number()
+    .int()
+    .min(0)
+    .max(24 * 3600)
+    .optional(),
   agent_phone: z.string().trim().min(5).max(20).nullable().optional(),
   recording_supported: z.boolean().optional(),
   recording_note: z.string().trim().max(300).nullable().optional(),

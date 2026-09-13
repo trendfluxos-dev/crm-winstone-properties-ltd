@@ -152,8 +152,8 @@ export function CommandAgentPanel({ surface }: { surface: Surface }) {
       <div className="space-y-3 px-4 py-4">
         {turns.length === 0 ? (
           <p className="text-xs text-muted-foreground">
-            সাধারণ বাংলায় লিখুন — উত্তর আসবে শুধু লাইভ তথ্য থেকে, আর করার মতো কাজ থাকলে বোতাম হিসেবে
-            দেখাবে। কোনো কাজ নিজে নিজে চলে না।
+            সাধারণ বাংলায় লিখুন — উত্তর আসবে শুধু লাইভ তথ্য থেকে, আর করার মতো কাজ থাকলে বোতাম
+            হিসেবে দেখাবে। কোনো কাজ নিজে নিজে চলে না।
           </p>
         ) : (
           <div className="max-h-[26rem] space-y-4 overflow-y-auto pr-1">
@@ -175,7 +175,9 @@ export function CommandAgentPanel({ surface }: { surface: Surface }) {
 
                     {(turn.facts?.length ?? 0) > 0 && (
                       <ul className="space-y-1 border-l-2 border-border pl-3 text-xs text-muted-foreground">
-                        {turn.facts?.map((fact) => <li key={fact}>{fact}</li>)}
+                        {turn.facts?.map((fact) => (
+                          <li key={fact}>{fact}</li>
+                        ))}
                       </ul>
                     )}
 

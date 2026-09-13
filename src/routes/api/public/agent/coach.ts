@@ -41,7 +41,11 @@ export const Route = createFileRoute("/api/public/agent/coach")({
 
         const [profileRes, configRes] = await Promise.all([
           parsed.data.agent_id
-            ? supabaseAdmin.from("profiles").select("id").eq("id", parsed.data.agent_id).maybeSingle()
+            ? supabaseAdmin
+                .from("profiles")
+                .select("id")
+                .eq("id", parsed.data.agent_id)
+                .maybeSingle()
             : supabaseAdmin
                 .from("profiles")
                 .select("id")

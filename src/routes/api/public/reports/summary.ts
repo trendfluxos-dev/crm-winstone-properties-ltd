@@ -15,8 +15,14 @@ import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
  * mixes and the agent scorecard, computed by the same aggregation code.
  */
 const Query = z.object({
-  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  from: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  to: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   employee_id: z.string().trim().min(2).max(32).optional(),
   agent_id: z.string().uuid().optional(),
   source: z.string().trim().max(64).default("all"),
