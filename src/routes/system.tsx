@@ -6,6 +6,7 @@ import { AccountApprovals } from "@/components/crm/AccountApprovals";
 import { ApkInstallCard } from "@/components/crm/ApkInstallCard";
 import { AuditTrail } from "@/components/crm/AuditTrail";
 import { DocSummaryPanel } from "@/components/crm/DocSummaryPanel";
+import { DriveBackupPanel } from "@/components/crm/DriveBackupPanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
 import { StaffAccountsTable } from "@/components/crm/StaffAccountsTable";
@@ -117,6 +118,8 @@ function SystemBoard() {
       <SyncedCallsPanel />
 
       <DayCallExportPanel />
+
+      <DriveBackupPanel />
 
       <DocSummaryPanel />
 
