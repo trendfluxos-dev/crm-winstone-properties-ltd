@@ -361,7 +361,7 @@ export const assignLeadsToAgent = createServerFn({ method: "POST" })
 
     let query = supabaseAdmin
       .from("leads")
-      .select("id")
+      .select("id, assigned_to")
       .eq("status", "pending")
       .order("created_at")
       .limit(data.count);
@@ -385,6 +385,7 @@ export const assignLeadsToAgent = createServerFn({ method: "POST" })
     await supabaseAdmin.from("lead_assignments").insert(
       pool.map((l) => ({
         lead_id: l.id,
+        from_agent_id: l.assigned_to ?? null,
         to_agent_id: data.agentId,
         source: "coordinator",
       })),
