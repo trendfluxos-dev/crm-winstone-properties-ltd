@@ -530,3 +530,132 @@ export async function loadPendingReportDetail(agentId: string) {
 
   return { report, lead, recording, suggestion };
 }
+
+/**
+ * Field-correction window: an agent may correct an update they already submitted
+ * while the Dhaka clock is inside 09:00–12:45 on the same day the call happened.
+ * Executive HQ recomputes its presentation on every read, so a correction simply
+ * shows up as newer numbers there — HQ is never shown that an edit took place.
+ */
+export const EDIT_WINDOW_START = 9 * 60;
+export const EDIT_WINDOW_END = 12 * 60 + 45;
+
+export function reportEditable(callEndedAt: string, at: Date = new Date()) {
+  const now = dhakaClock(at);
+  if (now.minutes < EDIT_WINDOW_START || now.minutes > EDIT_WINDOW_END) return false;
+  return dhakaClock(new Date(callEndedAt)).dateKey === now.dateKey;
+}
+
+function dhakaClock(at: Date) {
+  const shifted = new Date(at.getTime() + 6 * 60 * 60 * 1000);
+  return {
+    minutes: shifted.getUTCHours() * 60 + shifted.getUTCMinutes(),
+    dateKey: shifted.toISOString().slice(0, 10),
+  };
+}
+
+/** Applies an agent's own correction to an already submitted update. */
+export async function editSubmittedReport(input: {
+  reportId: string;
+  agentId: string;
+  category: string;
+  summary?: string | null;
+  note?: string | null;
+  reason?: string | null;
+  followUpAt?: string | null;
+  temperature?: string | null;
+  grade?: string | null;
+}) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+  const { data: report } = await supabaseAdmin
+    .from("call_reports")
+    .select("*")
+    .eq("id", input.reportId)
+    .maybeSingle();
+  if (!report) throw new Error("রিপোর্ট পাওয়া যায়নি");
+  if (report.agent_id !== input.agentId) throw new Error("এই রিপোর্ট আপনার নয়");
+  if (report.status !== "submitted") throw new Error("এই রিপোর্ট এখনো জমা হয়নি");
+  if (!reportEditable(report.call_ended_at)) {
+    throw new Error("সংশোধনের সময় শেষ — সকাল ৯:০০ থেকে ১২:৪৫ পর্যন্ত একই দিনের রিপোর্ট বদলানো যায়");
+  }
+
+  const received = report.connected !== false;
+  const invalid = validateReport({ ...input, connected: received });
+  if (invalid) throw new Error(invalid.message);
+
+  const category = input.category as CallCategory;
+  const temperature = received ? ((input.temperature ?? null) as LeadTemperature | null) : null;
+  const grade = received ? ((input.grade ?? null) as LeadGrade | null) : null;
+  const nowIso = new Date().toISOString();
+
+  const { error } = await supabaseAdmin
+    .from("call_reports")
+    .update({
+      category,
+      summary: input.summary?.trim() || null,
+      note: input.note?.trim() || null,
+      reason: input.reason?.trim() || null,
+      follow_up_at: input.followUpAt ?? null,
+      temperature,
+      grade,
+    })
+    .eq("id", report.id)
+    .eq("agent_id", input.agentId);
+  if (error) throw new Error(error.message);
+
+  const notes =
+    [input.summary?.trim(), input.note?.trim(), input.reason?.trim()].filter(Boolean).join(" — ") ||
+    null;
+
+  await supabaseAdmin
+    .from("leads")
+    .update({
+      status: received && temperature && grade ? LEAD_STATUS_FOR[category] : "pending",
+      outcome_category: category,
+      notes,
+      ...(received && temperature && grade
+        ? {
+            temperature,
+            grade,
+            classification_note: input.note?.trim() || null,
+            classified_at: nowIso,
+            classified_by: input.agentId,
+            work_state: "completed",
+          }
+        : {}),
+    })
+    .eq("id", report.lead_id);
+
+  if (input.followUpAt) {
+    await supabaseAdmin
+      .from("follow_up_events")
+      .update({
+        category,
+        note: input.note?.trim() || null,
+        scheduled_at: input.followUpAt,
+        priority: category === "callback" ? "high" : "normal",
+      })
+      .eq("report_id", report.id)
+      .neq("status", "done");
+  }
+
+  const { logAudit } = await import("@/lib/audit.server");
+  await logAudit({
+    action: "call_report_edited",
+    entityType: "call_report",
+    entityId: report.id,
+    actorProfileId: input.agentId,
+    metadata: { leadId: report.lead_id, category, temperature, grade },
+  });
+
+  // Keep the spreadsheet aligned; an outage must never reject the correction.
+  try {
+    const { syncReportsToSheet } = await import("@/lib/report-sheet.server");
+    await syncReportsToSheet();
+  } catch (sheetError) {
+    console.error("report sheet sync after edit failed:", sheetError);
+  }
+
+  return { ok: true as const };
+}
