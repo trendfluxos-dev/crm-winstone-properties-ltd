@@ -12,7 +12,7 @@ import {
   type PipelineRow,
   type StageState,
 } from "@/lib/pipeline.functions";
-import { adminToken } from "@/lib/session";
+import { useAdminToken } from "@/lib/local-session";
 
 const FILTERS: { key: Parameters<typeof recordingPipeline>[0] extends never ? string : string; label: string }[] = [
   { key: "all", label: "সব" },
