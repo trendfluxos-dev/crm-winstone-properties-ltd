@@ -358,7 +358,7 @@ export async function submitCallReport(input: {
     entityType: "call_report",
     entityId: report.id,
     idempotencyKey: `report_submitted:${report.id}`,
-    payload: { leadId: report.lead_id, category },
+    payload: { leadId: report.lead_id, category, temperature, grade },
   });
 
   // The spreadsheet is updated as soon as the agent's update is accepted.
@@ -372,7 +372,12 @@ export async function submitCallReport(input: {
     console.error("report sheet sync after submit failed:", error);
   }
 
-  return { ok: true, followUpId, sheet };
+  return {
+    ok: true,
+    followUpId,
+    sheet,
+    workState: received && classified ? ("completed" as const) : ("pending" as const),
+  };
 }
 
 /**
