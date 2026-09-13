@@ -95,7 +95,8 @@ export function LeadCard({
           aria-label="Open dossier"
         >
           <FolderOpen className="size-5" />
-          <span className="expand-label text-sm">Dossier</span>
+          <span className="text-sm font-semibold sm:hidden">Dossier</span>
+          <span className="expand-label hidden text-sm sm:inline">Dossier</span>
         </Button>
       </div>
     </article>
