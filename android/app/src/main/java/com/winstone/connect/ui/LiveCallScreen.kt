@@ -297,8 +297,8 @@ private fun ReportSheet(notes: String) {
                     val id = reportId ?: return@Button
                     busy = true; error = null
                     scope.launch {
-                        val followUp = "${'$'}{date}T${'$'}{time}:00+06:00"
-                        val result = runCatching {
+                    val followUp = "${date}T${time}:00+06:00"
+                    val result = runCatching {
                             WinstoneApi.submitReport(
                                 reportId = id,
                                 category = category,
