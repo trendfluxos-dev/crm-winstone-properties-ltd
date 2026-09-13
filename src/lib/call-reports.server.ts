@@ -45,6 +45,30 @@ const LEAD_STATUS_FOR: Record<CallCategory, "pending" | "contacted" | "follow_up
   closed_converted: "closed",
 };
 
+/**
+ * Classification is the business decision on a received call: how warm the
+ * customer is, and how valuable the lead is. It is always a human decision —
+ * AI may suggest, never write it.
+ */
+export const LEAD_TEMPERATURES = ["hot", "warm", "cold"] as const;
+export const LEAD_GRADES = ["A", "B", "C", "D"] as const;
+
+export type LeadTemperature = (typeof LEAD_TEMPERATURES)[number];
+export type LeadGrade = (typeof LEAD_GRADES)[number];
+
+export const TEMPERATURE_LABEL: Record<LeadTemperature, string> = {
+  hot: "HOT — এখনই কিনবেন",
+  warm: "WARM — আগ্রহ আছে",
+  cold: "COLD — এখন নয়",
+};
+
+export const GRADE_LABEL: Record<LeadGrade, string> = {
+  A: "A — সর্বোচ্চ মান",
+  B: "B — ভালো",
+  C: "C — সাধারণ",
+  D: "D — দুর্বল",
+};
+
 export type ReportValidationError = { field: string; message: string };
 
 /** Same rules as the database trigger, so the UI can show them before submit. */
@@ -54,6 +78,10 @@ export function validateReport(input: {
   note?: string | null;
   reason?: string | null;
   followUpAt?: string | null;
+  /** A received call must be classified; an unanswered one goes back to the retry queue. */
+  connected?: boolean;
+  temperature?: string | null;
+  grade?: string | null;
 }): ReportValidationError | null {
   const category = input.category as CallCategory | null;
   if (!category || !CALL_CATEGORIES.includes(category)) {
@@ -71,6 +99,14 @@ export function validateReport(input: {
   }
   if ((category === "not_interested" || category === "wrong_number") && !reason) {
     return { field: "reason", message: "কারণ লিখুন" };
+  }
+  if (input.connected !== false) {
+    if (!LEAD_TEMPERATURES.includes((input.temperature ?? "") as LeadTemperature)) {
+      return { field: "temperature", message: "কথা হওয়া কলে Hot / Warm / Cold বাছাই করুন" };
+    }
+    if (!LEAD_GRADES.includes((input.grade ?? "") as LeadGrade)) {
+      return { field: "grade", message: "কথা হওয়া কলে গ্রেড A / B / C / D বাছাই করুন" };
+    }
   }
   return null;
 }
