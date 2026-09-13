@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { AccountApprovals } from "@/components/crm/AccountApprovals";
 import { ApkInstallCard } from "@/components/crm/ApkInstallCard";
+import { AppReleasePanel } from "@/components/crm/AppReleasePanel";
 import { AuditTrail } from "@/components/crm/AuditTrail";
 import { DocSummaryPanel } from "@/components/crm/DocSummaryPanel";
 import { DriveBackupPanel } from "@/components/crm/DriveBackupPanel";
@@ -137,6 +138,8 @@ function SystemBoard() {
       <SystemCustomizer />
 
       <ApkInstallCard />
+
+      <AppReleasePanel />
 
       <AuditTrail />
 
