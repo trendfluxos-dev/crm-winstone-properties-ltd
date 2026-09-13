@@ -50,6 +50,7 @@ import com.winstone.connect.data.remote.WinstoneApi
 import androidx.compose.ui.platform.LocalContext
 import com.winstone.connect.data.AgentSession
 import com.winstone.connect.telephony.LiveCallLauncher
+import com.winstone.connect.data.remote.UpdateChecker
 import com.winstone.connect.telephony.RecordingCapabilityCheck
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
@@ -70,6 +71,16 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
     var callBlocked by remember { mutableStateOf<String?>(null) }
     var showNewLead by remember { mutableStateOf(false) }
     var whatsappLead by remember { mutableStateOf<Lead?>(null) }
+    val context = LocalContext.current
+    var update by remember { mutableStateOf<UpdateChecker.Available?>(null) }
+    var updateDismissed by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val installed = runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode.toInt()
+        }.getOrDefault(0)
+        update = UpdateChecker.check(installed)
+    }
 
     LaunchedEffect(state.toast) {
         state.toast?.let {
@@ -97,6 +108,23 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                 onRefresh = { vm.refresh() },
                 onSignOut = { vm.signOut() },
             )
+
+            update?.takeIf { !updateDismissed || it.mandatory }?.let { available ->
+                UpdateBanner(
+                    available = available,
+                    onInstall = {
+                        runCatching {
+                            context.startActivity(
+                                android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse(available.downloadUrl),
+                                ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+                            )
+                        }
+                    },
+                    onDismiss = { updateDismissed = true },
+                )
+            }
 
             state.error?.let {
                 Text(
@@ -510,6 +538,48 @@ private fun StatusCards(state: DeskUiState) {
                 fontSize = 12.sp,
                 color = WinInkMuted,
             )
+        }
+    }
+}
+
+
+/**
+ * New-version banner. A mandatory release cannot be dismissed, but installing is
+ * still an explicit agent action followed by Android's own install confirmation.
+ */
+@Composable
+private fun UpdateBanner(
+    available: UpdateChecker.Available,
+    onInstall: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = WinGreenSoft),
+        shape = RoundedCornerShape(14.dp),
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                if (available.mandatory) "নতুন ভার্সন বাধ্যতামূলক: ${available.versionName}"
+                else "নতুন ভার্সন এসেছে: ${available.versionName}",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+            )
+            available.notes?.let {
+                Text(it, fontSize = 12.sp, color = WinInkMuted, modifier = Modifier.padding(top = 2.dp))
+            }
+            Text(
+                "ডাউনলোড শেষে ইনস্টল করার অনুমতি ফোন নিজেই চাইবে।",
+                fontSize = 11.sp,
+                color = WinInkMuted,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onInstall) { Text("ডাউনলোড ও ইনস্টল") }
+                if (!available.mandatory) {
+                    TextButton(onClick = onDismiss) { Text("পরে") }
+                }
+            }
         }
     }
 }
