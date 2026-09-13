@@ -124,13 +124,7 @@ function ControlBoard() {
           </p>
         </div>
 
-        <SystemNoticeBar surface="hq" />
-
-        <CallOpsPanel />
-
-        <SyncedCallsPanel />
-
-        <DayCallExportPanel />
+        <ExecutiveBrief />
 
         <ShiftSummaryPanel scope="hq" />
 
@@ -138,7 +132,6 @@ function ControlBoard() {
 
         <AskHqPanel />
 
-        <SelfClaimsFeed />
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile
