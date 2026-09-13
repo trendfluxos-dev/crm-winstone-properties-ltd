@@ -132,12 +132,15 @@ object CallSyncQueue {
         durationSeconds: Int = 0,
         recordingSupported: Boolean? = null,
         recordingNote: String? = null,
+        /** "incoming" for a customer callback, "outgoing" for a dialer call. */
+        direction: String = "incoming",
     ) {
         enqueue(
             context,
-            unique = "incoming_${callUid}_$state",
+            unique = "${direction}_${callUid}_$state",
             data = Data.Builder()
                 .putString(KEY_KIND, KIND_INCOMING_CALL)
+                .putString(KEY_DIRECTION, direction)
                 .putString(KEY_CALL_UID, callUid)
                 .putString(KEY_PHONE, phoneNumber)
                 .putString(KEY_STATE, state)
@@ -180,6 +183,7 @@ object CallSyncQueue {
     const val KIND_OUTCOME = "outcome"
     const val KIND_REPORT_OPEN = "report_open"
     const val KIND_INCOMING_CALL = "incoming_call"
+    const val KEY_DIRECTION = "direction"
 }
 
 class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -225,6 +229,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                                 inputData.getBoolean(CallSyncQueue.KEY_REC_SUPPORTED, false)
                             else null,
                         recordingNote = inputData.getString(CallSyncQueue.KEY_REC_NOTE),
+                        direction = inputData.getString(CallSyncQueue.KEY_DIRECTION) ?: "incoming",
                     )
                     Result.success()
                 }
