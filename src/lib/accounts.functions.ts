@@ -172,12 +172,8 @@ export const listAccountRequests = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ adminToken: z.string() }).parse(input))
   .handler(async ({ data }) => {
     const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
-    {
-      const decider = await resolveCaller(data.adminToken);
-      requireAuthority(decider);
-      const { requireWrite } = await import("@/lib/access.server");
-      requireWrite(decider);
-    }
+    requireAuthority(await resolveCaller(data.adminToken));
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("profiles")
