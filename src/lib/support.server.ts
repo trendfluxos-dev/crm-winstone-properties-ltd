@@ -311,7 +311,9 @@ export async function searchArticles(query: string, limit = 5) {
       .from("support_articles")
       .select("id, slug, title, summary, body_markdown, tags, updated_at")
       .eq("status", "published")
-      .textSearch("search_tsv", terms.join(" | "), { type: "plain", config: "simple" })
+      .textSearch("search_tsv", terms.map((term) => `${term}:*`).join(" | "), {
+        config: "simple",
+      })
       .limit(limit);
     if (data?.length) return data;
   }
