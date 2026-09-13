@@ -24,6 +24,7 @@ import { Route as IngestRouteImport } from './routes/ingest'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VoiceTranscriptionRouteImport } from './routes/voice-transcription'
@@ -131,6 +132,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SystemRoute = SystemRouteImport.update({
@@ -323,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
+  '/support': typeof SupportRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
@@ -373,6 +380,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
+  '/support': typeof SupportRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
@@ -424,6 +432,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
+  '/support': typeof SupportRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
@@ -476,6 +485,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/privacy'
     | '/reports'
+    | '/support'
     | '/system'
     | '/terms'
     | '/voice-transcription'
@@ -526,6 +536,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/privacy'
     | '/reports'
+    | '/support'
     | '/system'
     | '/terms'
     | '/voice-transcription'
@@ -576,6 +587,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/privacy'
     | '/reports'
+    | '/support'
     | '/system'
     | '/terms'
     | '/voice-transcription'
@@ -627,6 +639,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportsRoute: typeof ReportsRoute
+  SupportRoute: typeof SupportRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
   VoiceTranscriptionRoute: typeof VoiceTranscriptionRoute
@@ -767,6 +780,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/system': {
@@ -1019,6 +1039,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
   ReportsRoute: ReportsRoute,
+  SupportRoute: SupportRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
   VoiceTranscriptionRoute: VoiceTranscriptionRoute,
