@@ -150,3 +150,32 @@ export async function driveFolderExists(folderId: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Real Drive metadata for one file id. Returns null when Drive does not have
+ * the file (deleted, wrong id, or no access) so callers can report
+ * DRIVE_VERIFICATION_FAILED instead of trusting a database flag.
+ */
+export async function driveFileMeta(fileId: string): Promise<
+  { id: string; name: string; size: number | null; trashed: boolean; webViewLink: string | null } | null
+> {
+  try {
+    const meta = await driveFetch<{
+      id?: string;
+      name?: string;
+      size?: string;
+      trashed?: boolean;
+      webViewLink?: string;
+    }>(`/files/${fileId}?fields=id,name,size,trashed,webViewLink`);
+    if (!meta?.id) return null;
+    return {
+      id: meta.id,
+      name: meta.name ?? "",
+      size: meta.size ? Number(meta.size) : null,
+      trashed: meta.trashed === true,
+      webViewLink: meta.webViewLink ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
