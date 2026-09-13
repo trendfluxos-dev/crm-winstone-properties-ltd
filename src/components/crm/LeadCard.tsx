@@ -1,6 +1,7 @@
-import { BadgeCheck, FolderOpen, PhoneOutgoing, Repeat, Sparkles } from "lucide-react";
+import { BadgeCheck, FolderOpen, Repeat, Sparkles } from "lucide-react";
 
 import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
+import { WebCallButton } from "@/components/crm/WebCallButton";
 import { Button } from "@/components/ui/button";
 import type { CallRecording, Lead, Profile } from "@/lib/crm-data";
 import { relativeTime, summaryBullets } from "@/lib/crm-format";
@@ -70,15 +71,12 @@ export function LeadCard({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button
-          asChild
-          size="lg"
-          className="h-11 min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-xl text-base font-semibold shadow-sm transition-all duration-300 hover:shadow-md"
-        >
-          <a href={`tel:${lead.phone_number}`}>
-            <PhoneOutgoing className="size-5" /> Call
-          </a>
-        </Button>
+        <WebCallButton
+          leadId={lead.id}
+          phone={lead.phone_number}
+          label="কল"
+          className="basis-[calc(50%-0.25rem)] transition-all duration-300 hover:shadow-md"
+        />
         <WhatsAppAction
           phone={lead.phone_number}
           leadId={lead.id}
