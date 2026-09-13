@@ -16,7 +16,8 @@ export type LeadEventKind =
   | "transcript_failed"
   | "outcome_logged"
   | "whatsapp_message"
-  | "self_claimed";
+  | "self_claimed"
+  | "lead_classified";
 
 export async function logLeadEvent(input: {
   leadId: string | null;
