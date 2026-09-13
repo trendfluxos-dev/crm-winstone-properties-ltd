@@ -91,12 +91,12 @@ export function validateReport(input: {
   const note = (input.note ?? "").trim();
   const reason = (input.reason ?? "").trim();
 
-  // Every call, every category: summary + note + follow-up date are mandatory.
+  // Every call, every category: summary + note are mandatory. Follow-up is
+  // OPTIONAL — an empty follow_up_at means "no follow-up needed", which is a
+  // complete report, not missing data.
   if (summary.length < 2) return { field: "summary", message: "কলের সারাংশ লিখুন" };
   if (note.length < 2) return { field: "note", message: "নোট লিখুন" };
-  if (!input.followUpAt) {
-    return { field: "followUpAt", message: "ফলো-আপের তারিখ ও সময় দিন" };
-  }
+
   if ((category === "not_interested" || category === "wrong_number") && !reason) {
     return { field: "reason", message: "কারণ লিখুন" };
   }
