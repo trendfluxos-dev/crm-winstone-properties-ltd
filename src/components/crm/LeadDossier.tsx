@@ -102,11 +102,12 @@ export function LeadDossier({
               </div>
               <ContactSuppressionNotice leadId={lead.id} />
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button asChild size="sm" className="flex-1 min-w-[100px]">
-                  <a href={`tel:${lead.phone_number}`}>
-                    <PhoneOutgoing className="size-4" /> সরাসরি কল
-                  </a>
-                </Button>
+                <WebCallButton
+                  leadId={lead.id}
+                  phone={lead.phone_number}
+                  label="সরাসরি কল"
+                  className="h-9 min-w-[100px] flex-1 text-sm"
+                />
                 <WhatsAppAction
                   phone={lead.phone_number}
                   leadId={lead.id}

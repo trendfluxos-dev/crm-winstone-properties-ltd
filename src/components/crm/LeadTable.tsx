@@ -176,11 +176,12 @@ export function LeadTable() {
                 </td>
                 <td className="px-3 py-2.5">
                   <div className="flex items-center justify-end gap-2">
-                    <Button asChild size="sm" className="gap-1.5">
-                      <a href={`tel:${lead.phone_number}`}>
-                        <PhoneOutgoing className="size-4" /> কল
-                      </a>
-                    </Button>
+                    <WebCallButton
+                      leadId={lead.id}
+                      phone={lead.phone_number}
+                      label="কল"
+                      className="h-9 flex-none text-sm"
+                    />
                     <CallbackLogButton leadId={lead.id} label="" />
                     <WhatsAppAction phone={lead.phone_number} leadId={lead.id} label="" />
                   </div>
