@@ -55,6 +55,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
         const { lead_id, outcome, notes, connected } = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { leadHeldByOther, LEAD_NOT_YOURS } = await import("@/lib/lead-access.server");
 
         const { data: lead } = await supabaseAdmin
           .from("leads")

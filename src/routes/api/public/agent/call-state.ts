@@ -45,6 +45,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
         const at = body.at ?? new Date().toISOString();
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { leadHeldByOther, LEAD_NOT_YOURS } = await import("@/lib/lead-access.server");
 
         const { data: lead } = await supabaseAdmin
           .from("leads")

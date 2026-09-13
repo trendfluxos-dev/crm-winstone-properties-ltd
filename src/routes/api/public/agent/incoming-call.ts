@@ -44,6 +44,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
         const at = body.at ?? new Date().toISOString();
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { leadOwnerId } = await import("@/lib/lead-access.server");
         const { normalizeLeadPhone, intakeLead } = await import("@/lib/lead-intake.server");
         const phone = normalizeLeadPhone(body.phone_number);
 
