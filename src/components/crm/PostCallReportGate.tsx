@@ -26,6 +26,20 @@ const CATEGORIES = [
 
 const NEEDS_REASON = new Set(["not_interested", "wrong_number"]);
 
+/** Classification, mandatory whenever the customer actually answered. */
+const TEMPERATURES = [
+  { value: "hot", label: "HOT — গরম" },
+  { value: "warm", label: "WARM — কিছুটা আগ্রহী" },
+  { value: "cold", label: "COLD — ঠান্ডা" },
+] as const;
+
+const GRADES = [
+  { value: "A", label: "A" },
+  { value: "B", label: "B" },
+  { value: "C", label: "C" },
+  { value: "D", label: "D" },
+] as const;
+
 /**
  * The next-lead lock, on the web desk.
  *
