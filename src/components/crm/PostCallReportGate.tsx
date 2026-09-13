@@ -65,9 +65,12 @@ export function PostCallReportGate() {
   const [note, setNote] = useState("");
   const [reason, setReason] = useState("");
   const [when, setWhen] = useState("");
+  const [noFollowUp, setNoFollowUp] = useState(false);
   const [temperature, setTemperature] = useState<"hot" | "warm" | "cold" | null>(null);
   const [grade, setGrade] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [aiDecision, setAiDecision] = useState<"accepted" | "edited" | "rejected" | null>(null);
+  const [smart, setSmart] = useState<string | null>(null);
+  const [smartBusy, setSmartBusy] = useState(false);
 
   const detail = pending.data;
   const suggestion = detail?.suggestion ?? null;
@@ -79,31 +82,67 @@ export function PostCallReportGate() {
       setNote("");
       setReason("");
       setWhen("");
+      setNoFollowUp(false);
       setTemperature(null);
       setGrade(null);
       setAiDecision(null);
+      setSmart(null);
     }
   }, [detail?.report?.id, detail]);
 
+  // Smart summary from the agent's own words — no transcript needed. Debounced,
+  // so a long note costs one short AI call after the agent pauses, not one per key.
+  const draft = useServerFn(draftReportSummary);
+  const lastAsked = useRef("");
+  useEffect(() => {
+    if (!detail) return;
+    const text = `${summary}\n${note}`.trim();
+    if (text.length < 40 || text === lastAsked.current) return;
+    const timer = window.setTimeout(() => {
+      lastAsked.current = text;
+      setSmartBusy(true);
+      draft({ data: { adminToken, text, category: category || null } })
+        .then((result) => setSmart(result.summary))
+        .catch(() => setSmart(null))
+        .finally(() => setSmartBusy(false));
+    }, 2500);
+    return () => window.clearTimeout(timer);
+  }, [summary, note, category, detail, adminToken, draft]);
+
+  const payloadOf = () => ({
+    adminToken,
+    reportId: detail!.report.id,
+    category,
+    summary: summary.trim() || null,
+    note: note.trim() || null,
+    reason: reason.trim() || null,
+    followUpAt: !noFollowUp && when ? new Date(when).toISOString() : null,
+    reminderMinutes: 15,
+    temperature,
+    grade,
+    aiDecision,
+  });
+
   const send = useMutation({
-    mutationFn: () =>
-      submit({
-        data: {
-          adminToken,
-          reportId: detail!.report.id,
-          category,
-          summary: summary.trim() || null,
-          note: note.trim() || null,
-          reason: reason.trim() || null,
-          followUpAt: when ? new Date(when).toISOString() : null,
-          reminderMinutes: 15,
-          temperature,
-          grade,
-          aiDecision,
-        },
-      }),
-    onSuccess: () => {
-      toast.success("রিপোর্ট জমা হয়েছে — পরের লিড খুলে গেল");
+    mutationFn: async () => {
+      const payload = payloadOf();
+      // No internet: keep it on this phone, honestly labelled, and sync later.
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        enqueue("report_submit", `কল রিপোর্ট (${detail!.lead?.name ?? "লিড"})`, {
+          ...payload,
+          clientEventId: `report-${detail!.report.id}`,
+        });
+        return { offline: true as const };
+      }
+      await submit({ data: payload });
+      return { offline: false as const };
+    },
+    onSuccess: (result) => {
+      toast.success(
+        result.offline
+          ? "ইন্টারনেট নেই — রিপোর্ট এই ফোনে সেভ হয়েছে, নেট ফিরলে নিজেই সার্ভারে যাবে"
+          : "রিপোর্ট জমা হয়েছে — পরের লিড খুলে গেল",
+      );
       void queryClient.invalidateQueries({ queryKey: ["pending-call-report"] });
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
       void queryClient.invalidateQueries({ queryKey: ["follow-ups"] });
@@ -117,14 +156,16 @@ export function PostCallReportGate() {
   // The customer answered -> classification (Hot/Warm/Cold + A/B/C/D) is what
   // turns the lead into COMPLETED. Not answered -> the lead goes back to retry.
   const received = detail.report.connected !== false;
-  // Every call: category + summary + note + follow-up date are all mandatory.
+  // Category + summary + note are mandatory. Follow-up is OPTIONAL: the agent
+  // either picks a date or explicitly says no follow-up is needed.
   const ready =
     Boolean(category) &&
     summary.trim().length > 1 &&
     note.trim().length > 1 &&
-    Boolean(when) &&
+    (noFollowUp || Boolean(when)) &&
     (!received || (Boolean(temperature) && Boolean(grade))) &&
     (!reasonRequired || reason.trim().length > 1);
+
 
   const applySuggestion = () => {
     if (!suggestion) return;
