@@ -16,17 +16,14 @@ import { AgentDossier } from "@/components/crm/AgentDossier";
 import { AgentRadar } from "@/components/crm/AgentRadar";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { AskHqPanel } from "@/components/crm/AskHqPanel";
-import { CallOpsPanel } from "@/components/crm/CallOpsPanel";
-import { DayCallExportPanel } from "@/components/crm/DayCallExportPanel";
-import { SyncedCallsPanel } from "@/components/crm/SyncedCallsPanel";
-import { SelfClaimsFeed } from "@/components/crm/SelfClaimsFeed";
+import { ExecutiveBrief } from "@/components/crm/ExecutiveBrief";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
-import { SystemNoticeBar } from "@/components/crm/SystemNoticeBar";
+
 import {
   buildAgentStats,
   buildTimeline,
@@ -124,13 +121,7 @@ function ControlBoard() {
           </p>
         </div>
 
-        <SystemNoticeBar surface="hq" />
-
-        <CallOpsPanel />
-
-        <SyncedCallsPanel />
-
-        <DayCallExportPanel />
+        <ExecutiveBrief />
 
         <ShiftSummaryPanel scope="hq" />
 
@@ -138,7 +129,6 @@ function ControlBoard() {
 
         <AskHqPanel />
 
-        <SelfClaimsFeed />
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile
@@ -241,7 +231,7 @@ function ControlBoard() {
         <Leaderboard stats={stats} onSelectAgent={setOpenAgentId} />
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">সর্বশেষ যাচাই হওয়া কথাবার্তা</h2>
+          <h2 className="text-lg font-semibold">সর্বশেষ কথাবার্তার সারসংক্ষেপ</h2>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {calls
               .filter((c) => c.ai_summary)
@@ -255,10 +245,8 @@ function ControlBoard() {
                     onClick={() => lead && setOpenLeadId(lead.id)}
                     className="card-elevated p-4 text-left transition-colors hover:border-primary/40"
                   >
-                    <p className="font-medium">{lead?.name ?? "অজানা লিড"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {agent?.name} · {call.sentiment ?? "রেটিং নেই"}
-                    </p>
+                    <p className="font-medium">{lead?.name ?? "লিড"}</p>
+                    <p className="text-xs text-muted-foreground">{agent?.name}</p>
                     <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
                       {call.ai_summary}
                     </p>

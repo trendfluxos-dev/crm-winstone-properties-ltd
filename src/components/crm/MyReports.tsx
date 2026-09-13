@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, ClipboardList, Loader2 } from "lucide-react";
+import { CalendarClock, ClipboardList, Loader2, Pencil } from "lucide-react";
+import { useState } from "react";
 
+import { ReportEditDialog, type EditableReport } from "@/components/crm/ReportEditDialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { myCallReports } from "@/lib/call-reports.functions";
 import { clockTime, relativeTime } from "@/lib/crm-format";
@@ -12,6 +15,7 @@ import { useAdminToken } from "@/lib/local-session";
 export function MyReports() {
   const adminToken = useAdminToken();
   const fetchReports = useServerFn(myCallReports);
+  const [editing, setEditing] = useState<EditableReport | null>(null);
   const { data, isPending } = useQuery({
     queryKey: ["my-call-reports", adminToken ? "pin" : "session"],
     queryFn: () => fetchReports({ data: { adminToken } }),
@@ -107,11 +111,28 @@ export function MyReports() {
                 {report.reason ? (
                   <p className="mt-1 text-xs text-muted-foreground">কারণ: {report.reason}</p>
                 ) : null}
+                {report.editable ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 gap-1.5"
+                    onClick={() => setEditing(report as EditableReport)}
+                  >
+                    <Pencil className="size-3.5" /> সংশোধন করুন
+                  </Button>
+                ) : null}
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <ReportEditDialog
+        key={editing?.id ?? "none"}
+        report={editing}
+        open={Boolean(editing)}
+        onOpenChange={(next) => !next && setEditing(null)}
+      />
     </div>
   );
 }

@@ -429,7 +429,9 @@ export function ShiftSummaryPanel({ scope }: { scope: "hq" | "it" }) {
                       <td className="py-1.5 pr-3 tabular">
                         {agent.reports}
                         {agent.pending ? (
-                          <span className="ml-1 text-xs text-destructive">
+                          <span
+                            className={`ml-1 text-xs ${scope === "hq" ? "text-muted-foreground" : "text-destructive"}`}
+                          >
                             ({agent.pending} বাকি)
                           </span>
                         ) : null}

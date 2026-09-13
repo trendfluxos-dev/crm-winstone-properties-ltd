@@ -264,7 +264,7 @@ export const myCallReports = createServerFn({ method: "POST" })
     const { data: reports } = await supabaseAdmin
       .from("call_reports")
       .select(
-        "id, lead_id, status, category, note, reason, follow_up_at, connected, duration_seconds, call_ended_at, submitted_at, recording_id",
+        "id, lead_id, status, category, summary, note, reason, follow_up_at, connected, duration_seconds, call_ended_at, submitted_at, recording_id, temperature, grade",
       )
       .eq("agent_id", me.id)
       .order("call_ended_at", { ascending: false })
@@ -290,9 +290,44 @@ export const myCallReports = createServerFn({ method: "POST" })
       .order("scheduled_at", { ascending: true })
       .limit(20);
 
+    const { reportEditable } = await import("@/lib/call-reports.server");
     return {
-      reports: (reports ?? []).map((r) => ({ ...r, lead: leadById.get(r.lead_id ?? "") ?? null })),
+      reports: (reports ?? []).map((r) => ({
+        ...r,
+        lead: leadById.get(r.lead_id ?? "") ?? null,
+        editable: r.status === "submitted" && reportEditable(r.call_ended_at),
+      })),
       upcoming: upcoming ?? [],
       overdueCount: (upcoming ?? []).filter((e) => e.scheduled_at < nowIso).length,
     };
+  });
+
+/** Field correction on an already submitted update, inside the 09:00–12:45 window. */
+export const editMyReport = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    Base.extend({
+      reportId: z.string().uuid(),
+      category: z.string().min(2).max(40),
+      summary: z.string().trim().max(4000).nullable().optional(),
+      note: z.string().trim().max(4000).nullable().optional(),
+      reason: z.string().trim().max(2000).nullable().optional(),
+      followUpAt: z.string().nullable().optional(),
+      temperature: z.enum(["hot", "warm", "cold"]).nullable().optional(),
+      grade: z.enum(["A", "B", "C", "D"]).nullable().optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const me = await agentOf(data.adminToken ?? null);
+    const { editSubmittedReport } = await import("@/lib/call-reports.server");
+    return editSubmittedReport({
+      reportId: data.reportId,
+      agentId: me.id,
+      category: data.category,
+      summary: data.summary ?? null,
+      note: data.note ?? null,
+      reason: data.reason ?? null,
+      followUpAt: data.followUpAt ? new Date(data.followUpAt).toISOString() : null,
+      temperature: data.temperature ?? null,
+      grade: data.grade ?? null,
+    });
   });
