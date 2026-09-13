@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Lock, LockOpen, Smartphone, Sparkles } from "lucide-react";
+import { Lock, LockOpen, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -51,17 +51,17 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen grid-noise">
       <header className="glass sticky top-0 z-40 border-b border-border">
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2.5">
+          <Link to="/" className="flex min-w-0 shrink items-center gap-2.5">
             <img
               src={logoAsset.url}
               alt="Winstone Properties Ltd. logo"
-              className="size-9 rounded-full object-cover shadow-sm ring-1 ring-border"
+              className="size-9 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-border"
             />
-            <span className="leading-tight">
-              <span className="block whitespace-nowrap text-[13px] font-bold tracking-tight">
+            <span className="min-w-0 leading-tight">
+              <span className="block truncate text-[13px] font-bold tracking-tight">
                 Winstone Connect
               </span>
-              <span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="hidden truncate text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground sm:block">
                 Tele-Sales OS
               </span>
             </span>
@@ -80,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
 
             <button
@@ -108,18 +108,21 @@ export function AppShell({ children }: { children: ReactNode }) {
             {scope !== "none" && !adminToken && (
               <button
                 type="button"
+                aria-label="Sign out"
                 onClick={() => {
                   void signOut().then(() => toast.info("Signed out"));
                 }}
-                className="inline-flex h-8 items-center rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:text-foreground hover:shadow-sm"
+                className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-2.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:text-foreground hover:shadow-sm sm:px-3"
               >
-                Sign out
+                <LogOut className="size-3.5 sm:hidden" />
+                <span className="hidden sm:inline">Sign out</span>
               </button>
             )}
 
             <Button
               size="sm"
-              className="h-8 gap-1.5 rounded-full px-3.5 text-xs font-semibold shadow-sm transition-all duration-300 hover:shadow-md"
+              aria-label="Download Agent Android App"
+              className="h-8 shrink-0 gap-1.5 whitespace-nowrap rounded-full px-2.5 text-xs font-semibold shadow-sm transition-all duration-300 hover:shadow-md sm:px-3.5"
               onClick={() => {
                 const a = document.createElement("a");
                 a.href = APK_URL;
@@ -132,7 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Smartphone className="size-3.5" />
               <span className="hidden xl:inline">Download Agent Android App</span>
-              <span className="xl:hidden">Agent App</span>
+              <span className="hidden sm:inline xl:hidden">Agent App</span>
             </Button>
 
             <div className="hidden h-8 items-center gap-2 rounded-full border border-live/30 bg-live/10 px-3 md:flex">
