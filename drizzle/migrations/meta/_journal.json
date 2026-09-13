@@ -155,6 +155,13 @@
       "when": 1789259306063,
       "tag": "0021_restrict_pin_hash_to_service_role",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1789260371379,
+      "tag": "0022_lead_classification_and_completion",
+      "breakpoints": true
     }
   ]
 }

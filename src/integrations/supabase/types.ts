@@ -540,6 +540,7 @@ export type Database = {
           device_id: string | null
           duration_seconds: number
           follow_up_at: string | null
+          grade: string | null
           id: string
           lead_id: string
           note: string | null
@@ -549,6 +550,7 @@ export type Database = {
           status: string
           submitted_at: string | null
           summary: string | null
+          temperature: string | null
           updated_at: string
         }
         Insert: {
@@ -563,6 +565,7 @@ export type Database = {
           device_id?: string | null
           duration_seconds?: number
           follow_up_at?: string | null
+          grade?: string | null
           id?: string
           lead_id: string
           note?: string | null
@@ -572,6 +575,7 @@ export type Database = {
           status?: string
           submitted_at?: string | null
           summary?: string | null
+          temperature?: string | null
           updated_at?: string
         }
         Update: {
@@ -586,6 +590,7 @@ export type Database = {
           device_id?: string | null
           duration_seconds?: number
           follow_up_at?: string | null
+          grade?: string | null
           id?: string
           lead_id?: string
           note?: string | null
@@ -595,6 +600,7 @@ export type Database = {
           status?: string
           submitted_at?: string | null
           summary?: string | null
+          temperature?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -957,6 +963,64 @@ export type Database = {
           },
         ]
       }
+      lead_classifications: {
+        Row: {
+          agent_id: string | null
+          classified_at: string
+          grade: string
+          id: string
+          lead_id: string
+          note: string | null
+          report_id: string | null
+          source: string
+          temperature: string
+        }
+        Insert: {
+          agent_id?: string | null
+          classified_at?: string
+          grade: string
+          id?: string
+          lead_id: string
+          note?: string | null
+          report_id?: string | null
+          source?: string
+          temperature: string
+        }
+        Update: {
+          agent_id?: string | null
+          classified_at?: string
+          grade?: string
+          id?: string
+          lead_id?: string
+          note?: string | null
+          report_id?: string | null
+          source?: string
+          temperature?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_classifications_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_classifications_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_classifications_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "call_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_events: {
         Row: {
           agent_id: string | null
@@ -1010,8 +1074,12 @@ export type Database = {
           assignment_source: string | null
           call_attempts: number
           call_count: number | null
+          classification_note: string | null
+          classified_at: string | null
+          classified_by: string | null
           company: string | null
           created_at: string
+          grade: string | null
           id: string
           is_verified: boolean
           last_call_at: string | null
@@ -1023,7 +1091,9 @@ export type Database = {
           serial_no: string | null
           source: string
           status: Database["public"]["Enums"]["lead_status"]
+          temperature: string | null
           updated_at: string
+          work_state: string
         }
         Insert: {
           address?: string | null
@@ -1032,8 +1102,12 @@ export type Database = {
           assignment_source?: string | null
           call_attempts?: number
           call_count?: number | null
+          classification_note?: string | null
+          classified_at?: string | null
+          classified_by?: string | null
           company?: string | null
           created_at?: string
+          grade?: string | null
           id?: string
           is_verified?: boolean
           last_call_at?: string | null
@@ -1045,7 +1119,9 @@ export type Database = {
           serial_no?: string | null
           source?: string
           status?: Database["public"]["Enums"]["lead_status"]
+          temperature?: string | null
           updated_at?: string
+          work_state?: string
         }
         Update: {
           address?: string | null
@@ -1054,8 +1130,12 @@ export type Database = {
           assignment_source?: string | null
           call_attempts?: number
           call_count?: number | null
+          classification_note?: string | null
+          classified_at?: string | null
+          classified_by?: string | null
           company?: string | null
           created_at?: string
+          grade?: string | null
           id?: string
           is_verified?: boolean
           last_call_at?: string | null
@@ -1067,7 +1147,9 @@ export type Database = {
           serial_no?: string | null
           source?: string
           status?: Database["public"]["Enums"]["lead_status"]
+          temperature?: string | null
           updated_at?: string
+          work_state?: string
         }
         Relationships: [
           {
@@ -1080,6 +1162,13 @@ export type Database = {
           {
             foreignKeyName: "leads_assigned_to_fkey"
             columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_classified_by_fkey"
+            columns: ["classified_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
