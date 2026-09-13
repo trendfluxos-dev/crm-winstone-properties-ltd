@@ -51,7 +51,6 @@ export const Route = createFileRoute("/api/public/agent/report")({
         if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { leadHeldByOther } = await import("@/lib/lead-access.server");
         const { data: report } = await supabaseAdmin
           .from("call_reports")
           .select(
