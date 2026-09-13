@@ -204,6 +204,13 @@
       "when": 1789270750612,
       "tag": "0028_ai_usage_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1789272291779,
+      "tag": "0029_support_workspace",
+      "breakpoints": true
     }
   ]
 }

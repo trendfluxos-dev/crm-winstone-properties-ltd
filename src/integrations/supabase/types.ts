@@ -1517,6 +1517,576 @@ export type Database = {
         }
         Relationships: []
       }
+      support_article_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      support_articles: {
+        Row: {
+          author_profile_id: string | null
+          body_markdown: string
+          category_id: string | null
+          created_at: string
+          id: string
+          published_at: string | null
+          search_tsv: unknown
+          slug: string
+          status: string
+          summary: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          author_profile_id?: string | null
+          body_markdown: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          search_tsv?: unknown
+          slug: string
+          status?: string
+          summary?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          author_profile_id?: string | null
+          body_markdown?: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          search_tsv?: unknown
+          slug?: string
+          status?: string
+          summary?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_articles_author_profile_id_fkey"
+            columns: ["author_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "support_article_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_canned_replies: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          shortcut: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          shortcut: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          shortcut?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_conversations: {
+        Row: {
+          access_token: string
+          ai_handled: boolean
+          assignee_profile_id: string | null
+          category: string | null
+          channel: string
+          created_at: string
+          customer_id: string
+          escalated_at: string | null
+          escalation_reason: string | null
+          first_customer_message_at: string | null
+          first_human_response_at: string | null
+          id: string
+          intent: string | null
+          last_message_at: string
+          message_count: number
+          priority: string
+          resolved_at: string | null
+          sentiment: string | null
+          sla_due_at: string | null
+          status: string
+          subject: string | null
+          summary: string | null
+          tags: string[]
+          unread_for_agent: boolean
+          unread_for_customer: boolean
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          ai_handled?: boolean
+          assignee_profile_id?: string | null
+          category?: string | null
+          channel?: string
+          created_at?: string
+          customer_id: string
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          first_customer_message_at?: string | null
+          first_human_response_at?: string | null
+          id?: string
+          intent?: string | null
+          last_message_at?: string
+          message_count?: number
+          priority?: string
+          resolved_at?: string | null
+          sentiment?: string | null
+          sla_due_at?: string | null
+          status?: string
+          subject?: string | null
+          summary?: string | null
+          tags?: string[]
+          unread_for_agent?: boolean
+          unread_for_customer?: boolean
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          ai_handled?: boolean
+          assignee_profile_id?: string | null
+          category?: string | null
+          channel?: string
+          created_at?: string
+          customer_id?: string
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          first_customer_message_at?: string | null
+          first_human_response_at?: string | null
+          id?: string
+          intent?: string | null
+          last_message_at?: string
+          message_count?: number
+          priority?: string
+          resolved_at?: string | null
+          sentiment?: string | null
+          sla_due_at?: string | null
+          status?: string
+          subject?: string | null
+          summary?: string | null
+          tags?: string[]
+          unread_for_agent?: boolean
+          unread_for_customer?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_conversations_assignee_profile_id_fkey"
+            columns: ["assignee_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_conversations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "support_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_csat: {
+        Row: {
+          comment: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          rating: number
+        }
+        Insert: {
+          comment?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          rating: number
+        }
+        Update: {
+          comment?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_csat_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_customers: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          name: string | null
+          notes: string | null
+          phone: string | null
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          ai_citations: Json
+          ai_confidence: number | null
+          ai_model: string | null
+          ai_needs_human: boolean | null
+          attachments: Json
+          author_kind: string
+          author_label: string | null
+          author_profile_id: string | null
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          ai_citations?: Json
+          ai_confidence?: number | null
+          ai_model?: string | null
+          ai_needs_human?: boolean | null
+          attachments?: Json
+          author_kind: string
+          author_label?: string | null
+          author_profile_id?: string | null
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          ai_citations?: Json
+          ai_confidence?: number | null
+          ai_model?: string | null
+          ai_needs_human?: boolean | null
+          attachments?: Json
+          author_kind?: string
+          author_label?: string | null
+          author_profile_id?: string | null
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_author_profile_id_fkey"
+            columns: ["author_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_notes: {
+        Row: {
+          author_label: string | null
+          author_profile_id: string | null
+          body: string
+          conversation_id: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          ticket_id: string | null
+        }
+        Insert: {
+          author_label?: string | null
+          author_profile_id?: string | null
+          body: string
+          conversation_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          ticket_id?: string | null
+        }
+        Update: {
+          author_label?: string | null
+          author_profile_id?: string | null
+          body?: string
+          conversation_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_notes_author_profile_id_fkey"
+            columns: ["author_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_notes_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_notes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "support_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_notes_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_settings: {
+        Row: {
+          data: Json
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          data?: Json
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_ticket_events: {
+        Row: {
+          actor_kind: string
+          actor_label: string | null
+          actor_profile_id: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          kind: string
+          ticket_id: string
+        }
+        Insert: {
+          actor_kind?: string
+          actor_label?: string | null
+          actor_profile_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          kind: string
+          ticket_id: string
+        }
+        Update: {
+          actor_kind?: string
+          actor_label?: string | null
+          actor_profile_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          kind?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assignee_profile_id: string | null
+          category: string | null
+          conversation_id: string | null
+          created_at: string
+          created_by_kind: string
+          created_by_profile_id: string | null
+          customer_id: string
+          description: string | null
+          id: string
+          priority: string
+          ref: string
+          resolved_at: string | null
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_profile_id?: string | null
+          category?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          created_by_kind?: string
+          created_by_profile_id?: string | null
+          customer_id: string
+          description?: string | null
+          id?: string
+          priority?: string
+          ref?: string
+          resolved_at?: string | null
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_profile_id?: string | null
+          category?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          created_by_kind?: string
+          created_by_profile_id?: string | null
+          customer_id?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          ref?: string
+          resolved_at?: string | null
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_assignee_profile_id_fkey"
+            columns: ["assignee_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "support_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sync_events: {
         Row: {
           agent_id: string | null
