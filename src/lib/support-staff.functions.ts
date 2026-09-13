@@ -332,7 +332,7 @@ export const escalateSupportConversation = createServerFn({ method: "POST" })
     const ticket = await escalateConversation({
       conversationId: data.conversationId,
       reason: data.reason,
-      priority: data.priority,
+      ...(data.priority ? { priority: data.priority } : {}),
       createdByKind: "agent",
       actorProfileId: me.profile?.id ?? null,
       actorLabel: actorLabel(me),
@@ -401,7 +401,7 @@ export const assistSupportConversation = createServerFn({ method: "POST" })
 
     await supabaseAdmin
       .from("support_conversations")
-      .update({ ai_summary: result.summary })
+      .update({ summary: result.summary })
       .eq("id", data.conversationId);
     return result;
   });
@@ -462,7 +462,7 @@ export const listSupportCustomers = createServerFn({ method: "POST" })
 
     let query = supabaseAdmin
       .from("support_customers")
-      .select("id, name, email, phone, company, plan, tags, created_at, last_seen_at")
+      .select("id, name, email, phone, company, tags, notes, created_at, last_seen_at")
       .order("last_seen_at", { ascending: false })
       .limit(200);
     if (data.search) {
@@ -507,7 +507,7 @@ export const updateSupportCustomer = createServerFn({ method: "POST" })
         name: z.string().trim().max(120).nullable().optional(),
         company: z.string().trim().max(160).nullable().optional(),
         phone: z.string().trim().max(40).nullable().optional(),
-        plan: z.string().trim().max(60).nullable().optional(),
+        notes: z.string().trim().max(4000).nullable().optional(),
         tags: z.array(z.string().trim().max(40)).max(12).optional(),
       })
       .parse(input),
@@ -516,7 +516,7 @@ export const updateSupportCustomer = createServerFn({ method: "POST" })
     await writer(data.adminToken);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: Record<string, unknown> = {};
-    for (const key of ["name", "company", "phone", "plan", "tags"] as const) {
+    for (const key of ["name", "company", "phone", "notes", "tags"] as const) {
       if (data[key] !== undefined) patch[key] = data[key];
     }
     const { error } = await supabaseAdmin
