@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Caller } from "@/lib/access.server";
+import { logAiUsage } from "@/lib/ai-usage.server";
 
 /**
  * Command Agent — one in-app assistant shared by all four surfaces
@@ -440,6 +441,13 @@ export async function runCommandAgent(
       label: String(a.label ?? "চালান").slice(0, 80),
       params: (a.params ?? {}) as CommandAction["params"],
     }));
+
+  await logAiUsage({
+    category: "command_agent",
+    model: "openai/gpt-6-astra",
+    actorProfileId: caller.profile?.id ?? null,
+    detail: surface,
+  });
 
   return {
     answer: parsed.answer?.trim() || "উত্তর তৈরি হয়নি — আবার চেষ্টা করুন",

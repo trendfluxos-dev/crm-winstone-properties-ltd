@@ -241,7 +241,19 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
 
 
     const transcript = stt.transcript;
+    await logAiUsage({
+      category: "transcription",
+      model: stt.model ?? stt.provider,
+      actorProfileId: recording.agent_id,
+      detail: recordingId,
+    });
     const analysis = await analyzeTranscript(transcript, recording.duration_seconds);
+    await logAiUsage({
+      category: "analysis",
+      model: "openai/gpt-6-astra",
+      actorProfileId: recording.agent_id,
+      detail: recordingId,
+    });
 
     await supabaseAdmin
       .from("call_recordings")
