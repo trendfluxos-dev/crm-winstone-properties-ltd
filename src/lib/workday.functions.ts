@@ -166,3 +166,55 @@ export const listYearArchives = createServerFn({ method: "POST" })
       .order("archive_year", { ascending: false });
     return rows ?? [];
   });
+
+/**
+ * One day's calling performance for the signed-in agent, straight from the
+ * reports they submitted.
+ *
+ * EVERY dialled call counts — including calls that lasted under three seconds
+ * (wrong number, cut off, not picked up). Those are reported separately as
+ * "very short", never dropped, because attempt count is part of the day's work.
+ */
+export const myDayPerformance = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Base.extend({ day: DATE }).parse(input))
+  .handler(async ({ data }) => {
+    const caller = await callerOf(data.adminToken ?? null);
+    const me = caller.profile!;
+    // Dhaka day boundaries in UTC.
+    const from = new Date(`${data.day}T00:00:00+06:00`).toISOString();
+    const to = new Date(new Date(from).getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from("call_reports")
+      .select("id, status, connected, duration_seconds, category, call_ended_at")
+      .eq("agent_id", me.id)
+      .gte("call_ended_at", from)
+      .lt("call_ended_at", to);
+
+    const reports = rows ?? [];
+    const categories: Record<string, number> = {};
+    let talkSeconds = 0;
+    let connected = 0;
+    let veryShort = 0;
+    let pending = 0;
+
+    for (const report of reports) {
+      const seconds = report.duration_seconds ?? 0;
+      talkSeconds += seconds;
+      if (report.connected) connected += 1;
+      if (seconds > 0 && seconds < 3) veryShort += 1;
+      if (report.status === "pending") pending += 1;
+      if (report.category) categories[report.category] = (categories[report.category] ?? 0) + 1;
+    }
+
+    return {
+      day: data.day,
+      calls: reports.length,
+      connected,
+      veryShort,
+      pending,
+      talkSeconds,
+      categories,
+    };
+  });
