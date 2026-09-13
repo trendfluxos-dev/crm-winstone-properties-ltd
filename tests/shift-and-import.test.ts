@@ -42,7 +42,8 @@ describe("lead import parsing", () => {
   it("maps headers to lead rows and drops rows without a phone", () => {
     const rows = toLeadRows(parseCsv("name,phone\nRahim,01712345678\nNoPhone,\n"));
     expect(rows).toHaveLength(1);
-    expect(rows[0]?.phone).toContain("1712345678");
+    expect(rows[0]?.phone_number).toContain("1712345678");
+    expect(rows[0]?.name).toBe("Rahim");
   });
 });
 
