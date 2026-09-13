@@ -177,7 +177,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           },
         });
 
-        if (body.state === "ringing") {
+        if (body.state === "ringing" || (outgoing && body.state === "answered")) {
           await logLeadEvent({
             leadId,
             agentId: caller.profile.id,
