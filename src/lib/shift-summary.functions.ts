@@ -74,3 +74,21 @@ export const exportShiftSummaryToDrive = createServerFn({ method: "POST" })
     const { backupShiftSummaryToDrive } = await import("@/lib/shift-drive.server");
     return backupShiftSummaryToDrive(data.shiftKey);
   });
+
+/** Writes one stored summary into the Google Sheets "শিফট সামারি" tab on demand. */
+export const exportShiftSummaryToSheets = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({ adminToken: z.string().nullable().optional(), shiftKey: z.string().min(3) })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const { appendShiftSummaryToSheetQuietly, shiftSheetUrl } = await import(
+      "@/lib/shift-sheet.server"
+    );
+    const result = await appendShiftSummaryToSheetQuietly(data.shiftKey);
+    if (!result) throw new Error("Google Sheets-এ লেখা যায়নি — সংযোগ বা সামারি পরীক্ষা করুন");
+    return { ...result, sheetUrl: shiftSheetUrl() };
+  });

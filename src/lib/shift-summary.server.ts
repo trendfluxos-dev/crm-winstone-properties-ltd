@@ -208,12 +208,17 @@ export async function generateShiftSummary(at: Date = new Date()) {
   const { backupShiftSummaryQuietly } = await import("./shift-drive.server");
   const drive = await backupShiftSummaryQuietly(due.shiftKey);
 
+  // And into the Google Sheets "শিফট সামারি" tab, so HQ can read it there too.
+  const { appendShiftSummaryToSheetQuietly } = await import("./shift-sheet.server");
+  const sheet = await appendShiftSummaryToSheetQuietly(due.shiftKey);
+
   return {
     generated: true as const,
     shiftKey: due.shiftKey,
     totals,
     agents: lines.length,
     driveFileUrl: drive?.driveFileUrl ?? null,
+    sheetUrl: sheet?.sheetUrl ?? null,
   };
 }
 
@@ -256,6 +261,8 @@ export async function backfillShiftSummaries(days = 14, at: Date = new Date()) {
       const key = `${dateKey}:${shift.id}`;
       const { backupShiftSummaryQuietly } = await import("./shift-drive.server");
       await backupShiftSummaryQuietly(key);
+      const { appendShiftSummaryToSheetQuietly } = await import("./shift-sheet.server");
+      await appendShiftSummaryToSheetQuietly(key);
       written.push(key);
     }
   }
