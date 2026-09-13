@@ -20,7 +20,9 @@ export type CommandActionType =
   | "classify_lead"
   | "retry_recording"
   | "verify_drive"
-  | "generate_shift_summary";
+  | "generate_shift_summary"
+  | "acknowledge_alert"
+  | "retry_failed_recordings";
 
 export type CommandAction = {
   type: CommandActionType;
@@ -54,9 +56,17 @@ export function allowedActions(caller: Caller): CommandActionType[] {
         "retry_recording",
         "verify_drive",
         "generate_shift_summary",
+        "acknowledge_alert",
+        "retry_failed_recordings",
       ];
     case "coordinator":
-      return ["assign_leads", "distribute_unassigned", "classify_lead", "generate_shift_summary"];
+      return [
+        "assign_leads",
+        "distribute_unassigned",
+        "classify_lead",
+        "generate_shift_summary",
+        "acknowledge_alert",
+      ];
     case "agent":
       return ["classify_lead"];
     default:
@@ -172,6 +182,22 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
 
   const unassigned = (leads ?? []).filter((l) => owner(l) === null);
 
+  // Open system problems, so the assistant can diagnose instead of guessing.
+  const [{ data: alerts }, { data: syncFailures }] = await Promise.all([
+    supabaseAdmin
+      .from("system_alerts")
+      .select("id, code, severity, title, detail, action, created_at")
+      .is("acknowledged_at", null)
+      .order("created_at", { ascending: false })
+      .limit(20),
+    supabaseAdmin
+      .from("sync_events")
+      .select("id, event_type, entity_type, entity_id, status, error_message, created_at")
+      .eq("status", "failed")
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
+
   const pipeline = {
     recordings_recent: (calls ?? []).length,
     not_uploaded: (calls ?? []).filter((c) => c.sync_status === "failed").length,
@@ -191,6 +217,8 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
     unassigned_leads: unassigned.length,
     unassigned_sample: unassigned.slice(0, 20).map((l) => ({ id: l.id, name: l.name })),
     pipeline,
+    open_alerts: alerts ?? [],
+    sync_failures: syncFailures ?? [],
   };
 }
 
@@ -200,9 +228,11 @@ const ACTION_CATALOGUE = `Available action types (only propose ones in "allowed_
 - classify_lead     params: { lead_id: uuid, lead_name: string, temperature: "hot"|"warm"|"cold", grade: "A"|"B"|"C"|"D", note?: string }
 - retry_recording   params: { recording_id: uuid, step: "drive"|"analysis" }       → re-runs a stuck recording step (idempotent)
 - verify_drive      params: { limit: number }                                      → checks real Drive files behind recent backups
-- generate_shift_summary params: {}                                               → rebuilds the current shift summary sheet`;
+- generate_shift_summary params: {}                                               → rebuilds the current shift summary sheet
+- acknowledge_alert  params: { alert_id: uuid }                                    → marks one open system alert as handled
+- retry_failed_recordings params: { limit: number }                                → re-runs transcript/AI for the recordings whose analysis failed (idempotent)`;
 
-const SYSTEM = `You are "কমান্ড এজেন্ট", the operations assistant inside a Bangladeshi tele-sales CRM (Winstone).
+const SYSTEM = `You are "Winstone AI", the operations assistant inside a Bangladeshi tele-sales CRM (Winstone).
 Always reply in Bengali, short and concrete, like a floor supervisor talking to a colleague.
 
 Hard rules:
@@ -212,6 +242,7 @@ Hard rules:
 - Propose an action ONLY when the user asked for something to be done AND its type is in allowed_actions.
   Copy ids verbatim from the JSON. If the right id is not in the JSON, do not propose the action — ask for the missing detail instead.
 - When allowed_actions is empty, answer only and explain that this session cannot make changes.
+- When the JSON shows open alerts, failed syncs or stuck pipeline rows, diagnose them: name the real error text, say what it blocks, and propose the repair action that fixes it. Never call something fixed until an action has actually run.
 
 ${ACTION_CATALOGUE}
 

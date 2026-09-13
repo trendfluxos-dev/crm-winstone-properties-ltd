@@ -30,17 +30,17 @@ const SUGGESTIONS: Record<Surface, string[]> = {
     "এই শিফটের সারসংক্ষেপ তৈরি করো",
   ],
   system: [
-    "পাইপলাইনে কোথায় আটকে আছে?",
+    "সিস্টেমে এখন কী কী সমস্যা আছে, আর সমাধান কী?",
     "Drive ব্যাকআপ যাচাই করো",
     "কোন রেকর্ডিং সার্ভারে ওঠেনি?",
   ],
 };
 
 const TITLE: Record<Surface, string> = {
-  desk: "কমান্ড এজেন্ট · আমার ডেস্ক",
-  dispatch: "কমান্ড এজেন্ট · কোঅর্ডিনেটর",
-  hq: "কমান্ড এজেন্ট · এক্সিকিউটিভ",
-  system: "কমান্ড এজেন্ট · আইটি কনসোল",
+  desk: "Winstone AI · আমার ডেস্ক",
+  dispatch: "Winstone AI · কোঅর্ডিনেটর",
+  hq: "Winstone AI · এক্সিকিউটিভ",
+  system: "Winstone AI · আইটি কনসোল",
 };
 
 /**

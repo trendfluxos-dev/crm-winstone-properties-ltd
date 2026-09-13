@@ -54,6 +54,8 @@ const RunInput = z.object({
       "retry_recording",
       "verify_drive",
       "generate_shift_summary",
+      "acknowledge_alert",
+      "retry_failed_recordings",
     ]),
     params: z.record(z.string(), z.union([z.string(), z.number(), z.null()])).default({}),
   }),
@@ -299,6 +301,51 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
       return {
         ok: missing === 0,
         message: `Drive যাচাই: ${verified}টি ঠিক আছে, ${missing}টি পাওয়া যায়নি`,
+      };
+    }
+
+    if (type === "acknowledge_alert") {
+      requireDispatch(caller);
+      const alertId = str(params, "alert_id");
+      if (!alertId) throw new Error("কোন সতর্কতা বন্ধ হবে তা বেছে নিন");
+      const { error } = await supabaseAdmin
+        .from("system_alerts")
+        .update({ acknowledged_at: new Date().toISOString(), acknowledged_by: actorProfileId })
+        .eq("id", alertId)
+        .is("acknowledged_at", null);
+      if (error) throw new Error(error.message);
+      await audit("alert_acknowledged");
+      return { ok: true, message: "সতর্কতা হ্যান্ডেল করা হয়েছে" };
+    }
+
+    if (type === "retry_failed_recordings") {
+      requireAuthority(caller);
+      const limit = Math.min(num(params, "limit", 5), 20);
+      const { data: stuck } = await supabaseAdmin
+        .from("call_recordings")
+        .select("id")
+        .eq("analysis_status", "failed")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (!stuck?.length) {
+        await audit("no_failed_recordings");
+        return { ok: true, message: "আটকে থাকা কোনো রেকর্ডিং নেই" };
+      }
+      const { analyzeOne } = await import("@/lib/analysis-queue.server");
+      let done = 0;
+      let failed = 0;
+      for (const row of stuck) {
+        try {
+          await analyzeOne(row.id);
+          done += 1;
+        } catch {
+          failed += 1;
+        }
+      }
+      await audit(`retry_failed:${done}/failed:${failed}`);
+      return {
+        ok: failed === 0,
+        message: `${done}টি রেকর্ডিং আবার চালানো হয়েছে${failed ? `, ${failed}টি আবারও ব্যর্থ` : ""}`,
       };
     }
 
