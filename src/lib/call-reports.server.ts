@@ -184,6 +184,11 @@ export async function openCallReport(input: {
  * Submits the report: validates, closes it, moves the lead forward and creates
  * the linked calendar event for FOLLOW UP / CALLBACK. The human category is
  * final — an AI suggestion is stored beside it and never overwrites it.
+ *
+ * Completion rule, enforced here and in the database trigger:
+ *   received + classified (temperature + grade) -> lead work_state = completed
+ *   received, not classified                    -> refused, report stays open
+ *   not received                                -> lead stays pending, retry queue
  */
 export async function submitCallReport(input: {
   reportId: string;
@@ -194,11 +199,10 @@ export async function submitCallReport(input: {
   reason?: string | null;
   followUpAt?: string | null;
   reminderMinutes?: number;
+  temperature?: string | null;
+  grade?: string | null;
   aiDecision?: "accepted" | "edited" | "rejected" | null;
 }) {
-  const invalid = validateReport(input);
-  if (invalid) throw new Error(invalid.message);
-
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const category = input.category as CallCategory;
 
@@ -212,6 +216,16 @@ export async function submitCallReport(input: {
   if (report.agent_id !== input.agentId) throw new Error("এই রিপোর্ট আপনার নয়");
   if (report.status === "submitted") return { ok: true, alreadySubmitted: true as const };
 
+  // `connected` is set when the call ends, so the phone cannot skip the
+  // classification requirement by omitting it from the submit payload.
+  const received = report.connected !== false;
+  const invalid = validateReport({ ...input, connected: received });
+  if (invalid) throw new Error(invalid.message);
+
+  const temperature = received ? ((input.temperature ?? null) as LeadTemperature | null) : null;
+  const grade = received ? ((input.grade ?? null) as LeadGrade | null) : null;
+  const classified = Boolean(temperature && grade);
+
   const { error } = await supabaseAdmin
     .from("call_reports")
     .update({
@@ -221,6 +235,8 @@ export async function submitCallReport(input: {
       note: input.note?.trim() || null,
       reason: input.reason?.trim() || null,
       follow_up_at: input.followUpAt ?? null,
+      temperature,
+      grade,
       ai_decision: input.aiDecision ?? null,
       submitted_at: new Date().toISOString(),
     })
@@ -234,18 +250,52 @@ export async function submitCallReport(input: {
     .eq("id", report.lead_id)
     .maybeSingle();
 
-  await supabaseAdmin
-    .from("leads")
-    .update({
-      status: LEAD_STATUS_FOR[category],
-      outcome_category: category,
-      notes:
-        [input.summary?.trim(), input.note?.trim(), input.reason?.trim()]
-          .filter(Boolean)
-          .join(" — ") || null,
-      last_call_at: new Date().toISOString(),
-    })
-    .eq("id", report.lead_id);
+  const nowIso = new Date().toISOString();
+  const notes =
+    [input.summary?.trim(), input.note?.trim(), input.reason?.trim()].filter(Boolean).join(" — ") ||
+    null;
+
+  if (received && classified) {
+    await supabaseAdmin
+      .from("leads")
+      .update({
+        status: LEAD_STATUS_FOR[category],
+        outcome_category: category,
+        notes,
+        last_call_at: nowIso,
+        temperature,
+        grade,
+        classification_note: input.note?.trim() || null,
+        classified_at: nowIso,
+        classified_by: input.agentId,
+        work_state: "completed",
+      })
+      .eq("id", report.lead_id);
+
+    await supabaseAdmin.from("lead_classifications").insert({
+      lead_id: report.lead_id,
+      agent_id: input.agentId,
+      report_id: report.id,
+      temperature: temperature!,
+      grade: grade!,
+      note: input.note?.trim() || null,
+      source: "manual",
+      classified_at: nowIso,
+    });
+  } else {
+    // Not received: the lead stays in the working queue for a retry call and is
+    // never silently completed.
+    await supabaseAdmin
+      .from("leads")
+      .update({
+        status: "pending",
+        outcome_category: category,
+        notes,
+        last_call_at: nowIso,
+        work_state: "pending",
+      })
+      .eq("id", report.lead_id);
+  }
 
   let followUpId: string | null = null;
   if (input.followUpAt) {
