@@ -27,6 +27,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SupportAdminRouteImport } from './routes/support-admin'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TicketsRouteImport } from './routes/tickets'
@@ -150,6 +151,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportAdminRoute = SupportAdminRouteImport.update({
+  id: '/support-admin',
+  path: '/support-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SystemRoute = SystemRouteImport.update({
@@ -350,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/support': typeof SupportRoute
+  '/support-admin': typeof SupportAdminRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/tickets': typeof TicketsRoute
@@ -404,6 +411,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/support': typeof SupportRoute
+  '/support-admin': typeof SupportAdminRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/tickets': typeof TicketsRoute
@@ -459,6 +467,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/support': typeof SupportRoute
+  '/support-admin': typeof SupportAdminRoute
   '/system': typeof SystemRoute
   '/terms': typeof TermsRoute
   '/tickets': typeof TicketsRoute
@@ -515,6 +524,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reports'
     | '/support'
+    | '/support-admin'
     | '/system'
     | '/terms'
     | '/tickets'
@@ -569,6 +579,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reports'
     | '/support'
+    | '/support-admin'
     | '/system'
     | '/terms'
     | '/tickets'
@@ -623,6 +634,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reports'
     | '/support'
+    | '/support-admin'
     | '/system'
     | '/terms'
     | '/tickets'
@@ -678,6 +690,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReportsRoute: typeof ReportsRoute
   SupportRoute: typeof SupportRoute
+  SupportAdminRoute: typeof SupportAdminRoute
   SystemRoute: typeof SystemRoute
   TermsRoute: typeof TermsRoute
   TicketsRoute: typeof TicketsRoute
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support-admin': {
+      id: '/support-admin'
+      path: '/support-admin'
+      fullPath: '/support-admin'
+      preLoaderRoute: typeof SupportAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/system': {
@@ -1102,6 +1122,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReportsRoute: ReportsRoute,
   SupportRoute: SupportRoute,
+  SupportAdminRoute: SupportAdminRoute,
   SystemRoute: SystemRoute,
   TermsRoute: TermsRoute,
   TicketsRoute: TicketsRoute,
