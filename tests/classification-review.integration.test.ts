@@ -23,7 +23,10 @@ async function makeReport(input: { recordingId: string | null; duration: number 
     .from("call_reports")
     .insert({
       lead_id: leadId!,
-      agent_id: agentId,
+      // Left unset on purpose: a live agent may legitimately have a pending
+      // report, and `call_reports_one_pending_per_agent` (correctly) forbids a
+      // second one. The probe must not disturb real work.
+      agent_id: null,
       recording_id: input.recordingId,
       call_ended_at: new Date().toISOString(),
       duration_seconds: input.duration,
