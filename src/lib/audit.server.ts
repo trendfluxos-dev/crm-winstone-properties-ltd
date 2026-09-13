@@ -19,6 +19,7 @@ export type AuditAction =
   | "lead_assigned"
   | "lead_self_claimed"
   | "call_report_submitted"
+  | "call_report_edited"
   | "device_registered"
   | "device_revoked"
   | "recording_reprocessed"
