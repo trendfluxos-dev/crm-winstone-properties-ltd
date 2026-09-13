@@ -41,7 +41,8 @@ export type AuditAction =
   | "pipeline_retry"
   | "drive_backup_verified"
   | "command_agent_action"
-  | "ai_agent_mismatch_flagged";
+  | "ai_agent_mismatch_flagged"
+  | "support_settings_updated";
 
 export async function logAudit(input: {
   action: AuditAction;
