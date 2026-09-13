@@ -186,6 +186,11 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
               <Badge variant="destructive">রেকর্ডিং সম্ভব নয়: {data.recording?.blocked ?? 0}</Badge>
               <Badge variant="outline">যাচাই বাকি: {data.recording?.untested ?? 0}</Badge>
             </div>
+            <div className="flex flex-wrap gap-1.5">
+              <Badge variant="secondary">সিম যাচাই হয়েছে: {data.sim?.verified ?? 0}</Badge>
+              <Badge variant="outline">সিম যুক্ত হয়নি: {data.sim?.missing ?? 0}</Badge>
+              <Badge variant="destructive">সিম মিলছে না: {data.sim?.mismatched ?? 0}</Badge>
+            </div>
             {data.devices.length === 0 ? (
               <p className="text-xs text-muted-foreground">কোনো ফোন এখনো সাইন ইন করেনি।</p>
             ) : (
@@ -209,8 +214,8 @@ export function CallOpsPanel({ showControls = false }: { showControls?: boolean 
                         {RECORDING_LABEL[device.recordingMode ?? ""] ?? "রেকর্ডিং যাচাই হয়নি"}
                       </Badge>
                       {device.agentSim ? (
-                        <Badge variant={device.simMatched ? "secondary" : "outline"}>
-                          সিম {device.agentSim}
+                        <Badge variant={device.simMatched ? "secondary" : "destructive"}>
+                          সিম {device.agentSim}{device.simMatched ? " · যাচাই হয়েছে" : " · মিলছে না"}
                           {device.agentName ? ` · ${device.agentName}` : ""}
                         </Badge>
                       ) : (
