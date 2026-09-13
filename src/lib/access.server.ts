@@ -2,8 +2,9 @@ import { createClient } from "@supabase/supabase-js";
 import { getRequest } from "@tanstack/react-start/server";
 
 import type { Database } from "@/integrations/supabase/types";
+import type { SafeProfile } from "@/lib/profile-columns";
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Profile = SafeProfile;
 export type Scope = "authority" | "coordinator" | "agent" | "none";
 
 export type Caller = {

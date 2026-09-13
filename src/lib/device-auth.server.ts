@@ -13,8 +13,9 @@
  * end-user devices any more.
  */
 import type { Database } from "@/integrations/supabase/types";
+import type { SafeProfile } from "@/lib/profile-columns";
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Profile = SafeProfile;
 export type AgentDevice = Database["public"]["Tables"]["agent_devices"]["Row"];
 
 export type ApiCaller =

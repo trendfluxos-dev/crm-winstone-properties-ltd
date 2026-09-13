@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCrmSnapshot } from "@/lib/crm.functions";
 import { useAdminToken } from "@/lib/local-session";
+import type { SafeProfile } from "@/lib/profile-columns";
 
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Profile = SafeProfile;
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
 export type CallRecording = Database["public"]["Tables"]["call_recordings"]["Row"];
 export type WhatsappMessage = Database["public"]["Tables"]["whatsapp_interactions"]["Row"];
