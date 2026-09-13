@@ -43,6 +43,7 @@ import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/a
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
+import { Route as ApiPublicHooksDriveBackupRouteImport } from './routes/api/public/hooks/drive-backup'
 import { Route as ApiPublicHooksShiftSummaryRouteImport } from './routes/api/public/hooks/shift-summary'
 import { Route as ApiPublicIngestAnalyzeRouteImport } from './routes/api/public/ingest/analyze'
 import { Route as ApiPublicIngestLeadRouteImport } from './routes/api/public/ingest/lead'
@@ -235,6 +236,12 @@ const ApiPublicDownloadApkRoute = ApiPublicDownloadApkRouteImport.update({
   path: '/api/public/download/apk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksDriveBackupRoute =
+  ApiPublicHooksDriveBackupRouteImport.update({
+    id: '/api/public/hooks/drive-backup',
+    path: '/api/public/hooks/drive-backup',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksShiftSummaryRoute =
   ApiPublicHooksShiftSummaryRouteImport.update({
     id: '/api/public/hooks/shift-summary',
@@ -363,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
   '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
   '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
@@ -416,6 +424,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
   '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
   '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
@@ -470,6 +479,7 @@ export interface FileRoutesById {
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
+  '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
   '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
   '/api/public/ingest/analyze': typeof ApiPublicIngestAnalyzeRoute
   '/api/public/ingest/lead': typeof ApiPublicIngestLeadRoute
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/hooks/drive-backup'
     | '/api/public/hooks/shift-summary'
     | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
@@ -578,6 +589,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/hooks/drive-backup'
     | '/api/public/hooks/shift-summary'
     | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
@@ -631,6 +643,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/workspace'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
+    | '/api/public/hooks/drive-backup'
     | '/api/public/hooks/shift-summary'
     | '/api/public/ingest/analyze'
     | '/api/public/ingest/lead'
@@ -685,6 +698,7 @@ export interface RootRouteChildren {
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
+  ApiPublicHooksDriveBackupRoute: typeof ApiPublicHooksDriveBackupRoute
   ApiPublicHooksShiftSummaryRoute: typeof ApiPublicHooksShiftSummaryRoute
   ApiPublicIngestAnalyzeRoute: typeof ApiPublicIngestAnalyzeRoute
   ApiPublicIngestLeadRoute: typeof ApiPublicIngestLeadRoute
@@ -944,6 +958,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDownloadApkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/drive-backup': {
+      id: '/api/public/hooks/drive-backup'
+      path: '/api/public/hooks/drive-backup'
+      fullPath: '/api/public/hooks/drive-backup'
+      preLoaderRoute: typeof ApiPublicHooksDriveBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/shift-summary': {
       id: '/api/public/hooks/shift-summary'
       path: '/api/public/hooks/shift-summary'
@@ -1102,6 +1123,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
+  ApiPublicHooksDriveBackupRoute: ApiPublicHooksDriveBackupRoute,
   ApiPublicHooksShiftSummaryRoute: ApiPublicHooksShiftSummaryRoute,
   ApiPublicIngestAnalyzeRoute: ApiPublicIngestAnalyzeRoute,
   ApiPublicIngestLeadRoute: ApiPublicIngestLeadRoute,

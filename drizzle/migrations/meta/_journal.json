@@ -162,6 +162,13 @@
       "when": 1789260371379,
       "tag": "0022_lead_classification_and_completion",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1789261217272,
+      "tag": "0023_lead_owner_column_sync",
+      "breakpoints": true
     }
   ]
 }

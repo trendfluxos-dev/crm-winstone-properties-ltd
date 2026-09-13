@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+
+import { leadOwner } from "./lead-owner";
 import { z } from "zod";
 
 import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
@@ -50,7 +52,7 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
 
     if (caller.scope === "agent" && caller.profile) {
       const me = caller.profile.id;
-      const myLeads = (leads.data ?? []).filter((l) => l.assigned_to === me);
+      const myLeads = (leads.data ?? []).filter((l) => leadOwner(l) === me);
       const myLeadIds = new Set(myLeads.map((l) => l.id));
       return {
         profiles: (profiles.data ?? []).filter((p) => p.id === me),

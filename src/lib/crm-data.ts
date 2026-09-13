@@ -1,4 +1,6 @@
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { leadOwner } from "./lead-owner";
 import { useEffect } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -142,7 +144,7 @@ export function buildAgentStats(
       const agentMessages = messages.filter(
         (m) => m.agent_id === profile.id && m.sender_type === "agent" && inWindow(m.created_at),
       );
-      const assignedLeads = leads.filter((l) => l.assigned_to === profile.id);
+      const assignedLeads = leads.filter((l) => leadOwner(l) === profile.id);
       const closedWon = assignedLeads.filter(
         (l) => l.status === "closed" && l.outcome_category === "deal_won",
       ).length;

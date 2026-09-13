@@ -240,6 +240,21 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             console.error("[ingest] background analysis failed", error),
           );
 
+          // Google Drive copy is best-effort and only runs when IT switched it
+          // on with a folder; a Drive failure never fails the phone's upload.
+          void (async () => {
+            try {
+              const { getDriveBackupSettings, backupRecordingToDrive } = await import(
+                "@/lib/recording-drive.server"
+              );
+              const settings = await getDriveBackupSettings();
+              if (!settings.enabled || !settings.folderId) return;
+              await backupRecordingToDrive(recordingId);
+            } catch (error) {
+              console.error("[ingest] drive backup failed", error);
+            }
+          })();
+
           return json({ recording_id: recordingId, analysis: "pending" }, 202);
         } catch (error) {
           console.error("[ingest] recording failed", error);
