@@ -68,7 +68,7 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: profile } = await supabaseAdmin
     .from("profiles")
-    .select("*")
+    .select(PROFILE_SAFE_COLUMNS)
     .eq("user_id", userId)
     .maybeSingle();
 

@@ -33,7 +33,7 @@ export type CoachBriefing = {
 async function loadAgentData(agentId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const [profileRes, leadsRes, configRes] = await Promise.all([
-    supabaseAdmin.from("profiles").select("*").eq("id", agentId).maybeSingle(),
+    supabaseAdmin.from("profiles").select(PROFILE_SAFE_COLUMNS).eq("id", agentId).maybeSingle(),
     supabaseAdmin.from("leads").select("*").eq("assigned_to", agentId).order("updated_at", { ascending: false }),
     supabaseAdmin.from("app_config").select("data").eq("id", "default").maybeSingle(),
   ]);

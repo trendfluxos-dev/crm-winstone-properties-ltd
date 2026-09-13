@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
+
 const AdminToken = z.string().min(1);
 /** PIN token is optional now: coordinators/agents authenticate with their account. */
 const OptionalToken = z.string().nullable().optional();
@@ -25,7 +27,7 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       return { profiles: [], leads: [], calls: [], messages: [], events: [] };
 
     const [profiles, leads, calls, messages, events] = await Promise.all([
-      supabaseAdmin.from("profiles").select("*").order("name"),
+      supabaseAdmin.from("profiles").select(PROFILE_SAFE_COLUMNS).order("name"),
       supabaseAdmin.from("leads").select("*").order("updated_at", { ascending: false }),
       supabaseAdmin
         .from("call_recordings")
