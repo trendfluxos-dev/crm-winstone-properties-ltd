@@ -146,6 +146,39 @@ object WinstoneAgentApi {
         }
     }
 
+    /**
+     * Syncs a WhatsApp message the agent sent from their own phone to the CRM,
+     * so the lead timeline shows the conversation next to the SIM calls.
+     * The client message id makes a retry idempotent: the same message never
+     * lands twice, exactly like the recording upload path.
+     */
+    suspend fun syncWhatsApp(
+        leadId: String,
+        clientMessageId: String,
+        text: String,
+    ): JSONObject = withContext(Dispatchers.IO) {
+        val message = JSONObject().apply {
+            put("client_message_id", clientMessageId)
+            put("sender", "agent")
+            put("message_type", "text")
+            put("text", text)
+        }
+        val payload = JSONObject().apply {
+            put("lead_id", leadId)
+            put("messages", org.json.JSONArray().put(message))
+        }
+        val req = Request.Builder()
+            .url(WinstoneApi.BASE_URL + "/api/public/agent/whatsapp")
+            .header("x-device-token", AgentSession.deviceToken.orEmpty())
+            .post(payload.toString().toRequestBody(JSON))
+            .build()
+        client.newCall(req).execute().use { res ->
+            val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
+            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            body
+        }
+    }
+
     private fun JSONObject.stringList(vararg keys: String): List<String> {
         for (key in keys) {
             val arr = optJSONArray(key) ?: continue
