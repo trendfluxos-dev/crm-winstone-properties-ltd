@@ -22,6 +22,8 @@ export type ShiftAgentLine = {
   reports: number;
   pending: number;
   followUps: number;
+  /** Total talk time from the agents' own call reports, in seconds. */
+  talkSeconds: number;
   categories: Record<string, number>;
 };
 
@@ -39,6 +41,7 @@ export type ShiftSummaryRow = {
     reports: number;
     pending: number;
     followUps: number;
+    talkSeconds?: number;
   };
   agents: ShiftAgentLine[];
 };
