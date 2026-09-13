@@ -93,11 +93,11 @@ export const Route = createFileRoute("/api/public/agent/report")({
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data: lead } = await supabaseAdmin
             .from("leads")
-            .select("id, assigned_to")
+            .select("id, assigned_to, assigned_agent_id")
             .eq("id", body.lead_id)
             .maybeSingle();
           if (!lead) return json({ error: "Unknown lead" }, 404);
-          if (lead.assigned_to && lead.assigned_to !== caller.profile.id) {
+          if (leadHeldByOther(lead, caller.profile.id)) {
             return json({ error: "এই লিড আপনার তালিকায় নেই" }, 403);
           }
 

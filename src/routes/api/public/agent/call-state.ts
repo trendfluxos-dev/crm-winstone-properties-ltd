@@ -48,12 +48,12 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
 
         const { data: lead } = await supabaseAdmin
           .from("leads")
-          .select("id, phone_number, assigned_to")
+          .select("id, phone_number, assigned_to, assigned_agent_id")
           .eq("id", body.lead_id)
           .maybeSingle();
         if (!lead) return json({ error: "Unknown lead" }, 404);
-        if (lead.assigned_to && lead.assigned_to !== caller.profile.id) {
-          return json({ error: "এই লিড আপনার তালিকায় নেই" }, 403);
+        if (leadHeldByOther(lead, caller.profile.id)) {
+          return json({ error: LEAD_NOT_YOURS }, 403);
         }
 
         // recording_status is honest: only the upload endpoint may set

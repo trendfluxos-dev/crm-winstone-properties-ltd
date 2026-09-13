@@ -49,7 +49,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
 
         const { data: found } = await supabaseAdmin
           .from("leads")
-          .select("id, assigned_to")
+          .select("id, assigned_to, assigned_agent_id")
           .eq("phone_number", phone)
           .maybeSingle();
 
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           });
           leadId = intake.leadId;
           created = !intake.duplicate;
-        } else if (!found?.assigned_to) {
+        } else if (!leadOwnerId(found)) {
           // Unowned lead called this agent: it becomes theirs, like a web callback.
           await supabaseAdmin
             .from("leads")

@@ -58,13 +58,13 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
 
         const { data: lead } = await supabaseAdmin
           .from("leads")
-          .select("id, notes, call_attempts, assigned_to")
+          .select("id, notes, call_attempts, assigned_to, assigned_agent_id")
           .eq("id", lead_id)
           .maybeSingle();
         if (!lead) return json({ error: "Unknown lead" }, 404);
         // A phone may only close out a lead that belongs to its own agent.
-        if (caller.kind === "device" && lead.assigned_to && lead.assigned_to !== caller.profile.id) {
-          return json({ error: "এই লিড আপনার তালিকায় নেই" }, 403);
+        if (caller.kind === "device" && leadHeldByOther(lead, caller.profile.id)) {
+          return json({ error: LEAD_NOT_YOURS }, 403);
         }
 
         const stamp = new Date();
