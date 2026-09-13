@@ -178,12 +178,13 @@ fun LiveCallScreen(phase: CallPhase) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReportSheet(notes: String) {
+fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var reportId by remember { mutableStateOf<String?>(null) }
+    var leadLabel by remember { mutableStateOf<String?>(null) }
     var category by remember { mutableStateOf("") }
     var summary by remember { mutableStateOf("") }
     var note by remember { mutableStateOf(notes) }
