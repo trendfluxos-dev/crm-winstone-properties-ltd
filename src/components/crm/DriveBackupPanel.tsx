@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Cloud, FolderSync, Loader2, Save, Settings } from "lucide-react";
+import { Cloud, FolderSync, Loader2, Save, Settings, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +12,8 @@ import {
   backupSingleRecordingToDriveFn,
   getDriveBackupSettingsFn,
   initializeDriveBackupFolderFn,
+  listAgentDriveFoldersFn,
+  syncAgentDriveFoldersFn,
   saveDriveBackupSettingsFn,
   syncRecordingDocToDriveFn,
   syncRecordingsToDriveFn,
@@ -28,6 +30,8 @@ export function DriveBackupPanel() {
   const syncRecordings = useServerFn(syncRecordingsToDriveFn);
   const syncDoc = useServerFn(syncRecordingDocToDriveFn);
   const backupOne = useServerFn(backupSingleRecordingToDriveFn);
+  const syncAgentFolders = useServerFn(syncAgentDriveFoldersFn);
+  const listAgentFolders = useServerFn(listAgentDriveFoldersFn);
 
   const [dateKey, setDateKey] = useState(todayDhaka());
   const [recordingId, setRecordingId] = useState("");
@@ -92,6 +96,23 @@ export function DriveBackupPanel() {
     mutationFn: () => backupOne({ data: { recordingId } }),
     onSuccess: (data) => {
       toast.success(`${data.driveFileName} Google Drive-ে জমা হয়েছে`);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const { data: agentFolders, refetch: refetchAgentFolders } = useQuery({
+    queryKey: ["drive-agent-folders"],
+    queryFn: () => listAgentFolders({}),
+  });
+
+  const agentFolderSync = useMutation({
+    mutationFn: () => syncAgentFolders({}),
+    onSuccess: (data) => {
+      toast.success(
+        `${data.total}জন এজেন্ট · নতুন ${data.created} · নাম বদল ${data.renamed} · সরানো ${data.moved}`,
+      );
+      if (data.failures.length > 0) console.error("Agent folder sync errors", data.failures);
+      void refetchAgentFolders();
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -224,6 +245,58 @@ export function DriveBackupPanel() {
                 {singleBackup.isPending ? <Loader2 className="size-4 animate-spin" /> : "জমা"}
               </Button>
             </div>
+          </div>
+
+          <div className="space-y-3 rounded-xl border border-border bg-surface p-3 sm:col-span-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Users className="size-3.5" />
+                এজেন্ট অনুযায়ী ফোল্ডার
+              </p>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={agentFolderSync.isPending}
+                onClick={() => agentFolderSync.mutate()}
+              >
+                {agentFolderSync.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  "ফোল্ডার মিলিয়ে নিন"
+                )}
+              </Button>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              প্রত্যেক এজেন্টের রেকর্ডিং তার নিজের ফোল্ডারে জমা হয়। নতুন এজেন্ট যোগ হলে ফোল্ডার
+              স্বয়ংক্রিয়ভাবে তৈরি হয়, নাম বা Agent ID বদলালে একই ফোল্ডারের নাম বদলে যায়, আর কোম্পানির
+              মূল ফোল্ডার বদলালে সব ফোল্ডার নতুন জায়গায় সরে যায়।
+            </p>
+
+            {agentFolders && agentFolders.length > 0 ? (
+              <ul className="grid gap-1.5 sm:grid-cols-2">
+                {agentFolders.map((folder) => (
+                  <li
+                    key={folder.profile_id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
+                  >
+                    <span className="truncate">{folder.folder_name}</span>
+                    <a
+                      href={folder.folder_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="shrink-0 text-primary underline"
+                    >
+                      খুলুন
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                এখনো কোনো এজেন্ট ফোল্ডার তৈরি হয়নি।
+              </p>
+            )}
           </div>
         </div>
       )}
