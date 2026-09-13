@@ -86,7 +86,7 @@ export const getCreditsReport = createServerFn({ method: "POST" })
     const agentMap = new Map<string | null, { calls: number; credits: number }>();
     for (const r of rows) {
       const credits = Number(r.est_credits) || 0;
-      const bump = <K,>(map: Map<K, { calls: number; credits: number }>, key: K) => {
+      const bump = <K>(map: Map<K, { calls: number; credits: number }>, key: K) => {
         const cur = map.get(key) ?? { calls: 0, credits: 0 };
         cur.calls += 1;
         cur.credits += credits;
