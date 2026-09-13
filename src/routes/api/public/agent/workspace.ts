@@ -61,7 +61,7 @@ export const Route = createFileRoute("/api/public/agent/workspace")({
           .select(
             "id, name, phone_number, company, notes, status, outcome_category, call_attempts, source, created_at, updated_at",
           )
-          .eq("assigned_to", agent.id)
+          .or(`assigned_to.eq.${agent.id},assigned_agent_id.eq.${agent.id}`)
           .order("updated_at", { ascending: false })
           .limit(limit);
         if (leadsError) return json({ error: leadsError.message }, 500);
