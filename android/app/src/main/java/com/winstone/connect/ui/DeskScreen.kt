@@ -69,6 +69,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
     val callScope = rememberCoroutineScope()
     var callBlocked by remember { mutableStateOf<String?>(null) }
     var showNewLead by remember { mutableStateOf(false) }
+    var whatsappLead by remember { mutableStateOf<Lead?>(null) }
 
     LaunchedEffect(state.toast) {
         state.toast?.let {
@@ -139,6 +140,7 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
                                     lead = lead,
                                     recordingMode = state.recordingMode,
                                     recordingReason = state.recordingReason,
+                                    onWhatsApp = { whatsappLead = lead },
                                     onCall = {
                                         // The server decides: an unfinished post-call
                                         // report blocks the next outbound call.
@@ -190,6 +192,47 @@ fun DeskScreen(activity: Activity, vm: DeskViewModel) {
         )
     }
 
+    whatsappLead?.let { lead ->
+        WhatsAppDialog(
+            lead = lead,
+            onDismiss = { whatsappLead = null },
+            onSend = { text ->
+                vm.sendWhatsApp(lead.id, lead.phone, text)
+                whatsappLead = null
+            },
+        )
+    }
+
+}
+
+/**
+ * Message composer for the lead's WhatsApp. Sending opens WhatsApp on this phone
+ * and syncs the same text to the CRM lead timeline.
+ */
+@Composable
+private fun WhatsAppDialog(lead: Lead, onDismiss: () -> Unit, onSend: (String) -> Unit) {
+    var text by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("হোয়াটসঅ্যাপ · ${lead.name}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(lead.phone, fontSize = 12.sp, color = WinInkMuted)
+                OutlinedTextField(text, { text = it }, label = { Text("মেসেজ") })
+                Text(
+                    "পাঠালে হোয়াটসঅ্যাপ খুলবে এবং একই লেখা লিডের টাইমলাইনে জমা হবে।",
+                    fontSize = 11.sp,
+                    color = WinInkMuted,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(enabled = text.isNotBlank(), onClick = { onSend(text.trim()) }) {
+                Text("পাঠান")
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("বাতিল") } },
+    )
 }
 
 @Composable
