@@ -26,6 +26,12 @@ const Body = z.object({
     .optional(),
   recording_supported: z.boolean().optional(),
   recording_note: z.string().trim().max(300).nullable().optional(),
+  /**
+   * "incoming" (default) is a callback from the customer. "outgoing" is a call
+   * the agent dialled from the phone's own dialer instead of from the app — the
+   * phone still observes it, so it must land in the CRM the same way.
+   */
+  direction: z.enum(["incoming", "outgoing"]).optional(),
 });
 
 function json(body: unknown, status = 200): Response {
@@ -47,6 +53,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
         if (!parsed.success) return json({ error: "Invalid payload" }, 400);
         const body = parsed.data;
         const at = body.at ?? new Date().toISOString();
+        const outgoing = body.direction === "outgoing";
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { leadOwnerId } = await import("@/lib/lead-access.server");
@@ -68,8 +75,10 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
             phoneNumber: phone,
             ownerId: caller.profile.id,
             ownerName: caller.profile.name,
-            referenceBy: "কলব্যাক",
-            notes: "ক্রেতা নিজে ফোন করেছেন (এজেন্টের ফোনে ইনকামিং কল)",
+            referenceBy: outgoing ? "ফোন থেকে কল" : "কলব্যাক",
+            notes: outgoing
+              ? "এজেন্ট ফোনের ডায়ালার থেকে কল করেছেন"
+              : "ক্রেতা নিজে ফোন করেছেন (এজেন্টের ফোনে ইনকামিং কল)",
           });
           leadId = intake.leadId;
           created = !intake.duplicate;
@@ -80,7 +89,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
             .update({
               assigned_to: caller.profile.id,
               assigned_agent_id: caller.profile.id,
-              assignment_source: "callback_claim",
+              assignment_source: outgoing ? "dialer_claim" : "callback_claim",
             })
             .eq("id", leadId);
         }
@@ -123,12 +132,12 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
               agent_id: caller.profile.id,
               device_id: caller.device.id,
               phone_number: phone,
-              call_direction: "incoming_callback",
+              call_direction: outgoing ? "outgoing" : "incoming_callback",
               duration_seconds: body.duration_seconds ?? 0,
               is_two_sided: false,
               sync_status: "uploaded",
               analysis_status: "pending",
-              call_source: "android_incoming",
+              call_source: outgoing ? "android_dialer" : "android_incoming",
               external_call_id: body.call_uid,
               upload_status: "pending",
               started_at: at,
@@ -155,10 +164,10 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
         await recordSyncEvent({
           agentId: caller.profile.id,
           deviceId: caller.device.id,
-          eventType: `incoming_${body.state}`,
+          eventType: `${outgoing ? "dialer" : "incoming"}_${body.state}`,
           entityType: "call_recording",
           entityId: recordingId,
-          idempotencyKey: `incoming_call:${body.call_uid}:${body.state}`,
+          idempotencyKey: `${outgoing ? "dialer_call" : "incoming_call"}:${body.call_uid}:${body.state}`,
           payload: {
             lead_id: leadId,
             phone_number: phone,
@@ -173,7 +182,9 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
             leadId,
             agentId: caller.profile.id,
             kind: "call_started",
-            detail: `ক্রেতা ${caller.profile.name}-কে ফিরতি কল করেছেন`,
+            detail: outgoing
+              ? `${caller.profile.name} ফোনের ডায়ালার থেকে কল শুরু করেছেন`
+              : `ক্রেতা ${caller.profile.name}-কে ফিরতি কল করেছেন`,
           });
         }
 
@@ -200,7 +211,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
               leadId,
               agentId: caller.profile.id,
               kind: "call_ended",
-              detail: "ইনকামিং কল ধরা হয়নি",
+              detail: outgoing ? "কল ধরা হয়নি" : "ইনকামিং কল ধরা হয়নি",
             });
           }
         }
