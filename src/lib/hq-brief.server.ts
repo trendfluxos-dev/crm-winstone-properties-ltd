@@ -327,6 +327,54 @@ async function loadBlock(
     .map(([label, count]) => ({ label, count }))
     .sort((a, b) => b.count - a.count);
 
+  // Lead-based summary: one line per lead, built from the agents' own updates.
+  const leadMap = new Map<string, BriefLead>();
+  for (const r of reports) {
+    const key = r.lead_id ?? `phone:${r.phone_number ?? r.id}`;
+    const lead = r.lead_id ? leadById.get(r.lead_id) : undefined;
+    const seconds = r.duration_seconds ?? 0;
+    const existing = leadMap.get(key);
+    const agentName = (r.agent_id && agentById.get(r.agent_id)?.name) || "এজেন্ট";
+    const followUp = r.follow_up_at ? `${dayLabel(r.follow_up_at)} ${clock(r.follow_up_at)}` : null;
+    if (!existing) {
+      leadMap.set(key, {
+        leadId: key,
+        name: lead?.name ?? "লিড",
+        phone: lead?.phone_number ?? r.phone_number ?? "—",
+        calls: 1,
+        connected: r.connected,
+        talkSeconds: seconds,
+        talkLabel: talkLabel(seconds),
+        lastTalkLabel: talkLabel(seconds),
+        lastFromLabel: clock(r.call_started_at ?? r.call_ended_at),
+        lastToLabel: clock(r.call_ended_at),
+        categoryLabel: CATEGORY_LABEL[r.category ?? ""] ?? r.category ?? "—",
+        temperature: r.temperature,
+        grade: r.grade,
+        summary: (r.summary ?? r.note ?? "").trim(),
+        followUpLabel: followUp,
+        lastAgentName: agentName,
+      });
+      continue;
+    }
+    existing.calls += 1;
+    existing.connected = existing.connected || r.connected;
+    existing.talkSeconds += seconds;
+    existing.talkLabel = talkLabel(existing.talkSeconds);
+    // Reports arrive ordered by call_ended_at, so the latest update wins.
+    existing.lastTalkLabel = talkLabel(seconds);
+    existing.lastFromLabel = clock(r.call_started_at ?? r.call_ended_at);
+    existing.lastToLabel = clock(r.call_ended_at);
+    existing.categoryLabel = CATEGORY_LABEL[r.category ?? ""] ?? r.category ?? "—";
+    existing.temperature = r.temperature ?? existing.temperature;
+    existing.grade = r.grade ?? existing.grade;
+    const text = (r.summary ?? r.note ?? "").trim();
+    if (text) existing.summary = text;
+    if (followUp) existing.followUpLabel = followUp;
+    existing.lastAgentName = agentName;
+  }
+  const leads = [...leadMap.values()].sort((a, b) => b.talkSeconds - a.talkSeconds);
+
   return {
     label,
     live,
@@ -336,6 +384,7 @@ async function loadBlock(
     hourly,
     categories,
     agents,
+    leads,
     narrative: narrate(label, totals, agents, categories, hourly, live),
   };
 }
