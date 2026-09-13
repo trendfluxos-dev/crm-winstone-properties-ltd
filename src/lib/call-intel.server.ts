@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { logAiUsage } from "@/lib/ai-usage.server";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
