@@ -94,6 +94,47 @@ export type Database = {
           },
         ]
       }
+      ai_usage_events: {
+        Row: {
+          actor_profile_id: string | null
+          category: string
+          created_at: string
+          detail: string | null
+          est_credits: number
+          id: string
+          model: string | null
+          units: number
+        }
+        Insert: {
+          actor_profile_id?: string | null
+          category: string
+          created_at?: string
+          detail?: string | null
+          est_credits: number
+          id?: string
+          model?: string | null
+          units?: number
+        }
+        Update: {
+          actor_profile_id?: string | null
+          category?: string
+          created_at?: string
+          detail?: string | null
+          est_credits?: number
+          id?: string
+          model?: string | null
+          units?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_events_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_voice_sessions: {
         Row: {
           call_sid: string | null
