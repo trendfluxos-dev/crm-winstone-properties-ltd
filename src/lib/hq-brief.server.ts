@@ -68,6 +68,25 @@ export type BriefAgent = {
   calls_detail: BriefCall[];
 };
 
+export type BriefLead = {
+  leadId: string;
+  name: string;
+  phone: string;
+  calls: number;
+  connected: boolean;
+  talkSeconds: number;
+  talkLabel: string;
+  lastTalkLabel: string;
+  lastFromLabel: string;
+  lastToLabel: string;
+  categoryLabel: string;
+  temperature: string | null;
+  grade: string | null;
+  summary: string;
+  followUpLabel: string | null;
+  lastAgentName: string;
+};
+
 export type BriefBlock = {
   label: string;
   live: boolean;
@@ -88,6 +107,7 @@ export type BriefBlock = {
   hourly: { hour: string; calls: number; connected: number; minutes: number }[];
   categories: { label: string; count: number }[];
   agents: BriefAgent[];
+  leads: BriefLead[];
   narrative: string[];
 };
 
