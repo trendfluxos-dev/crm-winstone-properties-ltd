@@ -42,6 +42,17 @@ object LiveCallLauncher {
     /** Bengali line shown in-call when this device cannot record. */
     @Volatile var recordingIssue: String? = null
 
+    /** Parameters kept when the user must grant CALL_PHONE first. */
+    private data class PendingCall(
+        val leadId: String,
+        val phone: String,
+        val agentId: String?,
+        val leadName: String?,
+    )
+
+    @Volatile
+    private var pendingCall: PendingCall? = null
+
     private val _phase = MutableStateFlow(CallPhase.Idle)
     val phase: StateFlow<CallPhase> = _phase.asStateFlow()
 
@@ -59,33 +70,80 @@ object LiveCallLauncher {
         agentId: String?,
         leadName: String? = null,
     ) {
-        val clean = phone.replace(Regex("[^\\d+]"), "")
-        activeLeadId = leadId; activePhone = clean; activeAgentId = agentId
-        activeLeadName = leadName
+        pendingCall = PendingCall(leadId, phone, agentId, leadName)
 
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CALL_PHONE), REQ_CALL)
+        val granted = ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE)
+            == PackageManager.PERMISSION_GRANTED
+
+        if (granted) {
+            doCall(activity, direct = true)
             return
         }
+
+        // Even without CALL_PHONE we can still open the system dialer so the
+        // agent is never stuck. Ask for the permission at the same time so the
+        // next tap can use ACTION_CALL.
+        doCall(activity, direct = false)
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CALL_PHONE)) {
+            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.CALL_PHONE), REQ_CALL)
+        }
+    }
+
+    /** Called from MainActivity.onRequestPermissionsResult after CALL_PHONE is granted. */
+    fun retryPendingCall(activity: Activity) {
+        doCall(activity, direct = true)
+    }
+
+    private fun doCall(activity: Activity, direct: Boolean) {
+        val pending = pendingCall ?: return
+        pendingCall = null
+
+        val normalized = normalizeBdMsisdn(pending.phone)
+        val clean = normalized ?: pending.phone.replace(Regex("[^\\d+]"), "")
+        activeLeadId = pending.leadId
+        activePhone = clean
+        activeAgentId = pending.agentId
+        activeLeadName = pending.leadName
         connectedAt = 0L
+
         // One id for this whole attempt: the CRM keys the call row on it, so a
         // retried state update updates that row instead of adding another call.
-        val uid = CallLifecycle.newCallUid(leadId)
+        val uid = CallLifecycle.newCallUid(pending.leadId)
         activeCallUid = uid
         val capability = RecordingCapabilityCheck.check(activity)
         CallSyncQueue.queueCallState(
             context = activity.applicationContext,
             callUid = uid,
-            leadId = leadId,
+            leadId = pending.leadId,
             state = CallState.INITIATED.wire!!,
             phoneNumber = clean,
             recordingSupported = capability.support == RecordingSupport.TWO_SIDED,
             recordingNote = capability.reason,
         )
         setPhase(CallPhase.Dialing)
-        activity.startActivity(Intent(Intent.ACTION_CALL, Uri.parse("tel:$clean")))
+
+        val dialUri = Uri.parse("tel:$clean")
+        if (direct) {
+            try {
+                activity.startActivity(Intent(Intent.ACTION_CALL, dialUri))
+                return
+            } catch (e: Exception) {
+                // Fall through to ACTION_DIAL so the agent can still call.
+            }
+        }
+        try {
+            activity.startActivity(
+                Intent(Intent.ACTION_DIAL, dialUri)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        } catch (_: Exception) {
+            setPhase(CallPhase.Idle)
+            android.widget.Toast.makeText(
+                activity,
+                "কোনো ডায়ালার পাওয়া যায়নি",
+                android.widget.Toast.LENGTH_LONG,
+            ).show()
+        }
     }
 
     /**
