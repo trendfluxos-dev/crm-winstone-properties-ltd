@@ -110,6 +110,12 @@ export type AgentStats = {
   closedWon: number;
   assigned: number;
   conversionRate: number;
+  /** Classification counts on the agent's own leads. */
+  hot: number;
+  warm: number;
+  cold: number;
+  /** Assigned leads that are not COMPLETED yet (unclassified or not reached). */
+  pendingWork: number;
 };
 
 function isToday(iso: string): boolean {
