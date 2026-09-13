@@ -37,7 +37,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 /** Month bounds in Dhaka time (UTC+6), returned as UTC ISO for the query. */
 function monthBounds(month: string): { start: string; end: string; label: string } {
-  const [y, m] = month.split("-").map(Number);
+  const [y = 0, m = 1] = month.split("-").map(Number);
   const start = new Date(Date.UTC(y, m - 1, 1, -6, 0, 0)); // 00:00 Dhaka = 18:00 prev day UTC
   const end = new Date(Date.UTC(y, m, 1, -6, 0, 0));
   const label = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-GB", {
