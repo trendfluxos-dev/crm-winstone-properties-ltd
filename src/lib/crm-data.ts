@@ -162,6 +162,10 @@ export function buildAgentStats(
         closedWon,
         assigned: assignedLeads.length,
         conversionRate: assignedLeads.length ? (closedWon / assignedLeads.length) * 100 : 0,
+        hot: assignedLeads.filter((l) => l.temperature === "hot").length,
+        warm: assignedLeads.filter((l) => l.temperature === "warm").length,
+        cold: assignedLeads.filter((l) => l.temperature === "cold").length,
+        pendingWork: assignedLeads.filter((l) => l.work_state !== "completed").length,
       };
     })
     .sort((a, b) => b.connected - a.connected || b.talkSeconds - a.talkSeconds);
