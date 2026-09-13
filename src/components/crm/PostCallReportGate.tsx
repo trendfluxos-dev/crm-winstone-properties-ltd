@@ -227,6 +227,61 @@ export function PostCallReportGate() {
           </div>
         </div>
 
+        {received ? (
+          <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+            <p className="text-xs font-bold">
+              শ্রেণিবিন্যাস (বাধ্যতামূলক — কথা হয়েছে)
+            </p>
+            <div className="space-y-1.5">
+              <Label className="text-xs">লিডের তাপমাত্রা</Label>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {TEMPERATURES.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setTemperature(item.value)}
+                    className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                      temperature === item.value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:bg-muted"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">গ্রেড</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {GRADES.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setGrade(item.value)}
+                    className={`rounded-lg border px-3 py-2 text-xs font-bold transition ${
+                      grade === item.value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:bg-muted"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              শ্রেণিবিন্যাস ছাড়া লিড COMPLETED হবে না। AI নিজে থেকে এটি বসাবে না।
+            </p>
+          </div>
+        ) : (
+          <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+            কথা হয়নি — লিড PENDING থাকবে এবং আবার কলের তালিকায় ফিরে যাবে।
+          </p>
+        )}
+
+
+
         <div className="space-y-1.5">
           <Label htmlFor="call-summary" className="text-xs">
             কলের সারাংশ (বাধ্যতামূলক)
