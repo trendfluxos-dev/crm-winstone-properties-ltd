@@ -128,6 +128,28 @@ export const callOpsSummary = createServerFn({ method: "POST" })
           simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) !== null &&
           simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) === simKeyOf(d.phone_number),
       })),
+      // Automatic SIM verification state, straight from what the phones report.
+      sim: {
+        verified: count(
+          devices.data,
+          (d) =>
+            !d.revoked_at &&
+            simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) !== null &&
+            simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) === simKeyOf(d.phone_number),
+        ),
+        mismatched: count(
+          devices.data,
+          (d) =>
+            !d.revoked_at &&
+            simKeyOf(d.phone_number) !== null &&
+            simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) !== null &&
+            simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) !== simKeyOf(d.phone_number),
+        ),
+        missing: count(
+          devices.data,
+          (d) => !d.revoked_at && simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) === null,
+        ),
+      },
       recording: {
         twoSided: count(
           devices.data,
