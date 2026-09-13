@@ -331,3 +331,81 @@ export const editMyReport = createServerFn({ method: "POST" })
       grade: data.grade ?? null,
     });
   });
+
+/**
+ * Replays a call attempt that happened while the browser was offline.
+ *
+ * Idempotent on the client-generated event id: a retry after a dropped
+ * connection finds the event already in the lead's timeline and does nothing, so
+ * a no-answer attempt and a later callback stay two distinct events and never
+ * duplicate.
+ */
+export const syncOfflineCallEvent = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    Base.extend({
+      clientEventId: z.string().min(8).max(64),
+      leadId: z.string().uuid(),
+      outcome: z.enum(["interested", "follow_up", "not_interested", "wrong_number", "no_answer"]),
+      notes: z.string().trim().max(2000).nullable().optional(),
+      occurredAt: z.string(),
+      durationSeconds: z.number().int().min(0).default(0),
+      connected: z.boolean().default(false),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const me = await agentOf(data.adminToken ?? null);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const marker = `[${data.clientEventId}]`;
+    const { data: existing } = await supabaseAdmin
+      .from("lead_events")
+      .select("id")
+      .eq("lead_id", data.leadId)
+      .like("detail", `%${marker}%`)
+      .maybeSingle();
+    if (existing) return { ok: true as const, duplicate: true as const };
+
+    const when = new Date(data.occurredAt);
+    const stamp = Number.isNaN(when.getTime()) ? new Date() : when;
+
+    const { data: lead } = await supabaseAdmin
+      .from("leads")
+      .select("id, call_attempts, last_call_at, notes")
+      .eq("id", data.leadId)
+      .maybeSingle();
+    if (!lead) throw new Error("লিড পাওয়া যায়নি");
+
+    const trimmed = data.notes?.trim();
+    await supabaseAdmin
+      .from("leads")
+      .update({
+        call_attempts: (lead.call_attempts ?? 0) + 1,
+        last_call_at:
+          !lead.last_call_at || new Date(lead.last_call_at) < stamp
+            ? stamp.toISOString()
+            : lead.last_call_at,
+        outcome_category: data.outcome,
+        ...(trimmed
+          ? {
+              notes: `${lead.notes ? `${lead.notes}\n\n` : ""}[${stamp
+                .toISOString()
+                .slice(0, 16)
+                .replace("T", " ")}] ${trimmed}`,
+            }
+          : {}),
+      })
+      .eq("id", data.leadId);
+
+    const { logLeadEvent } = await import("@/lib/lead-events.server");
+    await logLeadEvent({
+      leadId: data.leadId,
+      agentId: me.id,
+      kind: data.connected ? "call_connected" : "outcome_logged",
+      detail: `অফলাইনে করা কল (${stamp.toLocaleString("bn-BD")}) — ${data.outcome.replace(
+        /_/g,
+        " ",
+      )} · ${data.durationSeconds}s ${marker}`,
+    });
+
+    return { ok: true as const, duplicate: false as const };
+  });

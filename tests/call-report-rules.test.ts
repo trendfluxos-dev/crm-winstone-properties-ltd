@@ -16,7 +16,7 @@ describe("post-call report rules", () => {
     ).toBe("category");
   });
 
-  it("requires a summary, a note and a follow-up time", () => {
+  it("requires a summary and a note, but not a follow-up", () => {
     expect(validateReport({ ...base, summary: "", temperature: "hot", grade: "A" })?.field).toBe(
       "summary",
     );
@@ -24,9 +24,10 @@ describe("post-call report rules", () => {
       "note",
     );
     expect(
-      validateReport({ ...base, followUpAt: null, temperature: "hot", grade: "A" })?.field,
-    ).toBe("followUpAt");
+      validateReport({ ...base, followUpAt: null, temperature: "hot", grade: "A" }),
+    ).toBeNull();
   });
+
 
   it("requires a reason for not_interested and wrong_number", () => {
     expect(
