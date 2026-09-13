@@ -251,6 +251,14 @@ export async function backupRecordingDocToDrive(dateKey: string) {
 
   const supabaseAdmin = await adminClient();
 
+  // Daily summaries live in their own branch of the company Drive tree, not in
+  // the recordings folder.
+  const { driveBranchFolder, dhakaYear } = await import("./drive-tree.server");
+  const docFolderId = await driveBranchFolder(
+    "day_exports",
+    dhakaYear(`${dateKey}T00:00:00Z`),
+  );
+
   const { data: existing } = await supabaseAdmin
     .from("recording_doc_backups")
     .select("id, status, doc_id, drive_file_url")
@@ -260,12 +268,12 @@ export async function backupRecordingDocToDrive(dateKey: string) {
   let docId = existing?.doc_id ?? undefined;
 
   if (!docId) {
-    const created = await createDriveDoc(`Winstone রেকর্ডিং · ${dateKey}`, settings.folderId);
+    const created = await createDriveDoc(`Winstone রেকর্ডিং · ${dateKey}`, docFolderId);
     docId = created.id;
   }
 
   // syncRecordingDoc writes content to any doc id; use the Drive-created one.
-  const { docUrl, calls, recordings } = await syncRecordingDoc(dateKey, settings.folderId, docId);
+  const { docUrl, calls, recordings } = await syncRecordingDoc(dateKey, docFolderId, docId);
 
   const backup = {
     date_key: dateKey,
@@ -273,7 +281,7 @@ export async function backupRecordingDocToDrive(dateKey: string) {
     drive_file_id: docId,
     drive_file_name: `Winstone রেকর্ডিং · ${dateKey}`,
     drive_file_url: docUrl,
-    drive_folder_id: settings.folderId,
+    drive_folder_id: docFolderId,
     status: "done" as const,
     error_message: null as string | null,
   };
@@ -285,7 +293,7 @@ export async function backupRecordingDocToDrive(dateKey: string) {
     action: "recording_doc_backed_up_to_drive",
     entityType: "recording_doc_backups",
     entityId: dateKey,
-    metadata: { docId, calls, recordings, folderId: settings.folderId },
+    metadata: { docId, calls, recordings, folderId: docFolderId },
   });
 
   return { dateKey, docId, docUrl, calls, recordings };

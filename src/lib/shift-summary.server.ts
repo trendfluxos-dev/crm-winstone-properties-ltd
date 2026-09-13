@@ -179,7 +179,18 @@ export async function generateShiftSummary(at: Date = new Date()) {
     metadata: { ...totals, agents: lines.length },
   });
 
-  return { generated: true as const, shiftKey: due.shiftKey, totals, agents: lines.length };
+  // Straight to the company Drive shift folder, so the file is ready to share
+  // the moment the window closes.
+  const { backupShiftSummaryQuietly } = await import("./shift-drive.server");
+  const drive = await backupShiftSummaryQuietly(due.shiftKey);
+
+  return {
+    generated: true as const,
+    shiftKey: due.shiftKey,
+    totals,
+    agents: lines.length,
+    driveFileUrl: drive?.driveFileUrl ?? null,
+  };
 }
 
 /**
@@ -218,7 +229,10 @@ export async function backfillShiftSummaries(days = 14, at: Date = new Date()) {
         { onConflict: "shift_key" },
       );
       if (error) throw new Error(error.message);
-      written.push(`${dateKey}:${shift.id}`);
+      const key = `${dateKey}:${shift.id}`;
+      const { backupShiftSummaryQuietly } = await import("./shift-drive.server");
+      await backupShiftSummaryQuietly(key);
+      written.push(key);
     }
   }
   return { written };

@@ -80,6 +80,7 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
                 .onSuccess { me ->
                     AgentSession.saveDevice(app, me.deviceToken, me.deviceId)
                     AgentSession.saveEmployeeId(app, me.employeeId)
+                    AgentSession.saveSim(app, phone.trim())
                     AgentSession.cacheAgent(app, me.agentId, me.name)
                     _state.value = _state.value.copy(employeeId = me.employeeId, error = null)
                     refresh()
@@ -119,7 +120,13 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
             recordingReason = capability.reason,
         )
         if (mode == lastCapability && !stale) return
-        runCatching { WinstoneAgentApi.reportRecordingCapability(mode, capability.reason) }
+        runCatching {
+            WinstoneAgentApi.reportRecordingCapability(
+                mode,
+                capability.reason,
+                AgentSession.simNumberNow(app),
+            )
+        }
             .onSuccess {
                 lastCapability = mode
                 lastCapabilityAt = System.currentTimeMillis()

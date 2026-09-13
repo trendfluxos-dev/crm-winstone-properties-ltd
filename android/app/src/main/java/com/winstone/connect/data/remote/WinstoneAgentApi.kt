@@ -150,6 +150,7 @@ object WinstoneAgentApi {
     suspend fun reportRecordingCapability(
         mode: String,
         note: String?,
+        simNumber: String? = null,
     ): Unit = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("recording_mode", mode)
@@ -158,6 +159,7 @@ object WinstoneAgentApi {
             put("android_version", android.os.Build.VERSION.SDK_INT.toString())
             put("manufacturer", android.os.Build.MANUFACTURER)
             put("model", android.os.Build.MODEL)
+            if (!simNumber.isNullOrBlank()) put("sim_number", simNumber.trim())
         }
         val req = Request.Builder()
             .url(WinstoneApi.BASE_URL + "/api/public/agent/device-capability")
