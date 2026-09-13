@@ -42,7 +42,8 @@ export type AuditAction =
   | "drive_backup_verified"
   | "command_agent_action"
   | "ai_agent_mismatch_flagged"
-  | "support_settings_updated";
+  | "support_settings_updated"
+  | "app_release_published";
 
 export async function logAudit(input: {
   action: AuditAction;
