@@ -290,8 +290,13 @@ export const myCallReports = createServerFn({ method: "POST" })
       .order("scheduled_at", { ascending: true })
       .limit(20);
 
+    const { reportEditable } = await import("@/lib/call-reports.server");
     return {
-      reports: (reports ?? []).map((r) => ({ ...r, lead: leadById.get(r.lead_id ?? "") ?? null })),
+      reports: (reports ?? []).map((r) => ({
+        ...r,
+        lead: leadById.get(r.lead_id ?? "") ?? null,
+        editable: r.status === "submitted" && reportEditable(r.call_ended_at),
+      })),
       upcoming: upcoming ?? [],
       overdueCount: (upcoming ?? []).filter((e) => e.scheduled_at < nowIso).length,
     };
