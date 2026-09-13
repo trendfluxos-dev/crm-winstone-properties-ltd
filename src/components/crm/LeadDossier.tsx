@@ -19,7 +19,6 @@ import { toast } from "sonner";
 
 import { CallAudioPlayer } from "@/components/crm/CallAudioPlayer";
 import { PreCallBriefCard } from "@/components/crm/PreCallBriefCard";
-import { TwilioCallButton } from "@/components/crm/TwilioCallButton";
 import { ContactSuppressionNotice } from "@/components/crm/ContactSuppressionNotice";
 import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { Button } from "@/components/ui/button";
@@ -101,7 +100,6 @@ export function LeadDossier({
                     <PhoneOutgoing className="size-4" /> সরাসরি কল
                   </a>
                 </Button>
-                <TwilioCallButton leadId={lead.id} className="flex-1 min-w-[100px]" variant="secondary" />
                 <WhatsAppAction
                   phone={lead.phone_number}
                   leadId={lead.id}

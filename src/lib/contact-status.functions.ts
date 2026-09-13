@@ -25,12 +25,13 @@ export const leadContactStatus = createServerFn({ method: "POST" })
     }
 
     const { findDoNotContact, latestConsent, recordingAllowed } = await import("@/lib/comms-guard.server");
-    const { twilioConfig } = await import("@/lib/twilio.server");
 
     const voiceBlock = await findDoNotContact(lead.phone_number, "voice");
     const waBlock = await findDoNotContact(lead.phone_number, "whatsapp");
     const consent = await latestConsent(lead.phone_number, "recording");
-    const notice = twilioConfig().recordingEnabled;
+    // Recording happens on the agent's own device (SIM call); the agent announces
+    // it at call start, so the notice is always in place unless the customer refused.
+    const notice = true;
 
     return {
       optedOut: Boolean(voiceBlock || waBlock),
