@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { routeTree } from "@/routeTree.gen";
-
 /**
  * Post-publish smoke test.
  *
@@ -19,7 +17,10 @@ import { routeTree } from "@/routeTree.gen";
 const ROUTES = ["/", "/auth", "/desk", "/dispatch", "/hq", "/system", "/import", "/docs"] as const;
 
 /** Every route path compiled into this build. */
-function deployedPaths(): Set<string> {
+async function deployedPaths(): Promise<Set<string>> {
+  // Imported lazily: routeTree.gen imports this file, so a top-level import
+  // would make the module graph circular and crash every SSR request.
+  const { routeTree } = await import("@/routeTree.gen");
   const found = new Set<string>();
   const walk = (node: unknown) => {
     const route = node as { options?: { path?: string }; children?: unknown };
@@ -77,7 +78,7 @@ export const Route = createFileRoute("/api/public/smoke")({
         }
 
         // 2. Every key CRM page is really part of this deployment
-        const deployed = deployedPaths();
+        const deployed = await deployedPaths();
         for (const path of ROUTES) {
           const present = deployed.has(path);
           checks.push({
