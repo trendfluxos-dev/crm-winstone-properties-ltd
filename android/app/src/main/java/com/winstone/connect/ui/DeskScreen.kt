@@ -299,6 +299,7 @@ private fun LeadCard(
     recordingMode: String?,
     recordingReason: String?,
     onCall: () -> Unit,
+    onWhatsApp: () -> Unit,
 ) {
     // Honest per-lead recording state, straight from this phone's own probe.
     val blocked = recordingMode == "unavailable"
@@ -333,10 +334,16 @@ private fun LeadCard(
             recordingReason?.let { Text(it, fontSize = 10.sp, color = WinInkMuted) }
         }
         Spacer(Modifier.height(10.dp))
-        androidx.compose.material3.Button(
-            onClick = onCall,
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text(if (blocked) "কল করুন (রেকর্ডিং ছাড়া)" else "কল করুন") }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            androidx.compose.material3.Button(
+                onClick = onCall,
+                modifier = Modifier.weight(1f),
+            ) { Text(if (blocked) "কল করুন (রেকর্ডিং ছাড়া)" else "কল করুন") }
+            OutlinedButton(
+                onClick = onWhatsApp,
+                modifier = Modifier.weight(1f),
+            ) { Text("হোয়াটসঅ্যাপ") }
+        }
     }
 }
 
