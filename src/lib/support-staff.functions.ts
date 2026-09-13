@@ -149,6 +149,13 @@ export const getSupportConversation = createServerFn({ method: "POST" })
           .order("created_at", { ascending: false })
       : { data: [] };
 
+    const { data: staffOptions } = await supabaseAdmin
+      .from("profiles")
+      .select("id, name")
+      .eq("approval_status", "approved")
+      .eq("is_active", true)
+      .order("name");
+
     const { data: history } = await supabaseAdmin
       .from("support_conversations")
       .select("id, subject, status, created_at")
@@ -171,6 +178,7 @@ export const getSupportConversation = createServerFn({ method: "POST" })
       notes: notes ?? [],
       cannedReplies: canned ?? [],
       customerHistory: history ?? [],
+      staffOptions: staffOptions ?? [],
       me: {
         scope: me.scope,
         profileId: me.profile?.id ?? null,

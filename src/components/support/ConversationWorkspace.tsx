@@ -195,7 +195,7 @@ export function ConversationWorkspace({ conversationId }: { conversationId: stri
               }
             >
               <option value="">Unassigned</option>
-              {(data.staffOptions ?? []).map((person) => (
+              {(data.staffOptions ?? []).map((person: { id: string; name: string }) => (
                 <option key={person.id} value={person.id}>
                   {person.name}
                 </option>
@@ -283,7 +283,6 @@ export function ConversationWorkspace({ conversationId }: { conversationId: stri
             readOnly ? "This session is view-only" : "Write your reply, or use /shortcut for a saved reply"
           }
           disabled={readOnly}
-          onChange0={undefined}
         />
         {data.cannedReplies.length > 0 && !readOnly && (
           <div className="mt-2 flex flex-wrap gap-1.5">
