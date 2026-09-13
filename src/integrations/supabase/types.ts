@@ -1154,6 +1154,50 @@ export type Database = {
           },
         ]
       }
+      lead_year_archives: {
+        Row: {
+          archive_year: number
+          archived_at: string
+          archived_by: string | null
+          created_at: string
+          id: string
+          lead_count: number
+          note: string | null
+          report_count: number
+          storage_location: string
+        }
+        Insert: {
+          archive_year: number
+          archived_at?: string
+          archived_by?: string | null
+          created_at?: string
+          id?: string
+          lead_count?: number
+          note?: string | null
+          report_count?: number
+          storage_location: string
+        }
+        Update: {
+          archive_year?: number
+          archived_at?: string
+          archived_by?: string | null
+          created_at?: string
+          id?: string
+          lead_count?: number
+          note?: string | null
+          report_count?: number
+          storage_location?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_year_archives_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           address: string | null
@@ -1181,6 +1225,7 @@ export type Database = {
           status: Database["public"]["Enums"]["lead_status"]
           temperature: string | null
           updated_at: string
+          work_date: string | null
           work_state: string
         }
         Insert: {
@@ -1209,6 +1254,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lead_status"]
           temperature?: string | null
           updated_at?: string
+          work_date?: string | null
           work_state?: string
         }
         Update: {
@@ -1237,6 +1283,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lead_status"]
           temperature?: string | null
           updated_at?: string
+          work_date?: string | null
           work_state?: string
         }
         Relationships: [
