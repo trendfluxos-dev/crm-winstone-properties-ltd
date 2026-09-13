@@ -111,11 +111,28 @@ export function MyReports() {
                 {report.reason ? (
                   <p className="mt-1 text-xs text-muted-foreground">কারণ: {report.reason}</p>
                 ) : null}
+                {report.editable ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 gap-1.5"
+                    onClick={() => setEditing(report as EditableReport)}
+                  >
+                    <Pencil className="size-3.5" /> সংশোধন করুন
+                  </Button>
+                ) : null}
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <ReportEditDialog
+        key={editing?.id ?? "none"}
+        report={editing}
+        open={Boolean(editing)}
+        onOpenChange={(next) => !next && setEditing(null)}
+      />
     </div>
   );
 }
