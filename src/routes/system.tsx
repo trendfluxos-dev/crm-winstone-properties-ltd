@@ -8,6 +8,7 @@ import { AppReleasePanel } from "@/components/crm/AppReleasePanel";
 import { AuditTrail } from "@/components/crm/AuditTrail";
 import { DocSummaryPanel } from "@/components/crm/DocSummaryPanel";
 import { DriveBackupPanel } from "@/components/crm/DriveBackupPanel";
+import { LeadDatabasePanel } from "@/components/crm/LeadDatabasePanel";
 import { YearArchivePanel } from "@/components/crm/YearArchivePanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
@@ -115,6 +116,8 @@ function SystemBoard() {
       <SystemNoticeBar surface="it" />
 
       <CommandAgentPanel surface="system" />
+
+      <LeadDatabasePanel />
 
       <CallOpsPanel showControls />
 
