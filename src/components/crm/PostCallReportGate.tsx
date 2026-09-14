@@ -174,7 +174,7 @@ export function PostCallReportGate() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  if (!detail) return null;
+  if (!detail || queuedReportIds.includes(detail.report.id)) return null;
 
   const reasonRequired = NEEDS_REASON.has(category);
   // The customer answered -> classification (Hot/Warm/Cold + A/B/C/D) is what
