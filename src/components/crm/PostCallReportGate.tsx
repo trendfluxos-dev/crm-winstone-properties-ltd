@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { myPendingReport, submitMyReport } from "@/lib/call-reports.functions";
 import { useAdminToken } from "@/lib/local-session";
-import { enqueue } from "@/lib/offline-queue";
+import { enqueue, subscribeQueue } from "@/lib/offline-queue";
 import { draftReportSummary } from "@/lib/report-summary.functions";
 
 /** Adds dictated words to what the agent already typed — never erases it. */
@@ -83,6 +83,21 @@ export function PostCallReportGate() {
 
   const detail = pending.data;
   const suggestion = detail?.suggestion ?? null;
+
+  // Reports already saved on this phone (waiting for sync) must not keep the
+  // gate open — the work is done from the agent's side, the queue owns the rest.
+  const [queuedReportIds, setQueuedReportIds] = useState<string[]>([]);
+  useEffect(
+    () =>
+      subscribeQueue((items) =>
+        setQueuedReportIds(
+          items
+            .filter((item) => item.kind === "report_submit")
+            .map((item) => String(item.payload["reportId"] ?? "")),
+        ),
+      ),
+    [],
+  );
 
   useEffect(() => {
     if (!detail) {
