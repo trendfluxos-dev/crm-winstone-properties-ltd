@@ -87,6 +87,18 @@ export function QueueBoard({
         )}
       </div>
 
+      <LeadQuickFilter
+        leads={leads}
+        period={period}
+        category={category}
+        onPeriodChange={setPeriod}
+        onCategoryChange={setCategory}
+        onClear={() => {
+          setPeriod("all");
+          setCategory("all");
+        }}
+      />
+
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <div className="relative min-w-0 flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
