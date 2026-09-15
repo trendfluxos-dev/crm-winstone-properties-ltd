@@ -48,22 +48,48 @@ function PendingAccountActions() {
     enabled: Boolean(adminToken),
   });
 
+  // Locks the row while its decision is in flight, so a double tap cannot
+  // submit twice, and keeps the result visible until the list refreshes.
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [done, setDone] = useState<Record<string, "approved" | "rejected">>({});
+
   const act = useMutation({
     mutationFn: (input: {
       profileId: string;
       decision: "approve_agent" | "approve_coordinator" | "reject";
     }) => decide({ data: { adminToken: getAdminToken() ?? "", ...input } }),
-    onSuccess: () => {
-      toast.success("অ্যাকাউন্ট হালনাগাদ হয়েছে");
-      void queryClient.invalidateQueries({ queryKey: ["account-requests"] });
-      void queryClient.invalidateQueries({ queryKey: ["system-notices"] });
-      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
-      void queryClient.invalidateQueries({ queryKey: ["staff-accounts"] });
+    onMutate: (input) => setBusyId(input.profileId),
+    onSuccess: async (_result, input) => {
+      setDone((prev) => ({
+        ...prev,
+        [input.profileId]: input.decision === "reject" ? "rejected" : "approved",
+      }));
+      toast.success(
+        input.decision === "reject"
+          ? "অ্যাকাউন্ট বাতিল হয়েছে — ডেস্কে ঢোকা বন্ধ"
+          : "অনুমোদন হয়েছে — এখন ডেস্কে ঢুকতে পারবেন",
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["account-requests"] }),
+        queryClient.invalidateQueries({ queryKey: ["system-notices"] }),
+        queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] }),
+        queryClient.invalidateQueries({ queryKey: ["staff-accounts"] }),
+      ]);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(error.message || "কাজটি সম্পন্ন হয়নি — আবার চেষ্টা করুন"),
+    onSettled: () => setBusyId(null),
   });
 
-  const pending = (list.data?.accounts ?? []).filter((a) => a.approval_status === "pending");
+  const pending = (list.data?.accounts ?? []).filter(
+    (a) => a.approval_status === "pending" || done[a.id],
+  );
+  if (list.isPending && adminToken) {
+    return (
+      <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+        <Loader2 className="size-3.5 animate-spin" /> অপেক্ষমাণ অ্যাকাউন্ট আনা হচ্ছে…
+      </p>
+    );
+  }
   if (pending.length === 0) return null;
 
   return (
@@ -80,39 +106,61 @@ function PendingAccountActions() {
               {account.requested_role === "team_leader" ? "কোঅর্ডিনেটর" : "এজেন্ট"}
             </p>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            <Button
-              size="sm"
-              className="h-8 gap-1 text-xs"
-              disabled={act.isPending}
-              onClick={() => act.mutate({ profileId: account.id, decision: "approve_agent" })}
+          {done[account.id] ? (
+            <span
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                done[account.id] === "approved"
+                  ? "bg-emerald-500/15 text-emerald-600"
+                  : "bg-destructive/15 text-destructive"
+              }`}
             >
-              {act.isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
+              {done[account.id] === "approved" ? (
+                <>
+                  <Check className="size-3.5" /> অনুমোদিত
+                </>
               ) : (
-                <Check className="size-3.5" />
+                <>
+                  <X className="size-3.5" /> বাতিল
+                </>
               )}
-              এজেন্ট
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-8 text-xs"
-              disabled={act.isPending}
-              onClick={() => act.mutate({ profileId: account.id, decision: "approve_coordinator" })}
-            >
-              কোঅর্ডিনেটর
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 gap-1 text-xs"
-              disabled={act.isPending}
-              onClick={() => act.mutate({ profileId: account.id, decision: "reject" })}
-            >
-              <X className="size-3.5" /> বাদ দিন
-            </Button>
-          </div>
+            </span>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              <Button
+                size="sm"
+                className="h-9 gap-1 text-xs"
+                disabled={busyId !== null}
+                onClick={() => act.mutate({ profileId: account.id, decision: "approve_agent" })}
+              >
+                {busyId === account.id ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Check className="size-3.5" />
+                )}
+                এজেন্ট
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-9 text-xs"
+                disabled={busyId !== null}
+                onClick={() =>
+                  act.mutate({ profileId: account.id, decision: "approve_coordinator" })
+                }
+              >
+                কোঅর্ডিনেটর
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="h-9 gap-1 text-xs"
+                disabled={busyId !== null}
+                onClick={() => act.mutate({ profileId: account.id, decision: "reject" })}
+              >
+                <X className="size-3.5" /> বাদ দিন
+              </Button>
+            </div>
+          )}
         </li>
       ))}
     </ul>

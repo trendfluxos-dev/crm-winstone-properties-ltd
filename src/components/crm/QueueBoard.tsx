@@ -3,6 +3,13 @@ import { useMemo, useState } from "react";
 
 import { LeadCard } from "@/components/crm/LeadCard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
+import {
+  LeadQuickFilter,
+  matchesCategory,
+  matchesPeriod,
+  type LeadCategory,
+  type LeadPeriod,
+} from "@/components/crm/LeadQuickFilter";
 import { ManualIngestDialog } from "@/components/crm/ManualIngestDialog";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { Input } from "@/components/ui/input";
@@ -32,6 +39,8 @@ export function QueueBoard({
   const [search, setSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [period, setPeriod] = useState<LeadPeriod>("all");
+  const [category, setCategory] = useState<LeadCategory>("all");
 
   const agents = useMemo(
     () => profiles.filter((p) => p.role === "agent" || p.role === "team_leader"),
@@ -51,9 +60,14 @@ export function QueueBoard({
         lead.name.toLowerCase().includes(needle) ||
         lead.phone_number.includes(needle) ||
         (lead.company ?? "").toLowerCase().includes(needle);
-      return matchesAgent && matchesSearch;
+      return (
+        matchesAgent &&
+        matchesSearch &&
+        matchesPeriod(lead, period) &&
+        matchesCategory(lead, category)
+      );
     });
-  }, [leads, search, agentFilter]);
+  }, [leads, search, agentFilter, period, category]);
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
 
@@ -72,6 +86,18 @@ export function QueueBoard({
           </div>
         )}
       </div>
+
+      <LeadQuickFilter
+        leads={leads}
+        period={period}
+        category={category}
+        onPeriodChange={setPeriod}
+        onCategoryChange={setCategory}
+        onClear={() => {
+          setPeriod("all");
+          setCategory("all");
+        }}
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <div className="relative min-w-0 flex-1">
