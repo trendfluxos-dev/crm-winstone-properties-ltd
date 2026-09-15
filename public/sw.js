@@ -7,7 +7,7 @@
  * pretends a write reached the server — writes go through the local queue in
  * src/lib/offline-queue.ts and only sync when the network is back.
  */
-const CACHE = "winstone-shell-v1";
+const CACHE = "winstone-shell-v2";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => {
@@ -26,6 +26,16 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   // Never cache API traffic — stale CRM data must not look live.
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_serverFn")) return;
+  // Vite development modules are revision-coupled. Caching them can combine an
+  // old React runtime with a newer router module and crash every hook call.
+  if (
+    url.pathname.startsWith("/src/") ||
+    url.pathname.startsWith("/node_modules/") ||
+    url.pathname.startsWith("/@vite/") ||
+    url.pathname.startsWith("/@react-refresh")
+  ) {
+    return;
+  }
 
   if (request.mode === "navigate") {
     event.respondWith(

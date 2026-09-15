@@ -158,7 +158,22 @@ function RootComponent() {
   // Writes still go through the local queue and only sync when the network is back.
   useEffect(() => {
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
-    void navigator.serviceWorker.register("/sw.js").catch(() => {
+
+    // A service worker must never cache Vite's development module graph. Mixing
+    // modules from two HMR revisions can load two incompatible React runtimes.
+    if (import.meta.env.DEV) {
+      void navigator.serviceWorker.getRegistrations().then((registrations) =>
+        Promise.all(registrations.map((registration) => registration.unregister())),
+      );
+      if (typeof caches !== "undefined") {
+        void caches.keys().then((keys) =>
+          Promise.all(keys.filter((key) => key.startsWith("winstone-shell-")).map((key) => caches.delete(key))),
+        );
+      }
+      return;
+    }
+
+    void navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).catch(() => {
       /* offline shell unavailable — the app still works online */
     });
   }, []);
