@@ -126,7 +126,11 @@ export function LeadTable() {
         period={period}
         category={category}
         onPeriodChange={setPeriod}
-        onCategoryChange={setCategory}
+        onCategoryChange={(next) => {
+          setCategory(next);
+          // Show every matching lead, not just the ones still awaiting a call.
+          if (next !== "all") setFilter("all");
+        }}
         onClear={() => {
           setPeriod("all");
           setCategory("all");
