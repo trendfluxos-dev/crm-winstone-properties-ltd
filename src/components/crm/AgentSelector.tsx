@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { selectableAgents } from "@/lib/agent-roster";
 import { useSnapshot } from "@/lib/crm-data";
 import { setOperatorId, useOperatorId } from "@/lib/local-session";
 
@@ -16,12 +17,7 @@ const NONE = "__none__";
 export function AgentSelector() {
   const data = useSnapshot();
   const operatorId = useOperatorId();
-  const agents = data.profiles.filter(
-    (p) =>
-      p.is_active &&
-      p.approval_status === "approved" &&
-      (p.role === "agent" || p.role === "team_leader"),
-  );
+  const agents = selectableAgents(data.profiles);
   const current = agents.find((a) => a.id === operatorId);
 
   return (
