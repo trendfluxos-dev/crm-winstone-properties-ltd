@@ -94,7 +94,7 @@ export function LeadTable() {
       .sort((a, b) =>
         (a.serial_no ?? "").localeCompare(b.serial_no ?? "", "bn", { numeric: true }),
       );
-  }, [leads, filter, search]);
+  }, [scoped, filter, search]);
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
 
@@ -120,6 +120,18 @@ export function LeadTable() {
           />
         </div>
       </div>
+
+      <LeadQuickFilter
+        leads={leads}
+        period={period}
+        category={category}
+        onPeriodChange={setPeriod}
+        onCategoryChange={setCategory}
+        onClear={() => {
+          setPeriod("all");
+          setCategory("all");
+        }}
+      />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList className="flex w-full flex-wrap">
