@@ -74,7 +74,10 @@ export function LeadDossier({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+      <SheetContent
+        side="right"
+        className="inset-0 h-full max-h-full w-full max-w-full gap-0 overflow-y-auto overflow-x-hidden p-0 sm:inset-y-0 sm:right-0 sm:max-w-2xl"
+      >
         {lead && (
           <>
             <SheetHeader className="border-b border-border bg-surface px-5 py-4">
