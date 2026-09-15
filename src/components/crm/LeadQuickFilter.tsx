@@ -81,7 +81,7 @@ export function LeadQuickFilter({
   onClear: () => void;
 }) {
   const inPeriod = leads.filter((lead) => matchesPeriod(lead, period));
-  const dirty = period !== "today" || category !== "all";
+  const dirty = period !== "all" || category !== "all";
 
   return (
     <div className="space-y-2 rounded-xl border border-border bg-surface-2 p-2.5">
