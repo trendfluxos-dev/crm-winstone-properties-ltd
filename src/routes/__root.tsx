@@ -126,12 +126,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const developmentCacheReset = import.meta.env.DEV
+    ? `
+      (() => {
+        if (!("serviceWorker" in navigator) || sessionStorage.getItem("winstone-dev-cache-reset-v2")) return;
+        sessionStorage.setItem("winstone-dev-cache-reset-v2", "1");
+        Promise.all([
+          navigator.serviceWorker.getRegistrations().then((items) => Promise.all(items.map((item) => item.unregister()))),
+          "caches" in window
+            ? caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith("winstone-shell-")).map((key) => caches.delete(key))))
+            : Promise.resolve(),
+        ]).then(() => {
+          if (navigator.serviceWorker.controller) window.location.reload();
+        });
+      })();
+    `
+    : "";
+
   return (
     <html lang="bn">
       <head>
         <HeadContent />
       </head>
       <body>
+        {developmentCacheReset ? (
+          <script dangerouslySetInnerHTML={{ __html: developmentCacheReset }} />
+        ) : null}
         {children}
         <Scripts />
       </body>
