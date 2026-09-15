@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, BellRing, CheckCircle2, Info, RefreshCw } from "lucide-react";
+import { AlertTriangle, BellRing, Check, CheckCircle2, Info, Loader2, RefreshCw, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { decideAccount, listAccountRequests } from "@/lib/accounts.functions";
 import { getSystemNotices } from "@/lib/notices.functions";
 import type { NoticeLevel, SystemNotice } from "@/lib/notices-types";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
@@ -31,17 +33,106 @@ function NoticeIcon({ level }: { level: NoticeLevel }) {
   return <Info className={cls} />;
 }
 
-function NoticeRow({ notice }: { notice: SystemNotice }) {
+/**
+ * Approve / deny straight from the notification, so IT never has to go hunting
+ * for the approvals list. The server re-checks the IT PIN on every decision.
+ */
+function PendingAccountActions() {
+  const adminToken = useAdminToken();
+  const queryClient = useQueryClient();
+  const decide = useServerFn(decideAccount);
+
+  const list = useQuery({
+    queryKey: ["account-requests"],
+    queryFn: () => listAccountRequests({ data: { adminToken: adminToken ?? "" } }),
+    enabled: Boolean(adminToken),
+  });
+
+  const act = useMutation({
+    mutationFn: (input: {
+      profileId: string;
+      decision: "approve_agent" | "approve_coordinator" | "reject";
+    }) => decide({ data: { adminToken: getAdminToken() ?? "", ...input } }),
+    onSuccess: () => {
+      toast.success("অ্যাকাউন্ট হালনাগাদ হয়েছে");
+      void queryClient.invalidateQueries({ queryKey: ["account-requests"] });
+      void queryClient.invalidateQueries({ queryKey: ["system-notices"] });
+      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
+      void queryClient.invalidateQueries({ queryKey: ["staff-accounts"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const pending = (list.data?.accounts ?? []).filter((a) => a.approval_status === "pending");
+  if (pending.length === 0) return null;
+
   return (
-    <li className={`flex gap-3 rounded-xl border px-3 py-2.5 ${STYLES[notice.level].row}`}>
-      <NoticeIcon level={notice.level} />
-      <div className="min-w-0 space-y-0.5">
-        <p className="text-sm font-semibold leading-snug">{notice.title}</p>
-        <p className="text-xs leading-relaxed text-muted-foreground">{notice.detail}</p>
-        {notice.action && (
-          <p className="text-xs font-medium text-primary">করণীয়: {notice.action}</p>
-        )}
+    <ul className="mt-2 space-y-2">
+      {pending.map((account) => (
+        <li
+          key={account.id}
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-2"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-semibold">{account.name}</p>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {account.email ?? "ইমেইল নেই"} · চেয়েছেন{" "}
+              {account.requested_role === "team_leader" ? "কোঅর্ডিনেটর" : "এজেন্ট"}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <Button
+              size="sm"
+              className="h-8 gap-1 text-xs"
+              disabled={act.isPending}
+              onClick={() => act.mutate({ profileId: account.id, decision: "approve_agent" })}
+            >
+              {act.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Check className="size-3.5" />
+              )}
+              এজেন্ট
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-8 text-xs"
+              disabled={act.isPending}
+              onClick={() => act.mutate({ profileId: account.id, decision: "approve_coordinator" })}
+            >
+              কোঅর্ডিনেটর
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1 text-xs"
+              disabled={act.isPending}
+              onClick={() => act.mutate({ profileId: account.id, decision: "reject" })}
+            >
+              <X className="size-3.5" /> বাদ দিন
+            </Button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function NoticeRow({ notice, canAct }: { notice: SystemNotice; canAct: boolean }) {
+  return (
+    <li className={`rounded-xl border px-3 py-2.5 ${STYLES[notice.level].row}`}>
+      <div className="flex gap-3">
+        <NoticeIcon level={notice.level} />
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-sm font-semibold leading-snug">{notice.title}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{notice.detail}</p>
+          {notice.action && (
+            <p className="text-xs font-medium text-primary">করণীয়: {notice.action}</p>
+          )}
+        </div>
       </div>
+      {canAct && notice.id === "pending-accounts" && <PendingAccountActions />}
     </li>
   );
 }
@@ -118,7 +209,7 @@ export function SystemNoticeBar({ surface }: { surface: "it" | "hq" }) {
         ) : (
           <ul className="mt-3 space-y-2">
             {notices.map((notice) => (
-              <NoticeRow key={notice.id} notice={notice} />
+              <NoticeRow key={notice.id} notice={notice} canAct={surface === "it"} />
             ))}
           </ul>
         )}
@@ -135,7 +226,7 @@ export function SystemNoticeBar({ surface }: { surface: "it" | "hq" }) {
           </DialogHeader>
           <ul className="space-y-2">
             {urgent.map((notice) => (
-              <NoticeRow key={notice.id} notice={notice} />
+              <NoticeRow key={notice.id} notice={notice} canAct={surface === "it"} />
             ))}
           </ul>
           <Button className="w-full" onClick={() => setPopup(false)}>

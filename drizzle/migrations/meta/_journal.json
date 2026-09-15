@@ -260,6 +260,13 @@
       "when": 1789369649511,
       "tag": "0036_fix_call_audio_ownership_check",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1789453424869,
+      "tag": "0037_fix_profiles_replica_identity",
+      "breakpoints": true
     }
   ]
 }
