@@ -293,6 +293,18 @@ export async function readSyncState() {
     .select("data")
     .eq("id", CONFIG_ID)
     .maybeSingle();
-  const state = (data?.data ?? {}) as { lastSyncedAt?: string; syncedIds?: string[] };
-  return { lastSyncedAt: state.lastSyncedAt ?? null, syncedCount: (state.syncedIds ?? []).length };
+  const state = (data?.data ?? {}) as {
+    lastSyncedAt?: string;
+    syncedIds?: string[];
+    pendingSince?: string | null;
+    lastError?: string | null;
+    lastErrorAt?: string | null;
+  };
+  return {
+    lastSyncedAt: state.lastSyncedAt ?? null,
+    syncedCount: (state.syncedIds ?? []).length,
+    pendingSince: state.pendingSince ?? null,
+    lastError: state.lastError ?? null,
+    lastErrorAt: state.lastErrorAt ?? null,
+  };
 }
