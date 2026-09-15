@@ -3,6 +3,13 @@ import { CheckCircle2, Search } from "lucide-react";
 
 import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { LeadDossier } from "@/components/crm/LeadDossier";
+import {
+  LeadQuickFilter,
+  matchesCategory,
+  matchesPeriod,
+  type LeadCategory,
+  type LeadPeriod,
+} from "@/components/crm/LeadQuickFilter";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { WebCallButton } from "@/components/crm/WebCallButton";
@@ -47,20 +54,28 @@ export function LeadTable() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("pending");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [period, setPeriod] = useState<LeadPeriod>("all");
+  const [category, setCategory] = useState<LeadCategory>("all");
+
+  // The quick filter narrows the pool first; the status tabs then count within it.
+  const scoped = useMemo(
+    () => leads.filter((lead) => matchesPeriod(lead, period) && matchesCategory(lead, category)),
+    [leads, period, category],
+  );
 
   const counts = useMemo(
     () => ({
-      pending: leads.filter((l) => l.status === "pending").length,
-      follow_up: leads.filter((l) => l.status === "follow_up").length,
-      done: leads.filter((l) => l.status === "contacted" || l.status === "closed").length,
-      all: leads.length,
+      pending: scoped.filter((l) => l.status === "pending").length,
+      follow_up: scoped.filter((l) => l.status === "follow_up").length,
+      done: scoped.filter((l) => l.status === "contacted" || l.status === "closed").length,
+      all: scoped.length,
     }),
-    [leads],
+    [scoped],
   );
 
   const rows = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return leads
+    return scoped
       .filter((lead) => {
         if (filter === "pending") return lead.status === "pending";
         if (filter === "follow_up") return lead.status === "follow_up";
@@ -79,7 +94,7 @@ export function LeadTable() {
       .sort((a, b) =>
         (a.serial_no ?? "").localeCompare(b.serial_no ?? "", "bn", { numeric: true }),
       );
-  }, [leads, filter, search]);
+  }, [scoped, filter, search]);
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
 
@@ -105,6 +120,18 @@ export function LeadTable() {
           />
         </div>
       </div>
+
+      <LeadQuickFilter
+        leads={leads}
+        period={period}
+        category={category}
+        onPeriodChange={setPeriod}
+        onCategoryChange={setCategory}
+        onClear={() => {
+          setPeriod("all");
+          setCategory("all");
+        }}
+      />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList className="flex w-full flex-wrap">
