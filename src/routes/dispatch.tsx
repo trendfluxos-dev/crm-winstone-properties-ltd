@@ -137,6 +137,8 @@ function Dispatcher() {
         </div>
       </div>
 
+      <LeadDatabasePanel />
+
       <section className="card-elevated p-4">
         <h2 className="text-sm font-semibold">Bulk push</h2>
         <div className="mt-3 flex flex-wrap items-center gap-2">
