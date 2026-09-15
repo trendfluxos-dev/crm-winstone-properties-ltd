@@ -388,13 +388,19 @@ export async function submitCallReport(input: {
 
   // The spreadsheet is updated as soon as the agent's update is accepted.
   // Best effort: a spreadsheet outage must never reject an accepted report.
-  let sheet: { appended: number } | null = null;
+  let sheet: { appended: number; pending: boolean; error: string | null } | null = null;
   try {
     const { syncReportsToSheet } = await import("@/lib/report-sheet.server");
     const result = await syncReportsToSheet();
-    sheet = { appended: result.appended };
+    sheet = { appended: result.appended, pending: Boolean(result.skipped), error: null };
   } catch (error) {
+    // Truthful state: the report is stored, the spreadsheet copy is still pending.
     console.error("report sheet sync after submit failed:", error);
+    sheet = {
+      appended: 0,
+      pending: true,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 
   return {
