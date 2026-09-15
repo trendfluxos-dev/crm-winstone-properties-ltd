@@ -60,9 +60,14 @@ export function QueueBoard({
         lead.name.toLowerCase().includes(needle) ||
         lead.phone_number.includes(needle) ||
         (lead.company ?? "").toLowerCase().includes(needle);
-      return matchesAgent && matchesSearch;
+      return (
+        matchesAgent &&
+        matchesSearch &&
+        matchesPeriod(lead, period) &&
+        matchesCategory(lead, category)
+      );
     });
-  }, [leads, search, agentFilter]);
+  }, [leads, search, agentFilter, period, category]);
 
   const openLead = leads.find((l) => l.id === openLeadId) ?? null;
 
