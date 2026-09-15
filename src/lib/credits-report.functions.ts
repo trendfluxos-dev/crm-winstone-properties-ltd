@@ -25,6 +25,8 @@ export type CreditsReport = {
   agents: CreditsAgentRow[];
   /** Static monthly projection agreed with the team, for context. */
   projection: { aiOnly: number; withDevelopment: number };
+  /** Rolling last-7-day view, independent of the selected month. */
+  recent7: { calls: number; credits: number; perDay: number; next7: number };
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
