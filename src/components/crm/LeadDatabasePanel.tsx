@@ -35,10 +35,14 @@ export function LeadDatabasePanel() {
   const willSend = Math.min(quantity * agentCount || 0, poolCount);
 
   const send = useMutation({
-    mutationFn: () => distributeFn({ data: { adminToken, perAgent: quantity } }),
+    mutationFn: () => distributeFn({ data: { adminToken, perAgent: quantity, saveAsDaily: true } }),
     onSuccess: (result) => {
       toast.success(
-        `${result.agents} জন এজেন্টকে মোট ${result.moved}টি লিড দেওয়া হয়েছে — ডেটাবেজে বাকি ${result.remaining}টি`,
+        `${result.agents} জন এজেন্টকে মোট ${result.moved}টি লিড দেওয়া হয়েছে — ডেটাবেজে বাকি ${result.remaining}টি${
+          result.duplicatesSkipped
+            ? ` · ${result.duplicatesSkipped}টি ডুপ্লিকেট নম্বর বাদ পড়েছে`
+            : ""
+        }`,
       );
       setPerAgent("");
       void queryClient.invalidateQueries({ queryKey: ["lead-pool"] });
