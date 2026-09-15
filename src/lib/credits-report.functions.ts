@@ -147,5 +147,6 @@ export const getCreditsReport = createServerFn({ method: "POST" })
           credits: Math.round(v.credits * 100) / 100,
         })),
       projection: { aiOnly: 525, withDevelopment: 650 },
+      recent7,
     };
   });
