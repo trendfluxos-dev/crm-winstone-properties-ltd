@@ -3,6 +3,13 @@ import { useMemo, useState } from "react";
 
 import { LeadCard } from "@/components/crm/LeadCard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
+import {
+  LeadQuickFilter,
+  matchesCategory,
+  matchesPeriod,
+  type LeadCategory,
+  type LeadPeriod,
+} from "@/components/crm/LeadQuickFilter";
 import { ManualIngestDialog } from "@/components/crm/ManualIngestDialog";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { Input } from "@/components/ui/input";
