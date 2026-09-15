@@ -3,6 +3,13 @@ import { CheckCircle2, Search } from "lucide-react";
 
 import { CallbackLogButton } from "@/components/crm/CallbackLogButton";
 import { LeadDossier } from "@/components/crm/LeadDossier";
+import {
+  LeadQuickFilter,
+  matchesCategory,
+  matchesPeriod,
+  type LeadCategory,
+  type LeadPeriod,
+} from "@/components/crm/LeadQuickFilter";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { WebCallButton } from "@/components/crm/WebCallButton";
