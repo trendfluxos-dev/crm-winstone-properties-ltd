@@ -106,39 +106,61 @@ function PendingAccountActions() {
               {account.requested_role === "team_leader" ? "কোঅর্ডিনেটর" : "এজেন্ট"}
             </p>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            <Button
-              size="sm"
-              className="h-8 gap-1 text-xs"
-              disabled={act.isPending}
-              onClick={() => act.mutate({ profileId: account.id, decision: "approve_agent" })}
+          {done[account.id] ? (
+            <span
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                done[account.id] === "approved"
+                  ? "bg-emerald-500/15 text-emerald-600"
+                  : "bg-destructive/15 text-destructive"
+              }`}
             >
-              {act.isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
+              {done[account.id] === "approved" ? (
+                <>
+                  <Check className="size-3.5" /> অনুমোদিত
+                </>
               ) : (
-                <Check className="size-3.5" />
+                <>
+                  <X className="size-3.5" /> বাতিল
+                </>
               )}
-              এজেন্ট
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-8 text-xs"
-              disabled={act.isPending}
-              onClick={() => act.mutate({ profileId: account.id, decision: "approve_coordinator" })}
-            >
-              কোঅর্ডিনেটর
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 gap-1 text-xs"
-              disabled={act.isPending}
-              onClick={() => act.mutate({ profileId: account.id, decision: "reject" })}
-            >
-              <X className="size-3.5" /> বাদ দিন
-            </Button>
-          </div>
+            </span>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              <Button
+                size="sm"
+                className="h-9 gap-1 text-xs"
+                disabled={busyId !== null}
+                onClick={() => act.mutate({ profileId: account.id, decision: "approve_agent" })}
+              >
+                {busyId === account.id ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Check className="size-3.5" />
+                )}
+                এজেন্ট
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-9 text-xs"
+                disabled={busyId !== null}
+                onClick={() =>
+                  act.mutate({ profileId: account.id, decision: "approve_coordinator" })
+                }
+              >
+                কোঅর্ডিনেটর
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="h-9 gap-1 text-xs"
+                disabled={busyId !== null}
+                onClick={() => act.mutate({ profileId: account.id, decision: "reject" })}
+              >
+                <X className="size-3.5" /> বাদ দিন
+              </Button>
+            </div>
+          )}
         </li>
       ))}
     </ul>
