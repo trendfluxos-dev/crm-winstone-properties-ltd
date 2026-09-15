@@ -130,6 +130,15 @@ export function ReportSheetPanel() {
         </div>
       </header>
 
+      {sheet.data?.sync.pendingSince || sheet.data?.sync.lastError ? (
+        <p className="rounded-md border border-warning/40 bg-warning/10 p-3 text-xs">
+          কিছু রিপোর্ট এখনো Google Sheet-এ যায়নি
+          {sheet.data.sync.pendingSince ? ` (${dhakaTime(sheet.data.sync.pendingSince)} থেকে)` : ""}।
+          রিপোর্টগুলো সিস্টেমে নিরাপদে জমা আছে — "Google Sheet-এ পাঠান" চাপলে এখনই যাবে।
+          {sheet.data.sync.lastError ? ` কারণ: ${sheet.data.sync.lastError}` : ""}
+        </p>
+      ) : null}
+
       {sheet.isLoading ? (
         <p className="text-xs text-muted-foreground">লোড হচ্ছে…</p>
       ) : rows.length === 0 ? (

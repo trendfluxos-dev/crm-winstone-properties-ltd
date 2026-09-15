@@ -124,25 +124,42 @@ function gatewayHeaders() {
   };
 }
 
-async function gatewayFetch(path: string, init?: RequestInit) {
+/** Google's per-minute quota is shared, so a 429/5xx waits and tries again. */
+async function gatewayFetch(path: string, init?: RequestInit, attempt = 0): Promise<unknown> {
   const response = await fetch(`${GATEWAY}${path}`, {
     ...init,
     headers: { ...gatewayHeaders(), ...(init?.headers ?? {}) },
   });
   const body = await response.text();
   if (!response.ok) {
+    const retryable = response.status === 429 || response.status >= 500;
+    if (retryable && attempt < 3) {
+      const retryAfter = Number(response.headers.get("retry-after"));
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? retryAfter * 1000
+        : 1500 * 2 ** attempt + Math.floor(Math.random() * 400);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      return gatewayFetch(path, init, attempt + 1);
+    }
     console.error(`Sheets gateway failed [${response.status}]: ${body}`);
     throw new Error(`Google Sheets ত্রুটি [${response.status}]: ${body.slice(0, 300)}`);
   }
   return body ? (JSON.parse(body) as unknown) : null;
 }
 
+/** The tab is created once; remembering that avoids a metadata read per submit. */
+let tabReady = false;
+
 async function ensureTab() {
+  if (tabReady) return;
   const meta = (await gatewayFetch(`/spreadsheets/${SHEET_ID}?fields=sheets.properties.title`)) as {
     sheets?: { properties?: { title?: string } }[];
   } | null;
   const exists = (meta?.sheets ?? []).some((s) => s.properties?.title === TAB);
-  if (exists) return;
+  if (exists) {
+    tabReady = true;
+    return;
+  }
 
   await gatewayFetch(`/spreadsheets/${SHEET_ID}:batchUpdate`, {
     method: "POST",
@@ -161,7 +178,7 @@ async function ensureTab() {
  * Remembers the previous row count so removed rows are cleared, and keeps the
  * last synced timestamp in public.app_config so repeat runs stay idempotent.
  */
-export async function syncReportsToSheet() {
+export async function syncReportsToSheet(options?: { force?: boolean }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: config } = await supabaseAdmin
     .from("app_config")
@@ -172,8 +189,52 @@ export async function syncReportsToSheet() {
     syncedIds?: string[];
     lastSyncedAt?: string;
     rowCount?: number;
+    pendingSince?: string | null;
+    lastError?: string | null;
+    lastErrorAt?: string | null;
   };
 
+  // Google counts reads per minute across the whole workspace, so busy hours
+  // are throttled: a submit inside the window is remembered as pending and the
+  // next sync (or the IT Console button) carries it into the sheet.
+  const sinceLast = state.lastSyncedAt ? Date.now() - Date.parse(state.lastSyncedAt) : Infinity;
+  if (!options?.force && sinceLast < 60_000) {
+    const pendingSince = state.pendingSince ?? new Date().toISOString();
+    await supabaseAdmin.from("app_config").upsert({
+      id: CONFIG_ID,
+      data: { ...state, pendingSince },
+      updated_at: new Date().toISOString(),
+    });
+    return {
+      appended: state.rowCount ?? 0,
+      sheetUrl: reportSheetUrl(),
+      lastSyncedAt: state.lastSyncedAt ?? null,
+      skipped: true as const,
+      pendingSince,
+    };
+  }
+
+  try {
+    return await writeSheet(state);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const now = new Date().toISOString();
+    await supabaseAdmin.from("app_config").upsert({
+      id: CONFIG_ID,
+      data: { ...state, pendingSince: state.pendingSince ?? now, lastError: message, lastErrorAt: now },
+      updated_at: now,
+    });
+    throw error;
+  }
+}
+
+async function writeSheet(state: {
+  syncedIds?: string[];
+  lastSyncedAt?: string;
+  rowCount?: number;
+  pendingSince?: string | null;
+}) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const rows = await fetchReportSheetRows(500);
   // Oldest first in the sheet so it reads chronologically top to bottom.
   const ordered = [...rows].reverse();
@@ -201,11 +262,24 @@ export async function syncReportsToSheet() {
   const lastSyncedAt = new Date().toISOString();
   await supabaseAdmin.from("app_config").upsert({
     id: CONFIG_ID,
-    data: { syncedIds: ordered.map((r) => r.id), rowCount: ordered.length, lastSyncedAt },
+    data: {
+      syncedIds: ordered.map((r) => r.id),
+      rowCount: ordered.length,
+      lastSyncedAt,
+      pendingSince: null,
+      lastError: null,
+      lastErrorAt: null,
+    },
     updated_at: lastSyncedAt,
   });
 
-  return { appended: ordered.length, sheetUrl: reportSheetUrl(), lastSyncedAt };
+  return {
+    appended: ordered.length,
+    sheetUrl: reportSheetUrl(),
+    lastSyncedAt,
+    skipped: false as const,
+    pendingSince: null,
+  };
 }
 
 export function reportSheetUrl() {
@@ -219,6 +293,18 @@ export async function readSyncState() {
     .select("data")
     .eq("id", CONFIG_ID)
     .maybeSingle();
-  const state = (data?.data ?? {}) as { lastSyncedAt?: string; syncedIds?: string[] };
-  return { lastSyncedAt: state.lastSyncedAt ?? null, syncedCount: (state.syncedIds ?? []).length };
+  const state = (data?.data ?? {}) as {
+    lastSyncedAt?: string;
+    syncedIds?: string[];
+    pendingSince?: string | null;
+    lastError?: string | null;
+    lastErrorAt?: string | null;
+  };
+  return {
+    lastSyncedAt: state.lastSyncedAt ?? null,
+    syncedCount: (state.syncedIds ?? []).length,
+    pendingSince: state.pendingSince ?? null,
+    lastError: state.lastError ?? null,
+    lastErrorAt: state.lastErrorAt ?? null,
+  };
 }

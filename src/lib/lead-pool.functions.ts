@@ -120,41 +120,55 @@ export const distributeLeadPool = createServerFn({ method: "POST" })
     if (available.length === 0) throw new Error("ডেটাবেজে অ্যাসাইন করার মতো কোনো লিড নেই");
 
     // Oldest first, one round at a time, so an incomplete batch is still fair.
-    const handed: Array<{ leadId: string; agentId: string; agentName: string }> = [];
+    const perAgentLeads = new Map<string, { name: string; leadIds: string[] }>();
     available.forEach((lead, index) => {
       const agent = agents[index % agents.length]!;
-      handed.push({ leadId: lead.id, agentId: agent.id, agentName: agent.name });
+      const bucket = perAgentLeads.get(agent.id) ?? { name: agent.name, leadIds: [] };
+      bucket.leadIds.push(lead.id);
+      perAgentLeads.set(agent.id, bucket);
     });
 
-    const { logLeadEvent } = await import("@/lib/lead-events.server");
+    // Batched writes: one update + one assignment insert + one event insert per
+    // chunk, so a big daily hand-out stays a handful of round-trips.
+    const CHUNK = 100;
     let moved = 0;
-    for (const item of handed) {
-      const { error } = await supabaseAdmin
-        .from("leads")
-        .update({
-          assigned_to: item.agentId,
-          assigned_agent_id: item.agentId,
-          assignment_source: "lead_database",
-          work_date: today,
-          reference_by: "হেড অফিস",
-        })
-        .eq("id", item.leadId)
-        .is("assigned_to", null);
-      if (error) continue;
-      moved += 1;
-      await supabaseAdmin.from("lead_assignments").insert({
-        lead_id: item.leadId,
-        from_agent_id: null,
-        to_agent_id: item.agentId,
-        source: "lead_database",
-        note: `লিড ডেটাবেজ থেকে ${item.agentName} — ${today}`,
-      });
-      await logLeadEvent({
-        leadId: item.leadId,
-        agentId: item.agentId,
-        kind: "workday_moved",
-        detail: `লিড ডেটাবেজ থেকে ${item.agentName}-কে দেওয়া হয়েছে (${today})`,
-      });
+    for (const [agentId, bucket] of perAgentLeads) {
+      for (let start = 0; start < bucket.leadIds.length; start += CHUNK) {
+        const ids = bucket.leadIds.slice(start, start + CHUNK);
+        const { data: updated, error } = await supabaseAdmin
+          .from("leads")
+          .update({
+            assigned_to: agentId,
+            assigned_agent_id: agentId,
+            assignment_source: "lead_database",
+            work_date: today,
+          })
+          .in("id", ids)
+          .is("assigned_to", null)
+          .select("id");
+        if (error) continue;
+        const takenIds = (updated ?? []).map((row) => row.id);
+        if (takenIds.length === 0) continue;
+        moved += takenIds.length;
+
+        await supabaseAdmin.from("lead_assignments").insert(
+          takenIds.map((leadId) => ({
+            lead_id: leadId,
+            from_agent_id: null,
+            to_agent_id: agentId,
+            source: "lead_database",
+            note: `লিড ডেটাবেজ থেকে ${bucket.name} — ${today}`,
+          })),
+        );
+        await supabaseAdmin.from("lead_events").insert(
+          takenIds.map((leadId) => ({
+            lead_id: leadId,
+            agent_id: agentId,
+            kind: "workday_moved" as const,
+            detail: `লিড ডেটাবেজ থেকে ${bucket.name}-কে দেওয়া হয়েছে (${today})`,
+          })),
+        );
+      }
     }
 
     const { logAudit } = await import("@/lib/audit.server");
