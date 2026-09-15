@@ -262,11 +262,24 @@ async function writeSheet(state: {
   const lastSyncedAt = new Date().toISOString();
   await supabaseAdmin.from("app_config").upsert({
     id: CONFIG_ID,
-    data: { syncedIds: ordered.map((r) => r.id), rowCount: ordered.length, lastSyncedAt },
+    data: {
+      syncedIds: ordered.map((r) => r.id),
+      rowCount: ordered.length,
+      lastSyncedAt,
+      pendingSince: null,
+      lastError: null,
+      lastErrorAt: null,
+    },
     updated_at: lastSyncedAt,
   });
 
-  return { appended: ordered.length, sheetUrl: reportSheetUrl(), lastSyncedAt };
+  return {
+    appended: ordered.length,
+    sheetUrl: reportSheetUrl(),
+    lastSyncedAt,
+    skipped: false as const,
+    pendingSince: null,
+  };
 }
 
 export function reportSheetUrl() {
