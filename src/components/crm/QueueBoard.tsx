@@ -39,6 +39,8 @@ export function QueueBoard({
   const [search, setSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [period, setPeriod] = useState<LeadPeriod>("all");
+  const [category, setCategory] = useState<LeadCategory>("all");
 
   const agents = useMemo(
     () => profiles.filter((p) => p.role === "agent" || p.role === "team_leader"),
