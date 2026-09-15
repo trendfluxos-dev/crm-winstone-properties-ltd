@@ -25,6 +25,8 @@ export type CreditsReport = {
   agents: CreditsAgentRow[];
   /** Static monthly projection agreed with the team, for context. */
   projection: { aiOnly: number; withDevelopment: number };
+  /** Rolling last-7-day view, independent of the selected month. */
+  recent7: { calls: number; credits: number; perDay: number; next7: number };
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -70,6 +72,23 @@ export const getCreditsReport = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     const rows = events ?? [];
+
+    // Rolling 7-day window, independent of the selected month.
+    const since = new Date(Date.now() - 7 * 24 * 3_600_000).toISOString();
+    const { data: recentRows } = await supabaseAdmin
+      .from("ai_usage_events")
+      .select("est_credits")
+      .gte("created_at", since)
+      .limit(20000);
+    const recentCredits =
+      Math.round((recentRows ?? []).reduce((s, r) => s + (Number(r.est_credits) || 0), 0) * 100) /
+      100;
+    const recent7 = {
+      calls: (recentRows ?? []).length,
+      credits: recentCredits,
+      perDay: Math.round((recentCredits / 7) * 100) / 100,
+      next7: Math.round(recentCredits * 100) / 100,
+    };
 
     const agentIds = [...new Set(rows.map((r) => r.actor_profile_id).filter(Boolean))] as string[];
     const nameById = new Map<string, string>();
@@ -128,5 +147,6 @@ export const getCreditsReport = createServerFn({ method: "POST" })
           credits: Math.round(v.credits * 100) / 100,
         })),
       projection: { aiOnly: 525, withDevelopment: 650 },
+      recent7,
     };
   });
