@@ -73,6 +73,23 @@ export const getCreditsReport = createServerFn({ method: "POST" })
 
     const rows = events ?? [];
 
+    // Rolling 7-day window, independent of the selected month.
+    const since = new Date(Date.now() - 7 * 24 * 3_600_000).toISOString();
+    const { data: recentRows } = await supabaseAdmin
+      .from("ai_usage_events")
+      .select("est_credits")
+      .gte("created_at", since)
+      .limit(20000);
+    const recentCredits =
+      Math.round((recentRows ?? []).reduce((s, r) => s + (Number(r.est_credits) || 0), 0) * 100) /
+      100;
+    const recent7 = {
+      calls: (recentRows ?? []).length,
+      credits: recentCredits,
+      perDay: Math.round((recentCredits / 7) * 100) / 100,
+      next7: Math.round(recentCredits * 100) / 100,
+    };
+
     const agentIds = [...new Set(rows.map((r) => r.actor_profile_id).filter(Boolean))] as string[];
     const nameById = new Map<string, string>();
     if (agentIds.length > 0) {
