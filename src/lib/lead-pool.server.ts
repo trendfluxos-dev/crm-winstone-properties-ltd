@@ -256,7 +256,7 @@ export async function raiseShortageAlert(input: {
     code: "lead_pool_low",
     severity: "warning",
     title: `হেড ডেটাবেজে লিড কমে এসেছে — বাকি ${input.remaining}টি`,
-    detail: `আগামীকাল প্রত্যেক এজেন্টকে ${input.perAgent}টি করে দিতে ${input.need}টি লিড দরকar, ডেটাবেজে আছে ${input.remaining}টি।`,
+    detail: `আগামীকাল প্রত্যেক এজেন্টকে ${input.perAgent}টি করে দিতে ${input.need}টি লিড দরকার, ডেটাবেজে আছে ${input.remaining}টি।`,
     action: "হেড অফিস থেকে নতুন লিড আপলোড করুন (IT Console → লিড ডেটাবেজ)",
   });
 }

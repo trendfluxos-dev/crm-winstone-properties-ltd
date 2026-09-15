@@ -15,6 +15,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
+import { LeadDatabasePanel } from "@/components/crm/LeadDatabasePanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
