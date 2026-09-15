@@ -111,6 +111,16 @@ function CreditsBoard() {
 
       {report && (
         <>
+          <div className="rounded-xl border bg-muted/40 p-4 text-sm">
+            <p className="font-medium">গত ৭ দিনের হিসাব (নজরদারি)</p>
+            <p className="mt-1 text-muted-foreground">
+              গত ৭ দিনে খরচ ≈ {report.recent7.credits} ক্রেডিট ({report.recent7.calls}টি এআই কাজ),
+              দিনে ≈ {report.recent7.perDay} ক্রেডিট। একই হারে চললে পরের ৭ দিনে ≈{" "}
+              {report.recent7.next7} ক্রেডিট লাগবে। কোনো ফিচার বন্ধ করা হয়নি — শুধু হিসাব দেখানো
+              হচ্ছে।
+            </p>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Tile
               label={`${report.monthLabel} — মোট`}
