@@ -54,20 +54,28 @@ export function LeadTable() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("pending");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [period, setPeriod] = useState<LeadPeriod>("all");
+  const [category, setCategory] = useState<LeadCategory>("all");
+
+  // The quick filter narrows the pool first; the status tabs then count within it.
+  const scoped = useMemo(
+    () => leads.filter((lead) => matchesPeriod(lead, period) && matchesCategory(lead, category)),
+    [leads, period, category],
+  );
 
   const counts = useMemo(
     () => ({
-      pending: leads.filter((l) => l.status === "pending").length,
-      follow_up: leads.filter((l) => l.status === "follow_up").length,
-      done: leads.filter((l) => l.status === "contacted" || l.status === "closed").length,
-      all: leads.length,
+      pending: scoped.filter((l) => l.status === "pending").length,
+      follow_up: scoped.filter((l) => l.status === "follow_up").length,
+      done: scoped.filter((l) => l.status === "contacted" || l.status === "closed").length,
+      all: scoped.length,
     }),
-    [leads],
+    [scoped],
   );
 
   const rows = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return leads
+    return scoped
       .filter((lead) => {
         if (filter === "pending") return lead.status === "pending";
         if (filter === "follow_up") return lead.status === "follow_up";
