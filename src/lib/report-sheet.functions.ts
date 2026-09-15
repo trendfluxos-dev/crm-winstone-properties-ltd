@@ -28,7 +28,7 @@ export const pushReportSheet = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const caller = await requireSupervisor(data.adminToken ?? null);
     const { syncReportsToSheet } = await import("@/lib/report-sheet.server");
-    const result = await syncReportsToSheet();
+    const result = await syncReportsToSheet({ force: true });
     const { logAudit } = await import("@/lib/audit.server");
     await logAudit({
       action: "report_sheet_sync",
