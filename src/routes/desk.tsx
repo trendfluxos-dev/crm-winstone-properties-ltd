@@ -11,6 +11,7 @@ import { CarryOverLeads } from "@/components/crm/CarryOverLeads";
 import { LeadDayBoard } from "@/components/crm/LeadDayBoard";
 import { FollowUpAlarm } from "@/components/crm/FollowUpAlarm";
 import { FollowUpCalendar } from "@/components/crm/FollowUpCalendar";
+import { FollowUpWeek } from "@/components/crm/FollowUpWeek";
 import { MyReports } from "@/components/crm/MyReports";
 import { PostCallReportGate } from "@/components/crm/PostCallReportGate";
 import { NewLeadDialog } from "@/components/crm/NewLeadDialog";
@@ -230,7 +231,8 @@ function DeskPage() {
           <TabsContent value="whatsapp">
             <WhatsappInbox />
           </TabsContent>
-          <TabsContent value="calendar">
+          <TabsContent value="calendar" className="space-y-4">
+            <FollowUpWeek />
             <FollowUpCalendar />
           </TabsContent>
           <TabsContent value="reports">

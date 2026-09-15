@@ -74,7 +74,10 @@ export function LeadDossier({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+      <SheetContent
+        side="right"
+        className="inset-0 h-full max-h-full w-full max-w-full gap-0 overflow-y-auto overflow-x-hidden p-0 sm:inset-y-0 sm:right-0 sm:max-w-2xl"
+      >
         {lead && (
           <>
             <SheetHeader className="border-b border-border bg-surface px-5 py-4">
@@ -107,15 +110,22 @@ export function LeadDossier({
                   leadId={lead.id}
                   phone={lead.phone_number}
                   label="সরাসরি কল"
-                  className="h-9 min-w-[100px] flex-1 text-sm"
+                  className="h-12 min-w-[140px] flex-1 text-base"
                 />
                 <WhatsAppAction
                   phone={lead.phone_number}
                   leadId={lead.id}
                   label="হোয়াটসঅ্যাপ চ্যাট"
-                  className="flex-1 min-w-[100px]"
+                  className="h-12 min-w-[140px] flex-1"
                 />
               </div>
+              {/* Dial without logging — for when the call was already reported. */}
+              <a
+                href={`tel:${lead.phone_number}`}
+                className="mt-2 inline-flex text-xs font-medium text-muted-foreground underline underline-offset-4"
+              >
+                শুধু ডায়াল করুন ({lead.phone_number})
+              </a>
             </SheetHeader>
 
             <div className="space-y-4 px-5 py-5">

@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { selectableAgents } from "@/lib/agent-roster";
 import { buildTimeline, latestVerifiedCall, LEAD_STATUSES, useSnapshot } from "@/lib/crm-data";
 
 /**
@@ -42,10 +43,8 @@ export function QueueBoard({
   const [period, setPeriod] = useState<LeadPeriod>("all");
   const [category, setCategory] = useState<LeadCategory>("all");
 
-  const agents = useMemo(
-    () => profiles.filter((p) => p.role === "agent" || p.role === "team_leader"),
-    [profiles],
-  );
+  // Locked roster: only the existing approved agents can ever be picked here.
+  const agents = useMemo(() => selectableAgents(profiles), [profiles]);
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();

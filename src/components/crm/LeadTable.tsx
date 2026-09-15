@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buildTimeline, useSnapshot } from "@/lib/crm-data";
-import { relativeTime } from "@/lib/crm-format";
+import { relativeTime, shortDate } from "@/lib/crm-format";
 import { cn } from "@/lib/utils";
 
 type Filter = "pending" | "follow_up" | "done" | "all";
@@ -34,6 +34,12 @@ const STATUS_LABELS: Record<string, string> = {
   contacted: "কথা হয়েছে",
   follow_up: "আবার যোগাযোগ",
   closed: "শেষ হয়েছে",
+};
+
+const TEMP_STYLES: Record<string, string> = {
+  hot: "border-destructive/30 bg-destructive/10 text-destructive",
+  warm: "border-chart-4/30 bg-chart-4/10 text-chart-4",
+  cold: "border-primary/25 bg-primary/10 text-primary",
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -147,7 +153,78 @@ export function LeadTable() {
         </TabsList>
       </Tabs>
 
-      <div className="card-elevated overflow-x-auto">
+      {/* Mobile: cards, no horizontal scrolling. Same rows, same data. */}
+      <ul className="space-y-3 md:hidden">
+        {rows.map((lead, index) => (
+          <li key={lead.id} className="card-elevated w-full max-w-full overflow-hidden p-3">
+            <button
+              type="button"
+              className="block w-full min-w-0 text-left"
+              onClick={() => setOpenLeadId(lead.id)}
+            >
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold">{lead.name}</p>
+                  <p className="tabular truncate text-sm text-muted-foreground">
+                    {lead.phone_number}
+                  </p>
+                </div>
+                <span className="tabular shrink-0 text-[11px] text-muted-foreground">
+                  #{lead.serial_no ?? index + 1}
+                </span>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {lead.temperature && (
+                  <span
+                    className={cn(
+                      "rounded-full border px-2 py-0.5 text-[11px] font-semibold capitalize",
+                      TEMP_STYLES[lead.temperature] ?? "border-border bg-surface-2",
+                    )}
+                  >
+                    {lead.temperature}
+                  </span>
+                )}
+                {lead.grade && (
+                  <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[11px] font-semibold">
+                    গ্রেড {lead.grade}
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                    STATUS_STYLES[lead.status],
+                  )}
+                >
+                  {STATUS_LABELS[lead.status] ?? lead.status}
+                </span>
+                <span className="tabular ml-auto text-[11px] text-muted-foreground">
+                  {shortDate(lead.classified_at ?? lead.last_call_at ?? lead.created_at)}
+                </span>
+              </div>
+              {lead.address && (
+                <p className="mt-1.5 truncate text-xs text-muted-foreground">{lead.address}</p>
+              )}
+            </button>
+            <div className="mt-3 flex items-center gap-2">
+              <WebCallButton
+                leadId={lead.id}
+                phone={lead.phone_number}
+                label="কল"
+                className="h-11 flex-1 text-base"
+              />
+              <WhatsAppAction phone={lead.phone_number} leadId={lead.id} label="" />
+              <CallbackLogButton leadId={lead.id} label="" />
+            </div>
+          </li>
+        ))}
+        {rows.length === 0 && (
+          <li className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            এই তালিকায় এখন কোনো লিড নেই
+          </li>
+        )}
+      </ul>
+
+      <div className="card-elevated hidden overflow-x-auto md:block">
         <table className="w-full min-w-[860px] text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted-foreground">
