@@ -31,6 +31,16 @@ export function dayLabel(iso: string): string {
   return new Date(iso).toLocaleDateString([], { day: "2-digit", month: "short" });
 }
 
+/** Clean "15 Sep 2026" date, used on the mobile lead cards. */
+export function shortDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export function digitsOnly(phone: string): string {
   return phone.replace(/[^\d]/g, "");
 }
