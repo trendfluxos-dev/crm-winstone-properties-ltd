@@ -35,10 +35,14 @@ export function LeadDatabasePanel() {
   const willSend = Math.min(quantity * agentCount || 0, poolCount);
 
   const send = useMutation({
-    mutationFn: () => distributeFn({ data: { adminToken, perAgent: quantity } }),
+    mutationFn: () => distributeFn({ data: { adminToken, perAgent: quantity, saveAsDaily: true } }),
     onSuccess: (result) => {
       toast.success(
-        `${result.agents} জন এজেন্টকে মোট ${result.moved}টি লিড দেওয়া হয়েছে — ডেটাবেজে বাকি ${result.remaining}টি`,
+        `${result.agents} জন এজেন্টকে মোট ${result.moved}টি লিড দেওয়া হয়েছে — ডেটাবেজে বাকি ${result.remaining}টি${
+          result.duplicatesSkipped
+            ? ` · ${result.duplicatesSkipped}টি ডুপ্লিকেট নম্বর বাদ পড়েছে`
+            : ""
+        }`,
       );
       setPerAgent("");
       void queryClient.invalidateQueries({ queryKey: ["lead-pool"] });
@@ -59,9 +63,26 @@ export function LeadDatabasePanel() {
       </header>
 
       <p className="text-xs text-muted-foreground">
-        যেসব লিড এখনো কারো নামে দেওয়া হয়নি সেগুলো এখানে জমা থাকে। প্রতিদিন প্রতি এজেন্টের জন্য
-        সংখ্যা লিখে দিন — ঠিক ততটি লিড সব চালু এজেন্টের কাছে চলে যাবে, বাকিগুলো ডেটাবেজেই থাকবে।
+        হেড অফিসের লিড এখানে জমা থাকে। প্রতিদিন প্রতি এজেন্টের জন্য সংখ্যা লিখে দিন — ঠিক ততটি লিড
+        সব চালু এজেন্টের কাছে চলে যাবে, বাকিগুলো ডেটাবেজেই থাকবে। একই নম্বর দুইজনের কাছে বা একজনের
+        কাছে দুইবার কখনো যাবে না।
       </p>
+
+      {status.data ? (
+        <p
+          className={
+            status.data.shortage
+              ? "rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs"
+              : "rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs text-muted-foreground"
+          }
+        >
+          স্বয়ংক্রিয় দৈনিক বিতরণ: প্রতি এজেন্ট {status.data.dailyPerAgent}টি · সর্বশেষ বিতরণ{" "}
+          {status.data.lastRunDate ?? "এখনো হয়নি"} ·{" "}
+          {status.data.shortage
+            ? "ডেটাবেজে এক দিনের ভাগও বাকি নেই — নতুন লিড আপলোড করুন"
+            : `প্রায় ${status.data.daysLeft} দিনের লিড বাকি আছে`}
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap items-end gap-2">
         <label className="space-y-1 text-xs text-muted-foreground">

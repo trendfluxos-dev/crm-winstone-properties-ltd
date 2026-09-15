@@ -7,6 +7,7 @@ import apkAsset from "@/assets/winstone-connect.apk.asset.json";
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AboutLegalModal } from "@/components/crm/AboutLegalModal";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
+import { InstallAppButton } from "@/components/crm/InstallAppButton";
 import { AgentSelector } from "@/components/crm/AgentSelector";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { OfflineSyncBar } from "@/components/crm/OfflineSyncBar";
@@ -84,6 +85,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
+
+            <InstallAppButton />
 
             <button
               type="button"

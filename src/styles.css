@@ -248,3 +248,23 @@
     margin-left: 0.375rem;
   }
 }
+
+/* Phone comfort: no accidental pinch/tap zoom, and taps land where agents aim.
+   16px form text is what stops mobile browsers auto-zooming on focus. */
+@media (max-width: 640px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  input,
+  textarea,
+  select,
+  button {
+    font-size: 16px;
+  }
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+  }
+}

@@ -66,14 +66,37 @@ export async function buildSystemNotices(): Promise<{
     });
   }
 
-  if (count(unassigned) > 0) {
-    notices.push({
-      id: "unassigned-leads",
-      level: "warning",
-      title: `${count(unassigned)}টি লিডের কোনো মালিক নেই`,
-      detail: "এজেন্টের কাছে না গেলে এই লিডগুলোতে কেউ কল করবে না, ফলে পাইপলাইন থেমে থাকছে।",
-      action: "Coordinator Deck → Balance all চাপুন",
-    });
+  // Leads waiting in the head database are normal — they are tomorrow's work.
+  // What HQ and IT must hear about is the database running dry.
+  {
+    const { usablePoolCount, activeAgents, dailyPlan } = await import("@/lib/lead-pool.server");
+    const [poolCount, agentList, plan] = await Promise.all([
+      usablePoolCount(),
+      activeAgents(),
+      dailyPlan(),
+    ]);
+    const need = agentList.length * plan.perAgent;
+    if (need > 0 && poolCount < need) {
+      notices.push({
+        id: "lead-pool-low",
+        level: poolCount === 0 ? "critical" : "warning",
+        title:
+          poolCount === 0
+            ? "হেড ডেটাবেজ খালি — কালকে কোনো লিড যাবে না"
+            : `হেড ডেটাবেজে আর ${poolCount}টি লিড — এক দিনের ভাগও পূর্ণ হবে না`,
+        detail: `প্রতিদিন ${agentList.length} জন এজেন্টকে ${plan.perAgent}টি করে দিতে ${need}টি লিড দরকার।`,
+        action: "হেড অফিস থেকে নতুন লিড ফাইল আপলোড করুন (IT Console → লিড ডেটাবেজ)",
+      });
+    } else if (need > 0 && poolCount < need * 3) {
+      notices.push({
+        id: "lead-pool-thin",
+        level: "info",
+        title: `হেড ডেটাবেজে ${poolCount}টি লিড — প্রায় ${Math.floor(poolCount / need)} দিনের কাজ`,
+        detail: `প্রতিদিন ${plan.perAgent}টি করে গেলে শীঘ্রই নতুন লিড দরকার হবে।`,
+        action: "নতুন লিড ফাইল প্রস্তুত রাখুন",
+      });
+    }
+    void count(unassigned);
   }
 
   if (count(failedSync) > 0) {

@@ -210,7 +210,7 @@ export function PostCallReportGate() {
 
   return (
     <Dialog open>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="h-[100dvh] max-h-[100dvh] w-full max-w-lg overflow-y-auto rounded-none p-4 pb-8 sm:h-auto sm:max-h-[90vh] sm:rounded-xl sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
             <AlertTriangle className="size-4 text-amber-600" />
