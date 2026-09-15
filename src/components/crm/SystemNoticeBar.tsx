@@ -209,7 +209,7 @@ export function SystemNoticeBar({ surface }: { surface: "it" | "hq" }) {
         ) : (
           <ul className="mt-3 space-y-2">
             {notices.map((notice) => (
-              <NoticeRow key={notice.id} notice={notice} />
+              <NoticeRow key={notice.id} notice={notice} canAct={surface === "it"} />
             ))}
           </ul>
         )}
@@ -226,7 +226,7 @@ export function SystemNoticeBar({ surface }: { surface: "it" | "hq" }) {
           </DialogHeader>
           <ul className="space-y-2">
             {urgent.map((notice) => (
-              <NoticeRow key={notice.id} notice={notice} />
+              <NoticeRow key={notice.id} notice={notice} canAct={surface === "it"} />
             ))}
           </ul>
           <Button className="w-full" onClick={() => setPopup(false)}>
