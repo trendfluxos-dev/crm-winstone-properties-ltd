@@ -48,22 +48,48 @@ function PendingAccountActions() {
     enabled: Boolean(adminToken),
   });
 
+  // Locks the row while its decision is in flight, so a double tap cannot
+  // submit twice, and keeps the result visible until the list refreshes.
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [done, setDone] = useState<Record<string, "approved" | "rejected">>({});
+
   const act = useMutation({
     mutationFn: (input: {
       profileId: string;
       decision: "approve_agent" | "approve_coordinator" | "reject";
     }) => decide({ data: { adminToken: getAdminToken() ?? "", ...input } }),
-    onSuccess: () => {
-      toast.success("অ্যাকাউন্ট হালনাগাদ হয়েছে");
-      void queryClient.invalidateQueries({ queryKey: ["account-requests"] });
-      void queryClient.invalidateQueries({ queryKey: ["system-notices"] });
-      void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
-      void queryClient.invalidateQueries({ queryKey: ["staff-accounts"] });
+    onMutate: (input) => setBusyId(input.profileId),
+    onSuccess: async (_result, input) => {
+      setDone((prev) => ({
+        ...prev,
+        [input.profileId]: input.decision === "reject" ? "rejected" : "approved",
+      }));
+      toast.success(
+        input.decision === "reject"
+          ? "অ্যাকাউন্ট বাতিল হয়েছে — ডেস্কে ঢোকা বন্ধ"
+          : "অনুমোদন হয়েছে — এখন ডেস্কে ঢুকতে পারবেন",
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["account-requests"] }),
+        queryClient.invalidateQueries({ queryKey: ["system-notices"] }),
+        queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] }),
+        queryClient.invalidateQueries({ queryKey: ["staff-accounts"] }),
+      ]);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(error.message || "কাজটি সম্পন্ন হয়নি — আবার চেষ্টা করুন"),
+    onSettled: () => setBusyId(null),
   });
 
-  const pending = (list.data?.accounts ?? []).filter((a) => a.approval_status === "pending");
+  const pending = (list.data?.accounts ?? []).filter(
+    (a) => a.approval_status === "pending" || done[a.id],
+  );
+  if (list.isPending && adminToken) {
+    return (
+      <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+        <Loader2 className="size-3.5 animate-spin" /> অপেক্ষমাণ অ্যাকাউন্ট আনা হচ্ছে…
+      </p>
+    );
+  }
   if (pending.length === 0) return null;
 
   return (
