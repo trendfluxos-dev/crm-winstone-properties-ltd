@@ -121,6 +121,8 @@ function SystemBoard() {
 
       <LeadDatabasePanel />
 
+      <LeadDatabaseSummary />
+
       <CallOpsPanel showControls />
 
       <RecordingPipelinePanel />
