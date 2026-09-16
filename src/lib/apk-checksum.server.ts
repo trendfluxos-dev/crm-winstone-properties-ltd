@@ -25,6 +25,8 @@ export type ApkChecksum = {
 
 /** Per-instance dedupe so a burst of first requests hashes the file once, not N times. */
 const inFlight = new Map<string, Promise<ApkChecksum | null>>();
+/** Short-lived memo of the durable sidecar, purely to save a storage round-trip. */
+const memo = new Map<string, ApkChecksum>();
 
 function sidecarPath(source: ApkChecksum["source"], size: number) {
   return `${SIDECAR_PREFIX}/${source}-${size}.json`;
@@ -115,10 +117,16 @@ export async function getApkChecksum(
   const size = published ?? bundled?.size ?? 0;
   if (!size) return null;
 
-  const stored = await readSidecar(source, size);
-  if (stored) return stored;
-
   const key = `${source}-${size}`;
+  const remembered = memo.get(key);
+  if (remembered) return remembered;
+
+  const stored = await readSidecar(source, size);
+  if (stored) {
+    memo.set(key, stored);
+    return stored;
+  }
+
   const running = inFlight.get(key);
   if (running) return running;
 
