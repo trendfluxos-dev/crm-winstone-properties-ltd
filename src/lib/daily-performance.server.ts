@@ -105,17 +105,70 @@ export type TeamDailyRow = DailyPerformance & {
 export type TeamDailyPerformance = {
   dayKey: string;
   agents: TeamDailyRow[];
+  /**
+   * Server-decided ranking of at most three agents with real activity today.
+   * Clients render this order as given; they never compute a ranking, and no
+   * score is returned so no motivational number can reach a screen.
+   */
+  top3: TeamDailyRow[];
   totals: {
     agents: number;
     callsMade: number;
     connected: number;
     interested: number;
     followUpsDue: number;
+    followUpsCompleted: number;
     reportsSubmitted: number;
     talkSeconds: number;
     pendingReports: number;
   };
 };
+
+/**
+ * Normalised weighted ranking, computed on the server only.
+ *
+ * Each counter is divided by the floor's best value for that counter, so the
+ * mix (calls 25%, connected 25%, interested 20%, follow-up completion 15%,
+ * reports 10%, talk time 5%) compares agents fairly on a quiet day and a busy
+ * one alike. The score itself is never returned to a client.
+ */
+function rankTop3(rows: TeamDailyRow[]): TeamDailyRow[] {
+  const active = rows.filter(
+    (r) => r.callsMade > 0 || r.reportsSubmitted > 0 || r.followUpsCompleted > 0,
+  );
+  if (active.length === 0) return [];
+
+  const max = (pick: (r: TeamDailyRow) => number) => Math.max(...active.map(pick), 0);
+  const maxCalls = max((r) => r.callsMade);
+  const maxConnected = max((r) => r.connected);
+  const maxInterested = max((r) => r.interested);
+  const maxFollowUps = max((r) => r.followUpsCompleted);
+  const maxReports = max((r) => r.reportsSubmitted);
+  const maxTalk = max((r) => r.talkSeconds);
+  const norm = (value: number, top: number) => (top > 0 ? value / top : 0);
+
+  const score = (r: TeamDailyRow) =>
+    norm(r.callsMade, maxCalls) * 0.25 +
+    norm(r.connected, maxConnected) * 0.25 +
+    norm(r.interested, maxInterested) * 0.2 +
+    norm(r.followUpsCompleted, maxFollowUps) * 0.15 +
+    norm(r.reportsSubmitted, maxReports) * 0.1 +
+    norm(r.talkSeconds, maxTalk) * 0.05;
+
+  return [...active]
+    .sort(
+      (a, b) =>
+        score(b) - score(a) ||
+        b.connected - a.connected ||
+        b.interested - a.interested ||
+        b.followUpsCompleted - a.followUpsCompleted ||
+        b.callsMade - a.callsMade ||
+        b.reportsSubmitted - a.reportsSubmitted ||
+        b.talkSeconds - a.talkSeconds ||
+        (a.employeeId ?? "").localeCompare(b.employeeId ?? ""),
+    )
+    .slice(0, 3);
+}
 
 /**
  * The same Dhaka-day counters, for every active agent on the floor.
