@@ -22,7 +22,15 @@ export type Caller = {
   maskPii: boolean;
 };
 
-const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null, readOnly: true };
+const ANON: Caller = {
+  scope: "none",
+  profile: null,
+  userId: null,
+  approval: null,
+  readOnly: true,
+  leadModerator: false,
+  maskPii: false,
+};
 
 function isNewKey(value: string) {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
