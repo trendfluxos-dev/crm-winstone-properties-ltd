@@ -115,9 +115,7 @@ export function ExecutiveOverview() {
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <div className="min-w-0">
             <p className="eyebrow">Winstone Connect</p>
-            <h1 className="truncate text-lg font-bold tracking-tight sm:text-2xl">
-              Executive HQ
-            </h1>
+            <h1 className="truncate text-lg font-bold tracking-tight sm:text-2xl">Executive HQ</h1>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {dhakaNow} · সর্বশেষ আপডেট {lastUpdated}
             </p>
@@ -290,9 +288,7 @@ function TopAgentRow({ rank, agent }: { rank: number; agent: TeamDailyRow }) {
         </div>
         <span
           className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
-            agent.pendingReport
-              ? "border-warning/40 text-warning"
-              : "border-live/40 text-live"
+            agent.pendingReport ? "border-warning/40 text-warning" : "border-live/40 text-live"
           }`}
         >
           {agent.pendingReport ? "রিপোর্ট বাকি" : "সিঙ্ক ঠিক"}
@@ -305,7 +301,8 @@ function TopAgentRow({ rank, agent }: { rank: number; agent: TeamDailyRow }) {
         <Metric label="ফলো-আপ" value={agent.followUpsDue} />
         <Metric label="রিপোর্ট" value={agent.reportsSubmitted} />
         <span>
-          কথার সময় <span className="tabular font-semibold text-foreground">
+          কথার সময়{" "}
+          <span className="tabular font-semibold text-foreground">
             {formatTalkTime(agent.talkSeconds)}
           </span>
         </span>
