@@ -13,6 +13,8 @@ import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
+import { CoordinatorIdentityDialog } from "@/components/crm/CoordinatorIdentityDialog";
+import { ElevatedAccessBar } from "@/components/crm/ElevatedAccessBar";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { LeadDatabasePanel } from "@/components/crm/LeadDatabasePanel";
@@ -66,6 +68,8 @@ function DispatchPage() {
         title="Team Coordinator Desk"
         description="Lead dispatching, team load and the full floor queue. Coordinator account or master PIN."
       >
+        <CoordinatorIdentityDialog />
+        <ElevatedAccessBar />
         <Dispatcher />
       </RoleGate>
     </AppShell>
