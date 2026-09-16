@@ -67,6 +67,7 @@ export function DailyPerformance() {
           <Metric label="সংযুক্ত" value={isPending ? null : data?.connected} />
           <Metric label="আগ্রহী" value={isPending ? null : data?.interested} />
           <Metric label="ফলো-আপ বাকি" value={isPending ? null : data?.followUpsDue} />
+          <Metric label="ফলো-আপ সম্পন্ন" value={isPending ? null : data?.followUpsCompleted} />
           <Metric label="রিপোর্ট জমা" value={isPending ? null : data?.reportsSubmitted} />
           <Metric
             label="কথা বলার সময়"
