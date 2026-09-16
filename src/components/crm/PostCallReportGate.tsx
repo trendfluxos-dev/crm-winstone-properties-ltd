@@ -227,6 +227,11 @@ export function PostCallReportGate() {
   if (!detail || queuedReportIds.includes(detail.report.id)) return null;
 
   const reasonRequired = NEEDS_REASON.has(category);
+  // Tap-to-add note lines: the picked category first, then general ones.
+  const noteSuggestions: string[] = [
+    ...(NOTE_SUGGESTIONS[category] ?? []),
+    ...GENERAL_NOTE_SUGGESTIONS,
+  ].slice(0, 6);
   // The customer answered -> classification (Hot/Warm/Cold + A/B/C/D) is what
   // turns the lead into COMPLETED. Not answered -> the lead goes back to retry.
   const received = detail.report.connected !== false;
