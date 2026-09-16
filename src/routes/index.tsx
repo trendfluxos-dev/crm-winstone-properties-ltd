@@ -1,11 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Headphones, Lock, Mic, Server, Users } from "lucide-react";
+import { BarChart3, ChevronRight, Headphones, Lock, Mic, Server, Users } from "lucide-react";
 import { useState } from "react";
 
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { ThemeToggle } from "@/components/crm/ThemeToggle";
-import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
 
 export const Route = createFileRoute("/")({
@@ -51,73 +50,68 @@ function EntryHall() {
           <img
             src={logoAsset.url}
             alt="Winstone Properties Ltd. — Find. Build. Invest."
-            className="size-16 rounded-full object-cover shadow-sm ring-2 ring-primary/20"
+            className="size-14 rounded-full object-cover shadow-sm ring-2 ring-primary/20"
           />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">Winstone Connect</h1>
-          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <h1 className="mt-3 text-xl font-bold tracking-tight sm:text-2xl">Winstone Connect</h1>
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Tele-Sales Operating System
-          </p>
-          <p className="mt-4 max-w-xl text-sm text-muted-foreground">
-            Choose how you are entering today. Agents and coordinators use their own account;
-            Executive HQ and the IT Console open with the master PIN.
           </p>
         </header>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <EntryCard
-            icon={<Headphones className="size-6" />}
-            title="Sales Agent"
-            description="Your own lead queue, call log, WhatsApp threads and AI coaching."
-            primary={
-              <Button asChild className="flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
-                  Sign in
-                </Link>
-              </Button>
-            }
-            secondary={
-              <Button asChild variant="secondary" className="flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signup" }}>
-                  Create account
-                </Link>
-              </Button>
-            }
-          />
+        <div className="mx-auto mt-8 w-full max-w-xl space-y-6">
+          <section>
+            <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Sign in with your account
+            </p>
+            <div className="space-y-2">
+              <EntryRow
+                icon={<Headphones className="size-5" />}
+                title="Sales Agent"
+                description="Your own lead queue, call log, WhatsApp threads and AI coaching."
+                to="/auth"
+                search={{ role: "agent" as const, mode: "signin" as const }}
+              />
+              <EntryRow
+                icon={<Users className="size-5" />}
+                title="Coordinator Deck"
+                description="Assign and balance leads, import lists and watch the whole floor queue."
+                to="/auth"
+                search={{ role: "coordinator" as const, mode: "signin" as const }}
+              />
+            </div>
+            <p className="px-1 pt-2 text-xs text-muted-foreground">
+              New agent?{" "}
+              <Link
+                to="/auth"
+                search={{ role: "agent", mode: "signup" }}
+                className="font-semibold text-primary hover:underline"
+              >
+                Create account
+              </Link>
+            </p>
+          </section>
 
-          <EntryCard
-            icon={<Users className="size-6" />}
-            title="Coordinator Deck"
-            description="Assign and balance leads, import lists and watch the whole floor queue."
-            primary={
-              <Button asChild className="flex-1">
-                <Link to="/auth" search={{ role: "coordinator", mode: "signin" }}>
-                  Log in as Coordinator
-                </Link>
-              </Button>
-            }
-          />
-
-          <EntryCard
-            icon={<BarChart3 className="size-6" />}
-            title="Executive HQ"
-            description="Live floor performance, leaderboards and ask-anything reports and charts."
-            primary={
-              <Button className="flex-1" onClick={() => openPin("/hq")}>
-                <Lock className="size-4" /> Unlock PIN
-              </Button>
-            }
-          />
-
-          <EntryCard
-            icon={<Server className="size-6" />}
-            title="IT Console"
-            description="System configuration, integrations, data health and account approvals."
-            primary={
-              <Button className="flex-1" onClick={() => openPin("/system")}>
-                <Lock className="size-4" /> Unlock PIN
-              </Button>
-            }
-          />
+          <section>
+            <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Protected consoles
+            </p>
+            <div className="space-y-2">
+              <EntryRow
+                icon={<BarChart3 className="size-5" />}
+                title="Executive HQ"
+                description="Live floor performance, leaderboards and ask-anything reports and charts."
+                action="Unlock PIN"
+                onClick={() => openPin("/hq")}
+              />
+              <EntryRow
+                icon={<Server className="size-5" />}
+                title="IT Console"
+                description="System configuration, integrations, data health and account approvals."
+                action="Unlock PIN"
+                onClick={() => openPin("/system")}
+              />
+            </div>
+          </section>
         </div>
 
         {scope !== "none" && (
@@ -161,32 +155,57 @@ function EntryHall() {
   );
 }
 
-function EntryCard({
-  icon,
-  title,
-  description,
-  primary,
-  secondary,
-}: {
+type EntryRowProps = {
   icon: React.ReactNode;
   title: string;
   description: string;
-  primary: React.ReactNode;
-  secondary?: React.ReactNode;
-}) {
-  return (
-    <section className="card-elevated flex flex-col gap-3 p-5">
-      <span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary">
+  to?: "/auth";
+  search?: { role: "agent" | "coordinator"; mode: "signin" | "signup" };
+  action?: string;
+  onClick?: () => void;
+};
+
+/**
+ * One role entry as a compact list row: icon tile, title, single-line
+ * description and a trailing affordance. Same palette and semantics as before —
+ * only the density and the primary/secondary hierarchy changed.
+ */
+function EntryRow({ icon, title, description, to, search, action, onClick }: EntryRowProps) {
+  const inner = (
+    <>
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
         {icon}
       </span>
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-      <div className="mt-auto flex flex-wrap gap-2 pt-2">
-        {primary}
-        {secondary}
-      </div>
-    </section>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-semibold tracking-tight">{title}</span>
+        <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+          {description}
+        </span>
+      </span>
+      {action ? (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-primary/30 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
+          <Lock className="size-3" /> {action}
+        </span>
+      ) : (
+        <ChevronRight className="size-4 shrink-0 text-primary" />
+      )}
+    </>
+  );
+
+  const className =
+    "group flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3.5 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.995]";
+
+  if (to && search) {
+    return (
+      <Link to={to} search={search} className={className}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {inner}
+    </button>
   );
 }
