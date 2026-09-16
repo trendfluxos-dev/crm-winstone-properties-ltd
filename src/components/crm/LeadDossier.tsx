@@ -80,26 +80,29 @@ export function LeadDossier({
       >
         {lead && (
           <>
-            <SheetHeader className="border-b border-border bg-surface px-5 py-4">
-              <SheetTitle className="text-xl">{lead.name}</SheetTitle>
+            <SheetHeader className="border-b border-primary/20 bg-surface px-5 py-5">
+              <p className="eyebrow">Lead 360</p>
+              <SheetTitle className="mt-1 text-2xl font-semibold tracking-tight">
+                {lead.name}
+              </SheetTitle>
               <p className="text-sm text-muted-foreground">
                 {lead.company ? `${lead.company} · ` : ""}
-                <span className="tabular">{lead.phone_number}</span>
+                <span className="tabular text-foreground">{lead.phone_number}</span>
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full border border-border bg-card px-2.5 py-1 capitalize">
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="rounded-md border border-primary/35 bg-primary/10 px-2.5 py-1 font-semibold capitalize text-primary">
                   {lead.status.replace("_", " ")}
                 </span>
                 {lead.outcome_category && (
-                  <span className="rounded-full border border-border bg-card px-2.5 py-1">
+                  <span className="rounded-md border border-border bg-card px-2.5 py-1">
                     {lead.outcome_category.replace(/_/g, " ")}
                   </span>
                 )}
-                <span className="rounded-full border border-border bg-card px-2.5 py-1">
-                  {lead.call_attempts}টি চেষ্টা
+                <span className="rounded-md border border-border bg-card px-2.5 py-1">
+                  <span className="tabular">{lead.call_attempts}</span>টি চেষ্টা
                 </span>
                 {agent && (
-                  <span className="rounded-full border border-border bg-card px-2.5 py-1">
+                  <span className="rounded-md border border-border bg-card px-2.5 py-1">
                     {agent.name}
                   </span>
                 )}
@@ -131,9 +134,7 @@ export function LeadDossier({
             <div className="space-y-4 px-5 py-5">
               <PreCallBriefCard leadId={lead.id} />
 
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                সব মাধ্যমের টাইমলাইন
-              </h3>
+              <h3 className="eyebrow gold-rule pt-4">সব মাধ্যমের টাইমলাইন</h3>
 
               {(() => {
                 const calls = timeline.filter((e) => e.kind === "call");

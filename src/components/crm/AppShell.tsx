@@ -58,25 +58,25 @@ export function AppShell({ children }: { children: ReactNode }) {
             <img
               src={logoAsset.url}
               alt="Winstone Properties Ltd. logo"
-              className="size-9 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-border"
+              className="size-9 shrink-0 rounded-full object-cover ring-1 ring-primary/30"
             />
             <span className="min-w-0 leading-tight">
-              <span className="block truncate text-[13px] font-bold tracking-tight">
+              <span className="block truncate text-[13px] font-semibold tracking-tight">
                 Winstone Connect
               </span>
-              <span className="hidden truncate text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground sm:block">
+              <span className="hidden truncate text-[10px] font-medium uppercase tracking-[0.18em] text-primary/70 sm:block">
                 Tele-Sales OS
               </span>
             </span>
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-0.5 rounded-full border border-border bg-surface-2/70 p-1 lg:flex">
+          <nav className="ml-3 hidden items-center gap-1 lg:flex">
             {nav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-all duration-300 hover:text-foreground data-[status=active]:bg-card data-[status=active]:text-primary data-[status=active]:shadow-sm"
+                className="whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:bg-surface-2 hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
               >
                 {item.label}
               </Link>
@@ -100,8 +100,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               }}
               className={
                 adminToken
-                  ? "inline-flex h-8 items-center gap-1.5 rounded-full border border-primary/25 bg-accent px-3 text-xs font-semibold text-accent-foreground transition-all duration-300 hover:shadow-sm"
-                  : "inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:text-foreground hover:shadow-sm"
+                  ? "inline-flex h-8 items-center gap-1.5 rounded-md border border-primary/40 bg-accent px-3 text-xs font-semibold text-accent-foreground transition-colors duration-200"
+                  : "inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-xs font-semibold text-muted-foreground transition-colors duration-200 hover:border-primary/35 hover:text-foreground"
               }
             >
               {adminToken ? <LockOpen className="size-3.5" /> : <Lock className="size-3.5" />}
@@ -117,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={() => {
                   void signOut().then(() => toast.info("Signed out"));
                 }}
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-2.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:text-foreground hover:shadow-sm sm:px-3"
+                className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-border bg-surface px-2.5 text-xs font-semibold text-muted-foreground transition-colors duration-200 hover:border-primary/35 hover:text-foreground sm:px-3"
               >
                 <LogOut className="size-3.5 sm:hidden" />
                 <span className="hidden sm:inline">Sign out</span>
@@ -127,7 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button
               size="sm"
               aria-label="Download Agent Android App"
-              className="h-8 shrink-0 gap-1.5 whitespace-nowrap rounded-full px-2.5 text-xs font-semibold shadow-sm transition-all duration-300 hover:shadow-md sm:px-3.5"
+              className="h-8 shrink-0 gap-1.5 whitespace-nowrap rounded-md px-2.5 text-xs font-semibold transition-colors duration-200 sm:px-3.5"
               onClick={() => {
                 const a = document.createElement("a");
                 a.href = APK_URL;
@@ -143,12 +143,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="hidden sm:inline xl:hidden">Agent App</span>
             </Button>
 
-            <div className="hidden h-8 items-center gap-2 rounded-full border border-live/30 bg-live/10 px-3 md:flex">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-live" />
+            <div className="hidden h-8 items-center gap-2 rounded-md border border-primary/25 px-3 md:flex">
+              <span className="inline-flex size-1.5 rounded-full bg-primary" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                Live
               </span>
-              <span className="text-[11px] font-semibold text-live">Live</span>
             </div>
           </div>
         </div>
@@ -159,7 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={item.to}
               to={item.to}
               activeOptions={{ exact: item.to === "/" }}
-              className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground data-[status=active]:border-primary/30 data-[status=active]:bg-accent data-[status=active]:text-primary"
+              className="shrink-0 rounded-md border border-border px-3 py-1 text-xs font-medium text-muted-foreground data-[status=active]:border-primary/45 data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
             >
               {item.label}
             </Link>

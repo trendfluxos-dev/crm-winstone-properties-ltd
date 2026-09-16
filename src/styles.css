@@ -93,55 +93,59 @@
   }
 }
 
+/* Winstone Properties brand system: deep matte charcoal, warm ivory text,
+   restrained champagne-gold accents. Gold is used for edges, states and
+   numerals — never as a heavy fill. */
 :root {
-  --radius: 0.75rem;
-  /* Warm cream foundation with clean white cards */
-  --background: oklch(0.985 0.01 95);
-  --foreground: oklch(0.25 0.02 95);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.02 95);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.02 95);
-  /* Emerald-600 primary: fresh green action color */
-  --primary: oklch(0.62 0.17 155);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.01 95);
-  --secondary-foreground: oklch(0.3 0.02 95);
-  --muted: oklch(0.965 0.01 95);
-  --muted-foreground: oklch(0.5 0.02 95);
-  --accent: oklch(0.95 0.05 155);
-  --accent-foreground: oklch(0.35 0.15 155);
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  /* Warm neutral micro-borders */
-  --border: oklch(0.9 0.01 95 / 80%);
-  --input: oklch(0.9 0.01 95);
-  --ring: oklch(0.62 0.17 155);
-  --surface: oklch(0.975 0.01 95);
-  --surface-2: oklch(0.96 0.01 95);
-  /* Dark "ink" surface for the waveform container */
-  --ink: oklch(0.2 0.02 95);
-  --ink-foreground: oklch(0.96 0.005 95);
-  --ink-muted: oklch(0.6 0.02 95);
-  /* Emerald-500 live, amber-500 idle */
-  --live: oklch(0.7 0.17 155);
-  --live-foreground: oklch(0.99 0 0);
-  --idle: oklch(0.77 0.17 70);
-  --idle-foreground: oklch(0.25 0.05 70);
-  --offline: oklch(0.72 0.015 95);
-  --offline-foreground: oklch(0.99 0 0);
-  --verified: oklch(0.65 0.17 155);
-  --verified-foreground: oklch(0.99 0 0);
-  --critical: oklch(0.6 0.22 25);
-  --whatsapp: oklch(0.68 0.17 155);
-  --chart-1: oklch(0.62 0.17 155);
-  --chart-2: oklch(0.7 0.17 155);
-  --chart-3: oklch(0.77 0.17 70);
-  --chart-4: oklch(0.62 0.2 320);
-  --chart-5: oklch(0.6 0.22 25);
-  --shadow-card: 0 1px 2px oklch(0.2 0.02 95 / 5%), 0 1px 3px oklch(0.2 0.02 95 / 4%);
-  --shadow-card-hover: 0 4px 12px oklch(0.2 0.02 95 / 7%), 0 2px 4px oklch(0.2 0.02 95 / 4%);
-  --shadow-glass: 0 1px 0 oklch(1 0 0 / 60%) inset, 0 8px 24px -12px oklch(0.2 0.02 95 / 15%);
+  --radius: 0.5rem;
+  /* Matte charcoal foundation, tonal panels, no gloss */
+  --background: oklch(0.155 0.004 70);
+  --foreground: oklch(0.97 0.004 85);
+  --card: oklch(0.192 0.004 70);
+  --card-foreground: oklch(0.97 0.004 85);
+  --popover: oklch(0.205 0.004 70);
+  --popover-foreground: oklch(0.97 0.004 85);
+  /* Champagne gold: warm, muted, metallic — never bright yellow */
+  --primary: oklch(0.795 0.068 84);
+  --primary-foreground: oklch(0.17 0.008 70);
+  --secondary: oklch(0.245 0.004 70);
+  --secondary-foreground: oklch(0.93 0.004 85);
+  --muted: oklch(0.225 0.004 70);
+  --muted-foreground: oklch(0.7 0.008 78);
+  --accent: oklch(0.255 0.018 84);
+  --accent-foreground: oklch(0.86 0.062 84);
+  --destructive: oklch(0.58 0.175 25);
+  --destructive-foreground: oklch(0.98 0.004 85);
+  /* Thin, low-intensity champagne hairlines */
+  --border: oklch(0.44 0.022 84 / 34%);
+  --input: oklch(0.32 0.008 74);
+  --ring: oklch(0.795 0.068 84);
+  --surface: oklch(0.178 0.004 70);
+  --surface-2: oklch(0.228 0.004 70);
+  /* Deepest panel, used for waveform and focus surfaces */
+  --ink: oklch(0.115 0.004 70);
+  --ink-foreground: oklch(0.96 0.004 85);
+  --ink-muted: oklch(0.62 0.008 78);
+  /* State colors stay in the brand's warm metal range */
+  --live: oklch(0.795 0.068 84);
+  --live-foreground: oklch(0.17 0.008 70);
+  --idle: oklch(0.72 0.085 66);
+  --idle-foreground: oklch(0.96 0.004 85);
+  --offline: oklch(0.46 0.006 70);
+  --offline-foreground: oklch(0.96 0.004 85);
+  --verified: oklch(0.82 0.06 88);
+  --verified-foreground: oklch(0.17 0.008 70);
+  --critical: oklch(0.58 0.175 25);
+  /* WhatsApp keeps its own identity green — required by the channel */
+  --whatsapp: oklch(0.66 0.11 158);
+  --chart-1: oklch(0.795 0.068 84);
+  --chart-2: oklch(0.68 0.05 84);
+  --chart-3: oklch(0.72 0.085 66);
+  --chart-4: oklch(0.56 0.03 80);
+  --chart-5: oklch(0.58 0.175 25);
+  --shadow-card: 0 1px 0 oklch(1 0 0 / 3%) inset, 0 1px 2px oklch(0 0 0 / 40%);
+  --shadow-card-hover: 0 1px 0 oklch(1 0 0 / 5%) inset, 0 6px 18px -10px oklch(0 0 0 / 55%);
+  --shadow-glass: 0 1px 0 oklch(1 0 0 / 4%) inset, 0 10px 28px -18px oklch(0 0 0 / 70%);
 }
 
 @layer base {
@@ -166,10 +170,24 @@
   }
 }
 
-/* Faint dot grid on the cream foundation */
+/* Barely-there architectural grid on the matte charcoal foundation */
 @utility grid-noise {
-  background-image: radial-gradient(oklch(0.25 0.02 95 / 5%) 1px, transparent 1px);
-  background-size: 22px 22px;
+  background-image: radial-gradient(oklch(0.85 0.03 84 / 4%) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+/* Thin champagne hairline used as a section divider */
+@utility gold-rule {
+  border-top: 1px solid color-mix(in oklab, var(--primary) 26%, transparent);
+}
+
+/* Section label: small, wide-tracked, warm grey */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
 }
 
 @utility tabular {
@@ -180,9 +198,9 @@
 
 /* Glassmorphism for nav, drawers and modal headers */
 @utility glass {
-  background-color: color-mix(in oklab, var(--card) 80%, transparent);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  background-color: color-mix(in oklab, var(--background) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
   box-shadow: var(--shadow-glass);
 }
 

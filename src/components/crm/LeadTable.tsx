@@ -37,16 +37,16 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const TEMP_STYLES: Record<string, string> = {
-  hot: "border-destructive/30 bg-destructive/10 text-destructive",
-  warm: "border-chart-4/30 bg-chart-4/10 text-chart-4",
-  cold: "border-primary/25 bg-primary/10 text-primary",
+  hot: "border-destructive/40 bg-destructive/10 text-destructive",
+  warm: "border-idle/35 bg-idle/10 text-idle",
+  cold: "border-border bg-surface-2 text-muted-foreground",
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "border-idle/30 bg-idle/15 text-idle-foreground",
-  contacted: "border-primary/25 bg-accent text-accent-foreground",
-  follow_up: "border-chart-4/30 bg-chart-4/10 text-chart-4",
-  closed: "border-live/30 bg-live/10 text-live",
+  pending: "border-idle/35 bg-idle/10 text-idle",
+  contacted: "border-primary/35 bg-primary/10 text-primary",
+  follow_up: "border-border bg-surface-2 text-foreground",
+  closed: "border-border bg-surface-2 text-muted-foreground",
 };
 
 /**
@@ -110,10 +110,12 @@ export function LeadTable() {
     <section className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">লিড ড্যাশবোর্ড</h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            আজ {counts.pending}টি লিডে কল বাকি · {counts.follow_up}টিতে আবার যোগাযোগ করতে হবে ·{" "}
-            {counts.done}টিতে কথা হয়ে গেছে
+          <p className="eyebrow">Lead Queue</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight">লিড ড্যাশবোর্ড</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+            আজ <span className="tabular font-semibold text-primary">{counts.pending}</span>টি লিডে কল
+            বাকি · <span className="tabular font-semibold">{counts.follow_up}</span>টিতে আবার যোগাযোগ
+            করতে হবে · <span className="tabular font-semibold">{counts.done}</span>টিতে কথা হয়ে গেছে
           </p>
         </div>
         <div className="relative w-full sm:w-64">
@@ -156,7 +158,10 @@ export function LeadTable() {
       {/* Mobile: cards, no horizontal scrolling. Same rows, same data. */}
       <ul className="space-y-3 md:hidden">
         {rows.map((lead, index) => (
-          <li key={lead.id} className="card-elevated w-full max-w-full overflow-hidden p-3">
+          <li
+            key={lead.id}
+            className="card-elevated w-full max-w-full overflow-hidden p-3.5 transition-colors hover:border-primary/30"
+          >
             <button
               type="button"
               className="block w-full min-w-0 text-left"
@@ -227,29 +232,29 @@ export function LeadTable() {
       <div className="card-elevated hidden overflow-x-auto md:block">
         <table className="w-full min-w-[860px] text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-xs text-muted-foreground">
-              <th className="px-3 py-2.5 font-medium">ক্রমিক</th>
-              <th className="px-3 py-2.5 font-medium">নাম</th>
-              <th className="px-3 py-2.5 font-medium">ঠিকানা</th>
-              <th className="px-3 py-2.5 font-medium">ফোন নম্বর</th>
-              <th className="px-3 py-2.5 font-medium">রেফারেন্স</th>
-              <th className="px-3 py-2.5 font-medium">অবস্থা</th>
-              <th className="px-3 py-2.5 font-medium">শেষ কল</th>
-              <th className="px-3 py-2.5 text-right font-medium">কাজ</th>
+            <tr className="border-b border-primary/20 text-left text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+              <th className="px-4 py-3 font-semibold">ক্রমিক</th>
+              <th className="px-4 py-3 font-semibold">নাম</th>
+              <th className="px-4 py-3 font-semibold">ঠিকানা</th>
+              <th className="px-4 py-3 font-semibold">ফোন নম্বর</th>
+              <th className="px-4 py-3 font-semibold">রেফারেন্স</th>
+              <th className="px-4 py-3 font-semibold">অবস্থা</th>
+              <th className="px-4 py-3 font-semibold">শেষ কল</th>
+              <th className="px-4 py-3 text-right font-semibold">কাজ</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((lead, index) => (
               <tr
                 key={lead.id}
-                className="border-b border-border/60 last:border-0 hover:bg-surface-2"
+                className="border-b border-border/50 transition-colors last:border-0 hover:bg-surface-2"
               >
-                <td className="tabular px-3 py-2.5 text-muted-foreground">
+                <td className="tabular px-4 py-3 text-xs text-muted-foreground">
                   {lead.serial_no ?? index + 1}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-4 py-3">
                   <button
-                    className="text-left font-medium hover:underline"
+                    className="text-left font-medium transition-colors hover:text-primary"
                     onClick={() => setOpenLeadId(lead.id)}
                   >
                     {lead.name}
@@ -258,17 +263,17 @@ export function LeadTable() {
                     <p className="truncate text-xs text-muted-foreground">{lead.company}</p>
                   )}
                 </td>
-                <td className="max-w-[200px] px-3 py-2.5 text-xs text-muted-foreground">
+                <td className="max-w-[200px] px-4 py-3 text-xs text-muted-foreground">
                   {lead.address ?? "—"}
                 </td>
-                <td className="tabular px-3 py-2.5">{lead.phone_number}</td>
-                <td className="px-3 py-2.5 text-xs text-muted-foreground">
+                <td className="tabular px-4 py-3">{lead.phone_number}</td>
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {lead.reference_by ?? "—"}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-4 py-3">
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold",
+                      "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold",
                       STATUS_STYLES[lead.status],
                     )}
                   >
@@ -278,12 +283,12 @@ export function LeadTable() {
                     {STATUS_LABELS[lead.status] ?? lead.status}
                   </span>
                 </td>
-                <td className="px-3 py-2.5 text-xs text-muted-foreground">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {lead.last_call_at
                     ? relativeTime(lead.last_call_at)
                     : `${lead.call_attempts} বার চেষ্টা`}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
                     <WebCallButton
                       leadId={lead.id}

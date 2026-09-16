@@ -109,13 +109,13 @@ function Tile({
   hint: string;
 }) {
   return (
-    <div className="card-elevated p-3">
-      <dt className="flex items-center gap-2 text-xs text-muted-foreground">
-        {icon}
+    <div className="card-elevated p-4 transition-colors hover:border-primary/30">
+      <dt className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <span className="text-primary">{icon}</span>
         {label}
       </dt>
-      <dd className="tabular mt-1 text-xl font-bold">{value}</dd>
-      <p className="text-[11px] text-muted-foreground">{hint}</p>
+      <dd className="tabular mt-2 text-2xl font-semibold text-primary">{value}</dd>
+      <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>
     </div>
   );
 }
@@ -182,10 +182,11 @@ function DeskPage() {
         <LeadDeadlineBanner />
         <MyProfileCard />
         <MyPhoneSetup />
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="gold-rule flex flex-wrap items-end justify-between gap-3 pt-5">
           <div>
-            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">আমার ডেস্ক</h1>
-            <p className="text-xs text-muted-foreground sm:text-sm">
+            <p className="eyebrow">Agent Desk</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">আমার ডেস্ক</h1>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
               নিজের লিড, কল, হোয়াটসঅ্যাপ কথা আর নতুন লিড — সব এক জায়গায়।
             </p>
           </div>
