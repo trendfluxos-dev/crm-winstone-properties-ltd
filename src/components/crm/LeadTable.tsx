@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buildTimeline, useSnapshot } from "@/lib/crm-data";
 import { relativeTime, shortDate } from "@/lib/crm-format";
+import { LEAD_STATUS_STYLES, TEMPERATURE_STYLES } from "@/lib/status-styles";
 import { cn } from "@/lib/utils";
 
 type Filter = "pending" | "follow_up" | "done" | "all";
