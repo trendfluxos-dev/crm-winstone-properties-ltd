@@ -26,7 +26,8 @@ import { useMyAccount } from "@/lib/session";
  * carries a name, Employee ID and phone number.
  */
 export function CoordinatorIdentityDialog() {
-  const { scope, profile, isPending } = useMyAccount();
+  const { scope, account, isPending } = useMyAccount();
+  const profile = account?.profile ?? null;
   const queryClient = useQueryClient();
   const save = useServerFn(confirmMyIdentity);
 
@@ -68,7 +69,7 @@ export function CoordinatorIdentityDialog() {
 
   return (
     <Dialog open>
-      <DialogContent className="sm:max-w-md" showCloseButton={false}>
+      <DialogContent className="sm:max-w-md [&>button]:hidden">
         <DialogHeader className="items-center text-center">
           <span className="grid size-11 place-items-center rounded-full bg-primary/15 text-primary">
             <BadgeCheck className="size-5" />
