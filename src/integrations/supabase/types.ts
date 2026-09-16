@@ -1778,6 +1778,8 @@ export type Database = {
           avatar_hue: number
           created_at: string
           current_call_started_at: string | null
+          daily_lead_quota: number | null
+          designation: string | null
           email: string | null
           employee_id: string | null
           id: string
@@ -1799,6 +1801,8 @@ export type Database = {
           avatar_hue?: number
           created_at?: string
           current_call_started_at?: string | null
+          daily_lead_quota?: number | null
+          designation?: string | null
           email?: string | null
           employee_id?: string | null
           id?: string
@@ -1820,6 +1824,8 @@ export type Database = {
           avatar_hue?: number
           created_at?: string
           current_call_started_at?: string | null
+          daily_lead_quota?: number | null
+          designation?: string | null
           email?: string | null
           employee_id?: string | null
           id?: string
