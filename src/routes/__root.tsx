@@ -144,7 +144,7 @@ function RootShell({ children }: { children: ReactNode }) {
     : "";
 
   return (
-    <html lang="bn">
+    <html lang="bn" className="dark">
       <head>
         <HeadContent />
       </head>
