@@ -9,7 +9,9 @@ import { sha256Hex } from "@/lib/apk-checksum.server";
  * other integration tests use.
  */
 const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
-const BASE = env?.["BASE_URL"] || "http://localhost:8080";
+// Some environments set BASE_URL to a path ("/"); only an absolute URL is usable here.
+const candidate = env?.["SMOKE_BASE_URL"] ?? env?.["BASE_URL"] ?? "";
+const BASE = /^https?:\/\//.test(candidate) ? candidate : "http://localhost:8080";
 
 describe("apk checksum", () => {
   it("hashes bytes to a 64-character hex digest", async () => {
