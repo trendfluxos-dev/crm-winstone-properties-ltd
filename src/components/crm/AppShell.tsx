@@ -11,6 +11,7 @@ import { InstallAppButton } from "@/components/crm/InstallAppButton";
 import { AgentSelector } from "@/components/crm/AgentSelector";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { OfflineSyncBar } from "@/components/crm/OfflineSyncBar";
+import { ThemeToggle } from "@/components/crm/ThemeToggle";
 
 
 import { Button } from "@/components/ui/button";
