@@ -63,6 +63,16 @@ export const dayCallExport = createServerFn({ method: "POST" })
       throw new Error("শুধুমাত্র HQ বা কোঅর্ডিনেটর এই এক্সপোর্ট নিতে পারবেন");
     }
 
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({
+      action: "report_viewed",
+      entityType: "day_call_export",
+      entityId: data.dateKey,
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.employee_id ?? "authority",
+      metadata: { dateKey: data.dateKey, scope: caller.scope, status: "success" },
+    });
+
     const [y, m, d] = data.dateKey.split("-").map(Number);
     const dayStart = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1) - DHAKA_OFFSET_MS);
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);

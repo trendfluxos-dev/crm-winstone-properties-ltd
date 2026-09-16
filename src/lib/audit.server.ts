@@ -59,7 +59,10 @@ export type AuditAction =
   | "billing_allocation_created"
   | "architect_payout_created"
   | "architect_payout_status_changed"
-  | "architect_profile_updated";
+  | "architect_profile_updated"
+  // Coordinator Deck activity.
+  | "coordinator_deck_opened"
+  | "report_viewed";
 
 export async function logAudit(input: {
   action: AuditAction;
