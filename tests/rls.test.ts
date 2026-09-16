@@ -28,8 +28,12 @@ const blocked = (result: { data: unknown; error: unknown }) =>
 
 describe.runIf(url && key)("RLS: an unauthenticated client cannot read production data", () => {
   it("cannot read PIN hashes", async () => {
+    // Either the request is refused outright or it comes back with no rows at
+    // all — what must never happen is a pin_hash value reaching the client.
     const result = await anon.from("profiles").select("pin_hash").limit(1);
-    expect(result.error).toBeTruthy();
+    expect(blocked(result)).toBe(true);
+    const rows = (result.data ?? []) as { pin_hash?: string | null }[];
+    expect(rows.some((row) => Boolean(row.pin_hash))).toBe(false);
   });
 
   it("cannot list leads", async () => {
