@@ -86,9 +86,37 @@ export const Route = createFileRoute("/api/public/agent/login")({
           },
         });
 
+        const { checkLoginRate, identifierFingerprint, recordLoginAttempt } = await import(
+          "@/lib/login-guard.server"
+        );
+        const fingerprint = await identifierFingerprint(parsed.data.email);
+
+        // Refused before the password is ever checked, so a stolen phone or a
+        // script cannot grind through passwords.
+        const guard = await checkLoginRate(fingerprint);
+        if (guard.blocked) {
+          await recordLoginAttempt({ outcome: "failed", fingerprint, reason: "rate_limited" });
+          return new Response(
+            JSON.stringify({ error: "অনেকবার ভুল চেষ্টা হয়েছে — কিছুক্ষণ পরে আবার চেষ্টা করুন" }),
+            {
+              status: 429,
+              headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store",
+                "Retry-After": String(guard.retryAfterSeconds),
+              },
+            },
+          );
+        }
+
+        // One message for "no such desk" and "wrong password": a caller must
+        // not be able to discover which phone numbers or employee IDs exist.
+        const BAD_CREDENTIALS = "লগইন তথ্য মিলছে না";
+
         const loginEmail = await resolveLoginEmail(parsed.data.email);
         if (!loginEmail) {
-          return json({ error: "এই ফোন নম্বর বা Employee ID পাওয়া যায়নি" }, 401);
+          await recordLoginAttempt({ outcome: "failed", fingerprint, reason: "unknown_identifier" });
+          return json({ error: BAD_CREDENTIALS }, 401);
         }
 
         const { data: session, error } = await auth.auth.signInWithPassword({
@@ -96,7 +124,8 @@ export const Route = createFileRoute("/api/public/agent/login")({
           password: parsed.data.password,
         });
         if (error || !session.user) {
-          return json({ error: "লগইন তথ্য মিলছে না" }, 401);
+          await recordLoginAttempt({ outcome: "failed", fingerprint, reason: "bad_credentials" });
+          return json({ error: BAD_CREDENTIALS }, 401);
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
