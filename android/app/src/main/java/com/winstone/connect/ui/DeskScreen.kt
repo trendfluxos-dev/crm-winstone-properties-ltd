@@ -328,6 +328,42 @@ private fun StatsRow(state: DeskUiState) {
     }
 }
 
+/**
+ * আজকের কাজ — server-counted numbers for the Dhaka day. Site visits are not
+ * recorded anywhere in the CRM, so the card states that instead of guessing.
+ */
+@Composable
+private fun DailyPerformanceRow(daily: DailyPerformance, lastSyncedAt: String?) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text("আজকের কাজ", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = WinInkMuted)
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            StatChip("কল করা", daily.callsMade.toString(), Modifier.weight(1f))
+            StatChip("সংযুক্ত", daily.connected.toString(), Modifier.weight(1f))
+            StatChip("আগ্রহী", daily.interested.toString(), Modifier.weight(1f))
+        }
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            StatChip("ফলো-আপ বাকি", daily.followUpsDue.toString(), Modifier.weight(1f))
+            StatChip("রিপোর্ট জমা", daily.reportsSubmitted.toString(), Modifier.weight(1f))
+            StatChip("কথা (মিনিট)", (daily.talkSeconds / 60).toString(), Modifier.weight(1f))
+        }
+        Text(
+            buildString {
+                append(if (daily.siteVisits == null) "সাইট ভিজিট ট্র্যাক হয় না" else "সাইট ভিজিট: ${daily.siteVisits}")
+                if (!lastSyncedAt.isNullOrBlank()) append(" · সিঙ্ক $lastSyncedAt")
+            },
+            fontSize = 13.sp,
+            color = WinInkMuted,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+    }
+}
+
 @Composable
 private fun StatChip(label: String, value: String, modifier: Modifier = Modifier) {
     Box(
