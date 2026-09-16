@@ -11,6 +11,7 @@ import { InstallAppButton } from "@/components/crm/InstallAppButton";
 import { AgentSelector } from "@/components/crm/AgentSelector";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { OfflineSyncBar } from "@/components/crm/OfflineSyncBar";
+import { ThemeToggle } from "@/components/crm/ThemeToggle";
 
 
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
+
+            <ThemeToggle />
 
             <InstallAppButton />
 

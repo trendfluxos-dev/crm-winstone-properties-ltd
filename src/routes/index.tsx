@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
+import { ThemeToggle } from "@/components/crm/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
 
@@ -42,6 +43,9 @@ function EntryHall() {
   return (
     <div className="grid-noise min-h-screen">
       <main className="mx-auto w-full max-w-5xl animate-rise px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mb-2 flex justify-end">
+          <ThemeToggle />
+        </div>
         <header className="flex flex-col items-center text-center">
           <img
             src={logoAsset.url}
