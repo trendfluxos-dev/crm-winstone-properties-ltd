@@ -1,13 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Check,
-  Copy,
-  Download,
-  Globe,
-  Smartphone,
-  ShieldCheck,
-  Info,
-} from "lucide-react";
+import { Check, Copy, Download, Globe, Smartphone, ShieldCheck, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
@@ -77,7 +69,9 @@ function InstallPage() {
   // Real release metadata only — the same endpoint the phones use.
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/public/agent/version?version_code=0", { headers: { accept: "application/json" } })
+    void fetch("/api/public/agent/version?version_code=0", {
+      headers: { accept: "application/json" },
+    })
       .then((res) => res.json())
       .then((body: { latest: Release | null }) => {
         if (cancelled) return;
