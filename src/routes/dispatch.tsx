@@ -14,6 +14,7 @@ import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { CoordinatorIdentityDialog } from "@/components/crm/CoordinatorIdentityDialog";
+import { TeamDailyPerformance } from "@/components/crm/TeamDailyPerformance";
 import { ElevatedAccessBar } from "@/components/crm/ElevatedAccessBar";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
@@ -70,6 +71,7 @@ function DispatchPage() {
       >
         <CoordinatorIdentityDialog />
         <ElevatedAccessBar />
+        <TeamDailyPerformance />
         <Dispatcher />
       </RoleGate>
     </AppShell>

@@ -113,7 +113,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               {adminToken ? <LockOpen className="size-3.5" /> : <Lock className="size-3.5" />}
               <span className="hidden lg:inline">
-                {adminToken ? "Authority unlocked" : "Master PIN"}
+                {adminToken ? "Authority unlocked" : "Unlock PIN"}
               </span>
             </button>
 
