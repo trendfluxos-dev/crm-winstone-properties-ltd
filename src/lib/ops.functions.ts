@@ -22,6 +22,11 @@ export const callOpsSummary = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
     const caller = await requireSupervisor(data.adminToken ?? null);
+    const maskCtx = {
+      maskPii: caller.maskPii,
+      leadModerator: caller.leadModerator,
+      selfId: caller.profile?.id ?? null,
+    };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const since = new Date(Date.now() - 7 * 24 * 3600_000).toISOString();
