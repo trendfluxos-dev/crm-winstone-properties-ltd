@@ -65,10 +65,22 @@ export async function uploadToDrive(opts: {
   body.set(suffixBytes, prefixBytes.length + opts.bytes.length);
 
   const url = `${UPLOAD_GATEWAY}/files?uploadType=multipart&fields=id,name,mimeType,webViewLink,parents,size`;
+  const { recordUsage } = await import("@/lib/billing-meter.server");
   const res = await fetch(url, {
     method: "POST",
     headers: gatewayHeaders({ "Content-Type": `multipart/related; boundary=${boundary}` }),
     body,
+  });
+  // Drive transfer is metered by bytes so storage/egress volume is visible even
+  // when its rate card is zero-cost.
+  void recordUsage({
+    provider: "google-drive",
+    operation: "drive_upload",
+    category: "other",
+    unitKind: "byte",
+    units: opts.bytes.length,
+    detail: opts.name,
+    status: res.ok ? "ok" : "error",
   });
   const result = await parseResponse<UploadResult>(res);
   if (!result) throw new Error("Google Drive আপলোড ফলাফল ফাঁকা");

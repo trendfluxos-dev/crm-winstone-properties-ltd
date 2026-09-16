@@ -1,3 +1,4 @@
+import { meteredFetch } from "@/lib/metered-fetch.server";
 /**
  * Bangla speech-to-text through Sarvam AI (Saaras).
  *
@@ -83,11 +84,11 @@ export async function sarvamTranscribeDetailed(
     if (model.startsWith("saaras")) form.append("mode", mode);
 
     // No client-side deadline: long calls legitimately take minutes.
-    const res = await fetch(SARVAM_STT_URL, {
+    const res = await meteredFetch(SARVAM_STT_URL, {
       method: "POST",
       headers: { "api-subscription-key": key },
       body: form,
-    });
+    }, { provider: "sarvam", operation: "transcription", category: "transcription" });
 
     if (res.ok) {
       const json = (await res.json()) as {

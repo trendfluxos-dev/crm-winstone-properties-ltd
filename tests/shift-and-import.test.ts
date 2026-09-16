@@ -9,7 +9,13 @@ import {
 } from "@/lib/shift.server";
 import { parseCsv, toLeadRows } from "@/lib/csv-leads";
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp";
-import { AI_USAGE_RATES } from "@/lib/credits-rates";
+import {
+  dhakaDayKey,
+  dhakaMonthBounds,
+  dhakaMonthDays,
+  dhakaMonthKey,
+  previousDhakaMonth,
+} from "@/lib/dhaka-time";
 
 const dhaka = (dateKey: string, minutes: number) => dhakaInstant(dateKey, minutes);
 
@@ -78,9 +84,26 @@ describe("WhatsApp number handling", () => {
   });
 });
 
-describe("credit rates", () => {
-  it("exposes the same rates the billing page quotes", () => {
-    expect(AI_USAGE_RATES.command_agent).toBe(0.25);
-    expect(AI_USAGE_RATES.transcription).toBeLessThan(AI_USAGE_RATES.command_agent);
+describe("Dhaka billing boundaries", () => {
+  it("buckets an instant into the Dhaka calendar day, not the UTC day", () => {
+    // 18:30 UTC on 31 Jan is already 00:30 on 1 Feb in Dhaka.
+    expect(dhakaDayKey("2026-01-31T18:30:00.000Z")).toBe("2026-02-01");
+    expect(dhakaDayKey("2026-01-31T17:30:00.000Z")).toBe("2026-01-31");
+    expect(dhakaMonthKey("2026-01-31T18:30:00.000Z")).toBe("2026-02");
+  });
+
+  it("returns month bounds that start and end at midnight Dhaka time", () => {
+    const { start, end } = dhakaMonthBounds("2026-02");
+    expect(start).toBe("2026-01-31T18:00:00.000Z");
+    expect(end).toBe("2026-02-28T18:00:00.000Z");
+    // Bounds are contiguous: the end of one month is the start of the next.
+    expect(dhakaMonthBounds("2026-03").start).toBe(end);
+  });
+
+  it("knows month lengths and the previous month across a year boundary", () => {
+    expect(dhakaMonthDays("2026-02")).toBe(28);
+    expect(dhakaMonthDays("2028-02")).toBe(29);
+    expect(dhakaMonthDays("2026-12")).toBe(31);
+    expect(previousDhakaMonth("2026-01")).toBe("2025-12");
   });
 });

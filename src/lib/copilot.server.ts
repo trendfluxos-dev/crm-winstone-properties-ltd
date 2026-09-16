@@ -1,3 +1,4 @@
+import { meteredFetch } from "@/lib/metered-fetch.server";
 import { buildAgentStats, buildBillingSummary, DEFAULT_RATE_PER_MINUTE } from "@/lib/crm-data";
 import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
 
@@ -202,11 +203,11 @@ export async function runCopilot(history: CopilotMessage[]) {
   let mutated = false;
 
   for (let round = 0; round < 4; round += 1) {
-    const res = await fetch(GATEWAY, {
+    const res = await meteredFetch(GATEWAY, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({ model: MODEL, messages, tools: TOOLS }),
-    });
+    }, { provider: "lovable-ai", operation: "copilot", category: "command_agent", model: MODEL });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       console.error("copilot gateway error", res.status, detail);

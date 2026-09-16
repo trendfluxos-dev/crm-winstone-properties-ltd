@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Coins, Download, Receipt, Users } from "lucide-react";
 import { useState } from "react";
 
@@ -7,8 +7,13 @@ import { AppShell } from "@/components/crm/AppShell";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  closeBillingMonthNow,
+  getBudgetSettings,
+  listBillingInvoices,
+  saveBudgetSettings,
+} from "@/lib/billing-admin.functions";
 import { getCreditsReport } from "@/lib/credits-report.functions";
-import { AI_USAGE_RATES } from "@/lib/credits-rates";
 import { getAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/credits")({
@@ -148,31 +153,89 @@ function CreditsBoard() {
             />
           </div>
 
-          <section className="card-elevated p-4">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <Coins className="size-4 text-primary" /> হার (প্রতি কাজে)
-            </h2>
-            <dl className="mt-3 space-y-1.5 text-sm">
-              <Row
-                label="Winstone AI-তে একটা প্রশ্ন"
-                value={`≈ ${AI_USAGE_RATES.command_agent} ক্রেডিট`}
-              />
-              <Row
-                label="একটা কলের ট্রান্সক্রিপ্ট"
-                value={`≈ ${AI_USAGE_RATES.transcription} ক্রেডিট`}
-              />
-              <Row
-                label="একটা কলের এআই সারসংক্ষেপ"
-                value={`≈ ${AI_USAGE_RATES.analysis} ক্রেডিট`}
-              />
-              <Row label="ডকুমেন্ট সারসংক্ষেপ" value={`≈ ${AI_USAGE_RATES.doc_summary} ক্রেডিট`} />
-            </dl>
-            <p className="mt-3 text-xs text-muted-foreground">
-              ৮ জন এজেন্ট নিয়ে মাসজুড়ে চালালে অনুমান: এআই কাজে ≈ {report.projection.aiOnly}{" "}
-              ক্রেডিট, সিস্টেম উন্নয়নসহ ≈ {report.projection.withDevelopment} ক্রেডিট/মাস। টাকার
-              দাম ও টপ-আপ Settings → Plans &amp; credits থেকে দেখুন।
-            </p>
+          <section className="grid gap-4 lg:grid-cols-2">
+            <div className="card-elevated p-4">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <Coins className="size-4 text-primary" /> হার তালিকা (সার্ভারে সংরক্ষিত)
+              </h2>
+              {report.rateCards.length === 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">কোনো হার নির্ধারণ করা নেই।</p>
+              )}
+              <dl className="mt-3 space-y-1.5 text-sm">
+                {report.rateCards.map((c) => (
+                  <Row
+                    key={`${c.provider}-${c.model ?? ""}-${c.operation ?? ""}`}
+                    label={`${c.provider}${c.operation ? ` · ${c.operation}` : ""}${c.model ? ` · ${c.model}` : ""}`}
+                    value={`${c.creditsPerUnit} ক্রেডিট / ${c.unitKind}`}
+                  />
+                ))}
+              </dl>
+              <p className="mt-3 text-xs text-muted-foreground">
+                প্রতিটি হিসাব তৈরির সময়ের হার দিয়েই স্থায়ীভাবে লেখা হয়, তাই হার বদলালেও পুরোনো
+                হিসাব বদলায় না।
+              </p>
+            </div>
+
+            <div className="card-elevated p-4">
+              <h2 className="text-sm font-semibold">মাসের অনুমান ও বাজেট</h2>
+              {report.projection.basis === "none" ? (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  এই মাসে কোনো রেকর্ড নেই, তাই অনুমান দেখানো যাচ্ছে না।
+                </p>
+              ) : (
+                <dl className="mt-3 space-y-1.5 text-sm">
+                  <Row
+                    label={`চলতি হার (${report.projection.elapsedDays} দিনের হিসাব)`}
+                    value={`${report.projection.perDay} ক্রেডিট / দিন`}
+                  />
+                  <Row
+                    label={`পুরো মাসে (${report.projection.monthDays} দিন)`}
+                    value={`≈ ${report.projection.monthEnd} ক্রেডিট`}
+                  />
+                  <Row
+                    label="টাকায় খরচ"
+                    value={`${report.totals.amount} ${report.totals.currency}`}
+                  />
+                </dl>
+              )}
+              {report.budget ? (
+                <dl className="mt-3 space-y-1.5 border-t border-border/60 pt-3 text-sm">
+                  <Row label="মাসিক বাজেট" value={`${report.budget.budget} ক্রেডিট`} />
+                  <Row
+                    label="ব্যবহার হয়েছে"
+                    value={`${report.budget.spent} ক্রেডিট (${report.budget.percent}%)`}
+                  />
+                  <Row
+                    label="সীমা ছাড়ালে"
+                    value={
+                      report.budget.hardCap
+                        ? "ঐচ্ছিক এআই বন্ধ, কল ও রিপোর্ট চালু"
+                        : "শুধু সতর্কবার্তা"
+                    }
+                  />
+                </dl>
+              ) : (
+                <p className="mt-3 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                  কোনো মাসিক বাজেট নির্ধারণ করা নেই।
+                </p>
+              )}
+            </div>
           </section>
+
+          {report.providers.length > 0 && (
+            <section className="card-elevated p-4">
+              <h2 className="text-sm font-semibold">প্রদানকারী ও মডেল অনুযায়ী</h2>
+              <dl className="mt-3 space-y-1.5 text-sm">
+                {report.providers.map((p) => (
+                  <Row
+                    key={`${p.provider}-${p.model ?? ""}`}
+                    label={`${p.provider}${p.model ? ` · ${p.model}` : ""} · ${p.calls}টি`}
+                    value={`${p.credits} ক্রেডিট`}
+                  />
+                ))}
+              </dl>
+            </section>
+          )}
 
           <section className="grid gap-4 lg:grid-cols-2">
             <div className="card-elevated p-4">
@@ -211,6 +274,8 @@ function CreditsBoard() {
               </div>
             </div>
           </section>
+
+          <BudgetAndInvoices />
         </>
       )}
 
@@ -241,5 +306,141 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="tabular font-medium">{value}</dd>
     </div>
+  );
+}
+
+/**
+ * Authority-only budget controls and the frozen monthly invoice list.
+ * A hard cap pauses optional AI only — calls, reports and recordings are
+ * never blocked by a budget.
+ */
+function BudgetAndInvoices() {
+  const queryClient = useQueryClient();
+  const [budget, setBudget] = useState("");
+  const [hardCap, setHardCap] = useState(false);
+  const [thresholds, setThresholds] = useState("50, 80, 100");
+  const [loaded, setLoaded] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const settingsQuery = useQuery({
+    queryKey: ["billing-budget"],
+    queryFn: () => getBudgetSettings({ data: { adminToken: getAdminToken() } }),
+  });
+  const invoicesQuery = useQuery({
+    queryKey: ["billing-invoices"],
+    queryFn: () => listBillingInvoices({ data: { adminToken: getAdminToken() } }),
+  });
+
+  const settings = settingsQuery.data;
+  if (settings && !loaded) {
+    setLoaded(true);
+    setBudget(String(settings.monthlyCreditBudget));
+    setHardCap(settings.hardCap);
+    setThresholds(settings.alertThresholds.join(", "));
+  }
+
+  const save = useMutation({
+    mutationFn: () =>
+      saveBudgetSettings({
+        data: {
+          adminToken: getAdminToken(),
+          monthlyCreditBudget: Number(budget) || 0,
+          alertThresholds: thresholds
+            .split(",")
+            .map((n) => Number(n.trim()))
+            .filter((n) => Number.isFinite(n) && n > 0),
+          hardCap,
+          isActive: true,
+        },
+      }),
+    onSuccess: () => {
+      setMessage("বাজেট সংরক্ষিত হয়েছে।");
+      void queryClient.invalidateQueries({ queryKey: ["billing-budget"] });
+      void queryClient.invalidateQueries({ queryKey: ["credits-report"] });
+    },
+    onError: (err) => setMessage(err instanceof Error ? err.message : "সংরক্ষণ হয়নি"),
+  });
+
+  const closeMonth = useMutation({
+    mutationFn: () => closeBillingMonthNow({ data: { adminToken: getAdminToken() } }),
+    onSuccess: (res) => {
+      setMessage(
+        res.created
+          ? `${res.month} মাসের হিসাব বন্ধ হয়েছে — ${res.totalCredits} ক্রেডিট।`
+          : `${res.month} মাসের হিসাব আগেই বন্ধ ছিল।`,
+      );
+      void queryClient.invalidateQueries({ queryKey: ["billing-invoices"] });
+    },
+    onError: (err) => setMessage(err instanceof Error ? err.message : "বন্ধ করা যায়নি"),
+  });
+
+  return (
+    <section className="grid gap-4 lg:grid-cols-2">
+      <div className="card-elevated p-4">
+        <h2 className="text-sm font-semibold">মাসিক বাজেট ও সতর্কতা</h2>
+        <div className="mt-3 space-y-3 text-sm">
+          <label className="block">
+            <span className="text-muted-foreground">মাসিক বাজেট (ক্রেডিট)</span>
+            <Input
+              inputMode="decimal"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              className="mt-1"
+              placeholder="যেমন 600"
+            />
+          </label>
+          <label className="block">
+            <span className="text-muted-foreground">সতর্কতার ধাপ (%)</span>
+            <Input
+              value={thresholds}
+              onChange={(e) => setThresholds(e.target.value)}
+              className="mt-1"
+              placeholder="50, 80, 100"
+            />
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={hardCap}
+              onChange={(e) => setHardCap(e.target.checked)}
+              className="size-4 accent-primary"
+            />
+            <span>সীমা ছাড়ালে ঐচ্ছিক এআই বন্ধ (কল ও রিপোর্ট কখনো বন্ধ হবে না)</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>
+              বাজেট সংরক্ষণ
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => closeMonth.mutate()}
+              disabled={closeMonth.isPending}
+            >
+              গত মাসের হিসাব বন্ধ করুন
+            </Button>
+          </div>
+          {message && <p className="text-xs text-muted-foreground">{message}</p>}
+        </div>
+      </div>
+
+      <div className="card-elevated p-4">
+        <h2 className="text-sm font-semibold">বন্ধ হওয়া মাসের বিল</h2>
+        {(invoicesQuery.data?.length ?? 0) === 0 && (
+          <p className="mt-3 text-sm text-muted-foreground">এখনো কোনো মাস বন্ধ করা হয়নি।</p>
+        )}
+        <dl className="mt-3 space-y-1.5 text-sm">
+          {(invoicesQuery.data ?? []).map((inv) => (
+            <Row
+              key={inv.id}
+              label={`${inv.label} · ${inv.calls}টি কাজ`}
+              value={`${inv.credits} ক্রেডিট`}
+            />
+          ))}
+        </dl>
+        <p className="mt-3 text-xs text-muted-foreground">
+          বন্ধ হওয়া মাসের হিসাব আর বদলায় না; প্রতিটির সঙ্গে একটি যাচাই-চিহ্ন সংরক্ষিত থাকে।
+        </p>
+      </div>
+    </section>
   );
 }

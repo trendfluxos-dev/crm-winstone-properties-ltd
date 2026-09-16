@@ -115,7 +115,7 @@ export const summarizeDocument = createServerFn({ method: "POST" })
     const roster = await activeAgentNames();
     content.push({ type: "text", text: `Active agent roster:\n${roster}` });
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await (await import("@/lib/metered-fetch.server")).meteredFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env["LOVABLE_API_KEY"] ?? ""}`,
@@ -125,7 +125,7 @@ export const summarizeDocument = createServerFn({ method: "POST" })
         model: "google/gemini-3.8-flash",
         messages: [{ role: "user", content }],
       }),
-    });
+    }, { provider: "lovable-ai", operation: "doc_summary", category: "doc_summary" });
 
     if (!response.ok) {
       const detail = await response.text();

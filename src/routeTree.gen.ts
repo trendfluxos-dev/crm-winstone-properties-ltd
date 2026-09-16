@@ -55,6 +55,7 @@ import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
 import { Route as ApiPublicDownloadApkInfoRouteImport } from './routes/api/public/download/apk-info'
+import { Route as ApiPublicHooksBillingCloseRouteImport } from './routes/api/public/hooks/billing-close'
 import { Route as ApiPublicHooksDriveBackupRouteImport } from './routes/api/public/hooks/drive-backup'
 import { Route as ApiPublicHooksLeadDistributionRouteImport } from './routes/api/public/hooks/lead-distribution'
 import { Route as ApiPublicHooksShiftSummaryRouteImport } from './routes/api/public/hooks/shift-summary'
@@ -302,6 +303,12 @@ const ApiPublicDownloadApkInfoRoute =
     path: '/api/public/download/apk-info',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksBillingCloseRoute =
+  ApiPublicHooksBillingCloseRouteImport.update({
+    id: '/api/public/hooks/billing-close',
+    path: '/api/public/hooks/billing-close',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDriveBackupRoute =
   ApiPublicHooksDriveBackupRouteImport.update({
     id: '/api/public/hooks/drive-backup',
@@ -416,6 +423,7 @@ export interface FileRoutesByFullPath {
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/download/apk-info': typeof ApiPublicDownloadApkInfoRoute
+  '/api/public/hooks/billing-close': typeof ApiPublicHooksBillingCloseRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
@@ -476,6 +484,7 @@ export interface FileRoutesByTo {
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/download/apk-info': typeof ApiPublicDownloadApkInfoRoute
+  '/api/public/hooks/billing-close': typeof ApiPublicHooksBillingCloseRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
@@ -537,6 +546,7 @@ export interface FileRoutesById {
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/download/apk-info': typeof ApiPublicDownloadApkInfoRoute
+  '/api/public/hooks/billing-close': typeof ApiPublicHooksBillingCloseRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/shift-summary': typeof ApiPublicHooksShiftSummaryRoute
@@ -599,6 +609,7 @@ export interface FileRouteTypes {
     | '/api/public/config/rules'
     | '/api/public/download/apk'
     | '/api/public/download/apk-info'
+    | '/api/public/hooks/billing-close'
     | '/api/public/hooks/drive-backup'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/shift-summary'
@@ -659,6 +670,7 @@ export interface FileRouteTypes {
     | '/api/public/config/rules'
     | '/api/public/download/apk'
     | '/api/public/download/apk-info'
+    | '/api/public/hooks/billing-close'
     | '/api/public/hooks/drive-backup'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/shift-summary'
@@ -719,6 +731,7 @@ export interface FileRouteTypes {
     | '/api/public/config/rules'
     | '/api/public/download/apk'
     | '/api/public/download/apk-info'
+    | '/api/public/hooks/billing-close'
     | '/api/public/hooks/drive-backup'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/shift-summary'
@@ -780,6 +793,7 @@ export interface RootRouteChildren {
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
   ApiPublicDownloadApkInfoRoute: typeof ApiPublicDownloadApkInfoRoute
+  ApiPublicHooksBillingCloseRoute: typeof ApiPublicHooksBillingCloseRoute
   ApiPublicHooksDriveBackupRoute: typeof ApiPublicHooksDriveBackupRoute
   ApiPublicHooksLeadDistributionRoute: typeof ApiPublicHooksLeadDistributionRoute
   ApiPublicHooksShiftSummaryRoute: typeof ApiPublicHooksShiftSummaryRoute
@@ -1118,6 +1132,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDownloadApkInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/billing-close': {
+      id: '/api/public/hooks/billing-close'
+      path: '/api/public/hooks/billing-close'
+      fullPath: '/api/public/hooks/billing-close'
+      preLoaderRoute: typeof ApiPublicHooksBillingCloseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/drive-backup': {
       id: '/api/public/hooks/drive-backup'
       path: '/api/public/hooks/drive-backup'
@@ -1253,6 +1274,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
   ApiPublicDownloadApkInfoRoute: ApiPublicDownloadApkInfoRoute,
+  ApiPublicHooksBillingCloseRoute: ApiPublicHooksBillingCloseRoute,
   ApiPublicHooksDriveBackupRoute: ApiPublicHooksDriveBackupRoute,
   ApiPublicHooksLeadDistributionRoute: ApiPublicHooksLeadDistributionRoute,
   ApiPublicHooksShiftSummaryRoute: ApiPublicHooksShiftSummaryRoute,
