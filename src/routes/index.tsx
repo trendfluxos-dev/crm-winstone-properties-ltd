@@ -51,73 +51,68 @@ function EntryHall() {
           <img
             src={logoAsset.url}
             alt="Winstone Properties Ltd. — Find. Build. Invest."
-            className="size-16 rounded-full object-cover shadow-sm ring-2 ring-primary/20"
+            className="size-14 rounded-full object-cover shadow-sm ring-2 ring-primary/20"
           />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">Winstone Connect</h1>
-          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <h1 className="mt-3 text-xl font-bold tracking-tight sm:text-2xl">Winstone Connect</h1>
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Tele-Sales Operating System
-          </p>
-          <p className="mt-4 max-w-xl text-sm text-muted-foreground">
-            Choose how you are entering today. Agents and coordinators use their own account;
-            Executive HQ and the IT Console open with the master PIN.
           </p>
         </header>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <EntryCard
-            icon={<Headphones className="size-6" />}
-            title="Sales Agent"
-            description="Your own lead queue, call log, WhatsApp threads and AI coaching."
-            primary={
-              <Button asChild className="flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
-                  Sign in
-                </Link>
-              </Button>
-            }
-            secondary={
-              <Button asChild variant="secondary" className="flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signup" }}>
-                  Create account
-                </Link>
-              </Button>
-            }
-          />
+        <div className="mx-auto mt-8 w-full max-w-xl space-y-6">
+          <section>
+            <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Sign in with your account
+            </p>
+            <div className="space-y-2">
+              <EntryRow
+                icon={<Headphones className="size-5" />}
+                title="Sales Agent"
+                description="Your own lead queue, call log, WhatsApp threads and AI coaching."
+                to="/auth"
+                search={{ role: "agent" as const, mode: "signin" as const }}
+              />
+              <EntryRow
+                icon={<Users className="size-5" />}
+                title="Coordinator Deck"
+                description="Assign and balance leads, import lists and watch the whole floor queue."
+                to="/auth"
+                search={{ role: "coordinator" as const, mode: "signin" as const }}
+              />
+            </div>
+            <p className="px-1 pt-2 text-xs text-muted-foreground">
+              New agent?{" "}
+              <Link
+                to="/auth"
+                search={{ role: "agent", mode: "signup" }}
+                className="font-semibold text-primary hover:underline"
+              >
+                Create account
+              </Link>
+            </p>
+          </section>
 
-          <EntryCard
-            icon={<Users className="size-6" />}
-            title="Coordinator Deck"
-            description="Assign and balance leads, import lists and watch the whole floor queue."
-            primary={
-              <Button asChild className="flex-1">
-                <Link to="/auth" search={{ role: "coordinator", mode: "signin" }}>
-                  Log in as Coordinator
-                </Link>
-              </Button>
-            }
-          />
-
-          <EntryCard
-            icon={<BarChart3 className="size-6" />}
-            title="Executive HQ"
-            description="Live floor performance, leaderboards and ask-anything reports and charts."
-            primary={
-              <Button className="flex-1" onClick={() => openPin("/hq")}>
-                <Lock className="size-4" /> Unlock PIN
-              </Button>
-            }
-          />
-
-          <EntryCard
-            icon={<Server className="size-6" />}
-            title="IT Console"
-            description="System configuration, integrations, data health and account approvals."
-            primary={
-              <Button className="flex-1" onClick={() => openPin("/system")}>
-                <Lock className="size-4" /> Unlock PIN
-              </Button>
-            }
-          />
+          <section>
+            <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Protected consoles
+            </p>
+            <div className="space-y-2">
+              <EntryRow
+                icon={<BarChart3 className="size-5" />}
+                title="Executive HQ"
+                description="Live floor performance, leaderboards and ask-anything reports and charts."
+                action="Unlock PIN"
+                onClick={() => openPin("/hq")}
+              />
+              <EntryRow
+                icon={<Server className="size-5" />}
+                title="IT Console"
+                description="System configuration, integrations, data health and account approvals."
+                action="Unlock PIN"
+                onClick={() => openPin("/system")}
+              />
+            </div>
+          </section>
         </div>
 
         {scope !== "none" && (
