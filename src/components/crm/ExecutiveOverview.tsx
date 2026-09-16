@@ -95,15 +95,9 @@ export function ExecutiveOverview() {
       ? { label: "Syncing", tone: "text-warning", dot: "bg-warning" }
       : { label: "Online", tone: "text-live", dot: "bg-live" };
 
-  // Ranking is a plain ordering of the real counters, not a score: most
-  // connected calls first, then calls made, then talk time.
-  const top3 = [...rows]
-    .sort(
-      (a, b) =>
-        b.connected - a.connected || b.callsMade - a.callsMade || b.talkSeconds - a.talkSeconds,
-    )
-    .filter((a) => a.callsMade > 0 || a.reportsSubmitted > 0)
-    .slice(0, 3);
+  // The order comes from the server's weighted ranking; the client never
+  // scores agents and no score is shown on screen.
+  const top3 = data?.top3 ?? [];
 
   const connectedRate =
     totals && totals.callsMade > 0 ? Math.round((totals.connected / totals.callsMade) * 100) : null;
