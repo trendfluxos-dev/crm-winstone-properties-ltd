@@ -127,6 +127,40 @@ describe.runIf(url && key)("RLS: an unauthenticated client cannot write producti
   });
 });
 
+describe.runIf(url && key)("billing tables are authority-only", () => {
+  it("does not expose rate cards, budgets or invoices to an anonymous client", async () => {
+    for (const table of [
+      "provider_rate_cards",
+      "billing_budgets",
+      "billing_invoices",
+      "billing_invoice_lines",
+    ] as const) {
+      const result = await anon.from(table).select("id").limit(1);
+      // Either the request is refused outright, or the policy returns nothing.
+      expect(Boolean(result.error) || (result.data ?? []).length === 0).toBe(true);
+    }
+  });
+
+  it("cannot write a budget or an invoice", async () => {
+    const budget = await anon
+      .from("billing_budgets")
+      .insert({ scope: "org", monthly_credit_budget: 1 })
+      .select("id");
+    expect(budget.error).toBeTruthy();
+
+    const invoice = await anon
+      .from("billing_invoices")
+      .insert({
+        period_month: "1999-01",
+        period_start: "1999-01-01T00:00:00Z",
+        period_end: "1999-02-01T00:00:00Z",
+        generation_hash: "probe",
+      })
+      .select("id");
+    expect(invoice.error).toBeTruthy();
+  });
+});
+
 describe.runIf(url && key)("private storage", () => {
   it("does not allow anonymous listing of call audio", async () => {
     const result = await anon.storage.from("call-audio").list();
