@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Lock, LockOpen, LogOut, Smartphone, Sparkles } from "lucide-react";
+import { ChevronDown, Lock, LockOpen, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -15,6 +15,14 @@ import { OfflineSyncBar } from "@/components/crm/OfflineSyncBar";
 import { ThemeToggle } from "@/components/crm/ThemeToggle";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
 import { useMyAccount, useSignOut } from "@/lib/session";
@@ -25,26 +33,54 @@ void apkAsset;
 
 type Scope = "authority" | "coordinator" | "agent" | "none";
 
-const NAV = [
+type NavItem = { to: string; label: string; scopes: readonly Scope[] };
+
+/**
+ * Navigation hierarchy. Every route stays reachable and every scope rule is
+ * unchanged — only the level at which a link is surfaced differs: five daily
+ * workspaces stay in the bar, the rest group under "More".
+ */
+const PRIMARY_NAV: readonly NavItem[] = [
   { to: "/", label: "Home", scopes: ["authority", "coordinator", "agent", "none"] },
   { to: "/desk", label: "My Desk", scopes: ["coordinator", "agent"] },
   { to: "/coach", label: "AI Coach", scopes: ["authority", "coordinator", "agent"] },
   { to: "/dispatch", label: "Coordinator Deck", scopes: ["authority", "coordinator"] },
   { to: "/hq", label: "Executive HQ", scopes: ["authority"] },
   { to: "/reports", label: "Reports", scopes: ["authority", "coordinator", "agent"] },
-  { to: "/system", label: "IT Console", scopes: ["authority"] },
-  { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
-  { to: "/docs", label: "Docs", scopes: ["authority", "coordinator", "agent", "none"] },
-  { to: "/docs-admin", label: "Docs Admin", scopes: ["authority", "coordinator"] },
-  { to: "/inbox", label: "Support Inbox", scopes: ["authority", "coordinator", "agent"] },
-  { to: "/tickets", label: "Tickets", scopes: ["authority", "coordinator", "agent"] },
-  { to: "/playbook", label: "প্লেবুক", scopes: ["authority", "coordinator", "agent"] },
-  { to: "/customers", label: "Customers", scopes: ["authority", "coordinator", "agent"] },
+];
 
-  { to: "/support-admin", label: "Support Admin", scopes: ["authority", "coordinator"] },
-  { to: "/install", label: "অ্যাপ ইনস্টল", scopes: ["authority", "coordinator", "agent", "none"] },
-  { to: "/help", label: "Help Centre", scopes: ["authority", "coordinator", "agent", "none"] },
-] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;
+const MORE_NAV: readonly { group: string; items: readonly NavItem[] }[] = [
+  {
+    group: "Operations",
+    items: [
+      { to: "/customers", label: "Customers", scopes: ["authority", "coordinator", "agent"] },
+      { to: "/inbox", label: "Support Inbox", scopes: ["authority", "coordinator", "agent"] },
+      { to: "/tickets", label: "Tickets", scopes: ["authority", "coordinator", "agent"] },
+      { to: "/playbook", label: "প্লেবুক", scopes: ["authority", "coordinator", "agent"] },
+    ],
+  },
+  {
+    group: "Administration",
+    items: [
+      { to: "/system", label: "IT Console", scopes: ["authority"] },
+      { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
+      { to: "/docs-admin", label: "Docs Admin", scopes: ["authority", "coordinator"] },
+      { to: "/support-admin", label: "Support Admin", scopes: ["authority", "coordinator"] },
+    ],
+  },
+  {
+    group: "Resources",
+    items: [
+      { to: "/docs", label: "Docs", scopes: ["authority", "coordinator", "agent", "none"] },
+      {
+        to: "/install",
+        label: "অ্যাপ ইনস্টল",
+        scopes: ["authority", "coordinator", "agent", "none"],
+      },
+      { to: "/help", label: "Help Centre", scopes: ["authority", "coordinator", "agent", "none"] },
+    ],
+  },
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   useCrmRealtime();
@@ -53,7 +89,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const signOut = useSignOut();
   const [pinOpen, setPinOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope));
+  const allowed = (item: NavItem) => item.scopes.includes(scope as Scope);
+  const primary = PRIMARY_NAV.filter(allowed);
+  const moreGroups = MORE_NAV.map((g) => ({ ...g, items: g.items.filter(allowed) })).filter(
+    (g) => g.items.length > 0,
+  );
+  const moreActive = moreGroups.some((g) => g.items.some((i) => pathname.startsWith(i.to)));
 
   return (
     <div className="min-h-screen grid-noise">
@@ -75,8 +116,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <nav className="ml-3 hidden items-center gap-1 lg:flex">
-            {nav.map((item) => (
+          <nav className="ml-3 hidden min-w-0 items-center gap-1 lg:flex">
+            {primary.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -86,6 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {item.label}
               </Link>
             ))}
+            {moreGroups.length > 0 && <MoreMenu groups={moreGroups} active={moreActive} />}
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -159,8 +201,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-2 lg:hidden">
-          {nav.map((item) => (
+        <nav className="flex items-center gap-1 overflow-x-auto px-3 pb-2 lg:hidden">
+          {primary.map((item) => (
             <Link
               key={item.to}
               to={item.to}
@@ -170,6 +212,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               {item.label}
             </Link>
           ))}
+          {moreGroups.length > 0 && <MoreMenu groups={moreGroups} active={moreActive} compact />}
         </nav>
       </header>
 
@@ -226,5 +269,50 @@ export function AppShell({ children }: { children: ReactNode }) {
         surface={pathname.startsWith("/hq") ? "hq" : "system"}
       />
     </div>
+  );
+}
+
+/** Grouped overflow menu: every non-daily route, one tap away, same RBAC. */
+function MoreMenu({
+  groups,
+  active,
+  compact = false,
+}: {
+  groups: { group: string; items: readonly NavItem[] }[];
+  active: boolean;
+  compact?: boolean;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={
+          compact
+            ? `shrink-0 inline-flex items-center gap-1 rounded-md border px-3 py-1 text-xs font-medium ${active ? "border-primary bg-accent font-semibold text-foreground" : "border-border text-muted-foreground"}`
+            : `inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-surface-2 hover:text-foreground ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`
+        }
+      >
+        More <ChevronDown className="size-3.5" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {groups.map((group, index) => (
+          <div key={group.group}>
+            {index > 0 && <DropdownMenuSeparator />}
+            <DropdownMenuLabel className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+              {group.group}
+            </DropdownMenuLabel>
+            {group.items.map((item) => (
+              <DropdownMenuItem key={item.to} asChild>
+                <Link
+                  to={item.to}
+                  className="cursor-pointer data-[status=active]:font-semibold data-[status=active]:text-foreground"
+                >
+                  {item.label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </div>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
