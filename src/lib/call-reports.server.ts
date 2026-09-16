@@ -335,7 +335,6 @@ export async function submitCallReport(input: {
     await closing;
   }
 
-
   const { logLeadEvent } = await import("@/lib/lead-events.server");
   await logLeadEvent({
     leadId: report.lead_id,
@@ -599,7 +598,9 @@ export async function editSubmittedReport(input: {
   if (report.agent_id !== input.agentId) throw new Error("এই রিপোর্ট আপনার নয়");
   if (report.status !== "submitted") throw new Error("এই রিপোর্ট এখনো জমা হয়নি");
   if (!reportEditable(report.call_ended_at)) {
-    throw new Error("সংশোধনের সময় শেষ — সকাল ৯:০০ থেকে ১২:৪৫ পর্যন্ত একই দিনের রিপোর্ট বদলানো যায়");
+    throw new Error(
+      "সংশোধনের সময় শেষ — সকাল ৯:০০ থেকে ১২:৪৫ পর্যন্ত একই দিনের রিপোর্ট বদলানো যায়",
+    );
   }
 
   const received = report.connected !== false;

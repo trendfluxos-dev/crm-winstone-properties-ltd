@@ -177,7 +177,10 @@ export function FollowUpWeek() {
                         {event.lead_id ? (
                           <WebCallButton leadId={event.lead_id} phone={event.phone_number} />
                         ) : (
-                          <Button asChild className="h-11 flex-1 rounded-xl text-base font-semibold">
+                          <Button
+                            asChild
+                            className="h-11 flex-1 rounded-xl text-base font-semibold"
+                          >
                             <a href={`tel:${event.phone_number}`}>
                               <PhoneCall className="size-5" /> কল
                             </a>
