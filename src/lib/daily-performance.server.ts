@@ -62,6 +62,13 @@ export async function computeDailyPerformance(agentId: string): Promise<DailyPer
       .neq("status", "done")
       .lte("scheduled_at", now.toISOString()),
     supabaseAdmin
+      .from("follow_up_events")
+      .select("id")
+      .eq("agent_id", agentId)
+      .eq("status", "done")
+      .gte("updated_at", startIso)
+      .lt("updated_at", endIso),
+    supabaseAdmin
       .from("call_reports")
       .select("id")
       .eq("agent_id", agentId)
