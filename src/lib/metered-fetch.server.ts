@@ -23,6 +23,11 @@ export async function meteredFetch(
     seconds?: number | null;
   },
 ): Promise<Response> {
+  // Budget guard runs before the request is paid for. It only ever applies to
+  // discretionary AI; call, report and recording operations pass through.
+  const blocked = await assertWithinBudget(meta.operation, meta.actorProfileId ?? null);
+  if (blocked) throw new Error(blocked);
+
   const started = Date.now();
   let response: Response;
   try {
