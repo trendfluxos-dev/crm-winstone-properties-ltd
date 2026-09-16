@@ -227,12 +227,24 @@ export const myFollowUps = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     const now = Date.now();
+    // Supervisors read the whole floor here, so another agent's customer number
+    // is masked before it leaves the server; the owning agent still gets theirs.
+    const { maskForCaller } = await import("@/lib/pii");
+    const maskCtx = {
+      maskPii: caller.maskPii,
+      leadModerator: caller.leadModerator,
+      selfId: caller.profile?.id ?? null,
+    };
     return (events ?? []).map((event) => {
       const at = new Date(event.scheduled_at).getTime();
       const due = at - (event.reminder_minutes ?? 30) * 60_000;
       const state =
         event.status === "done" ? "done" : at < now ? "overdue" : due <= now ? "due" : "upcoming";
-      return { ...event, state } as typeof event & {
+      return {
+        ...event,
+        phone_number: maskForCaller(maskCtx, event.agent_id, event.phone_number),
+        state,
+      } as typeof event & {
         state: "done" | "overdue" | "due" | "upcoming";
       };
     });
