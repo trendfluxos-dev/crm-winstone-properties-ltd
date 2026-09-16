@@ -267,23 +267,46 @@ function InstallPage() {
                     বিল্ডটি দিচ্ছে। রিলিজ প্রকাশ করলে এখানে ভার্সন দেখা যাবে।
                   </span>
                 )}
-                {file ? (
-                  <div className="mt-2 space-y-1 border-t border-border pt-2">
-                    <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span className="font-semibold">ফাইল যাচাই</span>
+                <div className="mt-2 space-y-1 border-t border-border pt-2">
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-semibold">ফাইল যাচাই</span>
+                    {file ? (
                       <span className="text-muted-foreground">
                         {file.filename} · {(file.size / (1024 * 1024)).toFixed(1)} MB (
                         {file.size.toLocaleString("en-US")} bytes)
                       </span>
-                    </p>
-                    <p className="break-all text-[11px] text-muted-foreground">
-                      SHA-256: <span className="tabular">{file.sha256}</span>
-                    </p>
+                    ) : null}
+                  </p>
+                  {file ? (
+                    <>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <code className="min-w-0 flex-1 break-all rounded-md bg-muted px-2 py-1 text-[11px] tabular">
+                          {file.sha256}
+                        </code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 shrink-0"
+                          onClick={() => void copyChecksum()}
+                          aria-label="SHA-256 চেকসাম কপি করুন"
+                        >
+                          {hashCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                          {hashCopied ? "কপি হয়েছে" : "কপি"}
+                        </Button>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Verify: Compare this SHA-256 with the downloaded APK using your device/OS
+                        checksum tool.
+                      </p>
+                    </>
+                  ) : checking || !releaseChecked ? (
+                    <p className="text-[11px] text-muted-foreground">চেকসাম আনা হচ্ছে…</p>
+                  ) : (
                     <p className="text-[11px] text-muted-foreground">
-                      ডাউনলোড করা ফাইলের চেকসাম এটির সাথে মিললে ফাইলটি সঠিক ও অক্ষত।
+                      চেকসাম এখন পাওয়া যাচ্ছে না — “নতুন ভার্সন দেখুন” চেপে আবার চেষ্টা করুন।
                     </p>
-                  </div>
-                ) : null}
+                  )}
+                </div>
                 <div className="mt-2">
                   <Button
                     size="sm"
