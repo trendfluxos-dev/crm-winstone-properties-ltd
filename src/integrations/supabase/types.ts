@@ -248,6 +248,42 @@ export type Database = {
           },
         ]
       }
+      app_artifact_checksums: {
+        Row: {
+          artifact_key: string
+          claimed_at: string
+          computed_at: string | null
+          created_at: string
+          filename: string
+          sha256: string | null
+          size_bytes: number | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          artifact_key: string
+          claimed_at?: string
+          computed_at?: string | null
+          created_at?: string
+          filename: string
+          sha256?: string | null
+          size_bytes?: number | null
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          artifact_key?: string
+          claimed_at?: string
+          computed_at?: string | null
+          created_at?: string
+          filename?: string
+          sha256?: string | null
+          size_bytes?: number | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           data: Json
