@@ -29,7 +29,7 @@ export type LeadPoolAgent = {
 export const leadPoolStatus = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => TokenInput.parse(input))
   .handler(async ({ data }) => {
-    await dispatcher(data.adminToken);
+    const caller = await dispatcher(data.adminToken);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { dhakaToday, usablePoolCount, activeAgents, dailyPlan } = await import(
       "@/lib/lead-pool.server"
