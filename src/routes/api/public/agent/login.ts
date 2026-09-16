@@ -136,12 +136,19 @@ export const Route = createFileRoute("/api/public/agent/login")({
           .maybeSingle();
 
         if (!profile) {
+          await recordLoginAttempt({ outcome: "failed", fingerprint, reason: "no_desk_profile" });
           return json(
             { error: "এই অ্যাকাউন্টের ডেস্ক প্রোফাইল তৈরি হয়নি — CRM এ একবার সাইন ইন করুন" },
             403,
           );
         }
         if (profile.approval_status !== "approved" || !profile.is_active) {
+          await recordLoginAttempt({
+            outcome: "failed",
+            fingerprint,
+            profileId: profile.id,
+            reason: "not_approved",
+          });
           return json({ error: "অ্যাকাউন্ট এখনও অনুমোদনের অপেক্ষায় আছে" }, 403);
         }
 
