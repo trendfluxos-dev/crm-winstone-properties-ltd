@@ -69,6 +69,26 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       };
     }
 
+    // Supervision sessions (Executive HQ, non-dialling coordinators) never
+    // receive raw phone numbers; the stored rows are untouched.
+    if (caller.maskPii) {
+      const { maskPhone } = await import("@/lib/pii");
+      return {
+        profiles: (profiles.data ?? []).map((p) => ({ ...p, phone: maskPhone(p.phone) })),
+        leads: (leads.data ?? []).map((l) => ({
+          ...l,
+          phone_number: maskPhone(l.phone_number) ?? "",
+        })),
+        calls: (calls.data ?? []).map((c) => ({
+          ...c,
+          phone_number: maskPhone(c.phone_number) ?? "",
+          agent_phone: maskPhone(c.agent_phone),
+        })),
+        messages: messages.data ?? [],
+        events: events.data ?? [],
+      };
+    }
+
     return {
       profiles: profiles.data ?? [],
       leads: leads.data ?? [],
