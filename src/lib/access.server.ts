@@ -16,6 +16,10 @@ export type Caller = {
   approval: "pending" | "approved" | "rejected" | null;
   /** True for HQ viewing sessions and unapproved accounts: reads only. */
   readOnly: boolean;
+  /** Agent who also moderates the Coordinator Deck (existing identity, no extra account). */
+  leadModerator: boolean;
+  /** Supervision surfaces (coordinator deck, HQ) never receive raw phone numbers. */
+  maskPii: boolean;
 };
 
 const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null, readOnly: true };
