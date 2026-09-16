@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Check, Copy, Download, QrCode, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -118,6 +119,9 @@ export function ApkInstallCard() {
             </Button>
             <Button size="sm" variant="outline" onClick={() => void runSmoke()} disabled={running}>
               <RefreshCw className={`size-4 ${running ? "animate-spin" : ""}`} /> আবার পরীক্ষা
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/install">ইনস্টল গাইড পেজ</Link>
             </Button>
           </div>
         </div>
