@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { maskWhen } from "@/lib/pii";
+import { maskForCaller } from "@/lib/pii";
 
 /**
  * The head lead database, reachable from both the IT Console and the Coordinator
@@ -71,7 +71,13 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
       poolCount,
       preview: (preview ?? []).map((row) => ({
         ...row,
-        phone_number: maskWhen(caller.maskPii, row.phone_number) ?? "",
+        // Unassigned pool rows belong to nobody yet, so a moderator sees them masked.
+        phone_number:
+          maskForCaller(
+            { maskPii: caller.maskPii, leadModerator: caller.leadModerator, selfId: caller.profile?.id ?? null },
+            null,
+            row.phone_number,
+          ) ?? "",
       })),
       agents: perAgent,
       dailyPerAgent: plan.perAgent,

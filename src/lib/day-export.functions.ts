@@ -8,7 +8,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { maskWhen } from "@/lib/pii";
+import { maskForCaller } from "@/lib/pii";
 
 const Input = z.object({
   adminToken: z.string().nullable().optional(),
@@ -126,7 +126,7 @@ export const dayCallExport = createServerFn({ method: "POST" })
         agentName: agent?.name ?? "—",
         employeeId: agent?.employee_id ?? null,
         leadName: (row.lead_id ? leadName.get(row.lead_id) : null) ?? "—",
-        phone: maskWhen(caller.maskPii, row.phone_number) ?? "",
+        phone: maskForCaller({ maskPii: caller.maskPii, leadModerator: caller.leadModerator, selfId: caller.profile?.id ?? null }, row.agent_id, row.phone_number) ?? "",
         source: row.call_source ?? "android",
         direction: row.call_direction,
         callStatus: row.call_status ?? "—",
@@ -230,7 +230,7 @@ export const recentSyncedCalls = createServerFn({ method: "POST" })
         agentName: agent?.name ?? "—",
         employeeId: agent?.employee_id ?? null,
         leadName: (row.lead_id ? leadName.get(row.lead_id) : null) ?? "—",
-        phone: maskWhen(caller.maskPii, row.phone_number) ?? "",
+        phone: maskForCaller({ maskPii: caller.maskPii, leadModerator: caller.leadModerator, selfId: caller.profile?.id ?? null }, row.agent_id, row.phone_number) ?? "",
         source: row.call_source ?? "android",
         direction: row.call_direction,
         callStatus: row.call_status ?? "—",

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { maskWhen } from "@/lib/pii";
+import { maskForCaller } from "@/lib/pii";
 
 /**
  * Supervisor read-outs: post-call report health, recording/AI pipeline state,
@@ -125,8 +125,8 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         recordingNote: d.recording_note,
         recordingCheckedAt: d.recording_checked_at,
         agentName: agentById.get(d.profile_id)?.name ?? null,
-        agentSim: maskWhen(caller.maskPii, agentById.get(d.profile_id)?.sim_number ?? null),
-        deviceSim: maskWhen(caller.maskPii, d.phone_number),
+        agentSim: maskForCaller(maskCtx, d.profile_id, agentById.get(d.profile_id)?.sim_number ?? null),
+        deviceSim: maskForCaller(maskCtx, d.profile_id, d.phone_number),
         simMatched:
           simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) !== null &&
           simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) === simKeyOf(d.phone_number),
