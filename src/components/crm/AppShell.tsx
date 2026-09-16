@@ -78,12 +78,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:bg-surface-2 hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
+                className="relative whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:bg-surface-2 hover:text-foreground data-[status=active]:font-semibold data-[status=active]:text-foreground data-[status=active]:after:absolute data-[status=active]:after:inset-x-2.5 data-[status=active]:after:-bottom-0.5 data-[status=active]:after:h-0.5 data-[status=active]:after:rounded-full data-[status=active]:after:bg-primary data-[status=active]:after:content-['']"
               >
                 {item.label}
               </Link>
             ))}
           </nav>
+
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
