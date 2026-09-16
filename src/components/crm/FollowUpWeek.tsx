@@ -173,11 +173,15 @@ export function FollowUpWeek() {
                     </div>
                     {event.phone_number && (
                       <div className="mt-2.5 flex items-center gap-2">
-                        <Button asChild className="h-11 flex-1 rounded-xl text-base font-semibold">
-                          <a href={`tel:${event.phone_number}`}>
-                            <PhoneCall className="size-5" /> কল
-                          </a>
-                        </Button>
+                        {event.lead_id ? (
+                          <WebCallButton leadId={event.lead_id} phone={event.phone_number} />
+                        ) : (
+                          <Button asChild className="h-11 flex-1 rounded-xl text-base font-semibold">
+                            <a href={`tel:${event.phone_number}`}>
+                              <PhoneCall className="size-5" /> কল
+                            </a>
+                          </Button>
+                        )}
                         <WhatsAppAction
                           phone={event.phone_number}
                           leadId={event.lead_id ?? null}
