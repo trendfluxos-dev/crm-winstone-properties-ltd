@@ -115,13 +115,22 @@ function EntryHall() {
         </div>
 
         {scope !== "none" && (
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            Already signed in —{" "}
-            <Link to="/desk" className="font-semibold text-primary hover:underline">
-              go to my desk
+          <div className="mt-8 flex justify-center">
+            <Link
+              to="/desk"
+              className="group inline-flex items-center gap-3 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm shadow-sm backdrop-blur-xl transition hover:border-primary/40 hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="relative flex size-2 items-center justify-center">
+                <span className="absolute inline-flex size-2 animate-ping rounded-full bg-primary/50" />
+                <span className="inline-flex size-2 rounded-full bg-primary" />
+              </span>
+              <span className="text-muted-foreground">Already signed in</span>
+              <span className="font-semibold text-foreground">Go to my desk</span>
+              <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
             </Link>
-          </p>
+          </div>
         )}
+
 
         <footer className="mt-14 text-center text-xs text-muted-foreground">
           <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
