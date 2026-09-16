@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Lock, LockOpen, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -217,7 +217,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />
+      {/* On Executive HQ the same button must mint the read-only HQ token,
+          so the audit record and the granted scope match the surface. */}
+      <AdminPinDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        surface={pathname.startsWith("/hq") ? "hq" : "system"}
+      />
     </div>
   );
 }
