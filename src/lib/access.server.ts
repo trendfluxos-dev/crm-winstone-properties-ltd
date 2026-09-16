@@ -103,20 +103,37 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
 
   const approval = (profile.approval_status ?? "pending") as Caller["approval"];
   if (approval !== "approved" || !profile.is_active) {
-    return { scope: "none", profile, userId, approval, readOnly: true };
+    return {
+      scope: "none",
+      profile,
+      userId,
+      approval,
+      readOnly: true,
+      leadModerator: false,
+      maskPii: false,
+    };
   }
 
+  const { isLeadModerator } = await import("@/lib/lead-moderators");
+  const leadModerator = profile.role === "agent" && isLeadModerator(profile.employee_id);
+
+  // A Lead Moderator keeps their agent account and adds Coordinator Deck duty.
+  const scope: Scope =
+    profile.role === "admin"
+      ? "authority"
+      : profile.role === "team_leader" || leadModerator
+        ? "coordinator"
+        : "agent";
+
   return {
-    scope:
-      profile.role === "admin"
-        ? "authority"
-        : profile.role === "team_leader"
-          ? "coordinator"
-          : "agent",
+    scope,
     profile,
     userId,
     approval,
     readOnly: false,
+    leadModerator,
+    // Coordinators moderate work, they do not dial: no raw customer numbers.
+    maskPii: scope === "coordinator",
   };
 }
 
