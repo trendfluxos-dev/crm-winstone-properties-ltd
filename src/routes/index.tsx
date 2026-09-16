@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Headphones, Lock, Mic, Server, Users } from "lucide-react";
+import { BarChart3, ChevronRight, Headphones, Lock, Mic, Server, Users } from "lucide-react";
 import { useState } from "react";
 
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
@@ -156,32 +156,57 @@ function EntryHall() {
   );
 }
 
-function EntryCard({
-  icon,
-  title,
-  description,
-  primary,
-  secondary,
-}: {
+type EntryRowProps = {
   icon: React.ReactNode;
   title: string;
   description: string;
-  primary: React.ReactNode;
-  secondary?: React.ReactNode;
-}) {
-  return (
-    <section className="card-elevated flex flex-col gap-3 p-5">
-      <span className="grid size-12 place-items-center rounded-full bg-primary/15 text-primary">
+  to?: "/auth";
+  search?: { role: "agent" | "coordinator"; mode: "signin" | "signup" };
+  action?: string;
+  onClick?: () => void;
+};
+
+/**
+ * One role entry as a compact list row: icon tile, title, single-line
+ * description and a trailing affordance. Same palette and semantics as before —
+ * only the density and the primary/secondary hierarchy changed.
+ */
+function EntryRow({ icon, title, description, to, search, action, onClick }: EntryRowProps) {
+  const inner = (
+    <>
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
         {icon}
       </span>
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-      <div className="mt-auto flex flex-wrap gap-2 pt-2">
-        {primary}
-        {secondary}
-      </div>
-    </section>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-semibold tracking-tight">{title}</span>
+        <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+          {description}
+        </span>
+      </span>
+      {action ? (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-primary/30 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
+          <Lock className="size-3" /> {action}
+        </span>
+      ) : (
+        <ChevronRight className="size-4 shrink-0 text-primary" />
+      )}
+    </>
+  );
+
+  const className =
+    "group flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3.5 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.995]";
+
+  if (to && search) {
+    return (
+      <Link to={to} search={search} className={className}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {inner}
+    </button>
   );
 }
