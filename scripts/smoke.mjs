@@ -78,7 +78,11 @@ async function checkApk() {
     const res = await fetch(url, { headers: { Range: "bytes=0-3" }, redirect: "follow" });
     const bytes = new Uint8Array(await res.arrayBuffer());
     const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK" — APKs are zip files
-    record("apk GET signature", res.ok && isZip, `status ${res.status}, ${bytes.length} bytes read`);
+    record(
+      "apk GET signature",
+      res.ok && isZip,
+      `status ${res.status}, ${bytes.length} bytes read`,
+    );
   } catch (error) {
     record("apk GET signature", false, String(error));
   }
@@ -86,8 +90,13 @@ async function checkApk() {
   try {
     const res = await fetch(`${BASE}/api/public/download/apk-info`);
     const info = await res.json();
-    const ok = res.ok && info.available && info.size > 1_000_000 && /^[a-f0-9]{64}$/.test(info.sha256);
-    record("apk checksum", ok, ok ? `${info.size} bytes, sha256 ${info.sha256.slice(0, 12)}…` : "unavailable");
+    const ok =
+      res.ok && info.available && info.size > 1_000_000 && /^[a-f0-9]{64}$/.test(info.sha256);
+    record(
+      "apk checksum",
+      ok,
+      ok ? `${info.size} bytes, sha256 ${info.sha256.slice(0, 12)}…` : "unavailable",
+    );
   } catch (error) {
     record("apk checksum", false, String(error));
   }
