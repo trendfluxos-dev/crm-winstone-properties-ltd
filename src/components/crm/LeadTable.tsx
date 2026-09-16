@@ -110,10 +110,12 @@ export function LeadTable() {
     <section className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">লিড ড্যাশবোর্ড</h2>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            আজ {counts.pending}টি লিডে কল বাকি · {counts.follow_up}টিতে আবার যোগাযোগ করতে হবে ·{" "}
-            {counts.done}টিতে কথা হয়ে গেছে
+          <p className="eyebrow">Lead Queue</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight">লিড ড্যাশবোর্ড</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+            আজ <span className="tabular font-semibold text-primary">{counts.pending}</span>টি লিডে কল
+            বাকি · <span className="tabular font-semibold">{counts.follow_up}</span>টিতে আবার যোগাযোগ
+            করতে হবে · <span className="tabular font-semibold">{counts.done}</span>টিতে কথা হয়ে গেছে
           </p>
         </div>
         <div className="relative w-full sm:w-64">
@@ -156,7 +158,10 @@ export function LeadTable() {
       {/* Mobile: cards, no horizontal scrolling. Same rows, same data. */}
       <ul className="space-y-3 md:hidden">
         {rows.map((lead, index) => (
-          <li key={lead.id} className="card-elevated w-full max-w-full overflow-hidden p-3">
+          <li
+            key={lead.id}
+            className="card-elevated w-full max-w-full overflow-hidden p-3.5 transition-colors hover:border-primary/30"
+          >
             <button
               type="button"
               className="block w-full min-w-0 text-left"
