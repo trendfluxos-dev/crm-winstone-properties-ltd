@@ -66,23 +66,27 @@ function InstallPage() {
     };
   }, [origin]);
 
-  // Real release metadata only — the same endpoint the phones use.
-  useEffect(() => {
-    let cancelled = false;
-    void fetch("/api/public/agent/version?version_code=0", {
-      headers: { accept: "application/json" },
-    })
-      .then((res) => res.json())
-      .then((body: { latest: Release | null }) => {
-        if (cancelled) return;
-        setRelease(body.latest ?? null);
-        setReleaseChecked(true);
-      })
-      .catch(() => setReleaseChecked(true));
-    return () => {
-      cancelled = true;
-    };
+  // Real release metadata only — the same endpoint the phones use. The shown
+  // version changes only when the server actually reports a published release.
+  const checkVersion = useCallback(async () => {
+    setChecking(true);
+    try {
+      const res = await fetch("/api/public/agent/version?version_code=0", {
+        headers: { accept: "application/json" },
+      });
+      const body = (await res.json()) as { latest: Release | null };
+      if (body.latest) setRelease(body.latest);
+    } catch {
+      /* network hiccup — keep whatever was already verified */
+    } finally {
+      setChecking(false);
+      setReleaseChecked(true);
+    }
   }, []);
+
+  useEffect(() => {
+    void checkVersion();
+  }, [checkVersion]);
 
   const copy = async () => {
     await navigator.clipboard.writeText(apkUrl);
