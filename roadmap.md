@@ -20,3 +20,6 @@
 
 ## সম্পন্ন (এই রাউন্ড)
 - [x] শিফট সামারি → Google Sheets "শিফট সামারি" ট্যাব (স্বয়ংক্রিয় 12:50/5:30 + ব্যাকফিল + ম্যানুয়াল বোতাম) — shift-sheet.server.ts, shift-summary ফাংশন/প্যানেল; গেটওয়ে লেখা প্রমাণিত, tsgo/vitest(54)/build পাস
+
+- [ ] V2 read-only architecture check (done %F): backend ref yqcllcilraqdwssfkeht, empty schema copy — not the live production data.
+- [ ] Security finding: restrict profiles.pin_hash reads to admins only (blocked — user instructed no auth/schema changes during audit).
