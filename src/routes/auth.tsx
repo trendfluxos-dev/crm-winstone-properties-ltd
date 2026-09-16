@@ -107,13 +107,13 @@ function AuthPage() {
     (!isSignup || name.trim().length >= 2);
 
   return (
-    <div className="grid-noise flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="card-elevated w-full max-w-md p-6">
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-10">
+      <div className="card-elevated w-full max-w-md bg-card p-6">
         <Link to="/" className="flex items-center gap-3">
           <img
             src={logoAsset.url}
             alt="Winstone Properties Ltd. logo"
-            className="size-11 rounded-full object-cover ring-1 ring-border"
+            className="size-11 rounded-full object-cover ring-1 ring-primary/40"
           />
           <span>
             <span className="block text-sm font-bold tracking-tight">Winstone Connect</span>

@@ -146,9 +146,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="hidden sm:inline xl:hidden">Agent App</span>
             </Button>
 
-            <div className="hidden h-8 items-center gap-2 rounded-md border border-primary/25 px-3 md:flex">
-              <span className="inline-flex size-1.5 rounded-full bg-primary" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <div className="hidden h-8 items-center gap-2 rounded-md border border-border px-3 md:flex">
+              <span className="status-dot text-success" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-success">
                 Live
               </span>
             </div>
@@ -161,7 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={item.to}
               to={item.to}
               activeOptions={{ exact: item.to === "/" }}
-              className="shrink-0 rounded-md border border-border px-3 py-1 text-xs font-medium text-muted-foreground data-[status=active]:border-primary/45 data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
+              className="shrink-0 rounded-md border border-border px-3 py-1 text-xs font-medium text-muted-foreground data-[status=active]:border-primary data-[status=active]:bg-accent data-[status=active]:font-semibold data-[status=active]:text-foreground"
             >
               {item.label}
             </Link>
