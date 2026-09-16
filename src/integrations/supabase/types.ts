@@ -1574,22 +1574,34 @@ export type Database = {
           assigned_agent_id: string | null
           assigned_to: string | null
           assignment_source: string | null
+          best_channel: string | null
           call_attempts: number
           call_count: number | null
+          city_area: string | null
           classification_note: string | null
           classified_at: string | null
           classified_by: string | null
           company: string | null
           created_at: string
+          data_completeness: string | null
+          email: string | null
           grade: string | null
           id: string
           is_verified: boolean
           last_call_at: string | null
+          lead_quality: string | null
+          lead_type: string | null
+          missing_fields: string | null
           name: string
+          next_action: string | null
           notes: string | null
           outcome_category: string | null
+          outreach_bn: string | null
+          outreach_en: string | null
           phone_number: string
+          profession: string | null
           reference_by: string | null
+          sector: string | null
           serial_no: string | null
           source: string
           status: Database["public"]["Enums"]["lead_status"]
@@ -1603,22 +1615,34 @@ export type Database = {
           assigned_agent_id?: string | null
           assigned_to?: string | null
           assignment_source?: string | null
+          best_channel?: string | null
           call_attempts?: number
           call_count?: number | null
+          city_area?: string | null
           classification_note?: string | null
           classified_at?: string | null
           classified_by?: string | null
           company?: string | null
           created_at?: string
+          data_completeness?: string | null
+          email?: string | null
           grade?: string | null
           id?: string
           is_verified?: boolean
           last_call_at?: string | null
+          lead_quality?: string | null
+          lead_type?: string | null
+          missing_fields?: string | null
           name: string
+          next_action?: string | null
           notes?: string | null
           outcome_category?: string | null
+          outreach_bn?: string | null
+          outreach_en?: string | null
           phone_number: string
+          profession?: string | null
           reference_by?: string | null
+          sector?: string | null
           serial_no?: string | null
           source?: string
           status?: Database["public"]["Enums"]["lead_status"]
@@ -1632,22 +1656,34 @@ export type Database = {
           assigned_agent_id?: string | null
           assigned_to?: string | null
           assignment_source?: string | null
+          best_channel?: string | null
           call_attempts?: number
           call_count?: number | null
+          city_area?: string | null
           classification_note?: string | null
           classified_at?: string | null
           classified_by?: string | null
           company?: string | null
           created_at?: string
+          data_completeness?: string | null
+          email?: string | null
           grade?: string | null
           id?: string
           is_verified?: boolean
           last_call_at?: string | null
+          lead_quality?: string | null
+          lead_type?: string | null
+          missing_fields?: string | null
           name?: string
+          next_action?: string | null
           notes?: string | null
           outcome_category?: string | null
+          outreach_bn?: string | null
+          outreach_en?: string | null
           phone_number?: string
+          profession?: string | null
           reference_by?: string | null
+          sector?: string | null
           serial_no?: string | null
           source?: string
           status?: Database["public"]["Enums"]["lead_status"]
