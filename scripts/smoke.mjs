@@ -16,7 +16,9 @@
  */
 
 const raw = (process.env.SMOKE_BASE_URL ?? "").trim();
-const required = ["1", "true", "yes"].includes((process.env.SMOKE_REQUIRE_BASE_URL ?? "").toLowerCase());
+const required = ["1", "true", "yes"].includes(
+  (process.env.SMOKE_REQUIRE_BASE_URL ?? "").toLowerCase(),
+);
 
 if (required && !/^https?:\/\//.test(raw)) {
   console.error(
@@ -26,7 +28,9 @@ if (required && !/^https?:\/\//.test(raw)) {
   process.exit(1);
 }
 if (raw && !/^https?:\/\//.test(raw)) {
-  console.error(`FAIL  SMOKE_BASE_URL must be an absolute http(s) URL (got ${JSON.stringify(raw)}).`);
+  console.error(
+    `FAIL  SMOKE_BASE_URL must be an absolute http(s) URL (got ${JSON.stringify(raw)}).`,
+  );
   process.exit(1);
 }
 
