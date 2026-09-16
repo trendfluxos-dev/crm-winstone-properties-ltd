@@ -237,7 +237,6 @@ function CreditsBoard() {
             </section>
           )}
 
-
           <section className="grid gap-4 lg:grid-cols-2">
             <div className="card-elevated p-4">
               <h2 className="text-sm font-semibold">দিনভিত্তিক খরচ</h2>
@@ -279,7 +278,6 @@ function CreditsBoard() {
           <BudgetAndInvoices />
         </>
       )}
-
 
       <p className="text-xs text-muted-foreground">
         আইটি কনসোলে ফিরে যেতে{" "}

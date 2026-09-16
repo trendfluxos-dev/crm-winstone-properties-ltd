@@ -19,7 +19,14 @@ export type CloseResult = {
   totalAmount: number;
 };
 
-type Line = { dimension: string; key: string; label: string; calls: number; credits: number; amount: number };
+type Line = {
+  dimension: string;
+  key: string;
+  label: string;
+  calls: number;
+  credits: number;
+  amount: number;
+};
 
 function hashOf(input: string): string {
   // FNV-1a: a stable content fingerprint, used only to prove a snapshot was
@@ -60,7 +67,9 @@ export async function closeBillingMonth(monthInput?: string): Promise<CloseResul
   const { start, end } = dhakaMonthBounds(month);
   const { data: events, error } = await supabaseAdmin
     .from("ai_usage_events")
-    .select("category, provider, model, cost_credits, est_credits, cost_amount, currency, actor_profile_id")
+    .select(
+      "category, provider, model, cost_credits, est_credits, cost_amount, currency, actor_profile_id",
+    )
     .gte("created_at", start)
     .lt("created_at", end)
     .limit(50000);
@@ -100,10 +109,22 @@ export async function closeBillingMonth(monthInput?: string): Promise<CloseResul
 
     const provider = r.provider ?? "unknown";
     add("provider", provider, provider, credits, amount);
-    add("model", `${provider}:${r.model ?? "default"}`, r.model ?? `${provider} (default)`, credits, amount);
+    add(
+      "model",
+      `${provider}:${r.model ?? "default"}`,
+      r.model ?? `${provider} (default)`,
+      credits,
+      amount,
+    );
     add("category", r.category, r.category, credits, amount);
     const agentKey = r.actor_profile_id ?? "system";
-    add("agent", agentKey, r.actor_profile_id ? (nameById.get(agentKey) ?? "অজানা") : "সিস্টেম", credits, amount);
+    add(
+      "agent",
+      agentKey,
+      r.actor_profile_id ? (nameById.get(agentKey) ?? "অজানা") : "সিস্টেম",
+      credits,
+      amount,
+    );
   }
 
   const lines = [...buckets.values()].map((l) => ({

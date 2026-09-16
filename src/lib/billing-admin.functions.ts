@@ -37,7 +37,9 @@ export const listBillingInvoices = createServerFn({ method: "POST" })
     const { dhakaMonthBounds } = await import("@/lib/dhaka-time");
     const { data: rows, error } = await supabaseAdmin
       .from("billing_invoices")
-      .select("id, period_month, status, total_calls, total_credits, total_amount, currency, closed_at, generation_hash")
+      .select(
+        "id, period_month, status, total_calls, total_credits, total_amount, currency, closed_at, generation_hash",
+      )
       .order("period_month", { ascending: false })
       .limit(24);
     if (error) throw new Error(error.message);

@@ -55,7 +55,12 @@ export async function meteredFetch(
   if (response.ok) {
     try {
       const peek = (await response.clone().json()) as {
-        usage?: { prompt_tokens?: number; completion_tokens?: number; input_tokens?: number; output_tokens?: number };
+        usage?: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          input_tokens?: number;
+          output_tokens?: number;
+        };
         model?: string;
       };
       inputUnits = peek.usage?.prompt_tokens ?? peek.usage?.input_tokens ?? 0;

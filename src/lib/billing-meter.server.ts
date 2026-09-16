@@ -17,12 +17,7 @@ import { dhakaMonthBounds, dhakaMonthKey } from "@/lib/dhaka-time";
 export type UsageUnitKind = "call" | "token" | "second" | "byte" | "message" | "operation";
 
 export type UsageProvider =
-  | "lovable-ai"
-  | "sarvam"
-  | "google-drive"
-  | "whatsapp"
-  | "storage"
-  | "other";
+  "lovable-ai" | "sarvam" | "google-drive" | "whatsapp" | "storage" | "other";
 
 export type RecordUsageInput = {
   provider: UsageProvider;
@@ -115,8 +110,7 @@ export async function recordUsage(input: RecordUsageInput): Promise<void> {
     const outputUnits = input.outputUnits ?? 0;
     const card = await findRateCard(input.provider, input.model ?? null, operation);
     const unitKind = (input.unitKind ?? card?.unit_kind ?? "call") as UsageUnitKind;
-    const billableUnits =
-      input.units ?? (unitKind === "call" ? 1 : inputUnits + outputUnits || 1);
+    const billableUnits = input.units ?? (unitKind === "call" ? 1 : inputUnits + outputUnits || 1);
 
     const costCredits = card ? Number(card.credits_per_unit) * billableUnits : 0;
     const costAmount = card ? Number(card.amount_per_unit) * billableUnits : 0;

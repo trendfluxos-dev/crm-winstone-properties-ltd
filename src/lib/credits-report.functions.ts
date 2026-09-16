@@ -77,7 +77,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   other: "অন্যান্য",
 };
 
-
 export const getCreditsReport = createServerFn({ method: "POST" })
   .inputValidator((input: { adminToken?: string | null; month?: string }) => input)
   .handler(async ({ data }): Promise<CreditsReport> => {
@@ -85,17 +84,10 @@ export const getCreditsReport = createServerFn({ method: "POST" })
     const caller = await resolveCaller(data.adminToken ?? null);
     requireAuthority(caller);
 
-    const {
-      dhakaDayKey,
-      dhakaMonthBounds,
-      dhakaMonthDays,
-      dhakaMonthElapsedDays,
-      dhakaMonthKey,
-    } = await import("@/lib/dhaka-time");
+    const { dhakaDayKey, dhakaMonthBounds, dhakaMonthDays, dhakaMonthElapsedDays, dhakaMonthKey } =
+      await import("@/lib/dhaka-time");
 
-    const month = /^\d{4}-\d{2}$/.test(data.month ?? "")
-      ? (data.month as string)
-      : dhakaMonthKey();
+    const month = /^\d{4}-\d{2}$/.test(data.month ?? "") ? (data.month as string) : dhakaMonthKey();
     const { start, end, label } = dhakaMonthBounds(month);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -270,4 +262,3 @@ export const getCreditsReport = createServerFn({ method: "POST" })
       recent7,
     };
   });
-

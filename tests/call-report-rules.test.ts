@@ -28,7 +28,6 @@ describe("post-call report rules", () => {
     ).toBeNull();
   });
 
-
   it("requires a reason for not_interested and wrong_number", () => {
     expect(
       validateReport({ ...base, category: "not_interested", temperature: "cold", grade: "D" })
