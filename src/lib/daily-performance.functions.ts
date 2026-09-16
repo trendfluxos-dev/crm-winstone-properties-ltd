@@ -15,3 +15,18 @@ export const getMyDailyPerformance = createServerFn({ method: "POST" })
     const { computeDailyPerformance } = await import("@/lib/daily-performance.server");
     return computeDailyPerformance(caller.profile.id);
   });
+
+/**
+ * Floor-wide Dhaka-day performance for the Coordinator Deck and Executive HQ.
+ * Server-authorised: agents cannot read other people's numbers.
+ */
+export const getTeamDailyPerformance = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    requireDispatch(await resolveCaller(data.adminToken ?? null));
+    const { computeTeamDailyPerformance } = await import("@/lib/daily-performance.server");
+    return computeTeamDailyPerformance();
+  });
