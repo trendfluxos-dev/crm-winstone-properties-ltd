@@ -16,6 +16,7 @@ import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { LeadDatabasePanel } from "@/components/crm/LeadDatabasePanel";
+import { MobileAppCard } from "@/components/crm/MobileAppCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -253,6 +254,8 @@ function Dispatcher() {
       <section className="border-t border-border pt-6">
         <QueueBoard title="Agent Queue" canSeeAllAgents showManualLog />
       </section>
+
+      <MobileAppCard />
     </div>
   );
 }
