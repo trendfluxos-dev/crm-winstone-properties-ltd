@@ -57,6 +57,7 @@ function InstallPage() {
   const [origin, setOrigin] = useState("");
   const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [hashCopied, setHashCopied] = useState(false);
   const [release, setRelease] = useState<Release | null>(null);
   const [releaseChecked, setReleaseChecked] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -115,10 +116,49 @@ function InstallPage() {
     void checkVersion();
   }, [checkVersion]);
 
+  /** Clipboard API is unavailable on http origins and old WebViews — fall back to a hidden textarea. */
+  const writeClipboard = async (text: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      /* fall through to the legacy path */
+    }
+    try {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(area);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
   const copy = async () => {
-    await navigator.clipboard.writeText(apkUrl);
+    if (!(await writeClipboard(apkUrl))) {
+      toast.error("কপি করা গেল না — লিংকটি হাতে সিলেক্ট করে কপি করুন");
+      return;
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
+  };
+
+  const copyChecksum = async () => {
+    if (!file) return;
+    if (!(await writeClipboard(file.sha256))) {
+      toast.error("কপি করা গেল না — চেকসামটি হাতে সিলেক্ট করে কপি করুন");
+      return;
+    }
+    setHashCopied(true);
+    window.setTimeout(() => setHashCopied(false), 1800);
   };
 
   return (
