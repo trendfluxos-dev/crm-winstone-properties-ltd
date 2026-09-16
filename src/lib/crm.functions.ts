@@ -74,8 +74,10 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
     if (caller.leadModerator && caller.profile) {
       const { maskForCaller } = await import("@/lib/pii");
       const ctx = { maskPii: false, leadModerator: true, selfId: caller.profile.id };
-      const ownerOf = (leadId: string | null) =>
-        leadOwner((leads.data ?? []).find((l) => l.id === leadId) ?? null);
+      const ownerOf = (leadId: string | null) => {
+        const lead = (leads.data ?? []).find((l) => l.id === leadId);
+        return lead ? leadOwner(lead) : null;
+      };
       return {
         profiles: (profiles.data ?? []).map((p) => ({
           ...p,
