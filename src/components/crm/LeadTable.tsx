@@ -36,18 +36,9 @@ const STATUS_LABELS: Record<string, string> = {
   closed: "শেষ হয়েছে",
 };
 
-const TEMP_STYLES: Record<string, string> = {
-  hot: "border-destructive/40 bg-destructive/10 text-destructive",
-  warm: "border-idle/35 bg-idle/10 text-idle",
-  cold: "border-border bg-surface-2 text-muted-foreground",
-};
+const TEMP_STYLES = TEMPERATURE_STYLES;
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: "border-idle/35 bg-idle/10 text-idle",
-  contacted: "border-primary/35 bg-primary/10 text-primary",
-  follow_up: "border-border bg-surface-2 text-foreground",
-  closed: "border-border bg-surface-2 text-muted-foreground",
-};
+const STATUS_STYLES = LEAD_STATUS_STYLES;
 
 /**
  * The agent's lead dashboard: one row per lead with serial, name, address,
