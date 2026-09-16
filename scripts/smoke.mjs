@@ -11,7 +11,9 @@
  *   BASE_URL=https://crm-v2.winstonebd.com node scripts/smoke.mjs
  */
 
-const BASE = (process.env.BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
+const raw = process.env.SMOKE_BASE_URL ?? process.env.BASE_URL ?? "";
+// Only an absolute URL is usable; some environments set BASE_URL to a path.
+const BASE = (/^https?:\/\//.test(raw) ? raw : "http://localhost:8080").replace(/\/$/, "");
 
 const ROUTES = [
   { path: "/", expect: [200] },
