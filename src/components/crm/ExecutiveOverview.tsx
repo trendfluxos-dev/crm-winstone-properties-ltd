@@ -292,7 +292,8 @@ function TopAgentRow({ rank, agent }: { rank: number; agent: TeamDailyRow }) {
         <Metric label="কল" value={agent.callsMade} />
         <Metric label="সংযুক্ত" value={agent.connected} />
         <Metric label="আগ্রহী" value={agent.interested} />
-        <Metric label="ফলো-আপ" value={agent.followUpsDue} />
+        <Metric label="ফলো-আপ বাকি" value={agent.followUpsDue} />
+        <Metric label="ফলো-আপ সম্পন্ন" value={agent.followUpsCompleted} />
         <Metric label="রিপোর্ট" value={agent.reportsSubmitted} />
         <span>
           কথার সময়{" "}
