@@ -17,6 +17,13 @@ import { Button } from "@/components/ui/button";
 
 const APK_PATH = "/api/public/download/apk";
 
+type ApkInfo = {
+  source: "published" | "bundled";
+  size: number;
+  sha256: string;
+  filename: string;
+};
+
 type Release = {
   version_code: number;
   version_name: string;
