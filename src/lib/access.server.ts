@@ -132,8 +132,10 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
     approval,
     readOnly: false,
     leadModerator,
-    // Coordinators moderate work, they do not dial: no raw customer numbers.
-    maskPii: scope === "coordinator",
+    // A pure coordinator moderates work and never dials, so the server strips
+    // customer numbers. A Lead Moderator is still an agent with their own call
+    // list, so their data stays intact and the deck masks on screen instead.
+    maskPii: scope === "coordinator" && !leadModerator,
   };
 }
 
