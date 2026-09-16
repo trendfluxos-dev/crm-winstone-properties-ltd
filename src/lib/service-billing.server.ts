@@ -62,7 +62,8 @@ export function currentCycle(now: Date = new Date()): Cycle {
   const day = dhakaDayKey(now);
   const dom = Number(day.slice(8, 10));
   const [y = 0, m = 1] = day.split("-").map(Number);
-  const anchor = dom >= BILLING_DAY ? new Date(Date.UTC(y, m - 1, 1)) : new Date(Date.UTC(y, m - 2, 1));
+  const anchor =
+    dom >= BILLING_DAY ? new Date(Date.UTC(y, m - 1, 1)) : new Date(Date.UTC(y, m - 2, 1));
   return cycleFor(anchor.toISOString().slice(0, 7));
 }
 
@@ -72,10 +73,7 @@ export function nextCycle(now: Date = new Date()): Cycle {
   return cycleFor(new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 7));
 }
 
-function derivedStatus(row: {
-  status: string;
-  due_at: string;
-}): InvoiceStatus {
+function derivedStatus(row: { status: string; due_at: string }): InvoiceStatus {
   const stored = row.status as InvoiceStatus;
   if (stored === "paid" || stored === "pending" || stored === "failed") return stored;
   const overdueAt = new Date(row.due_at).getTime() + OVERDUE_GRACE_DAYS * 86_400_000;
@@ -333,7 +331,11 @@ async function activateService(invoice: InvoiceRow, transactionId: string): Prom
 
   const allocations = [
     { kind: "system_infrastructure", label: "System / Infrastructure", amount: ALLOCATION_SYSTEM },
-    { kind: "architect_maintenance", label: "Architect Maintenance Fee", amount: ALLOCATION_ARCHITECT },
+    {
+      kind: "architect_maintenance",
+      label: "Architect Maintenance Fee",
+      amount: ALLOCATION_ARCHITECT,
+    },
   ];
 
   for (const a of allocations) {
@@ -449,6 +451,9 @@ export function nextBillingDate(now: Date = new Date()): string {
   const y = local.getUTCFullYear();
   const m = local.getUTCMonth();
   const dom = local.getUTCDate();
-  const target = dom < BILLING_DAY ? new Date(Date.UTC(y, m, BILLING_DAY)) : new Date(Date.UTC(y, m + 1, BILLING_DAY));
+  const target =
+    dom < BILLING_DAY
+      ? new Date(Date.UTC(y, m, BILLING_DAY))
+      : new Date(Date.UTC(y, m + 1, BILLING_DAY));
   return target.toISOString().slice(0, 10);
 }

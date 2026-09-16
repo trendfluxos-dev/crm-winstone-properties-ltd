@@ -63,9 +63,8 @@ export const getBillingOverview = createServerFn({ method: "POST" })
     requireAuthority(await resolveCaller(data.adminToken ?? null));
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { ensureCurrentInvoice, nextBillingDate, configuredAmount } = await import(
-      "./service-billing.server"
-    );
+    const { ensureCurrentInvoice, nextBillingDate, configuredAmount } =
+      await import("./service-billing.server");
     const { paymentProviderHealth } = await import("./payment-adapter.server");
     const { BILLING_DAY, SERVICE_CURRENCY } = await import("./service-billing");
 
@@ -118,8 +117,7 @@ export const getBillingOverview = createServerFn({ method: "POST" })
       invoices: (invoices ?? []).map((i) => ({
         month: i.period_month,
         reference: i.reference,
-        status: (i.status === "due" &&
-        Date.now() > new Date(i.due_at).getTime() + 7 * 86_400_000
+        status: (i.status === "due" && Date.now() > new Date(i.due_at).getTime() + 7 * 86_400_000
           ? "overdue"
           : i.status) as InvoiceStatus,
         amount: Number(i.amount),
@@ -162,7 +160,8 @@ export const startServicePayment = createServerFn({ method: "POST" })
       requireAuthority(await resolveCaller(data.adminToken ?? null));
 
       const { ensureCurrentInvoice, configuredAmount } = await import("./service-billing.server");
-      const { getPaymentProvider, paymentProviderHealth } = await import("./payment-adapter.server");
+      const { getPaymentProvider, paymentProviderHealth } =
+        await import("./payment-adapter.server");
       const { SERVICE_CURRENCY } = await import("./service-billing");
 
       const invoice = await ensureCurrentInvoice();
@@ -219,7 +218,12 @@ export type BillingControl = {
     routingNumber: string | null;
     verifiedAt: string | null;
   } | null;
-  paymentProvider: { configured: boolean; providerId: string | null; message: string; webhookSecretConfigured: boolean };
+  paymentProvider: {
+    configured: boolean;
+    providerId: string | null;
+    message: string;
+    webhookSecretConfigured: boolean;
+  };
   payoutProvider: { configured: boolean; providerId: string | null; message: string };
   encryptionConfigured: boolean;
 };
@@ -387,7 +391,10 @@ export const saveArchitectProfile = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const { error } = existing
-      ? await supabaseAdmin.from("architect_payout_profiles").update(base as never).eq("id", existing.id)
+      ? await supabaseAdmin
+          .from("architect_payout_profiles")
+          .update(base as never)
+          .eq("id", existing.id)
       : await supabaseAdmin.from("architect_payout_profiles").insert(base as never);
     if (error) throw new Error(error.message);
 

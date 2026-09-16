@@ -72,9 +72,7 @@ export const Route = createFileRoute("/api/public/billing/webhook")({
             providerTxnId: txnId,
             amount: Number(body["amount"] ?? 0),
             currency: String(body["currency"] ?? "BDT"),
-            invoiceReference: body["invoice_reference"]
-              ? String(body["invoice_reference"])
-              : null,
+            invoiceReference: body["invoice_reference"] ? String(body["invoice_reference"]) : null,
             succeeded: String(body["status"] ?? "").toLowerCase() === "succeeded",
             failureReason: body["failure_reason"] ? String(body["failure_reason"]) : null,
             payload: body,
