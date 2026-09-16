@@ -192,6 +192,8 @@ export const Route = createFileRoute("/api/public/agent/login")({
           });
         }
 
+        await recordLoginAttempt({ outcome: "succeeded", fingerprint, profileId: profile.id });
+
         return json({
           ok: true,
           device_token: device.token,
