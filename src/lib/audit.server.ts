@@ -62,7 +62,11 @@ export type AuditAction =
   | "architect_profile_updated"
   // Coordinator Deck activity.
   | "coordinator_deck_opened"
-  | "report_viewed";
+  | "report_viewed"
+  // Android agent sign-in. Outcome and a one-way fingerprint only — never the
+  // submitted identifier, password or device token.
+  | "agent_login_succeeded"
+  | "agent_login_failed";
 
 export async function logAudit(input: {
   action: AuditAction;
