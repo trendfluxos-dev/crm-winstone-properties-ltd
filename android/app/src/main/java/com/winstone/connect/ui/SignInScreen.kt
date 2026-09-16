@@ -138,18 +138,15 @@ fun SignInScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             )
         }
+        Spacer(Modifier.height(20.dp))
         Button(
             onClick = { onSignIn(phone, password) },
             enabled = !loading && digits.length >= 6 && password.length >= 6,
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth().height(52.dp).padding(top = 0.dp),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
         ) {
             if (loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp).padding(end = 0.dp),
-                    strokeWidth = 2.dp,
-                )
-                Spacer(Modifier.height(0.dp))
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
             }
             Text("প্রবেশ করুন", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         }

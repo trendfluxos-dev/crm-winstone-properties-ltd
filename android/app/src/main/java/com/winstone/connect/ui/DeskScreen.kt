@@ -102,8 +102,8 @@ fun DeskScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showNewLead = true },
-                containerColor = WinGreen,
-                contentColor = androidx.compose.ui.graphics.Color.White,
+                containerColor = com.winstone.connect.ui.theme.WinGold,
+                contentColor = com.winstone.connect.ui.theme.WinOnGold,
             ) { Text("নতুন লিড") }
         },
     ) { padding ->
@@ -328,11 +328,17 @@ private fun StatsRow(state: DeskUiState) {
 private fun StatChip(label: String, value: String, modifier: Modifier = Modifier) {
     Box(
         modifier
-            .background(WinGreenSoft, RoundedCornerShape(12.dp))
-            .padding(vertical = 10.dp, horizontal = 8.dp),
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            .border(1.dp, WinBorder, RoundedCornerShape(12.dp))
+            .padding(vertical = 12.dp, horizontal = 10.dp),
     ) {
         Column {
-            Text(value, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(
+                value,
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp,
+                color = com.winstone.connect.ui.theme.WinGold,
+            )
             Text(label, fontSize = 14.sp, color = WinInkMuted)
         }
     }
