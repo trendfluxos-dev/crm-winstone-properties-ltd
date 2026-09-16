@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { canTransition, currentCycle, cycleFor, nextBillingDate } from "@/lib/service-billing.server";
-import { ALLOCATION_ARCHITECT, ALLOCATION_SYSTEM, SERVICE_MONTHLY_AMOUNT } from "@/lib/service-billing";
+import {
+  canTransition,
+  currentCycle,
+  cycleFor,
+  nextBillingDate,
+} from "@/lib/service-billing.server";
+import {
+  ALLOCATION_ARCHITECT,
+  ALLOCATION_SYSTEM,
+  SERVICE_MONTHLY_AMOUNT,
+} from "@/lib/service-billing";
 
 describe("monthly service billing cycle (Asia/Dhaka, 15th)", () => {
   it("splits the service amount exactly", () => {

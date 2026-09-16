@@ -124,8 +124,8 @@ export function BillingControlPanel() {
           <Wallet className="size-4 text-primary" /> বিলিং কন্ট্রোল
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          মাসিক সার্ভিস ৳৪,০০০ — অভ্যন্তরীণ ভাগ, পেমেন্ট যাচাই ও আর্কিটেক্ট পেআউট। শুধু আইটি
-          কনসোলে দেখা যায়।
+          মাসিক সার্ভিস ৳৪,০০০ — অভ্যন্তরীণ ভাগ, পেমেন্ট যাচাই ও আর্কিটেক্ট পেআউট। শুধু আইটি কনসোলে
+          দেখা যায়।
         </p>
       </header>
 
@@ -181,12 +181,16 @@ export function BillingControlPanel() {
                 onClick={() => manual.mutate()}
                 disabled={manual.isPending || !txn.trim()}
               >
-                {manual.isPending ? <Loader2 className="size-4 animate-spin" /> : "যাচাই করে সক্রিয় করুন"}
+                {manual.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  "যাচাই করে সক্রিয় করুন"
+                )}
               </Button>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              যাচাই সার্ভারে হয় এবং অডিটে লেখা থাকে। একই রেফারেন্স দ্বিতীয়বার দিলে কিছু দ্বিগুণ হবে
-              না।
+              যাচাই সার্ভারে হয় এবং অডিটে লেখা থাকে। একই রেফারেন্স দ্বিতীয়বার দিলে কিছু দ্বিগুণ
+              হবে না।
             </p>
           </div>
 
