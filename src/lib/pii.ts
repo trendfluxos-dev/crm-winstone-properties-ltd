@@ -7,6 +7,11 @@
  * leads; nothing here touches the stored data.
  */
 
+/** Masks only when the caller is a supervision surface; agents keep raw numbers. */
+export function maskWhen(mask: boolean, value: string | null | undefined): string | null {
+  return mask ? maskPhone(value) : (value ?? null);
+}
+
 /** `01712345678` -> `017••••••78`. Returns null for empty input. */
 export function maskPhone(value: string | null | undefined): string | null {
   if (!value) return null;

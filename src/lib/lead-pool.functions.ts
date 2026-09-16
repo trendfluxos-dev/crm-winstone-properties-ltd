@@ -69,7 +69,10 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
     return {
       today,
       poolCount,
-      preview: preview ?? [],
+      preview: (preview ?? []).map((row) => ({
+        ...row,
+        phone_number: maskWhen(caller.maskPii, row.phone_number) ?? "",
+      })),
       agents: perAgent,
       dailyPerAgent: plan.perAgent,
       lastRunDate: plan.lastRunDate,

@@ -101,6 +101,7 @@ export const yearArchiveExport = createServerFn({ method: "POST" })
       year: data.year,
       leads: (leads.data ?? []).map((lead) => ({
         ...lead,
+        phone_number: maskWhen(caller.maskPii, lead.phone_number) ?? "",
         agent_name: lead.assigned_to ? (names.get(lead.assigned_to) ?? "") : "",
       })),
       reports: (reports.data ?? []).map((report) => ({

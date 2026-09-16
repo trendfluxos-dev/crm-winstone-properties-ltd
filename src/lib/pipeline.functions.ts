@@ -261,7 +261,7 @@ export const recordingPipeline = createServerFn({ method: "POST" })
         leadName: lead?.name ?? null,
         agentId: r.agent_id,
         agentName: r.agent_id ? (agentBy.get(r.agent_id)?.name ?? null) : null,
-        phone: r.phone_number,
+        phone: maskWhen(caller.maskPii, r.phone_number),
         durationSeconds: r.duration_seconds ?? 0,
         startedAt: r.started_at,
         createdAt: r.created_at,
