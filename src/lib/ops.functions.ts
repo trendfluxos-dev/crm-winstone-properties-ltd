@@ -130,7 +130,11 @@ export const callOpsSummary = createServerFn({ method: "POST" })
         recordingNote: d.recording_note,
         recordingCheckedAt: d.recording_checked_at,
         agentName: agentById.get(d.profile_id)?.name ?? null,
-        agentSim: maskForCaller(maskCtx, d.profile_id, agentById.get(d.profile_id)?.sim_number ?? null),
+        agentSim: maskForCaller(
+          maskCtx,
+          d.profile_id,
+          agentById.get(d.profile_id)?.sim_number ?? null,
+        ),
         deviceSim: maskForCaller(maskCtx, d.profile_id, d.phone_number),
         simMatched:
           simKeyOf(agentById.get(d.profile_id)?.sim_number ?? null) !== null &&

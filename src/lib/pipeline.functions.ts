@@ -131,7 +131,11 @@ export const recordingPipeline = createServerFn({ method: "POST" })
     const leadBy = new Map((leads.data ?? []).map((l) => [l.id, l]));
     const agentBy = new Map((agents.data ?? []).map((a) => [a.id, a]));
 
-    const maskCtx = { maskPii: caller.maskPii, leadModerator: caller.leadModerator, selfId: caller.profile?.id ?? null };
+    const maskCtx = {
+      maskPii: caller.maskPii,
+      leadModerator: caller.leadModerator,
+      selfId: caller.profile?.id ?? null,
+    };
     const built: PipelineRow[] = rows.map((r) => {
       const backup = backupBy.get(r.id) ?? null;
       const report = reportBy.get(r.id) ?? null;

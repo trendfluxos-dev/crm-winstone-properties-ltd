@@ -74,7 +74,11 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
         // Unassigned pool rows belong to nobody yet, so a moderator sees them masked.
         phone_number:
           maskForCaller(
-            { maskPii: caller.maskPii, leadModerator: caller.leadModerator, selfId: caller.profile?.id ?? null },
+            {
+              maskPii: caller.maskPii,
+              leadModerator: caller.leadModerator,
+              selfId: caller.profile?.id ?? null,
+            },
             null,
             row.phone_number,
           ) ?? "",

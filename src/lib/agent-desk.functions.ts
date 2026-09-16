@@ -73,7 +73,11 @@ export const listOpenLeads = createServerFn({ method: "POST" })
       ...lead,
       phone_number:
         maskForCaller(
-          { maskPii: caller.maskPii, leadModerator: caller.leadModerator, selfId: caller.profile?.id ?? null },
+          {
+            maskPii: caller.maskPii,
+            leadModerator: caller.leadModerator,
+            selfId: caller.profile?.id ?? null,
+          },
           null,
           lead.phone_number,
         ) ?? "",
