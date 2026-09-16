@@ -95,15 +95,9 @@ export function ExecutiveOverview() {
       ? { label: "Syncing", tone: "text-warning", dot: "bg-warning" }
       : { label: "Online", tone: "text-live", dot: "bg-live" };
 
-  // Ranking is a plain ordering of the real counters, not a score: most
-  // connected calls first, then calls made, then talk time.
-  const top3 = [...rows]
-    .sort(
-      (a, b) =>
-        b.connected - a.connected || b.callsMade - a.callsMade || b.talkSeconds - a.talkSeconds,
-    )
-    .filter((a) => a.callsMade > 0 || a.reportsSubmitted > 0)
-    .slice(0, 3);
+  // The order comes from the server's weighted ranking; the client never
+  // scores agents and no score is shown on screen.
+  const top3 = data?.top3 ?? [];
 
   const connectedRate =
     totals && totals.callsMade > 0 ? Math.round((totals.connected / totals.callsMade) * 100) : null;
@@ -298,7 +292,8 @@ function TopAgentRow({ rank, agent }: { rank: number; agent: TeamDailyRow }) {
         <Metric label="কল" value={agent.callsMade} />
         <Metric label="সংযুক্ত" value={agent.connected} />
         <Metric label="আগ্রহী" value={agent.interested} />
-        <Metric label="ফলো-আপ" value={agent.followUpsDue} />
+        <Metric label="ফলো-আপ বাকি" value={agent.followUpsDue} />
+        <Metric label="ফলো-আপ সম্পন্ন" value={agent.followUpsCompleted} />
         <Metric label="রিপোর্ট" value={agent.reportsSubmitted} />
         <span>
           কথার সময়{" "}
@@ -308,8 +303,9 @@ function TopAgentRow({ rank, agent }: { rank: number; agent: TeamDailyRow }) {
         </span>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        {agent.callsMade}টি কলের মধ্যে {agent.connected}টিতে কথা হয়েছে, {agent.reportsSubmitted}টি
-        রিপোর্ট জমা।
+        {agent.callsMade}টি কলের মধ্যে {agent.connected}টিতে কথা হয়েছে, {agent.interested}টি
+        আগ্রহী, {agent.followUpsCompleted}টি ফলো-আপ সম্পন্ন এবং {agent.reportsSubmitted}টি রিপোর্ট
+        জমা।
       </p>
     </li>
   );
