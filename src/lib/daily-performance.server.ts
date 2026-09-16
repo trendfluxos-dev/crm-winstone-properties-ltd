@@ -200,6 +200,7 @@ export async function computeTeamDailyPerformance(): Promise<TeamDailyPerformanc
   return {
     dayKey: dhakaDayKey(),
     agents: rows,
+    top3: rankTop3(rows),
     totals: {
       agents: rows.length,
       callsMade: rows.reduce((s, r) => s + r.callsMade, 0),
