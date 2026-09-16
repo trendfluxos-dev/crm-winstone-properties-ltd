@@ -89,6 +89,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
 
+            <ThemeToggle />
+
             <InstallAppButton />
 
             <button

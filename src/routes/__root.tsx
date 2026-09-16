@@ -149,6 +149,13 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        {/* Applies the saved light/dark choice before first paint. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(()=>{try{var s=localStorage.getItem("winstone-theme");var d=s==="dark"||(s!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();',
+          }}
+        />
         {developmentCacheReset ? (
           <script dangerouslySetInnerHTML={{ __html: developmentCacheReset }} />
         ) : null}
