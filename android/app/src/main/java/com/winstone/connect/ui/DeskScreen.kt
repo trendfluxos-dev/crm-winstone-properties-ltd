@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.foundation.border
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -102,8 +103,8 @@ fun DeskScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showNewLead = true },
-                containerColor = WinGreen,
-                contentColor = androidx.compose.ui.graphics.Color.White,
+                containerColor = com.winstone.connect.ui.theme.WinGold,
+                contentColor = com.winstone.connect.ui.theme.WinOnGold,
             ) { Text("নতুন লিড") }
         },
     ) { padding ->
@@ -151,11 +152,11 @@ fun DeskScreen(
                     Text(
                         callBlocked ?: "আগের কলের রিপোর্ট জমা বাকি",
                         color = WinRed,
-                        fontSize = 12.sp,
+                        fontSize = 15.sp,
                         modifier = Modifier.weight(1f),
                     )
                     TextButton(onClick = { showPendingReport = true }) {
-                        Text("এখনই জমা দিন", color = WinRed, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text("এখনই জমা দিন", color = WinRed, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                 }
             }
@@ -164,7 +165,7 @@ fun DeskScreen(
 
             TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.background) {
                 listOf("লিড", "কল লগ", "স্টেটাস", "AI কোচ").forEachIndexed { i, label ->
-                    Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label, fontSize = 13.sp) })
+                    Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label, fontSize = 15.sp) })
                 }
             }
 
@@ -274,11 +275,11 @@ private fun WhatsAppDialog(lead: Lead, onDismiss: () -> Unit, onSend: (String) -
         title = { Text("হোয়াটসঅ্যাপ · ${lead.name}") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(lead.phone, fontSize = 12.sp, color = WinInkMuted)
+                Text(lead.phone, fontSize = 15.sp, color = WinInkMuted)
                 OutlinedTextField(text, { text = it }, label = { Text("মেসেজ") })
                 Text(
                     "পাঠালে হোয়াটসঅ্যাপ খুলবে এবং একই লেখা লিডের টাইমলাইনে জমা হবে।",
-                    fontSize = 11.sp,
+                    fontSize = 14.sp,
                     color = WinInkMuted,
                 )
             }
@@ -300,7 +301,7 @@ private fun DeskHeader(agentName: String, employeeId: String, onRefresh: () -> U
     ) {
         Column(Modifier.weight(1f)) {
             Text("এজেন্ট ডেস্ক", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-            Text("$agentName · $employeeId", color = WinInkMuted, fontSize = 13.sp)
+            Text("$agentName · $employeeId", color = WinInkMuted, fontSize = 15.sp)
         }
         OutlinedButton(onClick = onRefresh) { Text("রিফ্রেশ") }
         Spacer(Modifier.width(8.dp))
@@ -328,12 +329,18 @@ private fun StatsRow(state: DeskUiState) {
 private fun StatChip(label: String, value: String, modifier: Modifier = Modifier) {
     Box(
         modifier
-            .background(WinGreenSoft, RoundedCornerShape(12.dp))
-            .padding(vertical = 10.dp, horizontal = 8.dp),
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            .border(1.dp, WinBorder, RoundedCornerShape(12.dp))
+            .padding(vertical = 12.dp, horizontal = 10.dp),
     ) {
         Column {
-            Text(value, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Text(label, fontSize = 11.sp, color = WinInkMuted)
+            Text(
+                value,
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp,
+                color = com.winstone.connect.ui.theme.WinGold,
+            )
+            Text(label, fontSize = 14.sp, color = WinInkMuted)
         }
     }
 }
@@ -377,18 +384,18 @@ private fun LeadCard(
         Text(
             listOfNotNull(lead.phone, lead.company).joinToString(" · "),
             color = WinInkMuted,
-            fontSize = 13.sp,
+            fontSize = 15.sp,
         )
         Text(
             "${statusLabel(lead.status)} · চেষ্টা ${lead.attempts}",
             color = if (lead.status == "pending") WinAmber else WinGreen,
-            fontSize = 12.sp,
+            fontSize = 15.sp,
         )
-        lead.notes?.let { Text(it, fontSize = 12.sp, color = WinInkMuted) }
+        lead.notes?.let { Text(it, fontSize = 15.sp, color = WinInkMuted) }
         Spacer(Modifier.height(6.dp))
-        Text(recordingLine, fontSize = 12.sp, color = recordingColor)
+        Text(recordingLine, fontSize = 15.sp, color = recordingColor)
         if (blocked) {
-            recordingReason?.let { Text(it, fontSize = 10.sp, color = WinInkMuted) }
+            recordingReason?.let { Text(it, fontSize = 15.sp, color = WinInkMuted) }
         }
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -411,7 +418,7 @@ private fun CallCard(call: CallRow, leads: List<Lead>) {
         Text(leadName, fontWeight = FontWeight.SemiBold)
         Text(
             "${call.durationSeconds} সেকেন্ড · ${shortTime(call.createdAt)}",
-            fontSize = 12.sp,
+            fontSize = 15.sp,
             color = WinInkMuted,
         )
         Text(
@@ -420,11 +427,11 @@ private fun CallCard(call: CallRow, leads: List<Lead>) {
                 "verified" -> "যাচাই হয়েছে"
                 else -> "আপলোড হয়েছে"
             },
-            fontSize = 12.sp,
+            fontSize = 15.sp,
             color = if (call.syncStatus == "failed") WinRed else WinGreen,
         )
-        call.summary?.let { Text(it, fontSize = 13.sp) }
-        call.sentiment?.let { Text("AI মনোভাব: $it", fontSize = 12.sp, color = WinInkMuted) }
+        call.summary?.let { Text(it, fontSize = 15.sp) }
+        call.sentiment?.let { Text("AI মনোভাব: $it", fontSize = 15.sp, color = WinInkMuted) }
     }
 }
 
@@ -432,13 +439,13 @@ private fun CallCard(call: CallRow, leads: List<Lead>) {
 private fun CoachCard(title: String, lines: List<String>) {
     WinCard {
         Text(title, fontWeight = FontWeight.Bold)
-        lines.forEach { Text("• $it", fontSize = 13.sp) }
+        lines.forEach { Text("• $it", fontSize = 15.sp) }
     }
 }
 
 @Composable
 private fun EmptyNote(text: String) {
-    Text(text, color = WinInkMuted, fontSize = 13.sp)
+    Text(text, color = WinInkMuted, fontSize = 15.sp)
 }
 
 @Composable
@@ -484,17 +491,17 @@ private fun StatusCards(state: DeskUiState) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         WinCard {
             Text("ডিভাইস", fontWeight = FontWeight.Bold)
-            Text("এজেন্ট: ${state.data?.agentName ?: "—"}", fontSize = 13.sp)
-            Text("Employee ID: ${state.employeeId ?: "—"}", fontSize = 13.sp, color = WinInkMuted)
+            Text("এজেন্ট: ${state.data?.agentName ?: "—"}", fontSize = 15.sp)
+            Text("Employee ID: ${state.employeeId ?: "—"}", fontSize = 15.sp, color = WinInkMuted)
             Text(
                 "ডিভাইস আইডি: ${AgentSession.deviceId ?: "—"}",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = WinInkMuted,
             )
             Text(
                 if (AgentSession.deviceToken != null) "এই ফোনটি CRM-এ যুক্ত আছে"
                 else "এই ফোনটি এখনও যুক্ত হয়নি — আবার সাইন ইন করুন",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = if (AgentSession.deviceToken != null) WinGreen else WinRed,
             )
         }
@@ -503,23 +510,23 @@ private fun StatusCards(state: DeskUiState) {
             Text("ফোনের তথ্য", fontWeight = FontWeight.Bold)
             Text(
                 "অ্যাপ ভার্সন: ${com.winstone.connect.BuildConfig.VERSION_NAME}",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = WinInkMuted,
             )
             Text(
                 "ফোন: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = WinInkMuted,
             )
             Text(
                 "অ্যান্ড্রয়েড: ${android.os.Build.VERSION.RELEASE}",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = WinInkMuted,
             )
             Text(
                 state.recordingStatus?.let { "CRM-এ জানানো হয়েছে: $it" }
                     ?: "রেকর্ডিং ক্ষমতা CRM-এ পাঠানোর অপেক্ষায়",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = if (state.recordingStatus != null) WinGreen else WinInkMuted,
             )
         }
@@ -529,25 +536,25 @@ private fun StatusCards(state: DeskUiState) {
             Text(
                 if (state.error == null) "সার্ভারের সাথে সংযোগ ঠিক আছে"
                 else "সংযোগে সমস্যা: ${state.error}",
-                fontSize = 13.sp,
+                fontSize = 15.sp,
                 color = if (state.error == null) WinGreen else WinRed,
             )
             Text(
                 "শেষ আপডেট: ${state.lastSyncedAt ?: "—"}",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = WinInkMuted,
             )
             Text(
                 "পাঠানোর অপেক্ষায়: ${state.sync.pending} · ব্যর্থ: ${state.sync.failed}",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = if (state.sync.failed > 0) WinRed else WinInkMuted,
             )
             state.sync.lastError?.let {
-                Text("শেষ সমস্যা: $it", fontSize = 11.sp, color = WinRed)
+                Text("শেষ সমস্যা: $it", fontSize = 14.sp, color = WinRed)
             }
             Text(
                 "ইন্টারনেট না থাকলে কল, রেকর্ডিং ও রিপোর্ট ফোনে জমা থাকে এবং নেটওয়ার্ক ফিরলে নিজে থেকেই পাঠানো হয়।",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = WinInkMuted,
             )
         }
@@ -556,15 +563,15 @@ private fun StatusCards(state: DeskUiState) {
             Text("কল রেকর্ডিং", fontWeight = FontWeight.Bold)
             Text(
                 capability?.label ?: "পরীক্ষা করা হচ্ছে…",
-                fontSize = 13.sp,
+                fontSize = 15.sp,
                 color = if (capability?.available == false) WinRed else WinGreen,
             )
             capability?.reason?.let {
-                Text(it, fontSize = 11.sp, color = WinInkMuted)
+                Text(it, fontSize = 14.sp, color = WinInkMuted)
             }
             Text(
                 "রেকর্ডিং সম্ভব না হলেও কলের তথ্য ও বাধ্যতামূলক রিপোর্ট আগের মতোই CRM-এ যাবে।",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 color = WinInkMuted,
             )
         }
@@ -592,14 +599,14 @@ private fun UpdateBanner(
                 if (available.mandatory) "নতুন ভার্সন বাধ্যতামূলক: ${available.versionName}"
                 else "নতুন ভার্সন এসেছে: ${available.versionName}",
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
+                fontSize = 15.sp,
             )
             available.notes?.let {
-                Text(it, fontSize = 12.sp, color = WinInkMuted, modifier = Modifier.padding(top = 2.dp))
+                Text(it, fontSize = 15.sp, color = WinInkMuted, modifier = Modifier.padding(top = 2.dp))
             }
             Text(
                 "ডাউনলোড শেষে ইনস্টল করার অনুমতি ফোন নিজেই চাইবে।",
-                fontSize = 11.sp,
+                fontSize = 14.sp,
                 color = WinInkMuted,
                 modifier = Modifier.padding(top = 4.dp),
             )
