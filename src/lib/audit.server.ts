@@ -50,7 +50,16 @@ export type AuditAction =
   | "ai_agent_mismatch_flagged"
   | "support_settings_updated"
   | "app_release_published"
-  | "year_archive_recorded";
+  | "year_archive_recorded"
+  // Monthly service billing. Amounts and references only — never card data.
+  | "service_invoice_created"
+  | "service_payment_verified"
+  | "service_payment_rejected"
+  | "service_activated"
+  | "billing_allocation_created"
+  | "architect_payout_created"
+  | "architect_payout_status_changed"
+  | "architect_profile_updated";
 
 export async function logAudit(input: {
   action: AuditAction;

@@ -368,6 +368,127 @@ export type Database = {
         }
         Relationships: []
       }
+      architect_payout_profiles: {
+        Row: {
+          account_number_encrypted: string | null
+          account_number_masked: string | null
+          bank_name: string
+          beneficiary_name: string
+          branch_name: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          note: string | null
+          routing_number: string | null
+          updated_at: string
+          verified_at: string | null
+        }
+        Insert: {
+          account_number_encrypted?: string | null
+          account_number_masked?: string | null
+          bank_name: string
+          beneficiary_name: string
+          branch_name?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          routing_number?: string | null
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Update: {
+          account_number_encrypted?: string | null
+          account_number_masked?: string | null
+          bank_name?: string
+          beneficiary_name?: string
+          branch_name?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          routing_number?: string | null
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      architect_payouts: {
+        Row: {
+          allocation_id: string | null
+          amount: number
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          failure_reason: string | null
+          id: string
+          invoice_id: string
+          profile_id: string | null
+          provider: string | null
+          provider_reference: string | null
+          requested_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allocation_id?: string | null
+          amount: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          invoice_id: string
+          profile_id?: string | null
+          provider?: string | null
+          provider_reference?: string | null
+          requested_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allocation_id?: string | null
+          amount?: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          invoice_id?: string
+          profile_id?: string | null
+          provider?: string | null
+          provider_reference?: string | null
+          requested_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "architect_payouts_allocation_id_fkey"
+            columns: ["allocation_id"]
+            isOneToOne: false
+            referencedRelation: "billing_allocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "architect_payouts_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: true
+            referencedRelation: "service_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "architect_payouts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "architect_payout_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -405,6 +526,44 @@ export type Database = {
             columns: ["actor_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_allocations: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          invoice_id: string
+          kind: string
+          label: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          invoice_id: string
+          kind: string
+          label: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          invoice_id?: string
+          kind?: string
+          label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_allocations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "service_invoices"
             referencedColumns: ["id"]
           },
         ]
@@ -1521,6 +1680,62 @@ export type Database = {
           },
         ]
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          failure_reason: string | null
+          id: string
+          invoice_id: string | null
+          payload: Json
+          provider: string
+          provider_txn_id: string
+          status: string
+          updated_at: string
+          verification_status: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          invoice_id?: string | null
+          payload?: Json
+          provider: string
+          provider_txn_id: string
+          status?: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          invoice_id?: string | null
+          payload?: Json
+          provider?: string
+          provider_txn_id?: string
+          status?: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "service_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           approval_status: string
@@ -1729,6 +1944,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_invoices: {
+        Row: {
+          amount: number
+          billing_date: string
+          created_at: string
+          currency: string
+          due_at: string
+          id: string
+          note: string | null
+          paid_at: string | null
+          period_end: string
+          period_month: string
+          period_start: string
+          reference: string
+          service_active_until: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          billing_date: string
+          created_at?: string
+          currency?: string
+          due_at: string
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          period_end: string
+          period_month: string
+          period_start: string
+          reference: string
+          service_active_until?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          billing_date?: string
+          created_at?: string
+          currency?: string
+          due_at?: string
+          id?: string
+          note?: string | null
+          paid_at?: string | null
+          period_end?: string
+          period_month?: string
+          period_start?: string
+          reference?: string
+          service_active_until?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       shift_summaries: {
         Row: {
