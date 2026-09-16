@@ -207,6 +207,7 @@ export async function computeTeamDailyPerformance(): Promise<TeamDailyPerformanc
       connected: rows.reduce((s, r) => s + r.connected, 0),
       interested: rows.reduce((s, r) => s + r.interested, 0),
       followUpsDue: rows.reduce((s, r) => s + r.followUpsDue, 0),
+      followUpsCompleted: rows.reduce((s, r) => s + r.followUpsCompleted, 0),
       reportsSubmitted: rows.reduce((s, r) => s + r.reportsSubmitted, 0),
       talkSeconds: rows.reduce((s, r) => s + r.talkSeconds, 0),
       pendingReports: rows.filter((r) => r.pendingReport).length,
