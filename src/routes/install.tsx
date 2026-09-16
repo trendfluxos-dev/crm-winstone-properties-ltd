@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Copy, Download, Globe, Smartphone, ShieldCheck, Info } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Check,
+  Copy,
+  Download,
+  Globe,
+  Smartphone,
+  ShieldCheck,
+  Info,
+  LifeBuoy,
+  RefreshCw,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
 import { Button } from "@/components/ui/button";
@@ -42,6 +52,7 @@ function InstallPage() {
   const [copied, setCopied] = useState(false);
   const [release, setRelease] = useState<Release | null>(null);
   const [releaseChecked, setReleaseChecked] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   const apkUrl = origin ? `${origin}${APK_PATH}` : APK_PATH;
 
@@ -66,23 +77,27 @@ function InstallPage() {
     };
   }, [origin]);
 
-  // Real release metadata only — the same endpoint the phones use.
-  useEffect(() => {
-    let cancelled = false;
-    void fetch("/api/public/agent/version?version_code=0", {
-      headers: { accept: "application/json" },
-    })
-      .then((res) => res.json())
-      .then((body: { latest: Release | null }) => {
-        if (cancelled) return;
-        setRelease(body.latest ?? null);
-        setReleaseChecked(true);
-      })
-      .catch(() => setReleaseChecked(true));
-    return () => {
-      cancelled = true;
-    };
+  // Real release metadata only — the same endpoint the phones use. The shown
+  // version changes only when the server actually reports a published release.
+  const checkVersion = useCallback(async () => {
+    setChecking(true);
+    try {
+      const res = await fetch("/api/public/agent/version?version_code=0", {
+        headers: { accept: "application/json" },
+      });
+      const body = (await res.json()) as { latest: Release | null };
+      if (body.latest) setRelease(body.latest);
+    } catch {
+      /* network hiccup — keep whatever was already verified */
+    } finally {
+      setChecking(false);
+      setReleaseChecked(true);
+    }
   }, []);
+
+  useEffect(() => {
+    void checkVersion();
+  }, [checkVersion]);
 
   const copy = async () => {
     await navigator.clipboard.writeText(apkUrl);
@@ -195,9 +210,68 @@ function InstallPage() {
                     বিল্ডটি দিচ্ছে। রিলিজ প্রকাশ করলে এখানে ভার্সন দেখা যাবে।
                   </span>
                 )}
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8"
+                    disabled={checking}
+                    onClick={() => void checkVersion()}
+                  >
+                    <RefreshCw className={checking ? "size-3.5 animate-spin" : "size-3.5"} />
+                    নতুন ভার্সন দেখুন
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Android install troubleshooting */}
+        <section className="rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center gap-2">
+            <LifeBuoy className="size-4 text-primary" />
+            <h2 className="text-lg font-semibold">ইনস্টলে সমস্যা হলে</h2>
+          </div>
+          <dl className="mt-3 space-y-3 text-sm">
+            <div>
+              <dt className="font-semibold">“Install blocked” / “অজানা উৎস” দেখাচ্ছে</dt>
+              <dd className="text-muted-foreground">
+                Settings → Apps → Special access → Install unknown apps → যে ব্রাউজার দিয়ে
+                নামিয়েছেন সেটি বেছে “Allow from this source” চালু করুন, তারপর আবার ফাইলে ট্যাপ
+                করুন।
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold">“App not installed” বা ফাইল খুলছে না</dt>
+              <dd className="text-muted-foreground">
+                ডাউনলোড অসম্পূর্ণ হলে এমন হয়। Downloads থেকে ফাইলটি মুছে আবার ডাউনলোড করুন, এবং
+                পুরোনো সংস্করণ থাকলে সেটি আনইনস্টল করে নিন।
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold">Play Protect সতর্কতা দিচ্ছে</dt>
+              <dd className="text-muted-foreground">
+                এটি কোম্পানির নিজস্ব অ্যাপ, Play Store-এ নেই — তাই সতর্কতা আসে। “More details” →
+                “Install anyway” দিন।
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold">কল বোতাম বা রেকর্ডিং কাজ করছে না</dt>
+              <dd className="text-muted-foreground">
+                প্রথমবার চালু করার সময় Phone, Call log, Contacts, Microphone ও Storage অনুমতিগুলো
+                “Allow” দিতে হবে। ভুলে “Deny” দিলে Settings → Apps → Winstone Connect → Permissions
+                থেকে চালু করুন, আর ব্যাটারি সেভিং থেকে অ্যাপটিকে বাদ (Unrestricted) দিন।
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold">লগইন হচ্ছে না</dt>
+              <dd className="text-muted-foreground">
+                ওয়েব CRM-এর একই ফোন নম্বর/ইমেইল ও পাসওয়ার্ড ব্যবহার করুন — আলাদা অ্যাপ-অ্যাকাউন্ট
+                নেই। অ্যাকাউন্ট অনুমোদনের অপেক্ষায় থাকলে কোঅর্ডিনেটরকে জানান।
+              </dd>
+            </div>
+          </dl>
         </section>
 
         {/* Web app / PWA */}

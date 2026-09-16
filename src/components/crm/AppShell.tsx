@@ -7,12 +7,12 @@ import apkAsset from "@/assets/winstone-connect.apk.asset.json";
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AboutLegalModal } from "@/components/crm/AboutLegalModal";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
+import { AppUpdatePrompt } from "@/components/crm/AppUpdatePrompt";
 import { InstallAppButton } from "@/components/crm/InstallAppButton";
 import { AgentSelector } from "@/components/crm/AgentSelector";
 import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { OfflineSyncBar } from "@/components/crm/OfflineSyncBar";
 import { ThemeToggle } from "@/components/crm/ThemeToggle";
-
 
 import { Button } from "@/components/ui/button";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
@@ -86,7 +86,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
@@ -175,9 +174,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="mx-auto w-full max-w-[1600px] animate-rise px-3 py-5 sm:px-6 sm:py-6">
         <OfflineSyncBar />
+        <AppUpdatePrompt />
         {children}
       </main>
-
 
       <footer className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
         <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>
