@@ -69,6 +69,26 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       };
     }
 
+    // Supervision sessions (Executive HQ, non-dialling coordinators) never
+    // receive raw phone numbers; the stored rows are untouched.
+    if (caller.maskPii) {
+      const { maskPhone } = await import("@/lib/pii");
+      return {
+        profiles: (profiles.data ?? []).map((p) => ({ ...p, phone: maskPhone(p.phone) })),
+        leads: (leads.data ?? []).map((l) => ({
+          ...l,
+          phone_number: maskPhone(l.phone_number) ?? "",
+        })),
+        calls: (calls.data ?? []).map((c) => ({
+          ...c,
+          phone_number: maskPhone(c.phone_number) ?? "",
+          agent_phone: maskPhone(c.agent_phone),
+        })),
+        messages: messages.data ?? [],
+        events: events.data ?? [],
+      };
+    }
+
     return {
       profiles: profiles.data ?? [],
       leads: leads.data ?? [],
@@ -91,7 +111,38 @@ export const unlockAdmin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { pinMatches, mintAdminToken } = await import("@/lib/admin-gate.server");
-    if (!pinMatches(data.pin)) return { ok: false as const };
+    const { logAudit } = await import("@/lib/audit.server");
+    const { requestMeta } = await import("@/lib/request-meta.server");
+    const surface = data.surface === "hq" ? "hq" : "it_console";
+    const meta = requestMeta();
+
+    // Only the outcome is ever recorded — never the submitted value, its
+    // length, or any derivative of it.
+    if (!pinMatches(data.pin)) {
+      await logAudit({
+        action: "pin_unlock_failed",
+        entityType: "console",
+        entityId: surface,
+        actorLabel: `${surface} PIN attempt`,
+        metadata: { surface, status: "failed", ...meta, at: new Date().toISOString() },
+      });
+      return { ok: false as const };
+    }
+
+    await logAudit({
+      action: "pin_unlock_succeeded",
+      entityType: "console",
+      entityId: surface,
+      actorLabel: `${surface} PIN unlock`,
+      metadata: {
+        surface,
+        status: "success",
+        accessLevel: surface === "hq" ? "read_only" : "full",
+        ...meta,
+        at: new Date().toISOString(),
+      },
+    });
+
     return {
       ok: true as const,
       token: mintAdminToken(data.surface === "hq" ? "hq" : "full"),
@@ -203,7 +254,6 @@ export const importLeads = createServerFn({ method: "POST" })
         autoAssign: z.boolean().default(false),
         // When present, the new leads are split evenly across exactly these agents.
         assignToAgentIds: z.array(z.string().uuid()).max(100).optional(),
-
       })
       .parse(input),
   )
@@ -237,7 +287,6 @@ export const importLeads = createServerFn({ method: "POST" })
       agents = activeAgents ?? [];
       if (picked.length && !agents.length) throw new Error("No active agents were selected");
     }
-
 
     const toInsert: {
       name: string;
@@ -299,7 +348,6 @@ export const importLeads = createServerFn({ method: "POST" })
       },
     });
     return { imported: toInsert.length, skipped, agents: agents.length };
-
   });
 
 const ManualCallInput = z.object({

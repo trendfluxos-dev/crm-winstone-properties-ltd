@@ -36,6 +36,10 @@ export type AuditAction =
   | "recording_doc_synced"
   | "agent_sim_bound"
   | "recording_backed_up_to_drive"
+  // Privileged console access. Outcome only — never the submitted PIN.
+  | "pin_unlock_succeeded"
+  | "pin_unlock_failed"
+  | "console_opened"
   | "recording_doc_backed_up_to_drive"
   | "shift_summary_backed_up_to_drive"
   | "agent_sim_verified"

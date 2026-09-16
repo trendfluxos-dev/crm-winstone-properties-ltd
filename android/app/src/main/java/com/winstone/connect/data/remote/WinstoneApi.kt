@@ -45,6 +45,8 @@ object WinstoneApi {
         val calls: JSONArray,
         val whatsapp: JSONArray,
         val roster: JSONArray,
+        /** Today's server-counted performance; null on older servers. */
+        val daily: JSONObject?,
     )
 
     /** Agent Workspace: this agent's own leads + call / WhatsApp logs. */
@@ -65,6 +67,7 @@ object WinstoneApi {
                 calls = body.optJSONArray("calls") ?: JSONArray(),
                 whatsapp = body.optJSONArray("whatsapp") ?: JSONArray(),
                 roster = body.optJSONArray("roster") ?: JSONArray(),
+                daily = body.optJSONObject("daily"),
             )
         }
     }

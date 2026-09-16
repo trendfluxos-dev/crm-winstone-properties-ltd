@@ -33,13 +33,42 @@ data class MessageRow(
     val createdAt: String,
 )
 
+/**
+ * Today's numbers as counted by the server for the Dhaka day. `siteVisits` is
+ * null because the CRM records no site-visit entity — the card says so rather
+ * than showing a made-up figure.
+ */
+data class DailyPerformance(
+    val callsMade: Int,
+    val connected: Int,
+    val interested: Int,
+    val followUpsDue: Int,
+    val reportsSubmitted: Int,
+    val talkSeconds: Int,
+    val siteVisits: Int?,
+)
+
 data class DeskData(
     val agentId: String,
     val agentName: String,
     val leads: List<Lead>,
     val calls: List<CallRow>,
     val messages: List<MessageRow>,
+    val daily: DailyPerformance? = null,
 )
+
+fun parseDaily(o: JSONObject?): DailyPerformance? {
+    if (o == null) return null
+    return DailyPerformance(
+        callsMade = o.optInt("callsMade"),
+        connected = o.optInt("connected"),
+        interested = o.optInt("interested"),
+        followUpsDue = o.optInt("followUpsDue"),
+        reportsSubmitted = o.optInt("reportsSubmitted"),
+        talkSeconds = o.optInt("talkSeconds"),
+        siteVisits = if (o.isNull("siteVisits")) null else o.optInt("siteVisits"),
+    )
+}
 
 private fun JSONObject.str(key: String): String? = optString(key).takeIf { it.isNotBlank() && it != "null" }
 

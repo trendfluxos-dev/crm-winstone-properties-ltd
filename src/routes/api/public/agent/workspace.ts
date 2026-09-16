@@ -88,6 +88,11 @@ export const Route = createFileRoute("/api/public/agent/workspace")({
             ])
           : [{ data: [] }, { data: [] }];
 
+        // Additive field: the phone's Daily Performance card. Existing keys and
+        // their shapes are unchanged, so older builds keep working.
+        const { computeDailyPerformance } = await import("@/lib/daily-performance.server");
+        const daily = await computeDailyPerformance(agent.id);
+
         return json({
           ok: true,
           server_time: new Date().toISOString(),
@@ -96,6 +101,7 @@ export const Route = createFileRoute("/api/public/agent/workspace")({
           leads: leads ?? [],
           calls: calls ?? [],
           whatsapp: messages ?? [],
+          daily,
         });
       },
     },

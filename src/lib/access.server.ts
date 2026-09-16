@@ -16,9 +16,21 @@ export type Caller = {
   approval: "pending" | "approved" | "rejected" | null;
   /** True for HQ viewing sessions and unapproved accounts: reads only. */
   readOnly: boolean;
+  /** Agent who also moderates the Coordinator Deck (existing identity, no extra account). */
+  leadModerator: boolean;
+  /** Supervision surfaces (coordinator deck, HQ) never receive raw phone numbers. */
+  maskPii: boolean;
 };
 
-const ANON: Caller = { scope: "none", profile: null, userId: null, approval: null, readOnly: true };
+const ANON: Caller = {
+  scope: "none",
+  profile: null,
+  userId: null,
+  approval: null,
+  readOnly: true,
+  leadModerator: false,
+  maskPii: false,
+};
 
 function isNewKey(value: string) {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -70,6 +82,10 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
       approval: "approved",
       // Executive HQ unlock is a viewing session: reads pass, mutations do not.
       readOnly: pinScope === "hq",
+      leadModerator: false,
+      // Executive HQ is a management view — it gets masked phone numbers.
+      // IT Console keeps raw values for data-health and support work.
+      maskPii: pinScope === "hq",
     };
   }
 
@@ -87,20 +103,39 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
 
   const approval = (profile.approval_status ?? "pending") as Caller["approval"];
   if (approval !== "approved" || !profile.is_active) {
-    return { scope: "none", profile, userId, approval, readOnly: true };
+    return {
+      scope: "none",
+      profile,
+      userId,
+      approval,
+      readOnly: true,
+      leadModerator: false,
+      maskPii: false,
+    };
   }
 
+  const { isLeadModerator } = await import("@/lib/lead-moderators");
+  const leadModerator = profile.role === "agent" && isLeadModerator(profile.employee_id);
+
+  // A Lead Moderator keeps their agent account and adds Coordinator Deck duty.
+  const scope: Scope =
+    profile.role === "admin"
+      ? "authority"
+      : profile.role === "team_leader" || leadModerator
+        ? "coordinator"
+        : "agent";
+
   return {
-    scope:
-      profile.role === "admin"
-        ? "authority"
-        : profile.role === "team_leader"
-          ? "coordinator"
-          : "agent",
+    scope,
     profile,
     userId,
     approval,
     readOnly: false,
+    leadModerator,
+    // A pure coordinator moderates work and never dials, so the server strips
+    // customer numbers. A Lead Moderator is still an agent with their own call
+    // list, so their data stays intact and the deck masks on screen instead.
+    maskPii: scope === "coordinator" && !leadModerator,
   };
 }
 
