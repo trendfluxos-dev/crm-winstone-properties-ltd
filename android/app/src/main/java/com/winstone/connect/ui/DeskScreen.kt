@@ -164,6 +164,8 @@ fun DeskScreen(
 
             StatsRow(state)
 
+            state.data?.daily?.let { DailyPerformanceRow(it, state.lastSyncedAt) }
+
             TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.background) {
                 listOf("লিড", "কল লগ", "স্টেটাস", "AI কোচ").forEachIndexed { i, label ->
                     Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label, fontSize = 15.sp) })
