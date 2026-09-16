@@ -23,6 +23,7 @@ import { Route as HqRouteImport } from './routes/hq'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as IngestRouteImport } from './routes/ingest'
+import { Route as InstallRouteImport } from './routes/install'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PlaybookRouteImport } from './routes/playbook'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -133,6 +134,11 @@ const InboxRoute = InboxRouteImport.update({
 const IngestRoute = IngestRouteImport.update({
   id: '/ingest',
   path: '/ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstallRoute = InstallRouteImport.update({
+  id: '/install',
+  path: '/install',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -365,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/import': typeof ImportRoute
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
+  '/install': typeof InstallRoute
   '/mcp': typeof McpRoute
   '/playbook': typeof PlaybookRoute
   '/privacy': typeof PrivacyRoute
@@ -422,6 +429,7 @@ export interface FileRoutesByTo {
   '/import': typeof ImportRoute
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
+  '/install': typeof InstallRoute
   '/mcp': typeof McpRoute
   '/playbook': typeof PlaybookRoute
   '/privacy': typeof PrivacyRoute
@@ -480,6 +488,7 @@ export interface FileRoutesById {
   '/import': typeof ImportRoute
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
+  '/install': typeof InstallRoute
   '/mcp': typeof McpRoute
   '/playbook': typeof PlaybookRoute
   '/privacy': typeof PrivacyRoute
@@ -539,6 +548,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/inbox'
     | '/ingest'
+    | '/install'
     | '/mcp'
     | '/playbook'
     | '/privacy'
@@ -596,6 +606,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/inbox'
     | '/ingest'
+    | '/install'
     | '/mcp'
     | '/playbook'
     | '/privacy'
@@ -653,6 +664,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/inbox'
     | '/ingest'
+    | '/install'
     | '/mcp'
     | '/playbook'
     | '/privacy'
@@ -711,6 +723,7 @@ export interface RootRouteChildren {
   ImportRoute: typeof ImportRoute
   InboxRoute: typeof InboxRoute
   IngestRoute: typeof IngestRoute
+  InstallRoute: typeof InstallRoute
   McpRoute: typeof McpRoute
   PlaybookRoute: typeof PlaybookRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -852,6 +865,13 @@ declare module '@tanstack/react-router' {
       path: '/ingest'
       fullPath: '/ingest'
       preLoaderRoute: typeof IngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/install': {
+      id: '/install'
+      path: '/install'
+      fullPath: '/install'
+      preLoaderRoute: typeof InstallRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -1159,6 +1179,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImportRoute: ImportRoute,
   InboxRoute: InboxRoute,
   IngestRoute: IngestRoute,
+  InstallRoute: InstallRoute,
   McpRoute: McpRoute,
   PlaybookRoute: PlaybookRoute,
   PrivacyRoute: PrivacyRoute,
