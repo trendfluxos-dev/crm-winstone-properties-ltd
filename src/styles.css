@@ -170,10 +170,24 @@
   }
 }
 
-/* Faint dot grid on the cream foundation */
+/* Barely-there architectural grid on the matte charcoal foundation */
 @utility grid-noise {
-  background-image: radial-gradient(oklch(0.25 0.02 95 / 5%) 1px, transparent 1px);
-  background-size: 22px 22px;
+  background-image: radial-gradient(oklch(0.85 0.03 84 / 4%) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+/* Thin champagne hairline used as a section divider */
+@utility gold-rule {
+  border-top: 1px solid color-mix(in oklab, var(--primary) 26%, transparent);
+}
+
+/* Section label: small, wide-tracked, warm grey */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
 }
 
 @utility tabular {
