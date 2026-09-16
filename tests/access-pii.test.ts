@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { isLeadModerator, LEAD_MODERATOR_EMPLOYEE_IDS } from "@/lib/lead-moderators";
-import { maskPhone } from "@/lib/pii";
+import { maskPhone, maskWhen } from "@/lib/pii";
 
 describe("phone masking for supervision surfaces", () => {
   it("keeps a recognisable head and tail but never a dialable number", () => {
@@ -30,5 +30,13 @@ describe("lead moderators", () => {
     expect(isLeadModerator("WIN2601")).toBe(false);
     expect(isLeadModerator("")).toBe(false);
     expect(isLeadModerator(null)).toBe(false);
+  });
+});
+
+describe("supervision masking helper", () => {
+  it("masks for supervision callers and leaves agent data intact", () => {
+    expect(maskWhen(true, "01712345678")).toBe("017••••••78");
+    expect(maskWhen(false, "01712345678")).toBe("01712345678");
+    expect(maskWhen(true, null)).toBeNull();
   });
 });

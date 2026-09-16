@@ -68,7 +68,11 @@ export const listOpenLeads = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
-    return leads ?? [];
+    const { maskWhen } = await import("@/lib/pii");
+    return (leads ?? []).map((lead) => ({
+      ...lead,
+      phone_number: maskWhen(caller.maskPii, lead.phone_number) ?? "",
+    }));
   });
 
 const ClaimInput = z.object({

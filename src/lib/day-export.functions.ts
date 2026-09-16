@@ -8,6 +8,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { maskWhen } from "@/lib/pii";
 
 const Input = z.object({
   adminToken: z.string().nullable().optional(),
@@ -125,7 +126,7 @@ export const dayCallExport = createServerFn({ method: "POST" })
         agentName: agent?.name ?? "—",
         employeeId: agent?.employee_id ?? null,
         leadName: (row.lead_id ? leadName.get(row.lead_id) : null) ?? "—",
-        phone: row.phone_number,
+        phone: maskWhen(caller.maskPii, row.phone_number) ?? "",
         source: row.call_source ?? "android",
         direction: row.call_direction,
         callStatus: row.call_status ?? "—",
@@ -229,7 +230,7 @@ export const recentSyncedCalls = createServerFn({ method: "POST" })
         agentName: agent?.name ?? "—",
         employeeId: agent?.employee_id ?? null,
         leadName: (row.lead_id ? leadName.get(row.lead_id) : null) ?? "—",
-        phone: row.phone_number,
+        phone: maskWhen(caller.maskPii, row.phone_number) ?? "",
         source: row.call_source ?? "android",
         direction: row.call_direction,
         callStatus: row.call_status ?? "—",

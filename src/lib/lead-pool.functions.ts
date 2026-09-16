@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { maskWhen } from "@/lib/pii";
 
 /**
  * The head lead database, reachable from both the IT Console and the Coordinator
@@ -28,11 +29,10 @@ export type LeadPoolAgent = {
 export const leadPoolStatus = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => TokenInput.parse(input))
   .handler(async ({ data }) => {
-    await dispatcher(data.adminToken);
+    const caller = await dispatcher(data.adminToken);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { dhakaToday, usablePoolCount, activeAgents, dailyPlan } = await import(
-      "@/lib/lead-pool.server"
-    );
+    const { dhakaToday, usablePoolCount, activeAgents, dailyPlan } =
+      await import("@/lib/lead-pool.server");
     const today = dhakaToday();
 
     const [poolCount, agents, plan, { data: preview }, { data: assigned }] = await Promise.all([
@@ -69,7 +69,10 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
     return {
       today,
       poolCount,
-      preview: preview ?? [],
+      preview: (preview ?? []).map((row) => ({
+        ...row,
+        phone_number: maskWhen(caller.maskPii, row.phone_number) ?? "",
+      })),
       agents: perAgent,
       dailyPerAgent: plan.perAgent,
       lastRunDate: plan.lastRunDate,
@@ -94,9 +97,8 @@ export const distributeLeadPool = createServerFn({ method: "POST" })
     const { requireWrite } = await import("@/lib/access.server");
     requireWrite(caller);
 
-    const { distributeDailyLeads, saveDailyPlan, dhakaToday } = await import(
-      "@/lib/lead-pool.server"
-    );
+    const { distributeDailyLeads, saveDailyPlan, dhakaToday } =
+      await import("@/lib/lead-pool.server");
     const result = await distributeDailyLeads({
       perAgent: data.perAgent,
       actorProfileId: caller.profile?.id ?? null,
