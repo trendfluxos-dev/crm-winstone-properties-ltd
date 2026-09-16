@@ -67,6 +67,7 @@ object WinstoneApi {
                 calls = body.optJSONArray("calls") ?: JSONArray(),
                 whatsapp = body.optJSONArray("whatsapp") ?: JSONArray(),
                 roster = body.optJSONArray("roster") ?: JSONArray(),
+                daily = body.optJSONObject("daily"),
             )
         }
     }
