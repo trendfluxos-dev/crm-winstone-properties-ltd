@@ -16,6 +16,8 @@ export type DailyPerformance = {
   connected: number;
   interested: number;
   followUpsDue: number;
+  /** Follow-ups marked done inside the Dhaka day — additive field, safe for older clients. */
+  followUpsCompleted: number;
   siteVisits: number | null;
   reportsSubmitted: number;
   talkSeconds: number;
