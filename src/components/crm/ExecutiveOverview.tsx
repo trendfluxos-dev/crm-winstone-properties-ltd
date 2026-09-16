@@ -303,8 +303,9 @@ function TopAgentRow({ rank, agent }: { rank: number; agent: TeamDailyRow }) {
         </span>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        {agent.callsMade}টি কলের মধ্যে {agent.connected}টিতে কথা হয়েছে, {agent.interested}টি আগ্রহী,{" "}
-        {agent.followUpsCompleted}টি ফলো-আপ সম্পন্ন এবং {agent.reportsSubmitted}টি রিপোর্ট জমা।
+        {agent.callsMade}টি কলের মধ্যে {agent.connected}টিতে কথা হয়েছে, {agent.interested}টি
+        আগ্রহী, {agent.followUpsCompleted}টি ফলো-আপ সম্পন্ন এবং {agent.reportsSubmitted}টি রিপোর্ট
+        জমা।
       </p>
     </li>
   );
