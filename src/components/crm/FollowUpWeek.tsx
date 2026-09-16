@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, PhoneCall } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { WebCallButton } from "@/components/crm/WebCallButton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
