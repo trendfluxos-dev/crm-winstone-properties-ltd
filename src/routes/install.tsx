@@ -290,7 +290,11 @@ function InstallPage() {
                           onClick={() => void copyChecksum()}
                           aria-label="SHA-256 চেকসাম কপি করুন"
                         >
-                          {hashCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                          {hashCopied ? (
+                            <Check className="size-3.5" />
+                          ) : (
+                            <Copy className="size-3.5" />
+                          )}
                           {hashCopied ? "কপি হয়েছে" : "কপি"}
                         </Button>
                       </div>
