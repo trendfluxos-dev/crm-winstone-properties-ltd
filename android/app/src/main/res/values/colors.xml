@@ -1,27 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Winstone Connect — white / green / cream palette.
-  Drop into app/src/main/res/values/colors.xml so the phone app matches
-  webcrm.winstonebd.com exactly. Hex values are the sRGB equivalents of the
-  OKLCH tokens used in the web CRM (src/styles.css).
+  Winstone Properties brand palette for the phone app — identical in meaning to
+  the web CRM tokens in src/styles.css: white / warm ivory surfaces, deep black
+  type, charcoal authority panels and one restrained champagne-gold accent.
 -->
 <resources>
     <!-- Foundation -->
-    <color name="win_cream">#FBF8F0</color>          <!-- app background -->
-    <color name="win_cream_deep">#F4EFE2</color>     <!-- muted / surface-2 -->
-    <color name="win_white">#FFFFFF</color>          <!-- cards, sheets -->
-    <color name="win_ink">#2B2A25</color>            <!-- primary text -->
-    <color name="win_ink_muted">#6F6B60</color>      <!-- secondary text -->
-    <color name="win_border">#E4DECE</color>         <!-- hairline borders -->
+    <color name="win_white">#FFFFFF</color>          <!-- app background, cards -->
+    <color name="win_ivory">#FAF9F6</color>          <!-- warm working surface -->
+    <color name="win_ink">#0B0B0B</color>            <!-- primary text -->
+    <color name="win_ink_secondary">#303030</color>  <!-- secondary text -->
+    <color name="win_ink_muted">#667085</color>      <!-- metadata only -->
+    <color name="win_border">#D9DDE3</color>         <!-- hairline borders -->
+    <color name="win_charcoal">#111318</color>       <!-- authority surface -->
 
-    <!-- Green accents -->
-    <color name="win_green">#2E9E64</color>          <!-- primary action -->
-    <color name="win_green_dark">#217A4C</color>     <!-- pressed state -->
-    <color name="win_green_soft">#E4F4EA</color>     <!-- tinted pill background -->
-    <color name="win_live">#35B473</color>           <!-- on-call pulse -->
+    <!-- Champagne gold: brand accent, primary action -->
+    <color name="win_gold">#B99245</color>
+    <color name="win_gold_light">#C5A35A</color>
+    <color name="win_gold_soft">#F7F1E4</color>
+    <color name="win_on_gold">#140F06</color>
 
-    <!-- Status -->
-    <color name="win_amber">#D89A2B</color>          <!-- pending / idle -->
-    <color name="win_red">#C4503F</color>            <!-- failed sync / critical -->
+    <!-- Semantic states -->
+    <color name="win_success">#16835B</color>        <!-- complete / synced -->
+    <color name="win_warning">#B7791F</color>        <!-- pending / warm -->
+    <color name="win_error">#C0392B</color>          <!-- urgent / hot / failed -->
+    <color name="win_info">#2563A6</color>           <!-- system information -->
+
+    <!-- Dark mode -->
+    <color name="win_dark_background">#0B0C0F</color>
+    <color name="win_dark_surface">#15171B</color>
+    <color name="win_dark_secondary_text">#B7BBC3</color>
+
+    <!-- Legacy names kept so existing layouts keep resolving -->
+    <color name="win_cream">#FFFFFF</color>
+    <color name="win_cream_deep">#FAF9F6</color>
+    <color name="win_green">#16835B</color>
+    <color name="win_green_dark">#11684817</color>
+    <color name="win_green_soft">#F7F1E4</color>
+    <color name="win_live">#16835B</color>
+    <color name="win_amber">#B7791F</color>
+    <color name="win_red">#C0392B</color>
     <color name="win_on_green">#FFFFFF</color>
 </resources>
