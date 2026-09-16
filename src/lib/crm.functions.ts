@@ -254,7 +254,6 @@ export const importLeads = createServerFn({ method: "POST" })
         autoAssign: z.boolean().default(false),
         // When present, the new leads are split evenly across exactly these agents.
         assignToAgentIds: z.array(z.string().uuid()).max(100).optional(),
-
       })
       .parse(input),
   )
@@ -288,7 +287,6 @@ export const importLeads = createServerFn({ method: "POST" })
       agents = activeAgents ?? [];
       if (picked.length && !agents.length) throw new Error("No active agents were selected");
     }
-
 
     const toInsert: {
       name: string;
@@ -350,7 +348,6 @@ export const importLeads = createServerFn({ method: "POST" })
       },
     });
     return { imported: toInsert.length, skipped, agents: agents.length };
-
   });
 
 const ManualCallInput = z.object({

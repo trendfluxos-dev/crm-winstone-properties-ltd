@@ -4,9 +4,7 @@ import { z } from "zod";
 /** The signed-in agent's own Dhaka-day performance. Real rows only. */
 export const getMyDailyPerformance = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z
-      .object({ adminToken: z.string().nullable().optional() })
-      .parse(input ?? {}),
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input ?? {}),
   )
   .handler(async ({ data }) => {
     const { resolveCaller } = await import("@/lib/access.server");

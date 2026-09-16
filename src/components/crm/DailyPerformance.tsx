@@ -50,9 +50,7 @@ export function DailyPerformance() {
         </div>
         <span
           className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] ${
-            online
-              ? "border-success/40 text-success"
-              : "border-destructive/40 text-destructive"
+            online ? "border-success/40 text-success" : "border-destructive/40 text-destructive"
           }`}
         >
           {online ? <Wifi className="size-3.5" /> : <CloudOff className="size-3.5" />}
@@ -80,7 +78,8 @@ export function DailyPerformance() {
 
       {data?.pendingReport ? (
         <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-destructive">
-          <PhoneCall className="size-3.5" /> আগের কলের রিপোর্ট জমা বাকি — জমা না দিলে পরের কল হবে না।
+          <PhoneCall className="size-3.5" /> আগের কলের রিপোর্ট জমা বাকি — জমা না দিলে পরের কল হবে
+          না।
         </p>
       ) : data && !isPending ? (
         <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
