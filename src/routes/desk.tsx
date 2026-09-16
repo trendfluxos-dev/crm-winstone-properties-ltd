@@ -201,6 +201,8 @@ function DeskPage() {
           </div>
         </div>
 
+        <DailyPerformance />
+
         <DeskStats />
 
         <FollowUpAlarm />
