@@ -232,29 +232,29 @@ export function LeadTable() {
       <div className="card-elevated hidden overflow-x-auto md:block">
         <table className="w-full min-w-[860px] text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-xs text-muted-foreground">
-              <th className="px-3 py-2.5 font-medium">ক্রমিক</th>
-              <th className="px-3 py-2.5 font-medium">নাম</th>
-              <th className="px-3 py-2.5 font-medium">ঠিকানা</th>
-              <th className="px-3 py-2.5 font-medium">ফোন নম্বর</th>
-              <th className="px-3 py-2.5 font-medium">রেফারেন্স</th>
-              <th className="px-3 py-2.5 font-medium">অবস্থা</th>
-              <th className="px-3 py-2.5 font-medium">শেষ কল</th>
-              <th className="px-3 py-2.5 text-right font-medium">কাজ</th>
+            <tr className="border-b border-primary/20 text-left text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+              <th className="px-4 py-3 font-semibold">ক্রমিক</th>
+              <th className="px-4 py-3 font-semibold">নাম</th>
+              <th className="px-4 py-3 font-semibold">ঠিকানা</th>
+              <th className="px-4 py-3 font-semibold">ফোন নম্বর</th>
+              <th className="px-4 py-3 font-semibold">রেফারেন্স</th>
+              <th className="px-4 py-3 font-semibold">অবস্থা</th>
+              <th className="px-4 py-3 font-semibold">শেষ কল</th>
+              <th className="px-4 py-3 text-right font-semibold">কাজ</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((lead, index) => (
               <tr
                 key={lead.id}
-                className="border-b border-border/60 last:border-0 hover:bg-surface-2"
+                className="border-b border-border/50 transition-colors last:border-0 hover:bg-surface-2"
               >
-                <td className="tabular px-3 py-2.5 text-muted-foreground">
+                <td className="tabular px-4 py-3 text-xs text-muted-foreground">
                   {lead.serial_no ?? index + 1}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-4 py-3">
                   <button
-                    className="text-left font-medium hover:underline"
+                    className="text-left font-medium transition-colors hover:text-primary"
                     onClick={() => setOpenLeadId(lead.id)}
                   >
                     {lead.name}
@@ -263,10 +263,10 @@ export function LeadTable() {
                     <p className="truncate text-xs text-muted-foreground">{lead.company}</p>
                   )}
                 </td>
-                <td className="max-w-[200px] px-3 py-2.5 text-xs text-muted-foreground">
+                <td className="max-w-[200px] px-4 py-3 text-xs text-muted-foreground">
                   {lead.address ?? "—"}
                 </td>
-                <td className="tabular px-3 py-2.5">{lead.phone_number}</td>
+                <td className="tabular px-4 py-3">{lead.phone_number}</td>
                 <td className="px-3 py-2.5 text-xs text-muted-foreground">
                   {lead.reference_by ?? "—"}
                 </td>
