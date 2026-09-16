@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Coins, Download, Receipt, Users } from "lucide-react";
 import { useState } from "react";
 
@@ -7,6 +7,12 @@ import { AppShell } from "@/components/crm/AppShell";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  closeBillingMonthNow,
+  getBudgetSettings,
+  listBillingInvoices,
+  saveBudgetSettings,
+} from "@/lib/billing-admin.functions";
 import { getCreditsReport } from "@/lib/credits-report.functions";
 import { getAdminToken } from "@/lib/local-session";
 
@@ -302,5 +308,141 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="tabular font-medium">{value}</dd>
     </div>
+  );
+}
+
+/**
+ * Authority-only budget controls and the frozen monthly invoice list.
+ * A hard cap pauses optional AI only — calls, reports and recordings are
+ * never blocked by a budget.
+ */
+function BudgetAndInvoices() {
+  const queryClient = useQueryClient();
+  const [budget, setBudget] = useState("");
+  const [hardCap, setHardCap] = useState(false);
+  const [thresholds, setThresholds] = useState("50, 80, 100");
+  const [loaded, setLoaded] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const settingsQuery = useQuery({
+    queryKey: ["billing-budget"],
+    queryFn: () => getBudgetSettings({ data: { adminToken: getAdminToken() } }),
+  });
+  const invoicesQuery = useQuery({
+    queryKey: ["billing-invoices"],
+    queryFn: () => listBillingInvoices({ data: { adminToken: getAdminToken() } }),
+  });
+
+  const settings = settingsQuery.data;
+  if (settings && !loaded) {
+    setLoaded(true);
+    setBudget(String(settings.monthlyCreditBudget));
+    setHardCap(settings.hardCap);
+    setThresholds(settings.alertThresholds.join(", "));
+  }
+
+  const save = useMutation({
+    mutationFn: () =>
+      saveBudgetSettings({
+        data: {
+          adminToken: getAdminToken(),
+          monthlyCreditBudget: Number(budget) || 0,
+          alertThresholds: thresholds
+            .split(",")
+            .map((n) => Number(n.trim()))
+            .filter((n) => Number.isFinite(n) && n > 0),
+          hardCap,
+          isActive: true,
+        },
+      }),
+    onSuccess: () => {
+      setMessage("বাজেট সংরক্ষিত হয়েছে।");
+      void queryClient.invalidateQueries({ queryKey: ["billing-budget"] });
+      void queryClient.invalidateQueries({ queryKey: ["credits-report"] });
+    },
+    onError: (err) => setMessage(err instanceof Error ? err.message : "সংরক্ষণ হয়নি"),
+  });
+
+  const closeMonth = useMutation({
+    mutationFn: () => closeBillingMonthNow({ data: { adminToken: getAdminToken() } }),
+    onSuccess: (res) => {
+      setMessage(
+        res.created
+          ? `${res.month} মাসের হিসাব বন্ধ হয়েছে — ${res.totalCredits} ক্রেডিট।`
+          : `${res.month} মাসের হিসাব আগেই বন্ধ ছিল।`,
+      );
+      void queryClient.invalidateQueries({ queryKey: ["billing-invoices"] });
+    },
+    onError: (err) => setMessage(err instanceof Error ? err.message : "বন্ধ করা যায়নি"),
+  });
+
+  return (
+    <section className="grid gap-4 lg:grid-cols-2">
+      <div className="card-elevated p-4">
+        <h2 className="text-sm font-semibold">মাসিক বাজেট ও সতর্কতা</h2>
+        <div className="mt-3 space-y-3 text-sm">
+          <label className="block">
+            <span className="text-muted-foreground">মাসিক বাজেট (ক্রেডিট)</span>
+            <Input
+              inputMode="decimal"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              className="mt-1"
+              placeholder="যেমন 600"
+            />
+          </label>
+          <label className="block">
+            <span className="text-muted-foreground">সতর্কতার ধাপ (%)</span>
+            <Input
+              value={thresholds}
+              onChange={(e) => setThresholds(e.target.value)}
+              className="mt-1"
+              placeholder="50, 80, 100"
+            />
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={hardCap}
+              onChange={(e) => setHardCap(e.target.checked)}
+              className="size-4 accent-primary"
+            />
+            <span>সীমা ছাড়ালে ঐচ্ছিক এআই বন্ধ (কল ও রিপোর্ট কখনো বন্ধ হবে না)</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>
+              বাজেট সংরক্ষণ
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => closeMonth.mutate()}
+              disabled={closeMonth.isPending}
+            >
+              গত মাসের হিসাব বন্ধ করুন
+            </Button>
+          </div>
+          {message && <p className="text-xs text-muted-foreground">{message}</p>}
+        </div>
+      </div>
+
+      <div className="card-elevated p-4">
+        <h2 className="text-sm font-semibold">বন্ধ হওয়া মাসের বিল</h2>
+        {(invoicesQuery.data?.length ?? 0) === 0 && (
+          <p className="mt-3 text-sm text-muted-foreground">এখনো কোনো মাস বন্ধ করা হয়নি।</p>
+        )}
+        <dl className="mt-3 space-y-1.5 text-sm">
+          {(invoicesQuery.data ?? []).map((inv) => (
+            <Row
+              key={inv.id}
+              label={`${inv.label} · ${inv.calls}টি কাজ`}
+              value={`${inv.credits} ক্রেডিট`}
+            />
+          ))}
+        </dl>
+        <p className="mt-3 text-xs text-muted-foreground">
+          বন্ধ হওয়া মাসের হিসাব আর বদলায় না; প্রতিটির সঙ্গে একটি যাচাই-চিহ্ন সংরক্ষিত থাকে।
+        </p>
+      </div>
+    </section>
   );
 }
