@@ -164,6 +164,45 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Required identity confirmation for a signed-in coordinator. This never
+ * authenticates anybody: the bearer token already proves who the caller is, and
+ * the row is matched on that user id only. It simply completes the existing
+ * profile with the details the floor needs (name, Employee ID, phone) and
+ * refuses an Employee ID that already belongs to another account.
+ */
+export const confirmMyIdentity = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        name: z.string().trim().min(2).max(80),
+        employeeId: z.string().trim().min(2).max(40),
+        phone: z.string().trim().min(6).max(24),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const employeeId = data.employeeId.toUpperCase();
+    const { data: clash } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id")
+      .eq("employee_id", employeeId)
+      .maybeSingle();
+    if (clash && clash.user_id !== context.userId) {
+      throw new Error("এই কর্মী আইডি অন্য একটি অ্যাকাউন্টে ব্যবহার হচ্ছে");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ name: data.name, employee_id: employeeId, phone: data.phone })
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 /** Pending sign-ups, for the IT Console / HQ approval list. */
 export const listAccountRequests = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ adminToken: z.string() }).parse(input))
