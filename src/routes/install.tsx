@@ -17,6 +17,13 @@ import { Button } from "@/components/ui/button";
 
 const APK_PATH = "/api/public/download/apk";
 
+type ApkInfo = {
+  source: "published" | "bundled";
+  size: number;
+  sha256: string;
+  filename: string;
+};
+
 type Release = {
   version_code: number;
   version_name: string;
@@ -53,6 +60,7 @@ function InstallPage() {
   const [release, setRelease] = useState<Release | null>(null);
   const [releaseChecked, setReleaseChecked] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [file, setFile] = useState<ApkInfo | null>(null);
 
   const apkUrl = origin ? `${origin}${APK_PATH}` : APK_PATH;
 
@@ -89,10 +97,18 @@ function InstallPage() {
       if (body.latest) setRelease(body.latest);
     } catch {
       /* network hiccup — keep whatever was already verified */
-    } finally {
-      setChecking(false);
-      setReleaseChecked(true);
     }
+    try {
+      const res = await fetch("/api/public/download/apk-info", {
+        headers: { accept: "application/json" },
+      });
+      const body = (await res.json()) as ApkInfo & { available: boolean };
+      if (body.available) setFile(body);
+    } catch {
+      /* checksum unavailable — the rest of the page still works */
+    }
+    setChecking(false);
+    setReleaseChecked(true);
   }, []);
 
   useEffect(() => {
@@ -210,6 +226,23 @@ function InstallPage() {
                     বিল্ডটি দিচ্ছে। রিলিজ প্রকাশ করলে এখানে ভার্সন দেখা যাবে।
                   </span>
                 )}
+                {file ? (
+                  <div className="mt-2 space-y-1 border-t border-border pt-2">
+                    <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-semibold">ফাইল যাচাই</span>
+                      <span className="text-muted-foreground">
+                        {file.filename} · {(file.size / (1024 * 1024)).toFixed(1)} MB (
+                        {file.size.toLocaleString("en-US")} bytes)
+                      </span>
+                    </p>
+                    <p className="break-all text-[11px] text-muted-foreground">
+                      SHA-256: <span className="tabular">{file.sha256}</span>
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      ডাউনলোড করা ফাইলের চেকসাম এটির সাথে মিললে ফাইলটি সঠিক ও অক্ষত।
+                    </p>
+                  </div>
+                ) : null}
                 <div className="mt-2">
                   <Button
                     size="sm"

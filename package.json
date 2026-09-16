@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsgo --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "smoke": "node scripts/smoke.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
