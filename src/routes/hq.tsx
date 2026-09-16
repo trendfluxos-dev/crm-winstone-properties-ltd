@@ -20,6 +20,7 @@ import { ExecutiveBrief } from "@/components/crm/ExecutiveBrief";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
 import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
+import { MobileAppCard } from "@/components/crm/MobileAppCard";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
@@ -109,6 +110,7 @@ function ControlBoard() {
   return (
     <>
       <div className="space-y-8">
+        <MobileAppCard />
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl">কন্ট্রোল বোর্ড</h1>
