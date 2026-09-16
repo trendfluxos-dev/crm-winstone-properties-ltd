@@ -111,7 +111,38 @@ export const unlockAdmin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { pinMatches, mintAdminToken } = await import("@/lib/admin-gate.server");
-    if (!pinMatches(data.pin)) return { ok: false as const };
+    const { logAudit } = await import("@/lib/audit.server");
+    const { requestMeta } = await import("@/lib/request-meta.server");
+    const surface = data.surface === "hq" ? "hq" : "it_console";
+    const meta = requestMeta();
+
+    // Only the outcome is ever recorded — never the submitted value, its
+    // length, or any derivative of it.
+    if (!pinMatches(data.pin)) {
+      await logAudit({
+        action: "pin_unlock_failed",
+        entityType: "console",
+        entityId: surface,
+        actorLabel: `${surface} PIN attempt`,
+        metadata: { surface, status: "failed", ...meta, at: new Date().toISOString() },
+      });
+      return { ok: false as const };
+    }
+
+    await logAudit({
+      action: "pin_unlock_succeeded",
+      entityType: "console",
+      entityId: surface,
+      actorLabel: `${surface} PIN unlock`,
+      metadata: {
+        surface,
+        status: "success",
+        accessLevel: surface === "hq" ? "read_only" : "full",
+        ...meta,
+        at: new Date().toISOString(),
+      },
+    });
+
     return {
       ok: true as const,
       token: mintAdminToken(data.surface === "hq" ? "hq" : "full"),
