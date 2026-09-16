@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
+import { DailyPerformance } from "@/components/crm/DailyPerformance";
 import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
 import { MobileAppCard } from "@/components/crm/MobileAppCard";
