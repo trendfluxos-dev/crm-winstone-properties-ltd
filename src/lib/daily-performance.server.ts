@@ -41,7 +41,7 @@ export async function computeDailyPerformance(agentId: string): Promise<DailyPer
   const now = new Date();
   const { startIso, endIso } = dhakaDayWindow(now);
 
-  const [calls, reports, followUps, pending] = await Promise.all([
+  const [calls, reports, followUps, doneFollowUps, pending] = await Promise.all([
     supabaseAdmin
       .from("call_recordings")
       .select("duration_seconds")
