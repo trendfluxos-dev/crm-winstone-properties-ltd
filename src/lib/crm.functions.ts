@@ -201,6 +201,9 @@ export const importLeads = createServerFn({ method: "POST" })
         adminToken: OptionalToken,
         rows: z.array(ImportRow).min(1).max(5000),
         autoAssign: z.boolean().default(false),
+        // When present, the new leads are split evenly across exactly these agents.
+        assignToAgentIds: z.array(z.string().uuid()).max(100).optional(),
+
       })
       .parse(input),
   )
@@ -219,16 +222,22 @@ export const importLeads = createServerFn({ method: "POST" })
     const seen = new Set((existing ?? []).map((l) => normalize(l.phone_number)));
 
     let agents: { id: string }[] = [];
-    if (data.autoAssign) {
-      const { data: activeAgents, error } = await supabaseAdmin
+    const picked = data.assignToAgentIds ?? [];
+    if (picked.length || data.autoAssign) {
+      const query = supabaseAdmin
         .from("profiles")
         .select("id")
         .eq("is_active", true)
         .in("role", ["agent", "team_leader"])
         .order("name");
+      const { data: activeAgents, error } = picked.length
+        ? await query.in("id", picked)
+        : await query;
       if (error) throw new Error(error.message);
       agents = activeAgents ?? [];
+      if (picked.length && !agents.length) throw new Error("No active agents were selected");
     }
+
 
     const toInsert: {
       name: string;
@@ -259,8 +268,22 @@ export const importLeads = createServerFn({ method: "POST" })
     }
 
     if (toInsert.length) {
-      const { error } = await supabaseAdmin.from("leads").insert(toInsert);
+      const { data: inserted, error } = await supabaseAdmin
+        .from("leads")
+        .insert(toInsert)
+        .select("id, assigned_to");
       if (error) throw new Error(error.message);
+      const assigned = (inserted ?? []).filter((lead) => lead.assigned_to);
+      if (assigned.length) {
+        await supabaseAdmin.from("lead_assignments").insert(
+          assigned.map((lead) => ({
+            lead_id: lead.id,
+            to_agent_id: lead.assigned_to,
+            changed_by: importer.profile?.id ?? null,
+            source: "csv_import",
+          })),
+        );
+      }
     }
     const { logAudit } = await import("@/lib/audit.server");
     await logAudit({
@@ -268,9 +291,15 @@ export const importLeads = createServerFn({ method: "POST" })
       entityType: "lead",
       actorProfileId: importer.profile?.id ?? null,
       actorLabel: importer.profile?.name ?? "Authority PIN",
-      metadata: { imported: toInsert.length, skipped, autoAssign: data.autoAssign },
+      metadata: {
+        imported: toInsert.length,
+        skipped,
+        autoAssign: data.autoAssign,
+        agents: agents.length,
+      },
     });
-    return { imported: toInsert.length, skipped };
+    return { imported: toInsert.length, skipped, agents: agents.length };
+
   });
 
 const ManualCallInput = z.object({

@@ -37,7 +37,9 @@ const NAV = [
   { to: "/docs-admin", label: "Docs Admin", scopes: ["authority", "coordinator"] },
   { to: "/inbox", label: "Support Inbox", scopes: ["authority", "coordinator", "agent"] },
   { to: "/tickets", label: "Tickets", scopes: ["authority", "coordinator", "agent"] },
+  { to: "/playbook", label: "প্লেবুক", scopes: ["authority", "coordinator", "agent"] },
   { to: "/customers", label: "Customers", scopes: ["authority", "coordinator", "agent"] },
+
   { to: "/support-admin", label: "Support Admin", scopes: ["authority", "coordinator"] },
   { to: "/help", label: "Help Centre", scopes: ["authority", "coordinator", "agent", "none"] },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;

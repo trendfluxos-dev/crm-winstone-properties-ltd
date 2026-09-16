@@ -24,6 +24,7 @@ import { Route as ImportRouteImport } from './routes/import'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as IngestRouteImport } from './routes/ingest'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as PlaybookRouteImport } from './routes/playbook'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SupportRouteImport } from './routes/support'
@@ -137,6 +138,11 @@ const IngestRoute = IngestRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlaybookRoute = PlaybookRouteImport.update({
+  id: '/playbook',
+  path: '/playbook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
+  '/playbook': typeof PlaybookRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/support': typeof SupportRoute
@@ -416,6 +423,7 @@ export interface FileRoutesByTo {
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
+  '/playbook': typeof PlaybookRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/support': typeof SupportRoute
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
   '/mcp': typeof McpRoute
+  '/playbook': typeof PlaybookRoute
   '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/support': typeof SupportRoute
@@ -531,6 +540,7 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/ingest'
     | '/mcp'
+    | '/playbook'
     | '/privacy'
     | '/reports'
     | '/support'
@@ -587,6 +597,7 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/ingest'
     | '/mcp'
+    | '/playbook'
     | '/privacy'
     | '/reports'
     | '/support'
@@ -643,6 +654,7 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/ingest'
     | '/mcp'
+    | '/playbook'
     | '/privacy'
     | '/reports'
     | '/support'
@@ -700,6 +712,7 @@ export interface RootRouteChildren {
   InboxRoute: typeof InboxRoute
   IngestRoute: typeof IngestRoute
   McpRoute: typeof McpRoute
+  PlaybookRoute: typeof PlaybookRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportsRoute: typeof ReportsRoute
   SupportRoute: typeof SupportRoute
@@ -846,6 +859,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playbook': {
+      id: '/playbook'
+      path: '/playbook'
+      fullPath: '/playbook'
+      preLoaderRoute: typeof PlaybookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1140,6 +1160,7 @@ const rootRouteChildren: RootRouteChildren = {
   InboxRoute: InboxRoute,
   IngestRoute: IngestRoute,
   McpRoute: McpRoute,
+  PlaybookRoute: PlaybookRoute,
   PrivacyRoute: PrivacyRoute,
   ReportsRoute: ReportsRoute,
   SupportRoute: SupportRoute,
