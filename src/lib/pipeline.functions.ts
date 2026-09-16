@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { maskWhen } from "@/lib/pii";
+import { maskForCaller } from "@/lib/pii";
 
 /**
  * Recording pipeline observability for the IT Console.
@@ -131,6 +131,11 @@ export const recordingPipeline = createServerFn({ method: "POST" })
     const leadBy = new Map((leads.data ?? []).map((l) => [l.id, l]));
     const agentBy = new Map((agents.data ?? []).map((a) => [a.id, a]));
 
+    const maskCtx = {
+      maskPii: caller.maskPii,
+      leadModerator: caller.leadModerator,
+      selfId: caller.profile?.id ?? null,
+    };
     const built: PipelineRow[] = rows.map((r) => {
       const backup = backupBy.get(r.id) ?? null;
       const report = reportBy.get(r.id) ?? null;
@@ -262,7 +267,7 @@ export const recordingPipeline = createServerFn({ method: "POST" })
         leadName: lead?.name ?? null,
         agentId: r.agent_id,
         agentName: r.agent_id ? (agentBy.get(r.agent_id)?.name ?? null) : null,
-        phone: maskWhen(caller.maskPii, r.phone_number) ?? "",
+        phone: maskForCaller(maskCtx, r.agent_id, r.phone_number) ?? "",
         durationSeconds: r.duration_seconds ?? 0,
         startedAt: r.started_at,
         createdAt: r.created_at,

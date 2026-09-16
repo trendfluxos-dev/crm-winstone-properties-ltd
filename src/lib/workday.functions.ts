@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { maskWhen } from "@/lib/pii";
+import { maskForCaller } from "@/lib/pii";
 
 /**
  * Day-by-day lead work and the yearly retention record.
@@ -102,7 +102,16 @@ export const yearArchiveExport = createServerFn({ method: "POST" })
       year: data.year,
       leads: (leads.data ?? []).map((lead) => ({
         ...lead,
-        phone_number: maskWhen(caller.maskPii, lead.phone_number) ?? "",
+        phone_number:
+          maskForCaller(
+            {
+              maskPii: caller.maskPii,
+              leadModerator: caller.leadModerator,
+              selfId: caller.profile?.id ?? null,
+            },
+            lead.assigned_to,
+            lead.phone_number,
+          ) ?? "",
         agent_name: lead.assigned_to ? (names.get(lead.assigned_to) ?? "") : "",
       })),
       reports: (reports.data ?? []).map((report) => ({

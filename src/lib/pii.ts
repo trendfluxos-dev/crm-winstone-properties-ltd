@@ -21,3 +21,29 @@ export function maskPhone(value: string | null | undefined): string | null {
   const tail = digits.slice(-2);
   return `${head}${"•".repeat(Math.max(2, digits.length - 5))}${tail}`;
 }
+
+export type MaskContext = {
+  /** Pure supervision surfaces (HQ, non-dialling coordinators): mask everything. */
+  maskPii: boolean;
+  /** Lead Moderators keep their own agent workflow but supervise others. */
+  leadModerator: boolean;
+  /** The caller's own profile id, when they have an account. */
+  selfId: string | null;
+};
+
+/**
+ * Row-aware masking.
+ *
+ * A Lead Moderator is both an agent and a supervisor: their own customers stay
+ * dialable, every other agent's customer is reduced to the masked shape, so a
+ * team-supervision payload never carries somebody else's raw number.
+ */
+export function maskForCaller(
+  ctx: MaskContext,
+  ownerId: string | null | undefined,
+  value: string | null | undefined,
+): string | null {
+  if (ctx.maskPii) return maskPhone(value);
+  if (ctx.leadModerator && (!ownerId || ownerId !== ctx.selfId)) return maskPhone(value);
+  return value ?? null;
+}

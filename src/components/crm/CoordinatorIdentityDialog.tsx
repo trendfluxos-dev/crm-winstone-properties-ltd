@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { confirmMyIdentity } from "@/lib/accounts.functions";
+import { confirmCoordinatorEntry, confirmMyIdentity } from "@/lib/accounts.functions";
 import { useMyAccount } from "@/lib/session";
 
 /**
@@ -35,6 +35,20 @@ export function CoordinatorIdentityDialog() {
   const [employeeId, setEmployeeId] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [entered, setEntered] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.sessionStorage.getItem("winstone.coordinator.entered") === "1";
+  });
+
+  const logEntry = useServerFn(confirmCoordinatorEntry);
+  const enter = useMutation({
+    mutationFn: () => logEntry({ data: { adminToken: null } }),
+    onSuccess: () => {
+      window.sessionStorage.setItem("winstone.coordinator.entered", "1");
+      setEntered(true);
+    },
+    onError: (err: Error) => toast.error("প্রবেশ নথিভুক্ত হয়নি", { description: err.message }),
+  });
 
   const incomplete =
     scope === "coordinator" &&
@@ -57,6 +71,41 @@ export function CoordinatorIdentityDialog() {
     },
     onError: (err: Error) => setError(err.message),
   });
+
+  // Identity complete: one confirmation of who is entering, then the deck.
+  // Recorded server-side as a Coordinator Deck entry for the audit trail.
+  if (!isPending && scope === "coordinator" && profile && !incomplete && !entered) {
+    return (
+      <Dialog open>
+        <DialogContent className="sm:max-w-md [&>button]:hidden">
+          <DialogHeader className="items-center text-center">
+            <span className="grid size-11 place-items-center rounded-full bg-primary/15 text-primary">
+              <BadgeCheck className="size-5" />
+            </span>
+            <DialogTitle>পরিচয় নিশ্চিত করুন</DialogTitle>
+            <DialogDescription>
+              এই পরিচয়ে কোঅর্ডিনেটর ডেক চালু হবে। শুধু আপনার নিজের তথ্য দেখানো হচ্ছে।
+            </DialogDescription>
+          </DialogHeader>
+
+          <dl className="space-y-2 rounded-xl bg-surface-2 p-3 text-sm">
+            <Row label="নাম" value={profile.name} />
+            <Row label="কর্মী আইডি" value={profile.employee_id ?? "—"} />
+            <Row label="মোবাইল" value={profile.phone ?? "—"} />
+          </dl>
+
+          <Button
+            className="h-11 w-full text-base"
+            disabled={enter.isPending}
+            onClick={() => enter.mutate()}
+          >
+            {enter.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            ডেস্কে প্রবেশ করুন
+          </Button>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (isPending || !incomplete) return null;
 
@@ -131,5 +180,14 @@ export function CoordinatorIdentityDialog() {
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="font-medium">{value}</dd>
+    </div>
   );
 }

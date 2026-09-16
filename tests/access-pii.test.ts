@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { isLeadModerator, LEAD_MODERATOR_EMPLOYEE_IDS } from "@/lib/lead-moderators";
-import { maskPhone, maskWhen } from "@/lib/pii";
+import { maskForCaller, maskPhone, maskWhen } from "@/lib/pii";
 
 describe("phone masking for supervision surfaces", () => {
   it("keeps a recognisable head and tail but never a dialable number", () => {
@@ -38,5 +38,30 @@ describe("supervision masking helper", () => {
     expect(maskWhen(true, "01712345678")).toBe("017••••••78");
     expect(maskWhen(false, "01712345678")).toBe("01712345678");
     expect(maskWhen(true, null)).toBeNull();
+  });
+});
+
+describe("lead moderator masking", () => {
+  const ctx = { maskPii: false, leadModerator: true, selfId: "me" };
+
+  it("keeps the moderator's own customers dialable", () => {
+    expect(maskForCaller(ctx, "me", "01712345678")).toBe("01712345678");
+  });
+
+  it("masks other agents' customers in supervision payloads", () => {
+    expect(maskForCaller(ctx, "someone-else", "01712345678")).toBe("017••••••78");
+    expect(maskForCaller(ctx, null, "01712345678")).toBe("017••••••78");
+  });
+
+  it("masks everything for a pure supervision session", () => {
+    expect(
+      maskForCaller({ maskPii: true, leadModerator: false, selfId: null }, "me", "01712345678"),
+    ).toBe("017••••••78");
+  });
+
+  it("never masks for a plain agent", () => {
+    expect(
+      maskForCaller({ maskPii: false, leadModerator: false, selfId: "me" }, "other", "01712345678"),
+    ).toBe("01712345678");
   });
 });

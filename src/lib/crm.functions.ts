@@ -69,6 +69,34 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       };
     }
 
+    // A Lead Moderator supervises the floor while still working their own
+    // leads: their own rows stay dialable, everyone else's are masked.
+    if (caller.leadModerator && caller.profile) {
+      const { maskForCaller } = await import("@/lib/pii");
+      const ctx = { maskPii: false, leadModerator: true, selfId: caller.profile.id };
+      const ownerOf = (leadId: string | null) => {
+        const lead = (leads.data ?? []).find((l) => l.id === leadId);
+        return lead ? leadOwner(lead) : null;
+      };
+      return {
+        profiles: (profiles.data ?? []).map((p) => ({
+          ...p,
+          phone: maskForCaller(ctx, p.id, p.phone),
+        })),
+        leads: (leads.data ?? []).map((l) => ({
+          ...l,
+          phone_number: maskForCaller(ctx, leadOwner(l), l.phone_number) ?? "",
+        })),
+        calls: (calls.data ?? []).map((c) => ({
+          ...c,
+          phone_number: maskForCaller(ctx, c.agent_id ?? ownerOf(c.lead_id), c.phone_number) ?? "",
+          agent_phone: maskForCaller(ctx, c.agent_id, c.agent_phone),
+        })),
+        messages: messages.data ?? [],
+        events: events.data ?? [],
+      };
+    }
+
     // Supervision sessions (Executive HQ, non-dialling coordinators) never
     // receive raw phone numbers; the stored rows are untouched.
     if (caller.maskPii) {

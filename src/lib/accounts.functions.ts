@@ -203,6 +203,41 @@ export const confirmMyIdentity = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Coordinator Deck entry confirmation.
+ *
+ * The caller has already been authenticated by the server as a dispatcher; this
+ * records that they confirmed their own identity and opened the deck, with safe
+ * request metadata only. No credential of any kind is written.
+ */
+export const confirmCoordinatorEntry = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireDispatch } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    requireDispatch(caller);
+
+    const { logAudit } = await import("@/lib/audit.server");
+    const { requestMeta } = await import("@/lib/request-meta.server");
+    await logAudit({
+      action: "coordinator_deck_opened",
+      entityType: "console",
+      entityId: "coordinator_deck",
+      actorProfileId: caller.profile?.id ?? null,
+      actorLabel: caller.profile?.employee_id ?? "authority",
+      metadata: {
+        surface: "coordinator_deck",
+        status: "success",
+        accessLevel: caller.leadModerator ? "lead_moderator" : caller.scope,
+        ...requestMeta(),
+        at: new Date().toISOString(),
+      },
+    });
+    return { ok: true };
+  });
+
 /** Pending sign-ups, for the IT Console / HQ approval list. */
 export const listAccountRequests = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ adminToken: z.string() }).parse(input))

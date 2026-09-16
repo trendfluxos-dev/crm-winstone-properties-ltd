@@ -68,10 +68,19 @@ export const listOpenLeads = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
-    const { maskWhen } = await import("@/lib/pii");
+    const { maskForCaller } = await import("@/lib/pii");
     return (leads ?? []).map((lead) => ({
       ...lead,
-      phone_number: maskWhen(caller.maskPii, lead.phone_number) ?? "",
+      phone_number:
+        maskForCaller(
+          {
+            maskPii: caller.maskPii,
+            leadModerator: caller.leadModerator,
+            selfId: caller.profile?.id ?? null,
+          },
+          null,
+          lead.phone_number,
+        ) ?? "",
     }));
   });
 
