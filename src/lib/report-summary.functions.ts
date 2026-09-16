@@ -31,7 +31,7 @@ export const draftReportSummary = createServerFn({ method: "POST" })
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { summary: null as string | null };
 
-    const response = await fetch(GATEWAY, {
+    const response = await (await import("@/lib/metered-fetch.server")).meteredFetch(GATEWAY, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
       body: JSON.stringify({
@@ -49,7 +49,7 @@ export const draftReportSummary = createServerFn({ method: "POST" })
           },
         ],
       }),
-    });
+    }, { provider: "lovable-ai", operation: "report_summary", category: "doc_summary", model: MODEL });
 
     if (!response.ok) {
       const message = await response.text().catch(() => "");

@@ -98,31 +98,67 @@ export type Database = {
         Row: {
           actor_profile_id: string | null
           category: string
+          cost_amount: number
+          cost_credits: number
           created_at: string
+          currency: string
           detail: string | null
           est_credits: number
           id: string
+          idempotency_key: string | null
+          input_units: number
+          latency_ms: number | null
           model: string | null
+          operation: string | null
+          output_units: number
+          provider: string | null
+          rate_card_id: string | null
+          status: string
+          unit_kind: string
           units: number
         }
         Insert: {
           actor_profile_id?: string | null
           category: string
+          cost_amount?: number
+          cost_credits?: number
           created_at?: string
+          currency?: string
           detail?: string | null
           est_credits: number
           id?: string
+          idempotency_key?: string | null
+          input_units?: number
+          latency_ms?: number | null
           model?: string | null
+          operation?: string | null
+          output_units?: number
+          provider?: string | null
+          rate_card_id?: string | null
+          status?: string
+          unit_kind?: string
           units?: number
         }
         Update: {
           actor_profile_id?: string | null
           category?: string
+          cost_amount?: number
+          cost_credits?: number
           created_at?: string
+          currency?: string
           detail?: string | null
           est_credits?: number
           id?: string
+          idempotency_key?: string | null
+          input_units?: number
+          latency_ms?: number | null
           model?: string | null
+          operation?: string | null
+          output_units?: number
+          provider?: string | null
+          rate_card_id?: string | null
+          status?: string
+          unit_kind?: string
           units?: number
         }
         Relationships: [
@@ -372,6 +408,145 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      billing_budgets: {
+        Row: {
+          alert_thresholds: number[]
+          created_at: string
+          hard_cap: boolean
+          id: string
+          is_active: boolean
+          monthly_credit_budget: number
+          note: string | null
+          profile_id: string | null
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          alert_thresholds?: number[]
+          created_at?: string
+          hard_cap?: boolean
+          id?: string
+          is_active?: boolean
+          monthly_credit_budget?: number
+          note?: string | null
+          profile_id?: string | null
+          scope?: string
+          updated_at?: string
+        }
+        Update: {
+          alert_thresholds?: number[]
+          created_at?: string
+          hard_cap?: boolean
+          id?: string
+          is_active?: boolean
+          monthly_credit_budget?: number
+          note?: string | null
+          profile_id?: string | null
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_budgets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_invoice_lines: {
+        Row: {
+          amount: number
+          calls: number
+          created_at: string
+          credits: number
+          dimension: string
+          id: string
+          invoice_id: string
+          key: string
+          label: string
+        }
+        Insert: {
+          amount?: number
+          calls?: number
+          created_at?: string
+          credits?: number
+          dimension: string
+          id?: string
+          invoice_id: string
+          key: string
+          label: string
+        }
+        Update: {
+          amount?: number
+          calls?: number
+          created_at?: string
+          credits?: number
+          dimension?: string
+          id?: string
+          invoice_id?: string
+          key?: string
+          label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "billing_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_invoices: {
+        Row: {
+          closed_at: string
+          created_at: string
+          currency: string
+          generation_hash: string
+          id: string
+          period_end: string
+          period_month: string
+          period_start: string
+          status: string
+          total_amount: number
+          total_calls: number
+          total_credits: number
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string
+          created_at?: string
+          currency?: string
+          generation_hash: string
+          id?: string
+          period_end: string
+          period_month: string
+          period_start: string
+          status?: string
+          total_amount?: number
+          total_calls?: number
+          total_credits?: number
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string
+          created_at?: string
+          currency?: string
+          generation_hash?: string
+          id?: string
+          period_end?: string
+          period_month?: string
+          period_start?: string
+          status?: string
+          total_amount?: number
+          total_calls?: number
+          total_credits?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       call_processing_jobs: {
         Row: {
@@ -1409,6 +1584,54 @@ export type Database = {
           sim_number?: string | null
           status?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      provider_rate_cards: {
+        Row: {
+          amount_per_unit: number
+          created_at: string
+          credits_per_unit: number
+          currency: string
+          effective_from: string
+          effective_to: string | null
+          id: string
+          model: string | null
+          note: string | null
+          operation: string | null
+          provider: string
+          unit_kind: string
+          updated_at: string
+        }
+        Insert: {
+          amount_per_unit?: number
+          created_at?: string
+          credits_per_unit?: number
+          currency?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          model?: string | null
+          note?: string | null
+          operation?: string | null
+          provider: string
+          unit_kind?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_per_unit?: number
+          created_at?: string
+          credits_per_unit?: number
+          currency?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          model?: string | null
+          note?: string | null
+          operation?: string | null
+          provider?: string
+          unit_kind?: string
+          updated_at?: string
         }
         Relationships: []
       }

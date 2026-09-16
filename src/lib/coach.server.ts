@@ -1,3 +1,4 @@
+import { meteredFetch } from "@/lib/metered-fetch.server";
 import {
   buildAgentStats,
   type CallRecording,
@@ -225,7 +226,7 @@ export async function buildCoachBriefing(agentId: string): Promise<CoachBriefing
 
   const evidence = buildEvidence(leads, calls, messages);
   try {
-    const res = await fetch(GATEWAY, {
+    const res = await meteredFetch(GATEWAY, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -247,7 +248,7 @@ export async function buildCoachBriefing(agentId: string): Promise<CoachBriefing
         ],
         response_format: { type: "json_object" },
       }),
-    });
+    }, { provider: "lovable-ai", operation: "coach", category: "command_agent", model: MODEL });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       console.error("coach gateway error", res.status, detail);

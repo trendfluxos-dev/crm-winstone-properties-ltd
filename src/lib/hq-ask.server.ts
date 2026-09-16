@@ -1,3 +1,4 @@
+import { meteredFetch } from "@/lib/metered-fetch.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type ChartSpec = {
@@ -90,7 +91,7 @@ export async function askFloorQuestion(question: string): Promise<HqAnswer> {
   if (!key) throw new Error("AI is not configured");
   const facts = await buildFloorFacts();
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await meteredFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({
@@ -104,7 +105,7 @@ export async function askFloorQuestion(question: string): Promise<HqAnswer> {
       ],
       response_format: { type: "json_object" },
     }),
-  });
+  }, { provider: "lovable-ai", operation: "hq_ask", category: "command_agent" });
 
   if (response.status === 429) throw new Error("AI is busy right now — try again in a moment");
   if (response.status === 402) throw new Error("AI credits are exhausted for this workspace");

@@ -1,3 +1,4 @@
+import { meteredFetch } from "@/lib/metered-fetch.server";
 /**
  * Provider-agnostic speech-to-text adapter (server-only).
  *
@@ -83,11 +84,11 @@ async function transcribeWithGateway(
   form.append("model", model);
   form.append("file", new Blob([bytes as BlobPart], { type: contentType }), filename);
 
-  const res = await fetch(`${GATEWAY}/audio/transcriptions`, {
+  const res = await meteredFetch(`${GATEWAY}/audio/transcriptions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}` },
     body: form,
-  });
+  }, { provider: "lovable-ai", operation: "transcription", category: "transcription" });
 
   if (!res.ok) {
     const retryable = res.status === 429 || res.status >= 500;

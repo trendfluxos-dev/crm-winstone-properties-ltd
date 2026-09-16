@@ -1,3 +1,4 @@
+import { meteredFetch } from "@/lib/metered-fetch.server";
 import type { CallRecording, Lead } from "@/lib/crm-data";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -108,7 +109,7 @@ export async function buildPreCallBrief(leadId: string): Promise<PreCallBrief> {
   };
 
   try {
-    const res = await fetch(GATEWAY, {
+    const res = await meteredFetch(GATEWAY, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -122,7 +123,7 @@ export async function buildPreCallBrief(leadId: string): Promise<PreCallBrief> {
         ],
         response_format: { type: "json_object" },
       }),
-    });
+    }, { provider: "lovable-ai", operation: "precall", category: "command_agent", model: MODEL });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       console.error("precall gateway error", res.status, detail);

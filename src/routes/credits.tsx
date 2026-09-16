@@ -8,7 +8,6 @@ import { RoleGate } from "@/components/crm/RoleGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getCreditsReport } from "@/lib/credits-report.functions";
-import { AI_USAGE_RATES } from "@/lib/credits-rates";
 import { getAdminToken } from "@/lib/local-session";
 
 export const Route = createFileRoute("/credits")({
@@ -148,31 +147,90 @@ function CreditsBoard() {
             />
           </div>
 
-          <section className="card-elevated p-4">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <Coins className="size-4 text-primary" /> হার (প্রতি কাজে)
-            </h2>
-            <dl className="mt-3 space-y-1.5 text-sm">
-              <Row
-                label="Winstone AI-তে একটা প্রশ্ন"
-                value={`≈ ${AI_USAGE_RATES.command_agent} ক্রেডিট`}
-              />
-              <Row
-                label="একটা কলের ট্রান্সক্রিপ্ট"
-                value={`≈ ${AI_USAGE_RATES.transcription} ক্রেডিট`}
-              />
-              <Row
-                label="একটা কলের এআই সারসংক্ষেপ"
-                value={`≈ ${AI_USAGE_RATES.analysis} ক্রেডিট`}
-              />
-              <Row label="ডকুমেন্ট সারসংক্ষেপ" value={`≈ ${AI_USAGE_RATES.doc_summary} ক্রেডিট`} />
-            </dl>
-            <p className="mt-3 text-xs text-muted-foreground">
-              ৮ জন এজেন্ট নিয়ে মাসজুড়ে চালালে অনুমান: এআই কাজে ≈ {report.projection.aiOnly}{" "}
-              ক্রেডিট, সিস্টেম উন্নয়নসহ ≈ {report.projection.withDevelopment} ক্রেডিট/মাস। টাকার
-              দাম ও টপ-আপ Settings → Plans &amp; credits থেকে দেখুন।
-            </p>
+          <section className="grid gap-4 lg:grid-cols-2">
+            <div className="card-elevated p-4">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <Coins className="size-4 text-primary" /> হার তালিকা (সার্ভারে সংরক্ষিত)
+              </h2>
+              {report.rateCards.length === 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">কোনো হার নির্ধারণ করা নেই।</p>
+              )}
+              <dl className="mt-3 space-y-1.5 text-sm">
+                {report.rateCards.map((c) => (
+                  <Row
+                    key={`${c.provider}-${c.model ?? ""}-${c.operation ?? ""}`}
+                    label={`${c.provider}${c.operation ? ` · ${c.operation}` : ""}${c.model ? ` · ${c.model}` : ""}`}
+                    value={`${c.creditsPerUnit} ক্রেডিট / ${c.unitKind}`}
+                  />
+                ))}
+              </dl>
+              <p className="mt-3 text-xs text-muted-foreground">
+                প্রতিটি হিসাব তৈরির সময়ের হার দিয়েই স্থায়ীভাবে লেখা হয়, তাই হার বদলালেও পুরোনো
+                হিসাব বদলায় না।
+              </p>
+            </div>
+
+            <div className="card-elevated p-4">
+              <h2 className="text-sm font-semibold">মাসের অনুমান ও বাজেট</h2>
+              {report.projection.basis === "none" ? (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  এই মাসে কোনো রেকর্ড নেই, তাই অনুমান দেখানো যাচ্ছে না।
+                </p>
+              ) : (
+                <dl className="mt-3 space-y-1.5 text-sm">
+                  <Row
+                    label={`চলতি হার (${report.projection.elapsedDays} দিনের হিসাব)`}
+                    value={`${report.projection.perDay} ক্রেডিট / দিন`}
+                  />
+                  <Row
+                    label={`পুরো মাসে (${report.projection.monthDays} দিন)`}
+                    value={`≈ ${report.projection.monthEnd} ক্রেডিট`}
+                  />
+                  <Row
+                    label="টাকায় খরচ"
+                    value={`${report.totals.amount} ${report.totals.currency}`}
+                  />
+                </dl>
+              )}
+              {report.budget ? (
+                <dl className="mt-3 space-y-1.5 border-t border-border/60 pt-3 text-sm">
+                  <Row label="মাসিক বাজেট" value={`${report.budget.budget} ক্রেডিট`} />
+                  <Row
+                    label="ব্যবহার হয়েছে"
+                    value={`${report.budget.spent} ক্রেডিট (${report.budget.percent}%)`}
+                  />
+                  <Row
+                    label="সীমা ছাড়ালে"
+                    value={
+                      report.budget.hardCap
+                        ? "ঐচ্ছিক এআই বন্ধ, কল ও রিপোর্ট চালু"
+                        : "শুধু সতর্কবার্তা"
+                    }
+                  />
+                </dl>
+              ) : (
+                <p className="mt-3 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                  কোনো মাসিক বাজেট নির্ধারণ করা নেই।
+                </p>
+              )}
+            </div>
           </section>
+
+          {report.providers.length > 0 && (
+            <section className="card-elevated p-4">
+              <h2 className="text-sm font-semibold">প্রদানকারী ও মডেল অনুযায়ী</h2>
+              <dl className="mt-3 space-y-1.5 text-sm">
+                {report.providers.map((p) => (
+                  <Row
+                    key={`${p.provider}-${p.model ?? ""}`}
+                    label={`${p.provider}${p.model ? ` · ${p.model}` : ""} · ${p.calls}টি`}
+                    value={`${p.credits} ক্রেডিট`}
+                  />
+                ))}
+              </dl>
+            </section>
+          )}
+
 
           <section className="grid gap-4 lg:grid-cols-2">
             <div className="card-elevated p-4">

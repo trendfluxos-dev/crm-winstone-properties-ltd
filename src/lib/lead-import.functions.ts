@@ -103,7 +103,7 @@ export const parseLeadFile = createServerFn({ method: "POST" })
       content.push({ type: "text", text: `File content:\n${text.slice(0, 60_000)}` });
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await (await import("@/lib/metered-fetch.server")).meteredFetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env["LOVABLE_API_KEY"]}`,
@@ -113,7 +113,7 @@ export const parseLeadFile = createServerFn({ method: "POST" })
         model: "google/gemini-3.8-flash",
         messages: [{ role: "user", content }],
       }),
-    });
+    }, { provider: "lovable-ai", operation: "lead_import_ai", category: "other" });
 
     if (!response.ok) {
       const detail = await response.text();

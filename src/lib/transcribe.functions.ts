@@ -32,11 +32,11 @@ export const transcribeAudio = createServerFn({ method: "POST" })
     form.append("response_format", "json");
     if (data.language) form.append("language", data.language);
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
+    const response = await (await import("@/lib/metered-fetch.server")).meteredFetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
       body: form,
-    });
+    }, { provider: "lovable-ai", operation: "transcription", category: "transcription" });
 
     if (!response.ok) {
       const detail = await response.text();
