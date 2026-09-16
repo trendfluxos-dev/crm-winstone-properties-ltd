@@ -53,6 +53,7 @@ function InstallPage() {
   const [release, setRelease] = useState<Release | null>(null);
   const [releaseChecked, setReleaseChecked] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [file, setFile] = useState<ApkInfo | null>(null);
 
   const apkUrl = origin ? `${origin}${APK_PATH}` : APK_PATH;
 
@@ -89,10 +90,18 @@ function InstallPage() {
       if (body.latest) setRelease(body.latest);
     } catch {
       /* network hiccup — keep whatever was already verified */
-    } finally {
-      setChecking(false);
-      setReleaseChecked(true);
     }
+    try {
+      const res = await fetch("/api/public/download/apk-info", {
+        headers: { accept: "application/json" },
+      });
+      const body = (await res.json()) as ApkInfo & { available: boolean };
+      if (body.available) setFile(body);
+    } catch {
+      /* checksum unavailable — the rest of the page still works */
+    }
+    setChecking(false);
+    setReleaseChecked(true);
   }, []);
 
   useEffect(() => {
