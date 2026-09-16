@@ -105,9 +105,8 @@ export const publishAppRelease = createServerFn({ method: "POST" })
     // Hash the exact bytes that were just uploaded, so the public info endpoint
     // never has to read the build back. A failure here must not publish a stale
     // digest: the old row is dropped first, and the endpoint backfills instead.
-    const { invalidatePublishedChecksum, storeApkChecksum } = await import(
-      "@/lib/apk-checksum.server"
-    );
+    const { invalidatePublishedChecksum, storeApkChecksum } =
+      await import("@/lib/apk-checksum.server");
     await invalidatePublishedChecksum();
     try {
       await storeApkChecksum(bytes);
