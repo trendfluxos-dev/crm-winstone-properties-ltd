@@ -87,6 +87,7 @@ export async function computeDailyPerformance(agentId: string): Promise<DailyPer
     interested: reportRows.filter((r) => r.category && INTERESTED_CATEGORIES.includes(r.category))
       .length,
     followUpsDue: (followUps.data ?? []).length,
+    followUpsCompleted: (doneFollowUps.data ?? []).length,
     // No site-visit entity exists in the production schema; never guess one.
     siteVisits: null,
     reportsSubmitted: reportRows.length,
