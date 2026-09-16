@@ -132,7 +132,7 @@ export type TeamDailyPerformance = {
  * reports 10%, talk time 5%) compares agents fairly on a quiet day and a busy
  * one alike. The score itself is never returned to a client.
  */
-function rankTop3(rows: TeamDailyRow[]): TeamDailyRow[] {
+export function rankTop3(rows: TeamDailyRow[]): TeamDailyRow[] {
   const active = rows.filter(
     (r) => r.callsMade > 0 || r.reportsSubmitted > 0 || r.followUpsCompleted > 0,
   );
