@@ -38,8 +38,8 @@ describe("apk checksum", () => {
   it("stores that checksum durably, so repeat requests never rehash", async () => {
     await fetch(`${BASE}/api/public/download/apk-info`);
 
-    const url = process.env["SUPABASE_URL"];
-    const key = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+    const url = env?.["SUPABASE_URL"];
+    const key = env?.["SUPABASE_SERVICE_ROLE_KEY"];
     if (!url || !key) return; // no admin access in this environment
 
     const admin = createClient(url, key, { auth: { persistSession: false } });
