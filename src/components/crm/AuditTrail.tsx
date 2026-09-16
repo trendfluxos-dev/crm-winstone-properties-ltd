@@ -21,6 +21,14 @@ const ACTION_LABEL: Record<string, string> = {
   device_registered: "ডিভাইস নিবন্ধন",
   recording_reprocessed: "রেকর্ডিং পুনঃবিশ্লেষণ",
   alert_acknowledged: "সতর্কতা দেখা হয়েছে",
+  service_invoice_created: "সার্ভিস ইনভয়েস তৈরি",
+  service_payment_verified: "সার্ভিস পেমেন্ট যাচাই",
+  service_payment_rejected: "সার্ভিস পেমেন্ট বাতিল",
+  service_activated: "সার্ভিস সক্রিয়",
+  billing_allocation_created: "অভ্যন্তরীণ বরাদ্দ",
+  architect_payout_created: "আর্কিটেক্ট পেআউট তৈরি",
+  architect_payout_status_changed: "আর্কিটেক্ট পেআউট অবস্থা",
+  architect_profile_updated: "আর্কিটেক্ট প্রোফাইল হালনাগাদ",
 };
 
 const ACTIONS = Object.keys(ACTION_LABEL);

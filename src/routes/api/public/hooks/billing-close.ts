@@ -42,7 +42,11 @@ export const Route = createFileRoute("/api/public/hooks/billing-close")({
           const month = url.searchParams.get("month") ?? undefined;
           const { closeBillingMonth } = await import("@/lib/billing-invoice.server");
           const result = await closeBillingMonth(month);
-          return new Response(JSON.stringify({ ok: true, ...result }), {
+          // Same schedule also opens the monthly ৳4,000 service invoice for the
+          // current 15th-to-15th cycle. Both steps are idempotent.
+          const { ensureCurrentInvoice } = await import("@/lib/service-billing.server");
+          const serviceInvoice = await ensureCurrentInvoice();
+          return new Response(JSON.stringify({ ok: true, ...result, serviceInvoice }), {
             headers: { "Content-Type": "application/json" },
           });
         } catch (err) {

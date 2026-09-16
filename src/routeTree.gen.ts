@@ -52,6 +52,7 @@ import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/ag
 import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/agent/version'
 import { Route as ApiPublicAgentWhatsappRouteImport } from './routes/api/public/agent/whatsapp'
 import { Route as ApiPublicAgentWorkspaceRouteImport } from './routes/api/public/agent/workspace'
+import { Route as ApiPublicBillingWebhookRouteImport } from './routes/api/public/billing/webhook'
 import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/config/rules'
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
 import { Route as ApiPublicDownloadApkInfoRouteImport } from './routes/api/public/download/apk-info'
@@ -287,6 +288,11 @@ const ApiPublicAgentWorkspaceRoute = ApiPublicAgentWorkspaceRouteImport.update({
   path: '/api/public/agent/workspace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBillingWebhookRoute = ApiPublicBillingWebhookRouteImport.update({
+  id: '/api/public/billing/webhook',
+  path: '/api/public/billing/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicConfigRulesRoute = ApiPublicConfigRulesRouteImport.update({
   id: '/api/public/config/rules',
   path: '/api/public/config/rules',
@@ -420,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
+  '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/download/apk-info': typeof ApiPublicDownloadApkInfoRoute
@@ -481,6 +488,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
+  '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/download/apk-info': typeof ApiPublicDownloadApkInfoRoute
@@ -543,6 +551,7 @@ export interface FileRoutesById {
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
   '/api/public/agent/workspace': typeof ApiPublicAgentWorkspaceRoute
+  '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
   '/api/public/config/rules': typeof ApiPublicConfigRulesRoute
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/download/apk-info': typeof ApiPublicDownloadApkInfoRoute
@@ -606,6 +615,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/version'
     | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
+    | '/api/public/billing/webhook'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
     | '/api/public/download/apk-info'
@@ -667,6 +677,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/version'
     | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
+    | '/api/public/billing/webhook'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
     | '/api/public/download/apk-info'
@@ -728,6 +739,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/version'
     | '/api/public/agent/whatsapp'
     | '/api/public/agent/workspace'
+    | '/api/public/billing/webhook'
     | '/api/public/config/rules'
     | '/api/public/download/apk'
     | '/api/public/download/apk-info'
@@ -790,6 +802,7 @@ export interface RootRouteChildren {
   ApiPublicAgentVersionRoute: typeof ApiPublicAgentVersionRoute
   ApiPublicAgentWhatsappRoute: typeof ApiPublicAgentWhatsappRoute
   ApiPublicAgentWorkspaceRoute: typeof ApiPublicAgentWorkspaceRoute
+  ApiPublicBillingWebhookRoute: typeof ApiPublicBillingWebhookRoute
   ApiPublicConfigRulesRoute: typeof ApiPublicConfigRulesRoute
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
   ApiPublicDownloadApkInfoRoute: typeof ApiPublicDownloadApkInfoRoute
@@ -1111,6 +1124,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentWorkspaceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/billing/webhook': {
+      id: '/api/public/billing/webhook'
+      path: '/api/public/billing/webhook'
+      fullPath: '/api/public/billing/webhook'
+      preLoaderRoute: typeof ApiPublicBillingWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/config/rules': {
       id: '/api/public/config/rules'
       path: '/api/public/config/rules'
@@ -1271,6 +1291,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentVersionRoute: ApiPublicAgentVersionRoute,
   ApiPublicAgentWhatsappRoute: ApiPublicAgentWhatsappRoute,
   ApiPublicAgentWorkspaceRoute: ApiPublicAgentWorkspaceRoute,
+  ApiPublicBillingWebhookRoute: ApiPublicBillingWebhookRoute,
   ApiPublicConfigRulesRoute: ApiPublicConfigRulesRoute,
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
   ApiPublicDownloadApkInfoRoute: ApiPublicDownloadApkInfoRoute,

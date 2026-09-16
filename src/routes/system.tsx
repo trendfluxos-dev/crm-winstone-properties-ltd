@@ -6,6 +6,7 @@ import { AccountApprovals } from "@/components/crm/AccountApprovals";
 import { ApkInstallCard } from "@/components/crm/ApkInstallCard";
 import { AppReleasePanel } from "@/components/crm/AppReleasePanel";
 import { AuditTrail } from "@/components/crm/AuditTrail";
+import { BillingControlPanel } from "@/components/crm/BillingControlPanel";
 import { DocSummaryPanel } from "@/components/crm/DocSummaryPanel";
 import { DriveBackupPanel } from "@/components/crm/DriveBackupPanel";
 import { LeadDatabasePanel } from "@/components/crm/LeadDatabasePanel";
@@ -146,6 +147,8 @@ function SystemBoard() {
       <AppReleasePanel />
 
       <YearArchivePanel />
+
+      <BillingControlPanel />
 
       <AuditTrail />
 
