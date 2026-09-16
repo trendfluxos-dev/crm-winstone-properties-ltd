@@ -82,6 +82,10 @@ export async function resolveCaller(adminToken?: string | null): Promise<Caller>
       approval: "approved",
       // Executive HQ unlock is a viewing session: reads pass, mutations do not.
       readOnly: pinScope === "hq",
+      leadModerator: false,
+      // Executive HQ is a management view — it gets masked phone numbers.
+      // IT Console keeps raw values for data-health and support work.
+      maskPii: pinScope === "hq",
     };
   }
 
