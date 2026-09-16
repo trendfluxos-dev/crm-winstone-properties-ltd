@@ -10,6 +10,7 @@ import { BillingControlPanel } from "@/components/crm/BillingControlPanel";
 import { DocSummaryPanel } from "@/components/crm/DocSummaryPanel";
 import { DriveBackupPanel } from "@/components/crm/DriveBackupPanel";
 import { LeadDatabasePanel } from "@/components/crm/LeadDatabasePanel";
+import { LeadDatabaseSummary } from "@/components/crm/LeadDatabaseSummary";
 import { YearArchivePanel } from "@/components/crm/YearArchivePanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { ShiftSummaryPanel } from "@/components/crm/ShiftSummaryPanel";
@@ -119,6 +120,8 @@ function SystemBoard() {
       <CommandAgentPanel surface="system" />
 
       <LeadDatabasePanel />
+
+      <LeadDatabaseSummary />
 
       <CallOpsPanel showControls />
 

@@ -133,3 +133,46 @@ export const setDailyLeadPlan = createServerFn({ method: "POST" })
     await saveDailyPlan({ perAgent: data.perAgent });
     return { perAgent: data.perAgent };
   });
+
+export type LeadPoolTally = { label: string; count: number };
+
+/**
+ * Head-office view of what the waiting lead database actually contains:
+ * totals by quality, sector and area. Counts only — no customer contact
+ * details leave the server here, so masking rules stay untouched.
+ */
+export const leadPoolBreakdown = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => TokenInput.parse(input))
+  .handler(async ({ data }) => {
+    await dispatcher(data.adminToken);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: rows } = await supabaseAdmin
+      .from("leads")
+      .select("lead_quality, sector, city_area, source, assigned_to")
+      .limit(50000);
+
+    const all = rows ?? [];
+    const pool = all.filter((row) => row.assigned_to === null);
+
+    const tally = (pick: (row: (typeof all)[number]) => string | null, take: number) => {
+      const map = new Map<string, number>();
+      for (const row of pool) {
+        const key = (pick(row) ?? "").trim() || "উল্লেখ নেই";
+        map.set(key, (map.get(key) ?? 0) + 1);
+      }
+      return [...map.entries()]
+        .map(([label, count]): LeadPoolTally => ({ label, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, take);
+    };
+
+    return {
+      total: all.length,
+      pool: pool.length,
+      assigned: all.length - pool.length,
+      quality: tally((row) => row.lead_quality, 6),
+      sectors: tally((row) => row.sector, 8),
+      areas: tally((row) => row.city_area, 8),
+    };
+  });
