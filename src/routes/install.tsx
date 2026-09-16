@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Copy, Download, Globe, Smartphone, ShieldCheck, Info } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Check,
+  Copy,
+  Download,
+  Globe,
+  Smartphone,
+  ShieldCheck,
+  Info,
+  LifeBuoy,
+  RefreshCw,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
 import { Button } from "@/components/ui/button";
@@ -42,6 +52,7 @@ function InstallPage() {
   const [copied, setCopied] = useState(false);
   const [release, setRelease] = useState<Release | null>(null);
   const [releaseChecked, setReleaseChecked] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   const apkUrl = origin ? `${origin}${APK_PATH}` : APK_PATH;
 
