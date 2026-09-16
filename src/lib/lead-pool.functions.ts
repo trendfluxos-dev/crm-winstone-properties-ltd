@@ -31,9 +31,8 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const caller = await dispatcher(data.adminToken);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { dhakaToday, usablePoolCount, activeAgents, dailyPlan } = await import(
-      "@/lib/lead-pool.server"
-    );
+    const { dhakaToday, usablePoolCount, activeAgents, dailyPlan } =
+      await import("@/lib/lead-pool.server");
     const today = dhakaToday();
 
     const [poolCount, agents, plan, { data: preview }, { data: assigned }] = await Promise.all([
@@ -98,9 +97,8 @@ export const distributeLeadPool = createServerFn({ method: "POST" })
     const { requireWrite } = await import("@/lib/access.server");
     requireWrite(caller);
 
-    const { distributeDailyLeads, saveDailyPlan, dhakaToday } = await import(
-      "@/lib/lead-pool.server"
-    );
+    const { distributeDailyLeads, saveDailyPlan, dhakaToday } =
+      await import("@/lib/lead-pool.server");
     const result = await distributeDailyLeads({
       perAgent: data.perAgent,
       actorProfileId: caller.profile?.id ?? null,
