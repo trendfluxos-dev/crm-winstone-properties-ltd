@@ -1,8 +1,16 @@
-name: Production deploy
+name: Verify and publish
 
-# Release gate: nothing reaches production unless the build, the typecheck and
-# the smoke test all pass first. The smoke test exits non-zero on any failed
-# check, which fails this job and skips the deploy job entirely.
+# Release gate for Winstone Connect.
+#
+# The `verify` job is the gate: install -> typecheck -> build -> tests -> smoke
+# test. `scripts/smoke.mjs` exits non-zero on any failed check, which fails the
+# job, and `publish` declares `needs: verify`, so a failed smoke test means the
+# publish job never runs.
+#
+# This repository is deployed by Lovable's own publish mechanism. There is no
+# deploy CLI in the repo, so the publish job only does something when a deploy
+# hook is configured as a secret; without one it fails loudly rather than
+# pretending a deployment happened.
 
 on:
   push:
@@ -33,6 +41,7 @@ jobs:
         run: bun run test
 
       - name: Start built app
+        if: vars.SMOKE_BASE_URL == ''
         run: |
           bun run preview --port 8080 &
           for i in $(seq 1 60); do
@@ -44,13 +53,14 @@ jobs:
 
       - name: Smoke test
         env:
-          # Point at a deployed candidate by setting the SMOKE_BASE_URL variable/secret.
-          SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL || 'http://localhost:8080' }}
+          # Set the SMOKE_BASE_URL repository variable to test a deployed
+          # candidate instead of the locally built app.
+          SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL }}
         run: node scripts/smoke.mjs
 
-  deploy:
-    name: Deploy to production
-    needs: verify # blocks the deploy whenever any verify step, including the smoke test, fails
+  publish:
+    name: Publish to production
+    needs: verify # a failed verify job — including the smoke test — skips this job entirely
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
@@ -61,23 +71,22 @@ jobs:
         with:
           bun-version: latest
 
-      # Deployment itself is performed by Lovable's publish mechanism for this
-      # project. Credentials live in repository/environment secrets only and are
-      # never written into the repo.
-      - name: Publish
+      # Credentials live in repository/environment secrets only, never in the repo.
+      - name: Trigger Lovable publish
         env:
           LOVABLE_DEPLOY_HOOK: ${{ secrets.LOVABLE_DEPLOY_HOOK }}
         run: |
           if [ -z "$LOVABLE_DEPLOY_HOOK" ]; then
-            echo "No deploy hook configured — publish from the Lovable editor instead."
-            exit 0
+            echo "::error::No LOVABLE_DEPLOY_HOOK secret configured. This repository is published"
+            echo "::error::from the Lovable editor; add the deploy hook secret to automate it, or"
+            echo "::error::disable this job and publish manually after the verify job passes."
+            exit 1
           fi
           curl -fsS -X POST "$LOVABLE_DEPLOY_HOOK"
 
-      - name: Post-deploy smoke test
-        if: env.PRODUCTION_URL != ''
+      - name: Post-publish smoke test
+        if: vars.PRODUCTION_URL != ''
         env:
-          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
           SMOKE_BASE_URL: ${{ vars.PRODUCTION_URL }}
         run: |
           bun install --frozen-lockfile
