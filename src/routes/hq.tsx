@@ -22,6 +22,7 @@ import { Leaderboard } from "@/components/crm/Leaderboard";
 import { LeadDossier } from "@/components/crm/LeadDossier";
 import { MobileAppCard } from "@/components/crm/MobileAppCard";
 import { ServiceBillingCard } from "@/components/crm/ServiceBillingCard";
+import { TeamDailyPerformance } from "@/components/crm/TeamDailyPerformance";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { AppShell } from "@/components/crm/AppShell";
@@ -125,6 +126,8 @@ function ControlBoard() {
             শুধু দেখার ভিউ · লিড অ্যাসাইন হয় কোঅর্ডিনেটর ডেস্ক থেকে
           </p>
         </div>
+
+        <TeamDailyPerformance title="ফ্লোরের আজকের কাজ" />
 
         <ExecutiveBrief />
 
