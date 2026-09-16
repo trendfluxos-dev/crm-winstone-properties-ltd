@@ -269,8 +269,11 @@ function CreditsBoard() {
               </div>
             </div>
           </section>
+
+          <BudgetAndInvoices />
         </>
       )}
+
 
       <p className="text-xs text-muted-foreground">
         আইটি কনসোলে ফিরে যেতে{" "}
