@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       // Home-screen install (manifest-only; no offline caching).
-      { name: "theme-color", content: "#171614" },
+      { name: "theme-color", content: "#ffffff" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
@@ -144,7 +144,7 @@ function RootShell({ children }: { children: ReactNode }) {
     : "";
 
   return (
-    <html lang="bn" className="dark">
+    <html lang="bn">
       <head>
         <HeadContent />
       </head>

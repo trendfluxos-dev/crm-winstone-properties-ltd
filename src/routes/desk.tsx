@@ -109,13 +109,15 @@ function Tile({
   hint: string;
 }) {
   return (
-    <div className="card-elevated p-4 transition-colors hover:border-primary/30">
+    <div className="card-elevated p-4 transition-colors hover:border-primary/40">
       <dt className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
         <span className="text-primary">{icon}</span>
         {label}
       </dt>
-      <dd className="tabular mt-2 text-2xl font-semibold text-primary">{value}</dd>
-      <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>
+      <dd className="tabular mt-2 text-[28px] font-semibold leading-none tracking-tight text-foreground">
+        {value}
+      </dd>
+      <p className="mt-1.5 text-[11px] text-muted-foreground">{hint}</p>
     </div>
   );
 }
