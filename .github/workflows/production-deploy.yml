@@ -1,25 +1,41 @@
-name: Verify and publish
+name: Release gate
 
-# Release gate for Winstone Connect.
+# Winstone Connect is deployed by Lovable's own publish mechanism, which is not
+# callable from GitHub Actions. This workflow therefore does NOT deploy — it is
+# the release gate that must be green before anyone publishes:
 #
-# The `verify` job is the gate: install -> typecheck -> build -> tests -> smoke
-# test. `scripts/smoke.mjs` exits non-zero on any failed check, which fails the
-# job, and `publish` declares `needs: verify`, so a failed smoke test means the
-# publish job never runs.
+#   install -> typecheck -> build -> tests -> smoke test
 #
-# This repository is deployed by Lovable's own publish mechanism. There is no
-# deploy CLI in the repo, so the publish job only does something when a deploy
-# hook is configured as a secret; without one it fails loudly rather than
-# pretending a deployment happened.
+# scripts/smoke.mjs exits non-zero on any failed check, so a red run here means
+# "do not publish". The documented release process is:
+#
+#   1. Merge to main and wait for this workflow to pass.
+#   2. Publish from the Lovable editor (Publish button).
+#   3. Re-run the "Post-publish verification" job below against the live site
+#      (Actions -> Release gate -> Run workflow -> target: production), which
+#      smoke-tests the deployed URL and fails if the release is broken.
+#
+# Set the repository variable PRODUCTION_URL (e.g. https://crm-v2.winstonebd.com)
+# to enable step 3. No credentials are needed and none are stored here.
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
+    inputs:
+      target:
+        description: "What to smoke-test"
+        type: choice
+        default: repository
+        options:
+          - repository # build this commit and smoke-test it locally
+          - production # smoke-test the already published site at PRODUCTION_URL
 
 jobs:
   verify:
     name: Build, typecheck and smoke test
+    if: github.event_name != 'workflow_dispatch' || inputs.target == 'repository'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +57,6 @@ jobs:
         run: bun run test
 
       - name: Start built app
-        if: vars.SMOKE_BASE_URL == ''
         run: |
           bun run preview --port 8080 &
           for i in $(seq 1 60); do
@@ -51,19 +66,18 @@ jobs:
           echo "App did not start" >&2
           exit 1
 
-      - name: Smoke test
+      - name: Smoke test (this commit)
         env:
-          # Set the SMOKE_BASE_URL repository variable to test a deployed
-          # candidate instead of the locally built app.
-          SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL }}
+          SMOKE_BASE_URL: http://localhost:8080
         run: node scripts/smoke.mjs
 
-  publish:
-    name: Publish to production
-    needs: verify # a failed verify job — including the smoke test — skips this job entirely
-    if: github.ref == 'refs/heads/main'
+      - name: Release gate result
+        run: echo "Gate passed. Publishing is done from the Lovable editor; do not publish a red commit."
+
+  post-publish:
+    name: Post-publish verification
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'production'
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@v4
 
@@ -71,23 +85,12 @@ jobs:
         with:
           bun-version: latest
 
-      # Credentials live in repository/environment secrets only, never in the repo.
-      - name: Trigger Lovable publish
-        env:
-          LOVABLE_DEPLOY_HOOK: ${{ secrets.LOVABLE_DEPLOY_HOOK }}
-        run: |
-          if [ -z "$LOVABLE_DEPLOY_HOOK" ]; then
-            echo "::error::No LOVABLE_DEPLOY_HOOK secret configured. This repository is published"
-            echo "::error::from the Lovable editor; add the deploy hook secret to automate it, or"
-            echo "::error::disable this job and publish manually after the verify job passes."
-            exit 1
-          fi
-          curl -fsS -X POST "$LOVABLE_DEPLOY_HOOK"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-      - name: Post-publish smoke test
-        if: vars.PRODUCTION_URL != ''
+      - name: Smoke test (live site)
         env:
           SMOKE_BASE_URL: ${{ vars.PRODUCTION_URL }}
-        run: |
-          bun install --frozen-lockfile
-          node scripts/smoke.mjs
+          # Never silently fall back to localhost when the live site is the target.
+          SMOKE_REQUIRE_BASE_URL: "1"
+        run: node scripts/smoke.mjs
