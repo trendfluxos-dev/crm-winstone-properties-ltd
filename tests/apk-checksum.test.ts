@@ -8,7 +8,8 @@ import { sha256Hex } from "@/lib/apk-checksum.server";
  * re-reading the 17 MB build. These checks run against the live project the
  * other integration tests use.
  */
-const BASE = process.env["BASE_URL"] || "http://localhost:8080";
+const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+const BASE = env?.["BASE_URL"] || "http://localhost:8080";
 
 describe("apk checksum", () => {
   it("hashes bytes to a 64-character hex digest", async () => {
