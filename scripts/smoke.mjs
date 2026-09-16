@@ -7,13 +7,31 @@
  * dead storage path or a broken redirect fails here instead of in an agent's
  * hands.
  *
- *   node scripts/smoke.mjs                       # against the local dev server
- *   BASE_URL=https://crm-v2.winstonebd.com node scripts/smoke.mjs
+ *   node scripts/smoke.mjs                                          # local dev server
+ *   SMOKE_BASE_URL=https://crm-v2.winstonebd.com node scripts/smoke.mjs
+ *
+ * SMOKE_BASE_URL is the one variable CI sets. Set SMOKE_REQUIRE_BASE_URL=1 when
+ * a deployed target is mandatory: the run then fails instead of quietly testing
+ * localhost and reporting a green release.
  */
 
-const raw = process.env.SMOKE_BASE_URL ?? process.env.BASE_URL ?? "";
-// Only an absolute URL is usable; some environments set BASE_URL to a path.
-const BASE = (/^https?:\/\//.test(raw) ? raw : "http://localhost:8080").replace(/\/$/, "");
+const raw = (process.env.SMOKE_BASE_URL ?? "").trim();
+const required = ["1", "true", "yes"].includes((process.env.SMOKE_REQUIRE_BASE_URL ?? "").toLowerCase());
+
+if (required && !/^https?:\/\//.test(raw)) {
+  console.error(
+    `FAIL  SMOKE_REQUIRE_BASE_URL is set, but SMOKE_BASE_URL is not an absolute http(s) URL (got ${JSON.stringify(raw)}).`,
+  );
+  console.error("      Refusing to fall back to localhost for a production smoke test.");
+  process.exit(1);
+}
+if (raw && !/^https?:\/\//.test(raw)) {
+  console.error(`FAIL  SMOKE_BASE_URL must be an absolute http(s) URL (got ${JSON.stringify(raw)}).`);
+  process.exit(1);
+}
+
+const BASE = (raw || "http://localhost:8080").replace(/\/$/, "");
+console.log(`Smoke target: ${BASE}`);
 
 const ROUTES = [
   { path: "/", expect: [200] },
