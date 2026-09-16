@@ -86,9 +86,8 @@ export const Route = createFileRoute("/api/public/agent/login")({
           },
         });
 
-        const { checkLoginRate, identifierFingerprint, recordLoginAttempt } = await import(
-          "@/lib/login-guard.server"
-        );
+        const { checkLoginRate, identifierFingerprint, recordLoginAttempt } =
+          await import("@/lib/login-guard.server");
         const fingerprint = await identifierFingerprint(parsed.data.email);
 
         // Refused before the password is ever checked, so a stolen phone or a
@@ -115,7 +114,11 @@ export const Route = createFileRoute("/api/public/agent/login")({
 
         const loginEmail = await resolveLoginEmail(parsed.data.email);
         if (!loginEmail) {
-          await recordLoginAttempt({ outcome: "failed", fingerprint, reason: "unknown_identifier" });
+          await recordLoginAttempt({
+            outcome: "failed",
+            fingerprint,
+            reason: "unknown_identifier",
+          });
           return json({ error: BAD_CREDENTIALS }, 401);
         }
 
