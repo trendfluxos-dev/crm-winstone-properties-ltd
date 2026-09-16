@@ -28,7 +28,9 @@ export function LeadDatabaseSummary() {
         <ListTree className="size-4 text-primary" />
         <h2 className="text-sm font-semibold">লিড ডেটাবেজের সারসংক্ষেপ</h2>
         <span className="ml-auto text-xs text-muted-foreground">
-          {data ? `মোট ${data.total}টি · অপেক্ষায় ${data.pool}টি · দেওয়া হয়েছে ${data.assigned}টি` : "…"}
+          {data
+            ? `মোট ${data.total}টি · অপেক্ষায় ${data.pool}টি · দেওয়া হয়েছে ${data.assigned}টি`
+            : "…"}
         </span>
       </header>
 
