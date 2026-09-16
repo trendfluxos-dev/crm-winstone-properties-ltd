@@ -99,59 +99,110 @@
   }
 }
 
-/* Winstone Properties brand system: deep matte charcoal, warm ivory text,
-   restrained champagne-gold accents. Gold is used for edges, states and
-   numerals — never as a heavy fill. */
+/* Winstone Properties brand system — one system, four moods.
+   Clean white / warm ivory working surfaces, deep charcoal for authority and
+   navigation, restrained champagne gold as the single brand accent. Colour
+   carries meaning: gold = brand/primary, green = done/synced, amber =
+   pending/warm, red = urgent/hot/error, blue = system info, grey = inactive. */
 :root {
   --radius: 0.5rem;
-  /* Matte charcoal foundation, tonal panels, no gloss */
-  --background: oklch(0.155 0.004 70);
-  --foreground: oklch(0.97 0.004 85);
-  --card: oklch(0.192 0.004 70);
-  --card-foreground: oklch(0.97 0.004 85);
-  --popover: oklch(0.205 0.004 70);
-  --popover-foreground: oklch(0.97 0.004 85);
+  /* Light working surfaces */
+  --background: #ffffff;
+  --foreground: #0b0b0b;
+  --card: #ffffff;
+  --card-foreground: #0b0b0b;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b0b;
   /* Champagne gold: warm, muted, metallic — never bright yellow */
-  --primary: oklch(0.795 0.068 84);
-  --primary-foreground: oklch(0.17 0.008 70);
-  --secondary: oklch(0.245 0.004 70);
-  --secondary-foreground: oklch(0.93 0.004 85);
-  --muted: oklch(0.225 0.004 70);
-  --muted-foreground: oklch(0.7 0.008 78);
-  --accent: oklch(0.255 0.018 84);
-  --accent-foreground: oklch(0.86 0.062 84);
-  --destructive: oklch(0.58 0.175 25);
-  --destructive-foreground: oklch(0.98 0.004 85);
-  /* Thin, low-intensity champagne hairlines */
-  --border: oklch(0.44 0.022 84 / 34%);
-  --input: oklch(0.32 0.008 74);
-  --ring: oklch(0.795 0.068 84);
-  --surface: oklch(0.178 0.004 70);
-  --surface-2: oklch(0.228 0.004 70);
-  /* Deepest panel, used for waveform and focus surfaces */
-  --ink: oklch(0.115 0.004 70);
-  --ink-foreground: oklch(0.96 0.004 85);
-  --ink-muted: oklch(0.62 0.008 78);
-  /* State colors stay in the brand's warm metal range */
-  --live: oklch(0.795 0.068 84);
-  --live-foreground: oklch(0.17 0.008 70);
-  --idle: oklch(0.72 0.085 66);
-  --idle-foreground: oklch(0.96 0.004 85);
-  --offline: oklch(0.46 0.006 70);
-  --offline-foreground: oklch(0.96 0.004 85);
-  --verified: oklch(0.82 0.06 88);
-  --verified-foreground: oklch(0.17 0.008 70);
-  --critical: oklch(0.58 0.175 25);
+  --primary: #b99245;
+  --primary-foreground: #ffffff;
+  --secondary: #faf9f6;
+  --secondary-foreground: #111318;
+  --muted: #f3f2ee;
+  --muted-foreground: #667085;
+  --accent: #f7f1e4;
+  --accent-foreground: #6e5420;
+  --destructive: #c0392b;
+  --destructive-foreground: #ffffff;
+  --border: #d9dde3;
+  --input: #d9dde3;
+  --ring: #b99245;
+  --surface: #faf9f6;
+  --surface-2: #f3f2ee;
+  /* Authority panel: charcoal with white text, used for secure surfaces */
+  --ink: #111318;
+  --ink-foreground: #ffffff;
+  --ink-muted: #b7bbc3;
+  /* Operational states */
+  --live: #16835b;
+  --live-foreground: #ffffff;
+  --idle: #b7791f;
+  --idle-foreground: #ffffff;
+  --offline: #667085;
+  --offline-foreground: #ffffff;
+  --verified: #16835b;
+  --verified-foreground: #ffffff;
+  --critical: #c0392b;
+  --success: #16835b;
+  --success-foreground: #ffffff;
+  --warning: #b7791f;
+  --warning-foreground: #ffffff;
+  --info: #2563a6;
+  --info-foreground: #ffffff;
   /* WhatsApp keeps its own identity green — required by the channel */
-  --whatsapp: oklch(0.66 0.11 158);
-  --chart-1: oklch(0.795 0.068 84);
-  --chart-2: oklch(0.68 0.05 84);
-  --chart-3: oklch(0.72 0.085 66);
-  --chart-4: oklch(0.56 0.03 80);
-  --chart-5: oklch(0.58 0.175 25);
-  --shadow-card: 0 1px 0 oklch(1 0 0 / 3%) inset, 0 1px 2px oklch(0 0 0 / 40%);
-  --shadow-card-hover: 0 1px 0 oklch(1 0 0 / 5%) inset, 0 6px 18px -10px oklch(0 0 0 / 55%);
-  --shadow-glass: 0 1px 0 oklch(1 0 0 / 4%) inset, 0 10px 28px -18px oklch(0 0 0 / 70%);
+  --whatsapp: #25d366;
+  --chart-1: #b99245;
+  --chart-2: #111318;
+  --chart-3: #b7791f;
+  --chart-4: #2563a6;
+  --chart-5: #c0392b;
+  --shadow-card: 0 1px 2px rgb(17 19 24 / 6%);
+  --shadow-card-hover: 0 8px 24px -14px rgb(17 19 24 / 22%);
+  --shadow-glass: 0 1px 0 rgb(17 19 24 / 4%);
+}
+
+/* Dark mode keeps the same semantics on near-black surfaces. */
+.dark {
+  --background: #0b0c0f;
+  --foreground: #ffffff;
+  --card: #15171b;
+  --card-foreground: #ffffff;
+  --popover: #15171b;
+  --popover-foreground: #ffffff;
+  --primary: #c5a35a;
+  --primary-foreground: #0b0c0f;
+  --secondary: #1c1f25;
+  --secondary-foreground: #ffffff;
+  --muted: #1c1f25;
+  --muted-foreground: #b7bbc3;
+  --accent: #221f18;
+  --accent-foreground: #d8b981;
+  --destructive: #d4574a;
+  --destructive-foreground: #ffffff;
+  --border: #272b32;
+  --input: #272b32;
+  --ring: #c5a35a;
+  --surface: #15171b;
+  --surface-2: #1c1f25;
+  --ink: #0b0c0f;
+  --ink-foreground: #ffffff;
+  --ink-muted: #b7bbc3;
+  --live: #35a97c;
+  --idle: #d1962f;
+  --offline: #8a919e;
+  --verified: #35a97c;
+  --critical: #d4574a;
+  --success: #35a97c;
+  --warning: #d1962f;
+  --info: #5b9bd8;
+  --chart-1: #c5a35a;
+  --chart-2: #b7bbc3;
+  --chart-3: #d1962f;
+  --chart-4: #5b9bd8;
+  --chart-5: #d4574a;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 45%);
+  --shadow-card-hover: 0 8px 24px -14px rgb(0 0 0 / 65%);
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 4%);
 }
 
 @layer base {
