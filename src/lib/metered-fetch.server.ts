@@ -1,4 +1,4 @@
-import { recordUsage, type UsageProvider } from "@/lib/billing-meter.server";
+import { assertWithinBudget, recordUsage, type UsageProvider } from "@/lib/billing-meter.server";
 
 /**
  * Drop-in `fetch` replacement for paid provider endpoints.
