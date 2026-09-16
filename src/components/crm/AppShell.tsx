@@ -14,7 +14,6 @@ import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { OfflineSyncBar } from "@/components/crm/OfflineSyncBar";
 import { ThemeToggle } from "@/components/crm/ThemeToggle";
 
-
 import { Button } from "@/components/ui/button";
 import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
@@ -87,7 +86,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {adminToken && <AgentSelector />}
@@ -179,7 +177,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <AppUpdatePrompt />
         {children}
       </main>
-
 
       <footer className="border-t border-border px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
         <p>© 2026 TrendFlux Digital. All Rights Reserved.</p>

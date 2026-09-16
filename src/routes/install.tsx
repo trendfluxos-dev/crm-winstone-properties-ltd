@@ -237,8 +237,9 @@ function InstallPage() {
             <div>
               <dt className="font-semibold">“Install blocked” / “অজানা উৎস” দেখাচ্ছে</dt>
               <dd className="text-muted-foreground">
-                Settings → Apps → Special access → Install unknown apps → যে ব্রাউজার দিয়ে নামিয়েছেন
-                সেটি বেছে “Allow from this source” চালু করুন, তারপর আবার ফাইলে ট্যাপ করুন।
+                Settings → Apps → Special access → Install unknown apps → যে ব্রাউজার দিয়ে
+                নামিয়েছেন সেটি বেছে “Allow from this source” চালু করুন, তারপর আবার ফাইলে ট্যাপ
+                করুন।
               </dd>
             </div>
             <div>
@@ -272,7 +273,6 @@ function InstallPage() {
             </div>
           </dl>
         </section>
-
 
         {/* Web app / PWA */}
         <section className="rounded-xl border border-border bg-card p-5">

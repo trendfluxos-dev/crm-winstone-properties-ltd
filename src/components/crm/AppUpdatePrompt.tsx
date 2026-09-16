@@ -52,8 +52,8 @@ export function AppUpdatePrompt() {
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
       <RefreshCw className="size-4 shrink-0 text-primary" />
       <p className="min-w-0 flex-1 text-xs text-muted-foreground">
-        অ্যাপের নতুন সংস্করণ প্রস্তুত — কাজ শেষ করে রিস্টার্ট দিলে সেটি চালু হবে। এখনকার কোনো
-        কাজ হারাবে না।
+        অ্যাপের নতুন সংস্করণ প্রস্তুত — কাজ শেষ করে রিস্টার্ট দিলে সেটি চালু হবে। এখনকার কোনো কাজ
+        হারাবে না।
       </p>
       <Button size="sm" onClick={() => window.location.reload()}>
         রিস্টার্ট করুন
