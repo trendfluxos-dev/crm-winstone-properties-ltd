@@ -108,8 +108,8 @@ function Tile({
   text,
 }: {
   label: string;
-  value?: number | null;
-  text?: string | null;
+  value?: number | null | undefined;
+  text?: string | null | undefined;
 }) {
   const shown = text ?? (value === null || value === undefined ? null : String(value));
   return (
