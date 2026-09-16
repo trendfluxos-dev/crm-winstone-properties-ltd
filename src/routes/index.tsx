@@ -90,14 +90,7 @@ function EntryHall() {
             primary={
               <Button asChild className="flex-1">
                 <Link to="/auth" search={{ role: "coordinator", mode: "signin" }}>
-                  Sign in
-                </Link>
-              </Button>
-            }
-            secondary={
-              <Button asChild variant="secondary" className="flex-1">
-                <Link to="/auth" search={{ role: "coordinator", mode: "signup" }}>
-                  Create account
+                  Log in as Coordinator
                 </Link>
               </Button>
             }
