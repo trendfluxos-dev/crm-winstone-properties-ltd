@@ -52,6 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { scope } = useMyAccount();
   const signOut = useSignOut();
   const [pinOpen, setPinOpen] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope));
 
   return (
