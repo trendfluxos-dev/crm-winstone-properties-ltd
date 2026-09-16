@@ -35,6 +35,56 @@ const CATEGORIES = [
 
 const NEEDS_REASON = new Set(["not_interested", "wrong_number"]);
 
+/**
+ * Ready-made note lines agents can tap instead of typing. They are appended to
+ * whatever the agent already wrote — nothing is ever replaced or auto-filled.
+ */
+const NOTE_SUGGESTIONS: Record<string, string[]> = {
+  hot_lead: [
+    "বাজেট ঠিক আছে, দ্রুত সিদ্ধান্ত নিতে চান।",
+    "ভিজিটে আগ্রহী — সময় ঠিক করতে হবে।",
+    "ফ্ল্যাটের ব্রোশিওর/প্রাইস পাঠাতে বলেছেন।",
+  ],
+  follow_up: [
+    "এখন ব্যস্ত, পরে কল করতে বলেছেন।",
+    "পরিবারের সাথে আলোচনা করে জানাবেন।",
+    "পরের সপ্তাহে আবার যোগাযোগ করতে বলেছেন।",
+  ],
+  interested: [
+    "প্রজেক্ট সম্পর্কে বিস্তারিত জানতে চেয়েছেন।",
+    "লোকেশন পছন্দ হয়েছে, দাম নিয়ে ভাবছেন।",
+    "পেমেন্ট/কিস্তির সুবিধা জানতে চেয়েছেন।",
+  ],
+  not_interested: [
+    "এখন ফ্ল্যাট কেনার পরিকল্পনা নেই।",
+    "বাজেটের সাথে মিলছে না।",
+    "অন্য জায়গায় ইতিমধ্যে কিনে ফেলেছেন।",
+  ],
+  callback: [
+    "নির্দিষ্ট সময়ে কলব্যাক চেয়েছেন।",
+    "মিটিংয়ে আছেন, পরে কথা বলবেন।",
+  ],
+  no_answer: [
+    "রিং হয়েছে, কেউ ধরেননি।",
+    "নম্বর বন্ধ/নেটওয়ার্কের বাইরে।",
+    "পরে আবার চেষ্টা করতে হবে।",
+  ],
+  wrong_number: [
+    "এই নম্বর অন্য ব্যক্তির।",
+    "নম্বরটি আর ব্যবহৃত হয় না।",
+  ],
+  closed_converted: [
+    "বুকিং নিশ্চিত হয়েছে।",
+    "পেমেন্ট প্রক্রিয়া শুরু হয়েছে।",
+  ],
+};
+
+const GENERAL_NOTE_SUGGESTIONS = [
+  "হোয়াটসঅ্যাপে তথ্য পাঠানো হয়েছে।",
+  "অফিস ভিজিটের জন্য আমন্ত্রণ জানানো হয়েছে।",
+  "পরবর্তী ধাপ: ফলো-আপ কল।",
+];
+
 /** Classification, mandatory whenever the customer actually answered. */
 const TEMPERATURES = [
   { value: "hot", label: "HOT — গরম" },
@@ -177,6 +227,11 @@ export function PostCallReportGate() {
   if (!detail || queuedReportIds.includes(detail.report.id)) return null;
 
   const reasonRequired = NEEDS_REASON.has(category);
+  // Tap-to-add note lines: the picked category first, then general ones.
+  const noteSuggestions: string[] = [
+    ...(NOTE_SUGGESTIONS[category] ?? []),
+    ...GENERAL_NOTE_SUGGESTIONS,
+  ].slice(0, 6);
   // The customer answered -> classification (Hot/Warm/Cold + A/B/C/D) is what
   // turns the lead into COMPLETED. Not answered -> the lead goes back to retry.
   const received = detail.report.connected !== false;
@@ -386,6 +441,21 @@ export function PostCallReportGate() {
             onChange={(event) => setNote(event.target.value)}
             placeholder="ক্রেতা কী বলেছেন, পরের ধাপ কী"
           />
+          <div className="flex flex-wrap gap-1.5">
+            {noteSuggestions.map((line) => (
+              <button
+                key={line}
+                type="button"
+                onClick={() => setNote((prev) => joinText(prev, line))}
+                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground transition hover:border-primary hover:bg-primary/10 hover:text-primary"
+              >
+                + {line}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            উপরের লেখাগুলোতে চাপ দিলে নোটে যোগ হবে — দরকার হলে বদলে নিতে পারেন।
+          </p>
         </div>
 
         {smartBusy || smart ? (
