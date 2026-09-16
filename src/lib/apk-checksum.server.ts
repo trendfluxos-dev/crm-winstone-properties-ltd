@@ -28,8 +28,8 @@ export type ApkChecksum = {
 const memo = new Map<string, ApkChecksum>();
 const inFlight = new Map<string, Promise<ApkChecksum | null>>();
 
-export async function sha256Hex(bytes: ArrayBuffer): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
+export async function sha256Hex(bytes: ArrayBuffer | Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes as BufferSource);
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
@@ -80,9 +80,23 @@ async function persist(key: string, entry: ApkChecksum): Promise<void> {
 }
 
 /**
- * Called right after a new build is uploaded, so no user ever pays for the hash.
+ * Drops any stored digest for the published build.
+ *
+ * Called before a new build's digest is written: if anything then fails, the
+ * endpoint finds no row and backfills from the real file, rather than serving
+ * the previous build's checksum for the new APK.
  */
-export async function storeApkChecksum(bytes: ArrayBuffer): Promise<ApkChecksum> {
+export async function invalidatePublishedChecksum(): Promise<void> {
+  memo.delete("published");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await supabaseAdmin.from("app_artifact_checksums").delete().eq("artifact_key", "published");
+}
+
+/**
+ * Called right after a new build is uploaded, hashing the very same bytes that
+ * were just written to storage — so no user ever pays for the hash.
+ */
+export async function storeApkChecksum(bytes: Uint8Array | ArrayBuffer): Promise<ApkChecksum> {
   const entry: ApkChecksum = {
     source: "published",
     size: bytes.byteLength,
