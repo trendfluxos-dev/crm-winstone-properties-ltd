@@ -1,0 +1,79 @@
+name: Production deploy
+
+# Release gate: nothing reaches production unless the build, the typecheck and
+# the smoke test all pass first. The smoke test exits non-zero on any failed
+# check, which fails this job and skips the deploy job entirely.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Build, typecheck and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Build
+        run: bun run build
+
+      - name: Unit tests
+        run: bun run test
+
+      - name: Start built app
+        run: |
+          bun run preview --port 8080 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:8080/ && exit 0
+            sleep 2
+          done
+          echo "App did not start" >&2
+          exit 1
+
+      - name: Smoke test
+        env:
+          BASE_URL: http://localhost:8080
+        run: bun run smoke
+
+  deploy:
+    name: Deploy to production
+    needs: verify # blocks the deploy whenever any verify step, including the smoke test, fails
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      # Deployment itself is performed by Lovable's publish mechanism for this
+      # project. Credentials live in repository/environment secrets only and are
+      # never written into the repo.
+      - name: Publish
+        env:
+          LOVABLE_DEPLOY_HOOK: ${{ secrets.LOVABLE_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$LOVABLE_DEPLOY_HOOK" ]; then
+            echo "No deploy hook configured — publish from the Lovable editor instead."
+            exit 0
+          fi
+          curl -fsS -X POST "$LOVABLE_DEPLOY_HOOK"
+
+      - name: Post-deploy smoke test
+        if: env.PRODUCTION_URL != ''
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+          BASE_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          bun install --frozen-lockfile
+          bun run smoke

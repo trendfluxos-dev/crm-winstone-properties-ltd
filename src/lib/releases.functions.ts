@@ -102,6 +102,12 @@ export const publishAppRelease = createServerFn({ method: "POST" })
       });
     if (uploadError) throw new Error(`আপলোড ব্যর্থ: ${uploadError.message}`);
 
+    // Hash once, here — so the public info endpoint never has to read the build.
+    const { storeApkChecksum } = await import("@/lib/apk-checksum.server");
+    await storeApkChecksum(
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
+    );
+
     const { data: release, error: insertError } = await supabaseAdmin
       .from("app_releases")
       .insert({
