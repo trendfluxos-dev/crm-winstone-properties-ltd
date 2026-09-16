@@ -320,6 +320,22 @@ export async function submitCallReport(input: {
     followUpId = event?.id ?? null;
   }
 
+  // The call that the follow-up asked for has now happened and been reported, so
+  // every follow-up that was already due for this lead is closed. Without this a
+  // yesterday-scheduled reminder keeps showing as overdue after the agent called.
+  {
+    let closing = supabaseAdmin
+      .from("follow_up_events")
+      .update({ status: "done", completed_at: nowIso })
+      .eq("lead_id", report.lead_id)
+      .eq("agent_id", input.agentId)
+      .neq("status", "done")
+      .lte("scheduled_at", nowIso);
+    if (followUpId) closing = closing.neq("id", followUpId);
+    await closing;
+  }
+
+
   const { logLeadEvent } = await import("@/lib/lead-events.server");
   await logLeadEvent({
     leadId: report.lead_id,
