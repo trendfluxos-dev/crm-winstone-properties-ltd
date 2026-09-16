@@ -123,12 +123,26 @@ export function analyzeGrid(grid: string[][]): { rows: CsvLeadRow[]; stats: Impo
   const seen = new Set<string>();
 
   for (const r of body) {
-    const name = (r[nameIdx] ?? "").trim();
-    const phone = extractPhone((r[phoneIdx] ?? "").trim());
+    // Sheets often hide the number inside the name cell ("Rahim, 01787686426")
+    // or another column, so fall back to the first usable mobile in the row.
+    const phone =
+      extractPhone((r[phoneIdx] ?? "").trim()) ??
+      (r.map((cell) => extractPhone((cell ?? "").trim())).find(Boolean) || null);
+    let name = (r[nameIdx] ?? "").trim();
+    if (phone) {
+      // Drop a number that was typed into the name cell, plus its separator.
+      name = name
+        .replace(/[,;|/-]?\s*(?:\+?88)?0?1[3-9][\s\-.]?\d{4}[\s\-.]?\d{4}\b/g, " ")
+        .replace(/\b(?:wp|whatsapp|mobile|tel|cell)\s*:?\s*$/i, "")
+        .replace(/\s{2,}/g, " ")
+        .replace(/[,;|:/-]+\s*$/, "")
+        .trim();
+    }
     if (!name || !phone) {
       stats.noPhone += 1;
       continue;
     }
+
     if (seen.has(phone)) {
       stats.duplicateInFile += 1;
       continue;
