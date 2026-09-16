@@ -1,5 +1,7 @@
-import { CONNECTED_THRESHOLD_SECONDS } from "@/lib/crm-data";
 import { dhakaDayKey, DHAKA_OFFSET_MS } from "@/lib/dhaka-time";
+
+/** Same rule the desk uses: a call counts as connected past 10 seconds. */
+const CONNECTED_THRESHOLD_SECONDS = 10;
 
 /**
  * One agent's real numbers for the current Dhaka day.
