@@ -372,7 +372,10 @@ function ReportsBoard() {
           <h2 className="text-sm font-semibold">Lead funnel</h2>
           <p className="text-xs text-muted-foreground">Leads by stage</p>
           {report.statusMix.length === 0 ? (
-            <EmptyCard title="No lead activity for this period" body="Adjust the date or filters." />
+            <EmptyCard
+              title="No lead activity for this period"
+              body="Adjust the date or filters."
+            />
           ) : (
             <BreakdownList rows={report.statusMix} />
           )}
