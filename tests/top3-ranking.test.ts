@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { __rankTop3ForTests as rankTop3, type TeamDailyRow } from "@/lib/daily-performance.server";
+import { rankTop3, type TeamDailyRow } from "@/lib/daily-performance.server";
 
 function row(over: Partial<TeamDailyRow> & { agentId: string }): TeamDailyRow {
   return {
