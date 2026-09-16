@@ -5,7 +5,6 @@ import { useState } from "react";
 import logoAsset from "@/assets/winstone-logo.png.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { ThemeToggle } from "@/components/crm/ThemeToggle";
-import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
 
 export const Route = createFileRoute("/")({
