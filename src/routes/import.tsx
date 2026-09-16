@@ -6,15 +6,23 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/crm/AppShell";
+import { AgentSplitPicker, ImportImpactBar } from "@/components/crm/ImportDistribution";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DEMO_CSV, parseCsv, toLeadRows, type CsvLeadRow } from "@/lib/csv-leads";
+import {
+  DEMO_CSV,
+  analyzeGrid,
+  parseCsv,
+  type CsvLeadRow,
+  type ImportStats,
+} from "@/lib/csv-leads";
 import { importLeads } from "@/lib/crm.functions";
 import { previewSheetLeads } from "@/lib/lead-sheet.functions";
 import { getAdminToken } from "@/lib/local-session";
+
 
 export const Route = createFileRoute("/import")({
   head: () => ({
@@ -66,8 +74,10 @@ function ImportScreen() {
   const queryClient = useQueryClient();
   const run = useServerFn(importLeads);
   const [rows, setRows] = useState<CsvLeadRow[]>([]);
+  const [stats, setStats] = useState<ImportStats | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [autoAssign, setAutoAssign] = useState(true);
+  const [autoAssign, setAutoAssign] = useState(false);
+  const [pickedAgents, setPickedAgents] = useState<string[]>([]);
   const [sheetUrl, setSheetUrl] = useState("");
   const [sheetTabs, setSheetTabs] = useState<string[]>([]);
   const [sheetTab, setSheetTab] = useState<string | null>(null);
@@ -80,6 +90,7 @@ function ImportScreen() {
       setSheetTabs(result.tabs);
       setSheetTab(result.tab);
       setRows(result.rows);
+      setStats(null);
       setFileName(`Google Sheet · ${result.tab}`);
       if (result.rows.length === 0)
         toast.error("এই ট্যাবে নাম ও ফোন নম্বরসহ কোনো সারি পাওয়া যায়নি");
@@ -89,15 +100,24 @@ function ImportScreen() {
   });
 
   const load = (text: string, label: string) => {
-    const parsed = toLeadRows(parseCsv(text));
-    setRows(parsed);
+    const parsed = analyzeGrid(parseCsv(text));
+    setRows(parsed.rows);
+    setStats(parsed.stats);
     setFileName(label);
-    if (parsed.length === 0) toast.error("এই ফাইলে ব্যবহারযোগ্য কোনো লিড পাওয়া যায়নি");
-    else toast.success(`${parsed.length}টি লিড প্রিভিউতে এলো`);
+    if (parsed.rows.length === 0) toast.error("এই ফাইলে ব্যবহারযোগ্য কোনো লিড পাওয়া যায়নি");
+    else toast.success(`${parsed.rows.length}টি লিড প্রিভিউতে এলো`);
   };
 
   const mutation = useMutation({
-    mutationFn: () => run({ data: { adminToken: getAdminToken() ?? "", rows, autoAssign } }),
+    mutationFn: () =>
+      run({
+        data: {
+          adminToken: getAdminToken() ?? "",
+          rows,
+          autoAssign: pickedAgents.length ? false : autoAssign,
+          assignToAgentIds: pickedAgents.length ? pickedAgents : undefined,
+        },
+      }),
     onSuccess: (result) => {
       toast.success(`${result.imported}টি লিড যোগ হলো`, {
         description: result.skipped
@@ -106,10 +126,12 @@ function ImportScreen() {
       });
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
       setRows([]);
+      setStats(null);
       setFileName(null);
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
 
   return (
     <div className="space-y-5">
@@ -118,10 +140,11 @@ function ImportScreen() {
           <FileUp className="size-5 text-primary" /> লিড ইমপোর্ট
         </h1>
         <p className="text-sm text-muted-foreground">
-          কলাম: <code>name, phone, company, notes</code> — হেডার সারি না থাকলেও চলবে। আগে থেকে থাকা
-          নম্বর নিজে থেকেই বাদ পড়বে।
+          ফাইলের কলাম নিজে থেকেই চেনা হবে (Name, Phone, Organization, Profession, Address, Email,
+          Sources)। আগে থেকে CRM-এ থাকা নম্বর বাদ পড়বে।
         </p>
       </header>
+
 
       <section className="card-elevated space-y-4 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -149,11 +172,22 @@ function ImportScreen() {
           </div>
         </div>
 
+        {stats ? <ImportImpactBar stats={stats} ready={rows.length} /> : null}
+
         <label className="flex items-center gap-2 text-sm">
-          <Checkbox checked={autoAssign} onCheckedChange={(v) => setAutoAssign(v === true)} />
-          <Label>চালু এজেন্টদের মধ্যে সমানভাবে ভাগ করে দিন</Label>
+          <Checkbox
+            checked={autoAssign}
+            disabled={pickedAgents.length > 0}
+            onCheckedChange={(v) => setAutoAssign(v === true)}
+          />
+          <Label>নিচে কাউকে না বাছলে — সব চালু এজেন্টের মধ্যে সমানভাবে ভাগ করুন</Label>
         </label>
       </section>
+
+      {rows.length > 0 ? (
+        <AgentSplitPicker selected={pickedAgents} onChange={setPickedAgents} total={rows.length} />
+      ) : null}
+
 
       <section className="card-elevated space-y-3 p-4">
         <header className="space-y-1">
@@ -237,7 +271,9 @@ function ImportScreen() {
                 ) : (
                   <Upload className="size-3.5" />
                 )}
-                {rows.length || ""} লিড যোগ করুন
+                {rows.length || ""} লিড{" "}
+                {pickedAgents.length ? `যোগ করে ${pickedAgents.length} জনকে ভাগ করুন` : "যোগ করুন"}
+
               </Button>
             </div>
           </header>
