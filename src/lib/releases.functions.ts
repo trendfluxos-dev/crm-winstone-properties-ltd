@@ -102,11 +102,18 @@ export const publishAppRelease = createServerFn({ method: "POST" })
       });
     if (uploadError) throw new Error(`আপলোড ব্যর্থ: ${uploadError.message}`);
 
-    // Hash once, here — so the public info endpoint never has to read the build.
-    const { storeApkChecksum } = await import("@/lib/apk-checksum.server");
-    await storeApkChecksum(
-      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
+    // Hash the exact bytes that were just uploaded, so the public info endpoint
+    // never has to read the build back. A failure here must not publish a stale
+    // digest: the old row is dropped first, and the endpoint backfills instead.
+    const { invalidatePublishedChecksum, storeApkChecksum } = await import(
+      "@/lib/apk-checksum.server"
     );
+    await invalidatePublishedChecksum();
+    try {
+      await storeApkChecksum(bytes);
+    } catch {
+      /* left unset on purpose — apk-info will compute it once on first request */
+    }
 
     const { data: release, error: insertError } = await supabaseAdmin
       .from("app_releases")
