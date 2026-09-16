@@ -320,6 +320,21 @@ export async function submitCallReport(input: {
     followUpId = event?.id ?? null;
   }
 
+  // The call that the follow-up asked for has now happened and been reported, so
+  // every follow-up that was already due for this lead is closed. Without this a
+  // yesterday-scheduled reminder keeps showing as overdue after the agent called.
+  {
+    let closing = supabaseAdmin
+      .from("follow_up_events")
+      .update({ status: "done", completed_at: nowIso })
+      .eq("lead_id", report.lead_id)
+      .eq("agent_id", input.agentId)
+      .neq("status", "done")
+      .lte("scheduled_at", nowIso);
+    if (followUpId) closing = closing.neq("id", followUpId);
+    await closing;
+  }
+
   const { logLeadEvent } = await import("@/lib/lead-events.server");
   await logLeadEvent({
     leadId: report.lead_id,
@@ -583,7 +598,9 @@ export async function editSubmittedReport(input: {
   if (report.agent_id !== input.agentId) throw new Error("এই রিপোর্ট আপনার নয়");
   if (report.status !== "submitted") throw new Error("এই রিপোর্ট এখনো জমা হয়নি");
   if (!reportEditable(report.call_ended_at)) {
-    throw new Error("সংশোধনের সময় শেষ — সকাল ৯:০০ থেকে ১২:৪৫ পর্যন্ত একই দিনের রিপোর্ট বদলানো যায়");
+    throw new Error(
+      "সংশোধনের সময় শেষ — সকাল ৯:০০ থেকে ১২:৪৫ পর্যন্ত একই দিনের রিপোর্ট বদলানো যায়",
+    );
   }
 
   const received = report.connected !== false;

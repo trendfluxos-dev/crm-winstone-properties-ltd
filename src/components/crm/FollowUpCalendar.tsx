@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { WebCallButton } from "@/components/crm/WebCallButton";
 import { WhatsAppAction } from "@/components/crm/WhatsAppAction";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -118,11 +119,20 @@ export function FollowUpCalendar() {
                 <Badge className={STATE_TONE[event.state]}>{STATE_LABEL[event.state]}</Badge>
                 {event.phone_number ? (
                   <>
-                    <Button asChild size="sm" variant="secondary" className="gap-1">
-                      <a href={`tel:${event.phone_number}`}>
-                        <PhoneCall className="size-3.5" /> কল
-                      </a>
-                    </Button>
+                    {event.lead_id ? (
+                      <WebCallButton
+                        leadId={event.lead_id}
+                        phone={event.phone_number}
+                        label="কল"
+                        className="h-9 flex-none text-sm"
+                      />
+                    ) : (
+                      <Button asChild size="sm" variant="secondary" className="gap-1">
+                        <a href={`tel:${event.phone_number}`}>
+                          <PhoneCall className="size-3.5" /> কল
+                        </a>
+                      </Button>
+                    )}
                     <WhatsAppAction
                       phone={event.phone_number}
                       leadId={event.lead_id ?? null}
