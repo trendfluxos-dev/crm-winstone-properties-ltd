@@ -108,7 +108,7 @@ fun LiveCallScreen(phase: CallPhase) {
                         .background(Color(0xFFB3261E), RoundedCornerShape(50))
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    Text("● REC", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("● REC", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -116,7 +116,7 @@ fun LiveCallScreen(phase: CallPhase) {
                 Spacer(Modifier.height(8.dp))
                 Text(
                     "$issue — কলের তথ্য ও রিপোর্ট ঠিকই CRM-এ যাবে",
-                    fontSize = 12.sp,
+                    fontSize = 15.sp,
                     color = Color(0xFFB3261E),
                 )
             }
@@ -240,24 +240,24 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
             Spacer(Modifier.height(4.dp))
             Text(
                 if (reportId == null) "রিপোর্ট তৈরি হচ্ছে…" else "ক্যাটাগরি বেছে নিয়ে জমা দিন — জমা না দিলে পরের কল হবে না",
-                fontSize = 12.sp,
+                fontSize = 15.sp,
             )
             if (talkSeconds > 0L) {
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "এই কলে কথা হয়েছে: ${formatDuration(talkSeconds)}",
-                    fontSize = 13.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
             aiSummary?.let {
                 Spacer(Modifier.height(8.dp))
-                Text("AI সারসংক্ষেপ: $it", fontSize = 12.sp)
+                Text("AI সারসংক্ষেপ: $it", fontSize = 15.sp)
             }
             aiCategory?.let {
                 Spacer(Modifier.height(4.dp))
-                Text("AI পরামর্শ: $it (চূড়ান্ত সিদ্ধান্ত আপনারই)", fontSize = 12.sp)
+                Text("AI পরামর্শ: $it (চূড়ান্ত সিদ্ধান্ত আপনারই)", fontSize = 15.sp)
             }
 
             Spacer(Modifier.height(12.dp))
@@ -309,7 +309,7 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
 
             error?.let {
                 Spacer(Modifier.height(8.dp))
-                Text(it, color = Color(0xFFB3261E), fontSize = 12.sp)
+                Text(it, color = Color(0xFFB3261E), fontSize = 15.sp)
             }
 
             Spacer(Modifier.height(12.dp))
