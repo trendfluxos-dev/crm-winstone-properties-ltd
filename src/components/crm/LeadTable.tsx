@@ -37,16 +37,16 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const TEMP_STYLES: Record<string, string> = {
-  hot: "border-destructive/30 bg-destructive/10 text-destructive",
-  warm: "border-chart-4/30 bg-chart-4/10 text-chart-4",
-  cold: "border-primary/25 bg-primary/10 text-primary",
+  hot: "border-destructive/40 bg-destructive/10 text-destructive",
+  warm: "border-idle/35 bg-idle/10 text-idle",
+  cold: "border-border bg-surface-2 text-muted-foreground",
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "border-idle/30 bg-idle/15 text-idle-foreground",
-  contacted: "border-primary/25 bg-accent text-accent-foreground",
-  follow_up: "border-chart-4/30 bg-chart-4/10 text-chart-4",
-  closed: "border-live/30 bg-live/10 text-live",
+  pending: "border-idle/35 bg-idle/10 text-idle",
+  contacted: "border-primary/35 bg-primary/10 text-primary",
+  follow_up: "border-border bg-surface-2 text-foreground",
+  closed: "border-border bg-surface-2 text-muted-foreground",
 };
 
 /**
