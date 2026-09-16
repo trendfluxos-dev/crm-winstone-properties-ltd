@@ -436,6 +436,21 @@ export function PostCallReportGate() {
             onChange={(event) => setNote(event.target.value)}
             placeholder="ক্রেতা কী বলেছেন, পরের ধাপ কী"
           />
+          <div className="flex flex-wrap gap-1.5">
+            {noteSuggestions.map((line) => (
+              <button
+                key={line}
+                type="button"
+                onClick={() => setNote((prev) => joinText(prev, line))}
+                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground transition hover:border-primary hover:bg-primary/10 hover:text-primary"
+              >
+                + {line}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            উপরের লেখাগুলোতে চাপ দিলে নোটে যোগ হবে — দরকার হলে বদলে নিতে পারেন।
+          </p>
         </div>
 
         {smartBusy || smart ? (
