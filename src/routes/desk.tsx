@@ -6,6 +6,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
+import { MobileAppCard } from "@/components/crm/MobileAppCard";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
 import { CarryOverLeads } from "@/components/crm/CarryOverLeads";
 import { LeadDayBoard } from "@/components/crm/LeadDayBoard";
@@ -184,6 +185,7 @@ function DeskPage() {
         <LeadDeadlineBanner />
         <MyProfileCard />
         <MyPhoneSetup />
+        <MobileAppCard />
         <div className="gold-rule flex flex-wrap items-end justify-between gap-3 pt-5">
           <div>
             <p className="eyebrow">Agent Desk</p>
