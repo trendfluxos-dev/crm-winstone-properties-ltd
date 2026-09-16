@@ -83,15 +83,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
       },
-      { title: "Winstone CRM" },
+      { title: "Winstone Connect — Tele-Sales Entry Hall" },
       {
         name: "description",
-        content: "উইনস্টোন টিমের কল, লিড ও রিপোর্ট — ফোনের হোম স্ক্রিন থেকেই চলবে।",
+        content:
+          "Winstone Connect: tele-sales CRM for Winstone Properties. Manage calls, leads, follow-ups and reports across sales agents, coordinators, executives and IT.",
       },
-      { property: "og:title", content: "Winstone CRM" },
+      { property: "og:title", content: "Winstone Connect — Tele-Sales Entry Hall" },
       {
         property: "og:description",
-        content: "উইনস্টোন টিমের কল, লিড ও রিপোর্ট — ফোনের হোম স্ক্রিন থেকেই চলবে।",
+        content:
+          "Winstone Connect: tele-sales CRM for Winstone Properties. Manage calls, leads, follow-ups and reports across sales agents, coordinators, executives and IT.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

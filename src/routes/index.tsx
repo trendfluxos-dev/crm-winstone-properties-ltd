@@ -15,12 +15,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Enter Winstone Connect as a sales agent, coordinator, executive or IT administrator. Accounts for agents and coordinators, master PIN for HQ and IT.",
+          "Winstone Connect: tele-sales CRM for Winstone Properties. Manage calls, leads, follow-ups and reports across sales agents, coordinators, executives and IT.",
       },
       { property: "og:title", content: "Winstone Connect — Tele-Sales Entry Hall" },
       {
         property: "og:description",
-        content: "Four ways in: Sales Agent desk, Coordinator Deck, Executive HQ and IT Console.",
+        content:
+          "Winstone Connect: tele-sales CRM for Winstone Properties. Manage calls, leads, follow-ups and reports across sales agents, coordinators, executives and IT.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
