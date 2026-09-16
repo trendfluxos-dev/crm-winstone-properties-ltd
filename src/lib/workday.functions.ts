@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { maskWhen } from "@/lib/pii";
 
 /**
  * Day-by-day lead work and the yearly retention record.

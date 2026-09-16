@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { maskWhen } from "@/lib/pii";
 
 /**
  * The head lead database, reachable from both the IT Console and the Coordinator

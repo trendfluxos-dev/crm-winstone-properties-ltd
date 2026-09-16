@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { maskWhen } from "@/lib/pii";
 
 /**
  * Supervisor read-outs: post-call report health, recording/AI pipeline state,
