@@ -18,6 +18,7 @@ import { Route as DeskRouteImport } from './routes/desk'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DocsAdminRouteImport } from './routes/docs-admin'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HqRouteImport } from './routes/hq'
 import { Route as ImportRouteImport } from './routes/import'
@@ -110,6 +111,11 @@ const DocsRoute = DocsRouteImport.update({
 const DocsAdminRoute = DocsAdminRouteImport.update({
   id: '/docs-admin',
   path: '/docs-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -373,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
+  '/faq': typeof FaqRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
   '/import': typeof ImportRoute
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
+  '/faq': typeof FaqRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
   '/import': typeof ImportRoute
@@ -492,6 +500,7 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
+  '/faq': typeof FaqRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
   '/import': typeof ImportRoute
@@ -553,6 +562,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
+    | '/faq'
     | '/help'
     | '/hq'
     | '/import'
@@ -612,6 +622,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
+    | '/faq'
     | '/help'
     | '/hq'
     | '/import'
@@ -671,6 +682,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
+    | '/faq'
     | '/help'
     | '/hq'
     | '/import'
@@ -731,6 +743,7 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   DocsRoute: typeof DocsRoute
   DocsAdminRoute: typeof DocsAdminRoute
+  FaqRoute: typeof FaqRoute
   HelpRoute: typeof HelpRoute
   HqRoute: typeof HqRoute
   ImportRoute: typeof ImportRoute
@@ -844,6 +857,13 @@ declare module '@tanstack/react-router' {
       path: '/docs-admin'
       fullPath: '/docs-admin'
       preLoaderRoute: typeof DocsAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -1195,6 +1215,7 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   DocsRoute: DocsRoute,
   DocsAdminRoute: DocsAdminRoute,
+  FaqRoute: FaqRoute,
   HelpRoute: HelpRoute,
   HqRoute: HqRoute,
   ImportRoute: ImportRoute,
