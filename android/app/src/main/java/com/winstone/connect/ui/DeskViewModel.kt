@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.winstone.connect.data.AgentSession
 import com.winstone.connect.data.DeskData
 import com.winstone.connect.data.parseCalls
+import com.winstone.connect.data.parseDaily
 import com.winstone.connect.data.parseLeads
 import com.winstone.connect.data.parseMessages
 import com.winstone.connect.data.remote.WinstoneAgentApi

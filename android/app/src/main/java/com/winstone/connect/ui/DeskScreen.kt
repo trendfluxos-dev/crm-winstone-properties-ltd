@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.winstone.connect.data.CallRow
+import com.winstone.connect.data.DailyPerformance
 import com.winstone.connect.data.Lead
 import com.winstone.connect.data.shortTime
 import com.winstone.connect.data.statusLabel
