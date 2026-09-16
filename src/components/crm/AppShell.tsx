@@ -58,25 +58,25 @@ export function AppShell({ children }: { children: ReactNode }) {
             <img
               src={logoAsset.url}
               alt="Winstone Properties Ltd. logo"
-              className="size-9 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-border"
+              className="size-9 shrink-0 rounded-full object-cover ring-1 ring-primary/30"
             />
             <span className="min-w-0 leading-tight">
-              <span className="block truncate text-[13px] font-bold tracking-tight">
+              <span className="block truncate text-[13px] font-semibold tracking-tight">
                 Winstone Connect
               </span>
-              <span className="hidden truncate text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground sm:block">
+              <span className="hidden truncate text-[10px] font-medium uppercase tracking-[0.18em] text-primary/70 sm:block">
                 Tele-Sales OS
               </span>
             </span>
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-0.5 rounded-full border border-border bg-surface-2/70 p-1 lg:flex">
+          <nav className="ml-3 hidden items-center gap-1 lg:flex">
             {nav.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-all duration-300 hover:text-foreground data-[status=active]:bg-card data-[status=active]:text-primary data-[status=active]:shadow-sm"
+                className="whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:bg-surface-2 hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
               >
                 {item.label}
               </Link>
